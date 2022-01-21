@@ -1,0 +1,29 @@
+const globalConstant = 5;
+let globalVariable = 28;
+
+func calculate(a: int, b: int) -> int {
+    if a == 0 {
+        37
+    } else {
+        a * b
+    }
+}
+
+func count(start: int, times: int, inc: int) {
+    let sum = start;
+    for i = 0; i < times; i++ {
+        println(sum)
+        sum += inc;
+    }
+
+    println(sum);
+}
+
+func main() {
+    const x: int = (1 + 2 * 3);
+    let y = calculate(x);
+
+    string message = "Value is: ";
+    print(message);
+    println(y);
+}

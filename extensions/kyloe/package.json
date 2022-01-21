@@ -1,0 +1,25 @@
+{
+    "name": "kyloe",
+    "displayName": "kyloe",
+    "description": "kyloe language support",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.63.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "kyloe",
+            "aliases": ["kyloe", "kyloe"],
+            "extensions": [".ky"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "kyloe",
+            "scopeName": "source.kyloe",
+            "path": "./syntaxes/kyloe.tmLanguage.json"
+        }]
+    }
+}

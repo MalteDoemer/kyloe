@@ -1,0 +1,29 @@
+import System.Console;
+
+
+struct ConsoleMessage {
+
+    private string message;
+
+    public func ConsoleMessage(string message) {
+        this.message = message;
+    }
+
+    public func Write() {
+        Console.Write(message);
+    }
+
+    public func WriteLine() {
+        Console.WriteLine(message);
+    }
+
+    public func GetMessage() {
+        message
+    }
+
+}
+
+func main() {
+    let msg = ConsoleMessage("Hello Kyloe");
+    msg.WriteLine();
+}

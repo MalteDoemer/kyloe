@@ -1,0 +1,58 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "kyloe",
+	"patterns": [
+		{
+			"name": "keyword.control.kyloe",
+			"match": "\\b(if|else|while|do|for|break|continue|return|match|import|in)\\b"
+		},
+		{
+			"name": "keyword.other.kyloe",
+			"match": "\\b(func|struct|public|private|true|false|const|let|char|byte|short|ushort|int|uint|long|ulong|float|double|string)\\b"
+		},
+		{
+			"name": "string.quoted.double.kyloe",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape",
+					"match": "\\\\[ntr\"'0\\\\]"
+				}
+			]
+		},
+		{
+			"name": "string.quoted.single.kyloe",
+			"begin": "'",
+			"end": "'",
+			"patterns": [
+				{
+					"name": "constant.character.escape",
+					"match": "\\\\[ntr\"'0\\\\]"
+				}
+			]
+		},
+		{
+			"name": "comment.line.double-slash.kyloe",
+			"begin": "//",
+			"end": "\n"
+		},
+		{
+			"name": "constant.numeric.kyloe",
+			"match": "\\b(\\d+)\\b"
+		},
+		{
+			"name": "entity.name.function.kyloe",
+			"match": "\\b[a-zA-Z_][\\w_]*\\s*(?=\\()"
+		},
+		{
+			"name": "variable.name.kyloe",
+			"match": "\\b[a-z_][\\w_]*\\b"
+		},
+		{
+			"name": "entity.name.class.kyloe",
+			"match": "\\b[A-Z][\\w_]*\\b"
+		}
+	],
+	"scopeName": "source.kyloe"
+}
