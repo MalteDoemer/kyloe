@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Kyloe
@@ -10,6 +10,11 @@ namespace Kyloe
 
         IntLiteral,
         FloatLiteral,
+        BoolLiteral,
+
+        Identifier,
+
+
 
         SmallArrow,
         PlusEquals,
@@ -76,7 +81,6 @@ namespace Kyloe
             }
         }
     }
-
 
     static class SyntaxInfo
     {
@@ -184,7 +188,22 @@ namespace Kyloe
 
         private SyntaxToken LexIdentOrKeyword()
         {
-            return null;
+
+            int start = position;
+
+            while (SyntaxInfo.IsIdentSubsequentChar(current))
+            {
+                AdvanceBy(1);
+            }
+
+            int end = position;
+
+            string ident = text.Substring(start, end - start);
+
+            if (SyntaxInfo.IsKeyword(ident) is SyntaxToken keywordToken)
+                return keywordToken;
+            else
+                return new SyntaxToken(SyntaxTokenType.Identifier, ident);
         }
 
         private SyntaxToken? TryLexDoubleToken()
@@ -307,6 +326,10 @@ namespace Kyloe
             {
                 return LexNumber();
             }
+            else if (SyntaxInfo.IsIdentStartChar(current))
+            {
+                return LexIdentOrKeyword();
+            }
             else if (current == '\0')
             {
                 return new SyntaxToken(SyntaxTokenType.End);
@@ -315,7 +338,6 @@ namespace Kyloe
             {
                 return new SyntaxToken(SyntaxTokenType.Invalid, AdvanceBy(1));
             }
-
         }
 
         public IEnumerable<SyntaxToken> Tokens()
