@@ -7,7 +7,46 @@ namespace Kyloe
     enum SyntaxTokenType
     {
         Invalid = 0,
-        End = 1,
+        SmallArrow,
+        PlusEquals,
+        MinusEquals,
+        StarEquals,
+        SlashEquals,
+        PercentEquals,
+        AmpersandEquals,
+        PipeEquals,
+        TildeEquals,
+        DoubleEquals,
+        BangEquals,
+        LessEquals,
+        GreaterEquals,
+        Plus,
+        Minus,
+        Star,
+        Slash,
+        Percent,
+        Ampersand,
+        Pipe,
+        Tilde,
+        Less,
+        Greater,
+        Equal,
+        DoubleAmpersand,
+        DoublePipe,
+        RightParen,
+        LeftParen,
+        Bang,
+        RightSquare,
+        LeftSquare,
+        RightBracket,
+        LeftBracket,
+        Comma,
+        Dot,
+        Colon,
+        SemiColon,
+        HatEquals,
+        Hat,
+        End,
     }
 
     class SyntaxToken
@@ -51,13 +90,153 @@ namespace Kyloe
         private char Peek(int offset)
         {
             var pos = position + offset;
-            return position < text.Length ? text[position] : '\0';
+            return pos < text.Length ? text[pos] : '\0';
         }
 
+        /// Advances the position by offset and returns the current char before the advance.
+        private char AdvanceBy(int offset)
+        {
+            char c = current;
+            position += offset;
+            return c;
+        }
+
+        private SyntaxToken LexStringLiteral()
+        {
+            return null;
+        }
+
+        private SyntaxToken LexNumber()
+        {
+            return null;
+        }
+
+        private SyntaxToken LexIdentOrKeyword()
+        {
+            return null;
+        }
+
+        private SyntaxToken? TryLexDoubleToken()
+        {
+            char c1 = current;
+            char c2 = Peek(1);
+
+            switch (c1, c2)
+            {
+                case ('-', '>'):
+                    return new SyntaxToken(SyntaxTokenType.SmallArrow);
+                case ('+', '='):
+                    return new SyntaxToken(SyntaxTokenType.PlusEquals);
+                case ('-', '='):
+                    return new SyntaxToken(SyntaxTokenType.MinusEquals);
+                case ('*', '='):
+                    return new SyntaxToken(SyntaxTokenType.StarEquals);
+                case ('/', '='):
+                    return new SyntaxToken(SyntaxTokenType.SlashEquals);
+                case ('%', '='):
+                    return new SyntaxToken(SyntaxTokenType.PercentEquals);
+                case ('&', '&'):
+                    return new SyntaxToken(SyntaxTokenType.DoubleAmpersand);
+                case ('|', '|'):
+                    return new SyntaxToken(SyntaxTokenType.DoublePipe);
+                case ('&', '='):
+                    return new SyntaxToken(SyntaxTokenType.AmpersandEquals);
+                case ('|', '='):
+                    return new SyntaxToken(SyntaxTokenType.PipeEquals);
+                case ('~', '='):
+                    return new SyntaxToken(SyntaxTokenType.TildeEquals);
+                case ('^', '='):
+                    return new SyntaxToken(SyntaxTokenType.HatEquals);
+                case ('=', '='):
+                    return new SyntaxToken(SyntaxTokenType.DoubleEquals);
+                case ('!', '='):
+                    return new SyntaxToken(SyntaxTokenType.BangEquals);
+                case ('<', '='):
+                    return new SyntaxToken(SyntaxTokenType.LessEquals);
+                case ('>', '='):
+                    return new SyntaxToken(SyntaxTokenType.GreaterEquals);
+                default:
+                    return null;
+            }
+        }
+
+        private SyntaxToken? TryLexSingleToken()
+        {
+            switch (current)
+            {
+                case '+':
+                    return new SyntaxToken(SyntaxTokenType.Plus);
+                case '-':
+                    return new SyntaxToken(SyntaxTokenType.Minus);
+                case '*':
+                    return new SyntaxToken(SyntaxTokenType.Star);
+                case '/':
+                    return new SyntaxToken(SyntaxTokenType.Slash);
+                case '%':
+                    return new SyntaxToken(SyntaxTokenType.Percent);
+                case '&':
+                    return new SyntaxToken(SyntaxTokenType.Ampersand);
+                case '|':
+                    return new SyntaxToken(SyntaxTokenType.Pipe);
+                case '~':
+                    return new SyntaxToken(SyntaxTokenType.Tilde);
+                case '^':
+                    return new SyntaxToken(SyntaxTokenType.Hat);
+                case '<':
+                    return new SyntaxToken(SyntaxTokenType.Less);
+                case '>':
+                    return new SyntaxToken(SyntaxTokenType.Greater);
+                case '=':
+                    return new SyntaxToken(SyntaxTokenType.Equal);
+                case '!':
+                    return new SyntaxToken(SyntaxTokenType.Bang);
+                case '(':
+                    return new SyntaxToken(SyntaxTokenType.RightParen);
+                case ')':
+                    return new SyntaxToken(SyntaxTokenType.LeftParen);
+                case '[':
+                    return new SyntaxToken(SyntaxTokenType.RightSquare);
+                case ']':
+                    return new SyntaxToken(SyntaxTokenType.LeftSquare);
+                case '{':
+                    return new SyntaxToken(SyntaxTokenType.RightBracket);
+                case '}':
+                    return new SyntaxToken(SyntaxTokenType.LeftBracket);
+                case ',':
+                    return new SyntaxToken(SyntaxTokenType.Comma);
+                case '.':
+                    return new SyntaxToken(SyntaxTokenType.Dot);
+                case ':':
+                    return new SyntaxToken(SyntaxTokenType.Colon);
+                case ';':
+                    return new SyntaxToken(SyntaxTokenType.SemiColon);
+                default:
+                    return null;
+            }
+        }
 
         public SyntaxToken NextToken()
         {
-            return new SyntaxToken(SyntaxTokenType.End);
+
+            if (TryLexDoubleToken() is SyntaxToken doubleToken)
+            {
+                AdvanceBy(2);
+                return doubleToken;
+            }
+            else if (TryLexSingleToken() is SyntaxToken singleToken)
+            {
+                AdvanceBy(1);
+                return singleToken;
+            }
+            else if (current == '\0')
+            {
+                return new SyntaxToken(SyntaxTokenType.End);
+            }
+            else
+            {
+                return new SyntaxToken(SyntaxTokenType.Invalid, AdvanceBy(1));
+            }
+
         }
 
         public IEnumerable<SyntaxToken> Tokens()
@@ -106,6 +285,11 @@ namespace Kyloe
             if (input.StartsWith("$exit"))
             {
                 return false;
+            }
+            else if (input.StartsWith("$clear"))
+            {
+                Console.Clear();
+                return true;
             }
             else
             {
