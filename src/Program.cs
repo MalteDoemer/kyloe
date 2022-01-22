@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Kyloe
@@ -73,6 +73,33 @@ namespace Kyloe
             else
             {
                 return $"{Type}: {Value}";
+            }
+        }
+    }
+
+
+    static class SyntaxInfo
+    {
+        public static bool IsIdentStartChar(char c)
+        {
+            return c == '_' || char.IsLetter(c);
+        }
+
+        public static bool IsIdentSubsequentChar(char c)
+        {
+            return c == '_' || char.IsLetterOrDigit(c);
+        }
+
+        public static SyntaxToken? IsKeyword(string ident)
+        {
+            switch (ident)
+            {
+                case "true":
+                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, true);
+                case "false":
+                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, false);
+                default:
+                    return null;
             }
         }
     }
