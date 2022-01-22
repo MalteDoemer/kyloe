@@ -7,6 +7,10 @@ namespace Kyloe
     enum SyntaxTokenType
     {
         Invalid = 0,
+
+        IntLiteral,
+        FloatLiteral,
+
         SmallArrow,
         PlusEquals,
         MinusEquals,
@@ -106,9 +110,49 @@ namespace Kyloe
             return null;
         }
 
+        private SyntaxToken SkipWhiteSpace()
+        {
+            while (char.IsWhiteSpace(current))
+                AdvanceBy(1);
+
+            return NextToken();
+        }
+
         private SyntaxToken LexNumber()
         {
-            return null;
+            long integer = 0;
+
+            // first parse the number as an int
+            // but if there is a dot in between
+            // switch to float
+
+            // TODO: handle non-ascii numbers
+
+            while (char.IsNumber(current))
+            {
+                int digit = current - '0';
+                integer = integer * 10 + digit;
+                AdvanceBy(1);
+            }
+
+            if (!(current == '.' && char.IsNumber(Peek(1))))
+                return new SyntaxToken(SyntaxTokenType.IntLiteral, integer);
+
+
+            AdvanceBy(1); // skip the decimal point
+
+            double floatingPoint = integer;
+            long factor = 10;
+
+            while (char.IsNumber(current))
+            {
+                int digit = current - '0';
+                floatingPoint += digit / (double)factor;
+                factor *= 10;
+                AdvanceBy(1);
+            }
+
+            return new SyntaxToken(SyntaxTokenType.FloatLiteral, floatingPoint);
         }
 
         private SyntaxToken LexIdentOrKeyword()
@@ -227,6 +271,14 @@ namespace Kyloe
             {
                 AdvanceBy(1);
                 return singleToken;
+            }
+            else if (char.IsWhiteSpace(current))
+            {
+                return SkipWhiteSpace();
+            }
+            else if (char.IsNumber(current))
+            {
+                return LexNumber();
             }
             else if (current == '\0')
             {
