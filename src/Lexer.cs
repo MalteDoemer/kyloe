@@ -193,17 +193,17 @@ namespace Kyloe
                 case '!':
                     return new SyntaxToken(SyntaxTokenType.Bang);
                 case '(':
-                    return new SyntaxToken(SyntaxTokenType.RightParen);
-                case ')':
                     return new SyntaxToken(SyntaxTokenType.LeftParen);
+                case ')':
+                    return new SyntaxToken(SyntaxTokenType.RightParen);
                 case '[':
-                    return new SyntaxToken(SyntaxTokenType.RightSquare);
-                case ']':
                     return new SyntaxToken(SyntaxTokenType.LeftSquare);
+                case ']':
+                    return new SyntaxToken(SyntaxTokenType.RightSquare);
                 case '{':
-                    return new SyntaxToken(SyntaxTokenType.RightBracket);
-                case '}':
                     return new SyntaxToken(SyntaxTokenType.LeftBracket);
+                case '}':
+                    return new SyntaxToken(SyntaxTokenType.RightBracket);
                 case ',':
                     return new SyntaxToken(SyntaxTokenType.Comma);
                 case '.':
