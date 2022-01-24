@@ -1,9 +1,13 @@
 using System.Collections.Generic;
+using System.IO;
 
 namespace Kyloe
 {
     abstract class SyntaxNode
     {
+
+
+        public abstract void PrettyWrite(TextWriter writer, string indent);
 
     }
 
@@ -15,6 +19,15 @@ namespace Kyloe
         }
 
         public SyntaxToken Token { get; }
+
+        public override void PrettyWrite(TextWriter writer, string indent)
+        {
+            writer.Write(indent);
+            writer.Write(nameof(MalformedSyntaxNode));
+            writer.WriteLine(":");
+            writer.Write(indent + "    ");
+            writer.WriteLine(Token);
+        }
     }
 
     class LiteralSyntaxNode : SyntaxNode
@@ -25,6 +38,15 @@ namespace Kyloe
         }
 
         public SyntaxToken LiteralToken { get; }
+
+        public override void PrettyWrite(TextWriter writer, string indent)
+        {
+            writer.Write(indent);
+            writer.Write(nameof(LiteralSyntaxNode));
+            writer.WriteLine(":");
+            writer.Write(indent + "    ");
+            writer.WriteLine(LiteralToken);
+        }
     }
 
     class BinaryExpressionNode : SyntaxNode
@@ -39,6 +61,20 @@ namespace Kyloe
         public SyntaxToken OperatorToken { get; }
         public SyntaxNode LeftChild { get; }
         public SyntaxNode RightChild { get; }
+
+        public override void PrettyWrite(TextWriter writer, string indent)
+        {
+
+            var nextIndent = indent + "    ";
+
+            writer.Write(indent);
+            writer.Write(nameof(BinaryExpressionNode));
+            writer.WriteLine(":");
+            LeftChild.PrettyWrite(writer, nextIndent);
+            writer.Write(nextIndent);
+            writer.WriteLine(OperatorToken);
+            RightChild.PrettyWrite(writer, nextIndent);
+        }
     }
 
 
@@ -62,7 +98,7 @@ namespace Kyloe
             var temp = current;
             current = next;
             next = lexer.NextToken();
-            return current;
+            return temp;
         }
 
         public SyntaxNode Parse()
@@ -72,18 +108,21 @@ namespace Kyloe
 
         private SyntaxNode ParseExpression()
         {
-            return ParsePrimary();
+            return ParseFactor();
         }
 
-        private SyntaxNode ParsePrimary()
+        private SyntaxNode ParseFactor()
         {
             if (current.Type.IsLiteralToken())
             {
                 return new LiteralSyntaxNode(Advance());
             }
-            else if (current.Type == SyntaxTokenType.RightParen)
+            else if (current.Type == SyntaxTokenType.LeftParen)
             {
-                return ParseExpression();
+                Advance(); // skip the left parenthesis
+                var expr = ParseExpression();
+                Expect(SyntaxTokenType.RightParen); // skip the right parenthesis
+                return expr;
             }
             else if (current.Type == SyntaxTokenType.Identifier)
             {
@@ -95,5 +134,14 @@ namespace Kyloe
             }
         }
 
+        private SyntaxToken Expect(SyntaxTokenType type)
+        {
+            if (current.Type != type)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            return Advance();
+        }
     }
 }

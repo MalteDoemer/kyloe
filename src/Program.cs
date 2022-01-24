@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Kyloe
 {
@@ -20,12 +21,13 @@ namespace Kyloe
                     continue;
                 }
 
-                Parser parser = new Parser(input);
+                var parser = new Parser(input);
 
-                Console.WriteLine(parser.Parse());
+                var tree = parser.Parse();
+
+                tree.PrettyWrite(Console.Out, "");
             }
         }
-
 
         private static bool EvaluteDollarCommand(string input)
         {
