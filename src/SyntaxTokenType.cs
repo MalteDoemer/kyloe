@@ -11,8 +11,6 @@ namespace Kyloe
 
         Identifier,
 
-
-
         SmallArrow,
         PlusEquals,
         MinusEquals,
