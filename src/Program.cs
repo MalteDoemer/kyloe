@@ -11,6 +11,7 @@ namespace Kyloe
         IntLiteral,
         FloatLiteral,
         BoolLiteral,
+        StringLiteral,
 
         Identifier,
 
@@ -94,6 +95,11 @@ namespace Kyloe
             return c == '_' || char.IsLetterOrDigit(c);
         }
 
+        public static bool IsStringQuote(char c)
+        {
+            return c == '\'' || c == '"';
+        }
+
         public static SyntaxToken? IsKeyword(string ident)
         {
             switch (ident)
@@ -138,7 +144,28 @@ namespace Kyloe
 
         private SyntaxToken LexStringLiteral()
         {
-            return null;
+            var quote = AdvanceBy(1);
+            int start = position;
+
+            while (current != quote)
+            {
+                // TODO: handle escape sequences
+
+                if (current == '\0')
+                {
+                    return new SyntaxToken(SyntaxTokenType.Invalid);
+                }
+
+                AdvanceBy(1);
+            }
+
+            int end = position;
+
+            AdvanceBy(1); // skip the terminating quote
+
+            var str = text.Substring(start, end - start);
+
+            return new SyntaxToken(SyntaxTokenType.StringLiteral, str);
         }
 
         private SyntaxToken SkipWhiteSpace()
@@ -188,7 +215,6 @@ namespace Kyloe
 
         private SyntaxToken LexIdentOrKeyword()
         {
-
             int start = position;
 
             while (SyntaxInfo.IsIdentSubsequentChar(current))
@@ -330,6 +356,10 @@ namespace Kyloe
             {
                 return LexIdentOrKeyword();
             }
+            else if (SyntaxInfo.IsStringQuote(current))
+            {
+                return LexStringLiteral();
+            }
             else if (current == '\0')
             {
                 return new SyntaxToken(SyntaxTokenType.End);
@@ -359,7 +389,7 @@ namespace Kyloe
         {
             while (true)
             {
-
+                Console.Write("> ");
                 var input = Console.ReadLine();
 
                 if (input is null)
