@@ -30,7 +30,7 @@ namespace Kyloe
             }
         }
 
-        public static bool IsLiteralToken(SyntaxTokenType type)
+        public static bool IsLiteralToken(this SyntaxTokenType type)
         {
             switch (type)
             {

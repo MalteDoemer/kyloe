@@ -2,14 +2,34 @@ using System.Collections.Generic;
 
 namespace Kyloe
 {
-    abstract class ASTNode
+    abstract class SyntaxNode
     {
 
     }
 
-    class BinaryExpressionNode : ASTNode
+    class MalformedSyntaxNode : SyntaxNode
     {
-        public BinaryExpressionNode(SyntaxToken operatorToken, ASTNode leftChild, ASTNode rightChild)
+        public MalformedSyntaxNode(SyntaxToken token)
+        {
+            Token = token;
+        }
+
+        public SyntaxToken Token { get; }
+    }
+
+    class LiteralSyntaxNode : SyntaxNode
+    {
+        public LiteralSyntaxNode(SyntaxToken literalToken)
+        {
+            LiteralToken = literalToken;
+        }
+
+        public SyntaxToken LiteralToken { get; }
+    }
+
+    class BinaryExpressionNode : SyntaxNode
+    {
+        public BinaryExpressionNode(SyntaxToken operatorToken, SyntaxNode leftChild, SyntaxNode rightChild)
         {
             OperatorToken = operatorToken;
             LeftChild = leftChild;
@@ -17,8 +37,8 @@ namespace Kyloe
         }
 
         public SyntaxToken OperatorToken { get; }
-        public ASTNode LeftChild { get; }
-        public ASTNode RightChild { get; }
+        public SyntaxNode LeftChild { get; }
+        public SyntaxNode RightChild { get; }
     }
 
 
@@ -45,9 +65,35 @@ namespace Kyloe
             return current;
         }
 
-        public ASTNode Parse()
+        public SyntaxNode Parse()
         {
-            throw new System.NotImplementedException();
+            return ParseExpression();
         }
+
+        private SyntaxNode ParseExpression()
+        {
+            return ParsePrimary();
+        }
+
+        private SyntaxNode ParsePrimary()
+        {
+            if (current.Type.IsLiteralToken())
+            {
+                return new LiteralSyntaxNode(Advance());
+            }
+            else if (current.Type == SyntaxTokenType.RightParen)
+            {
+                return ParseExpression();
+            }
+            else if (current.Type == SyntaxTokenType.Identifier)
+            {
+                throw new System.NotImplementedException();
+            }
+            else
+            {
+                return new MalformedSyntaxNode(Advance());
+            }
+        }
+
     }
 }

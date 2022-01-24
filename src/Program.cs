@@ -20,12 +20,9 @@ namespace Kyloe
                     continue;
                 }
 
-                Lexer lexer = new Lexer(input);
+                Parser parser = new Parser(input);
 
-                foreach (var token in lexer.Tokens())
-                {
-                    Console.WriteLine(token);
-                }
+                Console.WriteLine(parser.Parse());
             }
         }
 
