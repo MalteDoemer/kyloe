@@ -1,0 +1,18 @@
+
+
+Lexer: Text -> TokenStream
+Parser: TokenStream -> SyntaxTree
+TypeChecker: SyntaxTree -> TypedTree
+Lowerer: TypedTree -> LoweredStream
+Emitter (with Mono.Cecil): LoweredStream -> Dotnet IL
+
+
+SyntaxTree: 
+1 + 2 * 3
+  
+    *
+   / \
+  +   3
+ / \
+1   2
+
