@@ -29,5 +29,19 @@ namespace Kyloe
                     return null;
             }
         }
+
+        public static bool IsLiteralToken(SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.IntLiteral:
+                case SyntaxTokenType.FloatLiteral:
+                case SyntaxTokenType.StringLiteral:
+                case SyntaxTokenType.BoolLiteral:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

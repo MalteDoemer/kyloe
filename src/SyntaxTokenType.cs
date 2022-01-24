@@ -2,8 +2,11 @@ namespace Kyloe
 {
     enum SyntaxTokenType
     {
+        // Special Tokens
         Invalid = 0,
+        End,
 
+        // Literal Tokens
         IntLiteral,
         FloatLiteral,
         BoolLiteral,
@@ -11,7 +14,8 @@ namespace Kyloe
 
         Identifier,
 
-        SmallArrow,
+        // Assignment Operators
+        Equals,
         PlusEquals,
         MinusEquals,
         StarEquals,
@@ -19,37 +23,45 @@ namespace Kyloe
         PercentEquals,
         AmpersandEquals,
         PipeEquals,
-        TildeEquals,
-        DoubleEquals,
-        BangEquals,
-        LessEquals,
-        GreaterEquals,
+        HatEquals,
+
+        // Comparison Operators
+        Less,
+        Greater,
+        DoubleEqual,
+        LessEqual,
+        GreaterEqual,
+        NotEqual,
+
+        // Binary Operators
         Plus,
         Minus,
         Star,
         Slash,
         Percent,
         Ampersand,
-        Pipe,
-        Tilde,
-        Less,
-        Greater,
-        Equal,
         DoubleAmpersand,
+        Pipe,
         DoublePipe,
+        Hat,
+
+        // Unary Operators
+        Tilde,
+        Bang,
+
+        // Parentheses
         RightParen,
         LeftParen,
-        Bang,
         RightSquare,
         LeftSquare,
         RightBracket,
         LeftBracket,
+
+        // Punctuation
         Comma,
         Dot,
         Colon,
         SemiColon,
-        HatEquals,
-        Hat,
-        End,
+        SmallArrow,
     }
 }

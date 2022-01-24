@@ -147,18 +147,16 @@ namespace Kyloe
                     return new SyntaxToken(SyntaxTokenType.AmpersandEquals);
                 case ('|', '='):
                     return new SyntaxToken(SyntaxTokenType.PipeEquals);
-                case ('~', '='):
-                    return new SyntaxToken(SyntaxTokenType.TildeEquals);
                 case ('^', '='):
                     return new SyntaxToken(SyntaxTokenType.HatEquals);
                 case ('=', '='):
-                    return new SyntaxToken(SyntaxTokenType.DoubleEquals);
+                    return new SyntaxToken(SyntaxTokenType.DoubleEqual);
                 case ('!', '='):
-                    return new SyntaxToken(SyntaxTokenType.BangEquals);
+                    return new SyntaxToken(SyntaxTokenType.NotEqual);
                 case ('<', '='):
-                    return new SyntaxToken(SyntaxTokenType.LessEquals);
+                    return new SyntaxToken(SyntaxTokenType.LessEqual);
                 case ('>', '='):
-                    return new SyntaxToken(SyntaxTokenType.GreaterEquals);
+                    return new SyntaxToken(SyntaxTokenType.GreaterEqual);
                 default:
                     return null;
             }
@@ -191,7 +189,7 @@ namespace Kyloe
                 case '>':
                     return new SyntaxToken(SyntaxTokenType.Greater);
                 case '=':
-                    return new SyntaxToken(SyntaxTokenType.Equal);
+                    return new SyntaxToken(SyntaxTokenType.Equals);
                 case '!':
                     return new SyntaxToken(SyntaxTokenType.Bang);
                 case '(':
