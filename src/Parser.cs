@@ -49,6 +49,30 @@ namespace Kyloe
         }
     }
 
+    class UnaryExpressionNode : SyntaxNode
+    {
+        public UnaryExpressionNode(SyntaxToken operatorToken, SyntaxNode child)
+        {
+            OperatorToken = operatorToken;
+            Child = child;
+        }
+
+        public SyntaxToken OperatorToken { get; }
+        public SyntaxNode Child { get; }
+
+        public override void PrettyWrite(TextWriter writer, string indent)
+        {
+            var nextIndent = indent + "    ";
+
+            writer.Write(indent);
+            writer.Write(nameof(UnaryExpressionNode));
+            writer.WriteLine(":");
+            writer.Write(nextIndent);
+            writer.WriteLine(OperatorToken);
+            Child.PrettyWrite(writer, nextIndent);
+        }
+    }
+
     class BinaryExpressionNode : SyntaxNode
     {
         public BinaryExpressionNode(SyntaxToken operatorToken, SyntaxNode leftChild, SyntaxNode rightChild)
@@ -64,7 +88,6 @@ namespace Kyloe
 
         public override void PrettyWrite(TextWriter writer, string indent)
         {
-
             var nextIndent = indent + "    ";
 
             writer.Write(indent);
@@ -101,73 +124,55 @@ namespace Kyloe
             return temp;
         }
 
+        private SyntaxToken Expect(SyntaxTokenType type)
+        {
+            if (current.Type != type)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            return Advance();
+        }
+
         public SyntaxNode Parse()
         {
-            return ParseExpression();
+            var expr = ParseExpression();
+            Expect(SyntaxTokenType.End);
+            return expr;
         }
 
-        private SyntaxNode ParseExpression()
+        public SyntaxNode ParseExpression()
         {
-            return ParseEquality();
+            return ParseBinaryExpression();
         }
 
-        private SyntaxNode ParseEquality()
+        private SyntaxNode ParseBinaryExpression(int precedence = SyntaxInfo.MAX_PRECEDENCE)
         {
-            var left = ParseComparision();
-            while (current.Type == SyntaxTokenType.Equals ||
-                   current.Type == SyntaxTokenType.NotEqual)
+            if (precedence == 0)
+                return ParseUnaryExpression();
+
+            var left = ParseBinaryExpression(precedence - 1);
+
+            while (current.Type.BinaryOperatorPrecedence() == precedence)
             {
                 var op = Advance();
-                var right = ParseComparision();
+                var right = ParseBinaryExpression(precedence - 1);
                 left = new BinaryExpressionNode(op, left, right);
             }
 
             return left;
         }
 
-        private SyntaxNode ParseComparision()
+        private SyntaxNode ParseUnaryExpression()
         {
-            var left = ParseAddition();
-            while (current.Type == SyntaxTokenType.Less ||
-                   current.Type == SyntaxTokenType.LessEqual ||
-                   current.Type == SyntaxTokenType.Greater ||
-                   current.Type == SyntaxTokenType.GreaterEqual)
+            if (current.Type.IsUnaryOperator())
             {
                 var op = Advance();
-                var right = ParseAddition();
-                left = new BinaryExpressionNode(op, left, right);
+                var child = ParseUnaryExpression();
+                return new UnaryExpressionNode(op, child);
             }
 
-            return left;
-        }
-
-        private SyntaxNode ParseAddition()
-        {
-            var left = ParseMultiplication();
-            while (current.Type == SyntaxTokenType.Plus ||
-                   current.Type == SyntaxTokenType.Minus)
-            {
-                var op = Advance();
-                var right = ParseMultiplication();
-                left = new BinaryExpressionNode(op, left, right);
-            }
-
-            return left;
-        }
-
-        private SyntaxNode ParseMultiplication()
-        {
-            var left = ParsePrimary();
-            while (current.Type == SyntaxTokenType.Star ||
-                   current.Type == SyntaxTokenType.Slash ||
-                   current.Type == SyntaxTokenType.Percent)
-            {
-                var op = Advance();
-                var right = ParsePrimary();
-                left = new BinaryExpressionNode(op, left, right);
-            }
-
-            return left;
+            return ParsePrimary();
         }
 
         private SyntaxNode ParsePrimary()
@@ -191,16 +196,6 @@ namespace Kyloe
             {
                 return new MalformedSyntaxNode(Advance());
             }
-        }
-
-        private SyntaxToken Expect(SyntaxTokenType type)
-        {
-            if (current.Type != type)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            return Advance();
         }
     }
 }
