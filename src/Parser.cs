@@ -108,10 +108,69 @@ namespace Kyloe
 
         private SyntaxNode ParseExpression()
         {
-            return ParseFactor();
+            return ParseEquality();
         }
 
-        private SyntaxNode ParseFactor()
+        private SyntaxNode ParseEquality()
+        {
+            var left = ParseComparision();
+            while (current.Type == SyntaxTokenType.Equals ||
+                   current.Type == SyntaxTokenType.NotEqual)
+            {
+                var op = Advance();
+                var right = ParseComparision();
+                left = new BinaryExpressionNode(op, left, right);
+            }
+
+            return left;
+        }
+
+        private SyntaxNode ParseComparision()
+        {
+            var left = ParseAddition();
+            while (current.Type == SyntaxTokenType.Less ||
+                   current.Type == SyntaxTokenType.LessEqual ||
+                   current.Type == SyntaxTokenType.Greater ||
+                   current.Type == SyntaxTokenType.GreaterEqual)
+            {
+                var op = Advance();
+                var right = ParseAddition();
+                left = new BinaryExpressionNode(op, left, right);
+            }
+
+            return left;
+        }
+
+        private SyntaxNode ParseAddition()
+        {
+            var left = ParseMultiplication();
+            while (current.Type == SyntaxTokenType.Plus ||
+                   current.Type == SyntaxTokenType.Minus)
+            {
+                var op = Advance();
+                var right = ParseMultiplication();
+                left = new BinaryExpressionNode(op, left, right);
+            }
+
+            return left;
+        }
+
+        private SyntaxNode ParseMultiplication()
+        {
+            var left = ParsePrimary();
+            while (current.Type == SyntaxTokenType.Star ||
+                   current.Type == SyntaxTokenType.Slash ||
+                   current.Type == SyntaxTokenType.Percent)
+            {
+                var op = Advance();
+                var right = ParsePrimary();
+                left = new BinaryExpressionNode(op, left, right);
+            }
+
+            return left;
+        }
+
+        private SyntaxNode ParsePrimary()
         {
             if (current.Type.IsLiteralToken())
             {
