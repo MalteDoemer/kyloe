@@ -25,7 +25,8 @@ namespace Kyloe
 
                 var tree = parser.Parse();
 
-                tree.PrettyWrite(Console.Out, "");
+                var writer = new PrettyWriter(Console.Out);
+                writer.Write(tree);
             }
         }
 

@@ -5,10 +5,6 @@ namespace Kyloe
 {
     abstract class SyntaxNode
     {
-
-
-        public abstract void PrettyWrite(TextWriter writer, string indent);
-
     }
 
     class MalformedSyntaxNode : SyntaxNode
@@ -20,14 +16,7 @@ namespace Kyloe
 
         public SyntaxToken Token { get; }
 
-        public override void PrettyWrite(TextWriter writer, string indent)
-        {
-            writer.Write(indent);
-            writer.Write(nameof(MalformedSyntaxNode));
-            writer.WriteLine(":");
-            writer.Write(indent + "    ");
-            writer.WriteLine(Token);
-        }
+
     }
 
     class LiteralSyntaxNode : SyntaxNode
@@ -39,14 +28,6 @@ namespace Kyloe
 
         public SyntaxToken LiteralToken { get; }
 
-        public override void PrettyWrite(TextWriter writer, string indent)
-        {
-            writer.Write(indent);
-            writer.Write(nameof(LiteralSyntaxNode));
-            writer.WriteLine(":");
-            writer.Write(indent + "    ");
-            writer.WriteLine(LiteralToken);
-        }
     }
 
     class UnaryExpressionNode : SyntaxNode
@@ -60,17 +41,6 @@ namespace Kyloe
         public SyntaxToken OperatorToken { get; }
         public SyntaxNode Child { get; }
 
-        public override void PrettyWrite(TextWriter writer, string indent)
-        {
-            var nextIndent = indent + "    ";
-
-            writer.Write(indent);
-            writer.Write(nameof(UnaryExpressionNode));
-            writer.WriteLine(":");
-            writer.Write(nextIndent);
-            writer.WriteLine(OperatorToken);
-            Child.PrettyWrite(writer, nextIndent);
-        }
     }
 
     class BinaryExpressionNode : SyntaxNode
@@ -86,20 +56,7 @@ namespace Kyloe
         public SyntaxNode LeftChild { get; }
         public SyntaxNode RightChild { get; }
 
-        public override void PrettyWrite(TextWriter writer, string indent)
-        {
-            var nextIndent = indent + "    ";
-
-            writer.Write(indent);
-            writer.Write(nameof(BinaryExpressionNode));
-            writer.WriteLine(":");
-            LeftChild.PrettyWrite(writer, nextIndent);
-            writer.Write(nextIndent);
-            writer.WriteLine(OperatorToken);
-            RightChild.PrettyWrite(writer, nextIndent);
-        }
     }
-
 
     class Parser
     {
@@ -124,14 +81,15 @@ namespace Kyloe
             return temp;
         }
 
-        private SyntaxToken Expect(SyntaxTokenType type)
+        private SyntaxToken Expect(params SyntaxTokenType[] types)
         {
-            if (current.Type != type)
+            foreach (var type in types)
             {
-                throw new System.NotImplementedException();
+                if (current.Type == type)
+                    return Advance();
             }
 
-            return Advance();
+            throw new System.NotImplementedException();
         }
 
         public SyntaxNode Parse()
