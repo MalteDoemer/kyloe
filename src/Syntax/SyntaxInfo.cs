@@ -1,4 +1,4 @@
-namespace Kyloe
+namespace Kyloe.Syntax
 {
     static class SyntaxInfo
     {

@@ -1,4 +1,4 @@
-namespace Kyloe
+namespace Kyloe.Syntax
 {
     enum SyntaxTokenType
     {

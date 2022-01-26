@@ -1,62 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace Kyloe
+namespace Kyloe.Syntax
 {
-    abstract class SyntaxNode
-    {
-    }
-
-    class MalformedSyntaxNode : SyntaxNode
-    {
-        public MalformedSyntaxNode(SyntaxToken token)
-        {
-            Token = token;
-        }
-
-        public SyntaxToken Token { get; }
-
-
-    }
-
-    class LiteralSyntaxNode : SyntaxNode
-    {
-        public LiteralSyntaxNode(SyntaxToken literalToken)
-        {
-            LiteralToken = literalToken;
-        }
-
-        public SyntaxToken LiteralToken { get; }
-
-    }
-
-    class UnaryExpressionNode : SyntaxNode
-    {
-        public UnaryExpressionNode(SyntaxToken operatorToken, SyntaxNode child)
-        {
-            OperatorToken = operatorToken;
-            Child = child;
-        }
-
-        public SyntaxToken OperatorToken { get; }
-        public SyntaxNode Child { get; }
-
-    }
-
-    class BinaryExpressionNode : SyntaxNode
-    {
-        public BinaryExpressionNode(SyntaxToken operatorToken, SyntaxNode leftChild, SyntaxNode rightChild)
-        {
-            OperatorToken = operatorToken;
-            LeftChild = leftChild;
-            RightChild = rightChild;
-        }
-
-        public SyntaxToken OperatorToken { get; }
-        public SyntaxNode LeftChild { get; }
-        public SyntaxNode RightChild { get; }
-
-    }
 
     class Parser
     {

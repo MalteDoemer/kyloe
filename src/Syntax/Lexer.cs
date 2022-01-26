@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Kyloe
+namespace Kyloe.Syntax
 {
     class Lexer
     {

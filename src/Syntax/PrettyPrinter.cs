@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Kyloe
+namespace Kyloe.Syntax
 {
     class PrettyWriter
     {
