@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Collections.Generic;
 
 using Kyloe.Diagnostics;
 
@@ -11,20 +9,18 @@ namespace Kyloe.Syntax
     {
         private Lexer lexer;
 
-        private List<Diagnostic> diagnostics;
+        private DiagnosticCollecter diagnostics;
 
         private SyntaxToken current;
         private SyntaxToken next;
 
-        public Parser(string text)
+        public Parser(string text, DiagnosticCollecter diagnostics)
         {
-            diagnostics = new List<Diagnostic>();
-            lexer = new Lexer(text);
+            this.diagnostics = diagnostics;
+            lexer = new Lexer(text, diagnostics);
             current = lexer.NextToken();
             next = lexer.NextToken();
         }
-
-        public IEnumerable<Diagnostic> GetDiagnostics() => diagnostics;
 
         /// Returns the current Token and then advances to the next one.
         private SyntaxToken Advance()
@@ -46,7 +42,9 @@ namespace Kyloe.Syntax
                     return Advance();
             }
 
-            diagnostics.Add(new UnexpectedTokenError(types, current.Type));
+            // Don't report a new diagnostic if the lexer already did.
+            if (current.Type != SyntaxTokenType.Invalid)
+                diagnostics.Add(new UnexpectedTokenError(types, current.Type));
 
             return Advance();
         }
@@ -110,9 +108,10 @@ namespace Kyloe.Syntax
                 throw new System.NotImplementedException();
             }
             else
-            {
-                Console.WriteLine("hi");
-                diagnostics.Add(new UnexpectedTokenError(current.Type));
+            {   // Don't report a new diagnostic if the lexer already did.
+                if (current.Type != SyntaxTokenType.Invalid)
+                    diagnostics.Add(new UnexpectedTokenError(current.Type));
+
                 return new MalformedSyntaxNode(Advance());
             }
         }

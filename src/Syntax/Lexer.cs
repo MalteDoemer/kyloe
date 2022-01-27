@@ -1,15 +1,17 @@
 using System.Collections.Generic;
+using Kyloe.Diagnostics;
 
 namespace Kyloe.Syntax
 {
     class Lexer
     {
-
+        private readonly DiagnosticCollecter diagnostics;
         private readonly string text;
         private int position;
 
-        public Lexer(string text)
+        public Lexer(string text, DiagnosticCollecter diagnostics)
         {
+            this.diagnostics = diagnostics;
             this.text = text;
             this.position = 0;
         }
@@ -41,6 +43,7 @@ namespace Kyloe.Syntax
 
                 if (current == '\0')
                 {
+                    diagnostics.Add(new NeverClosedStringLiteralError());
                     return new SyntaxToken(SyntaxTokenType.Invalid);
                 }
 
@@ -252,6 +255,7 @@ namespace Kyloe.Syntax
             }
             else
             {
+                diagnostics.Add(new UnknownCharacterError(current));
                 return new SyntaxToken(SyntaxTokenType.Invalid, AdvanceBy(1));
             }
         }

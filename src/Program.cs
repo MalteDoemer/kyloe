@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Kyloe.Diagnostics;
 using Kyloe.Syntax;
 
 namespace Kyloe
@@ -22,20 +23,38 @@ namespace Kyloe
                     continue;
                 }
 
-                var parser = new Parser(input);
+                var diagnostics = new DiagnosticCollecter();
 
+                var parser = new Parser(input, diagnostics);
                 var tree = parser.Parse();
 
-                foreach (var d in parser.GetDiagnostics())
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(d.Message());
-                    Console.ForegroundColor = ConsoleColor.White;
-                }
+                PrintDiagnostics(diagnostics);
 
                 var writer = new PrettyWriter(Console.Out);
                 writer.Write(tree);
             }
+        }
+
+        private static void PrintDiagnostics(DiagnosticCollecter diagnostics)
+        {
+            var prevColor = Console.ForegroundColor;
+
+            if (diagnostics.HasWarnings())
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                foreach (var warning in diagnostics.GetWarnings())
+                    Console.WriteLine(warning.Message());
+            }
+
+            if (diagnostics.HasErrors())
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+
+                foreach (var warning in diagnostics.GetErrors())
+                    Console.WriteLine(warning.Message());
+            }
+
+            Console.ForegroundColor = prevColor;
         }
 
         private static bool EvaluteDollarCommand(string input)
