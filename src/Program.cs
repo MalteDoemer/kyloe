@@ -26,6 +26,13 @@ namespace Kyloe
 
                 var tree = parser.Parse();
 
+                foreach (var d in parser.GetDiagnostics())
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(d.Message());
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+
                 var writer = new PrettyWriter(Console.Out);
                 writer.Write(tree);
             }

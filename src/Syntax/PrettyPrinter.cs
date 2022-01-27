@@ -23,7 +23,7 @@ namespace Kyloe.Syntax
             else if (node is MalformedSyntaxNode malformedSyntaxNode)
             {
                 writer.Write(indent);
-                writer.WriteLine($"{nameof(MalformedSyntaxNode)}: ${malformedSyntaxNode.Token}");
+                writer.WriteLine($"{nameof(MalformedSyntaxNode)}: {malformedSyntaxNode.Token}");
             }
             else if (node is UnaryExpressionNode unaryExpressionNode)
             {
