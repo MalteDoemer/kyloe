@@ -16,7 +16,7 @@ func main() {
     let sum1 = sum(values);
 
     let lenght = random(5, 100);
-    let values2 = new [int](lenght);
+    let values2 = [int; lenght];
 
     for i = 0; i < lenght; i++ {
         values2[i] = random(0, 10);

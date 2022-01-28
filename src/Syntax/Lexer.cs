@@ -167,7 +167,57 @@ namespace Kyloe.Syntax
 
         private SyntaxToken? TryLexSingleToken()
         {
-            // return SyntaxInfo.IsSingleToken();
+            switch (current)
+            {
+                case '+':
+                    return new SyntaxToken(SyntaxTokenType.Plus);
+                case '-':
+                    return new SyntaxToken(SyntaxTokenType.Minus);
+                case '*':
+                    return new SyntaxToken(SyntaxTokenType.Star);
+                case '/':
+                    return new SyntaxToken(SyntaxTokenType.Slash);
+                case '%':
+                    return new SyntaxToken(SyntaxTokenType.Percent);
+                case '&':
+                    return new SyntaxToken(SyntaxTokenType.Ampersand);
+                case '|':
+                    return new SyntaxToken(SyntaxTokenType.Pipe);
+                case '~':
+                    return new SyntaxToken(SyntaxTokenType.Tilde);
+                case '^':
+                    return new SyntaxToken(SyntaxTokenType.Hat);
+                case '<':
+                    return new SyntaxToken(SyntaxTokenType.Less);
+                case '>':
+                    return new SyntaxToken(SyntaxTokenType.Greater);
+                case '=':
+                    return new SyntaxToken(SyntaxTokenType.Equals);
+                case '!':
+                    return new SyntaxToken(SyntaxTokenType.Bang);
+                case '(':
+                    return new SyntaxToken(SyntaxTokenType.LeftParen);
+                case ')':
+                    return new SyntaxToken(SyntaxTokenType.RightParen);
+                case '[':
+                    return new SyntaxToken(SyntaxTokenType.LeftSquare);
+                case ']':
+                    return new SyntaxToken(SyntaxTokenType.RightSquare);
+                case '{':
+                    return new SyntaxToken(SyntaxTokenType.LeftBracket);
+                case '}':
+                    return new SyntaxToken(SyntaxTokenType.RightBracket);
+                case ',':
+                    return new SyntaxToken(SyntaxTokenType.Comma);
+                case '.':
+                    return new SyntaxToken(SyntaxTokenType.Dot);
+                case ':':
+                    return new SyntaxToken(SyntaxTokenType.Colon);
+                case ';':
+                    return new SyntaxToken(SyntaxTokenType.SemiColon);
+                default:
+                    return null;
+            }
         }
 
         public SyntaxToken NextToken()

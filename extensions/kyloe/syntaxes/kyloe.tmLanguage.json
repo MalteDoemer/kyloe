@@ -11,10 +11,6 @@
 			"match": "\\b(func|struct|public|private|true|false|const|let|char|byte|short|ushort|int|uint|long|ulong|float|double|string)\\b"
 		},
 		{
-			"name": "keyword.operator.new",
-			"match": "\\b(new)\\b"
-		},
-		{
 			"name": "string.quoted.double.kyloe",
 			"begin": "\"",
 			"end": "\"",
