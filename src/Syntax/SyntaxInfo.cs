@@ -17,19 +17,6 @@ namespace Kyloe.Syntax
             return c == '\'' || c == '"';
         }
 
-        public static SyntaxToken? IsKeyword(string ident)
-        {
-            switch (ident)
-            {
-                case "true":
-                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, true);
-                case "false":
-                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, false);
-                default:
-                    return null;
-            }
-        }
-
         public static bool IsLiteralToken(this SyntaxTokenType type)
         {
             switch (type)

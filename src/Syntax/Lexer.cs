@@ -117,10 +117,15 @@ namespace Kyloe.Syntax
 
             string ident = text.Substring(start, end - start);
 
-            if (SyntaxInfo.IsKeyword(ident) is SyntaxToken keywordToken)
-                return keywordToken;
-            else
-                return new SyntaxToken(SyntaxTokenType.Identifier, ident);
+            switch (ident)
+            {
+                case "true":
+                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, true);
+                case "false":
+                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, false);
+                default:
+                    return new SyntaxToken(SyntaxTokenType.Identifier, ident);
+            }
         }
 
         private SyntaxToken? TryLexDoubleToken()
