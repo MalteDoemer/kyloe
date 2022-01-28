@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Kyloe.Diagnostics;
+using Kyloe.Text;
 
 namespace Kyloe.Syntax
 {
@@ -44,19 +45,20 @@ namespace Kyloe.Syntax
                 if (current == '\0')
                 {
                     diagnostics.Add(new NeverClosedStringLiteralError());
-                    return new SyntaxToken(SyntaxTokenType.Invalid);
+                    return new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
                 }
 
                 AdvanceBy(1);
             }
 
-            int end = position;
+            int length = position - start;
 
             AdvanceBy(1); // skip the terminating quote
 
-            var str = text.Substring(start, end - start);
+            var str = text.Substring(start, length);
+            var location = SourceLocation.FromLength(start, length);
 
-            return new SyntaxToken(SyntaxTokenType.StringLiteral, str);
+            return new SyntaxToken(SyntaxTokenType.StringLiteral, location, str);
         }
 
         private SyntaxToken SkipWhiteSpace()
@@ -69,6 +71,7 @@ namespace Kyloe.Syntax
 
         private SyntaxToken LexNumber()
         {
+            int start = position;
             long integer = 0;
 
             // first parse the number as an int
@@ -85,7 +88,7 @@ namespace Kyloe.Syntax
             }
 
             if (!(current == '.' && char.IsNumber(Peek(1))))
-                return new SyntaxToken(SyntaxTokenType.IntLiteral, integer);
+                return new SyntaxToken(SyntaxTokenType.IntLiteral, SourceLocation.FromBounds(start, position), integer);
 
 
             AdvanceBy(1); // skip the decimal point
@@ -101,7 +104,7 @@ namespace Kyloe.Syntax
                 AdvanceBy(1);
             }
 
-            return new SyntaxToken(SyntaxTokenType.FloatLiteral, floatingPoint);
+            return new SyntaxToken(SyntaxTokenType.FloatLiteral, SourceLocation.FromBounds(start, position), floatingPoint);
         }
 
         private SyntaxToken LexIdentOrKeyword()
@@ -113,18 +116,19 @@ namespace Kyloe.Syntax
                 AdvanceBy(1);
             }
 
-            int end = position;
+            int length = position - start;
 
-            string ident = text.Substring(start, end - start);
+            string ident = text.Substring(start, length);
+            var location = SourceLocation.FromLength(start, length);
 
             switch (ident)
             {
                 case "true":
-                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, true);
+                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, location, true);
                 case "false":
-                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, false);
+                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, location, false);
                 default:
-                    return new SyntaxToken(SyntaxTokenType.Identifier, ident);
+                    return new SyntaxToken(SyntaxTokenType.Identifier, location, ident);
             }
         }
 
@@ -133,38 +137,40 @@ namespace Kyloe.Syntax
             char c1 = current;
             char c2 = Peek(1);
 
+            var location = SourceLocation.FromLength(position, 2);
+
             switch (c1, c2)
             {
                 case ('-', '>'):
-                    return new SyntaxToken(SyntaxTokenType.SmallArrow);
+                    return new SyntaxToken(SyntaxTokenType.SmallArrow, location);
                 case ('+', '='):
-                    return new SyntaxToken(SyntaxTokenType.PlusEquals);
+                    return new SyntaxToken(SyntaxTokenType.PlusEquals, location);
                 case ('-', '='):
-                    return new SyntaxToken(SyntaxTokenType.MinusEquals);
+                    return new SyntaxToken(SyntaxTokenType.MinusEquals, location);
                 case ('*', '='):
-                    return new SyntaxToken(SyntaxTokenType.StarEquals);
+                    return new SyntaxToken(SyntaxTokenType.StarEquals, location);
                 case ('/', '='):
-                    return new SyntaxToken(SyntaxTokenType.SlashEquals);
+                    return new SyntaxToken(SyntaxTokenType.SlashEquals, location);
                 case ('%', '='):
-                    return new SyntaxToken(SyntaxTokenType.PercentEquals);
+                    return new SyntaxToken(SyntaxTokenType.PercentEquals, location);
                 case ('&', '&'):
-                    return new SyntaxToken(SyntaxTokenType.DoubleAmpersand);
+                    return new SyntaxToken(SyntaxTokenType.DoubleAmpersand, location);
                 case ('|', '|'):
-                    return new SyntaxToken(SyntaxTokenType.DoublePipe);
+                    return new SyntaxToken(SyntaxTokenType.DoublePipe, location);
                 case ('&', '='):
-                    return new SyntaxToken(SyntaxTokenType.AmpersandEquals);
+                    return new SyntaxToken(SyntaxTokenType.AmpersandEquals, location);
                 case ('|', '='):
-                    return new SyntaxToken(SyntaxTokenType.PipeEquals);
+                    return new SyntaxToken(SyntaxTokenType.PipeEquals, location);
                 case ('^', '='):
-                    return new SyntaxToken(SyntaxTokenType.HatEquals);
+                    return new SyntaxToken(SyntaxTokenType.HatEquals, location);
                 case ('=', '='):
-                    return new SyntaxToken(SyntaxTokenType.DoubleEqual);
+                    return new SyntaxToken(SyntaxTokenType.DoubleEqual, location);
                 case ('!', '='):
-                    return new SyntaxToken(SyntaxTokenType.NotEqual);
+                    return new SyntaxToken(SyntaxTokenType.NotEqual, location);
                 case ('<', '='):
-                    return new SyntaxToken(SyntaxTokenType.LessEqual);
+                    return new SyntaxToken(SyntaxTokenType.LessEqual, location);
                 case ('>', '='):
-                    return new SyntaxToken(SyntaxTokenType.GreaterEqual);
+                    return new SyntaxToken(SyntaxTokenType.GreaterEqual, location);
                 default:
                     return null;
             }
@@ -172,54 +178,56 @@ namespace Kyloe.Syntax
 
         private SyntaxToken? TryLexSingleToken()
         {
+            var location = SourceLocation.FromLength(position, 1);
+
             switch (current)
             {
                 case '+':
-                    return new SyntaxToken(SyntaxTokenType.Plus);
+                    return new SyntaxToken(SyntaxTokenType.Plus, location);
                 case '-':
-                    return new SyntaxToken(SyntaxTokenType.Minus);
+                    return new SyntaxToken(SyntaxTokenType.Minus, location);
                 case '*':
-                    return new SyntaxToken(SyntaxTokenType.Star);
+                    return new SyntaxToken(SyntaxTokenType.Star, location);
                 case '/':
-                    return new SyntaxToken(SyntaxTokenType.Slash);
+                    return new SyntaxToken(SyntaxTokenType.Slash, location);
                 case '%':
-                    return new SyntaxToken(SyntaxTokenType.Percent);
+                    return new SyntaxToken(SyntaxTokenType.Percent, location);
                 case '&':
-                    return new SyntaxToken(SyntaxTokenType.Ampersand);
+                    return new SyntaxToken(SyntaxTokenType.Ampersand, location);
                 case '|':
-                    return new SyntaxToken(SyntaxTokenType.Pipe);
+                    return new SyntaxToken(SyntaxTokenType.Pipe, location);
                 case '~':
-                    return new SyntaxToken(SyntaxTokenType.Tilde);
+                    return new SyntaxToken(SyntaxTokenType.Tilde, location);
                 case '^':
-                    return new SyntaxToken(SyntaxTokenType.Hat);
+                    return new SyntaxToken(SyntaxTokenType.Hat, location);
                 case '<':
-                    return new SyntaxToken(SyntaxTokenType.Less);
+                    return new SyntaxToken(SyntaxTokenType.Less, location);
                 case '>':
-                    return new SyntaxToken(SyntaxTokenType.Greater);
+                    return new SyntaxToken(SyntaxTokenType.Greater, location);
                 case '=':
-                    return new SyntaxToken(SyntaxTokenType.Equals);
+                    return new SyntaxToken(SyntaxTokenType.Equals, location);
                 case '!':
-                    return new SyntaxToken(SyntaxTokenType.Bang);
+                    return new SyntaxToken(SyntaxTokenType.Bang, location);
                 case '(':
-                    return new SyntaxToken(SyntaxTokenType.LeftParen);
+                    return new SyntaxToken(SyntaxTokenType.LeftParen, location);
                 case ')':
-                    return new SyntaxToken(SyntaxTokenType.RightParen);
+                    return new SyntaxToken(SyntaxTokenType.RightParen, location);
                 case '[':
-                    return new SyntaxToken(SyntaxTokenType.LeftSquare);
+                    return new SyntaxToken(SyntaxTokenType.LeftSquare, location);
                 case ']':
-                    return new SyntaxToken(SyntaxTokenType.RightSquare);
+                    return new SyntaxToken(SyntaxTokenType.RightSquare, location);
                 case '{':
-                    return new SyntaxToken(SyntaxTokenType.LeftBracket);
+                    return new SyntaxToken(SyntaxTokenType.LeftBracket, location);
                 case '}':
-                    return new SyntaxToken(SyntaxTokenType.RightBracket);
+                    return new SyntaxToken(SyntaxTokenType.RightBracket, location);
                 case ',':
-                    return new SyntaxToken(SyntaxTokenType.Comma);
+                    return new SyntaxToken(SyntaxTokenType.Comma, location);
                 case '.':
-                    return new SyntaxToken(SyntaxTokenType.Dot);
+                    return new SyntaxToken(SyntaxTokenType.Dot, location);
                 case ':':
-                    return new SyntaxToken(SyntaxTokenType.Colon);
+                    return new SyntaxToken(SyntaxTokenType.Colon, location);
                 case ';':
-                    return new SyntaxToken(SyntaxTokenType.SemiColon);
+                    return new SyntaxToken(SyntaxTokenType.SemiColon, location);
                 default:
                     return null;
             }
@@ -256,12 +264,12 @@ namespace Kyloe.Syntax
             }
             else if (current == '\0')
             {
-                return new SyntaxToken(SyntaxTokenType.End);
+                return new SyntaxToken(SyntaxTokenType.End, SourceLocation.FromLength(position, 0));
             }
             else
             {
                 diagnostics.Add(new UnknownCharacterError(current));
-                return new SyntaxToken(SyntaxTokenType.Invalid, AdvanceBy(1));
+                return new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromLength(position, 1), AdvanceBy(1));
             }
         }
 

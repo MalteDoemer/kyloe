@@ -1,9 +1,12 @@
 using System.IO;
+using Kyloe.Text;
 
 namespace Kyloe.Syntax
 {
     abstract class SyntaxNode
     {
+        public abstract SourceLocation Location { get; }
+
         public override string ToString()
         {
             using (StringWriter writer = new StringWriter())

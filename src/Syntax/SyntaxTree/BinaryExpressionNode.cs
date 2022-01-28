@@ -1,3 +1,5 @@
+using Kyloe.Text;
+
 namespace Kyloe.Syntax
 {
     class BinaryExpressionNode : SyntaxNode
@@ -12,5 +14,7 @@ namespace Kyloe.Syntax
         public SyntaxToken OperatorToken { get; }
         public SyntaxNode LeftChild { get; }
         public SyntaxNode RightChild { get; }
+
+        public override SourceLocation Location => SourceLocation.CreateAround(LeftChild.Location, RightChild.Location);
     }
 }

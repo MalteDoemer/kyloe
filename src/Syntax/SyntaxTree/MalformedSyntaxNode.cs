@@ -1,3 +1,5 @@
+using Kyloe.Text;
+
 namespace Kyloe.Syntax
 {
     class MalformedSyntaxNode : SyntaxNode
@@ -8,5 +10,7 @@ namespace Kyloe.Syntax
         }
 
         public SyntaxToken Token { get; }
+
+        public override SourceLocation Location => Token.Location;
     }
 }

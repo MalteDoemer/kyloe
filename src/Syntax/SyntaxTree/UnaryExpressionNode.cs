@@ -1,3 +1,5 @@
+using Kyloe.Text;
+
 namespace Kyloe.Syntax
 {
     class UnaryExpressionNode : SyntaxNode
@@ -11,5 +13,6 @@ namespace Kyloe.Syntax
         public SyntaxToken OperatorToken { get; }
         public SyntaxNode Child { get; }
 
+        public override SourceLocation Location => SourceLocation.CreateAround(OperatorToken.Location, Child.Location);
     }
 }
