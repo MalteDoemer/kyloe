@@ -16,9 +16,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => token.Location;
 
-        public override string Message()
-        {
-            return "Never closed string literal.";
-        }
+        public override string Message() => "Never closed string literal.";
     }
 }

@@ -19,6 +19,8 @@ namespace Kyloe.Syntax
 
         private char current => Peek(0);
 
+        private char next => Peek(1);
+
         private char Peek(int offset)
         {
             var pos = position + offset;
@@ -71,14 +73,43 @@ namespace Kyloe.Syntax
             return NextToken();
         }
 
+        private SyntaxToken SkipLineComment()
+        {
+            while (!(current == '\n' || current == '\0'))
+                AdvanceBy(1);
+
+
+            return NextToken();
+        }
+
+        private SyntaxToken SkipBlockComment()
+        {
+            var start = position;
+
+            while (!(current == '*' && next == '/'))
+            {
+                if (current == '\0')
+                {
+                    var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
+                    diagnostics.Add(new NeverClosedBlockComment(token));
+                    return token;
+                }
+                AdvanceBy(1);
+            }
+
+            AdvanceBy(2); // skip the closing chars: */
+
+            return NextToken();
+        }
+
         private SyntaxToken LexNumber()
         {
             int start = position;
             long integer = 0;
 
-            // first parse the number as an int
+            // First parse the number as an int
             // but if there is a dot in between
-            // switch to float
+            // switch to float.
 
             // TODO: handle non-ascii numbers
 
@@ -89,7 +120,7 @@ namespace Kyloe.Syntax
                 AdvanceBy(1);
             }
 
-            if (!(current == '.' && char.IsNumber(Peek(1))))
+            if (!(current == '.' && char.IsNumber(next)))
                 return new SyntaxToken(SyntaxTokenType.IntLiteral, SourceLocation.FromBounds(start, position), integer);
 
 
@@ -137,7 +168,7 @@ namespace Kyloe.Syntax
         private SyntaxToken? TryLexDoubleToken()
         {
             char c1 = current;
-            char c2 = Peek(1);
+            char c2 = next;
 
             var location = SourceLocation.FromLength(position, 2);
 
@@ -191,6 +222,10 @@ namespace Kyloe.Syntax
                 case '*':
                     return new SyntaxToken(SyntaxTokenType.Star, location);
                 case '/':
+                    // A slash could also mean a line comment, or a block comment.
+                    // In that case just return null, it will be handled later.
+                    if (next == '/' || next == '*')
+                        return null;
                     return new SyntaxToken(SyntaxTokenType.Slash, location);
                 case '%':
                     return new SyntaxToken(SyntaxTokenType.Percent, location);
@@ -237,7 +272,6 @@ namespace Kyloe.Syntax
 
         public SyntaxToken NextToken()
         {
-
             if (TryLexDoubleToken() is SyntaxToken doubleToken)
             {
                 AdvanceBy(2);
@@ -247,6 +281,14 @@ namespace Kyloe.Syntax
             {
                 AdvanceBy(1);
                 return singleToken;
+            }
+            else if (current == '/' && next == '/')
+            {
+                return SkipLineComment();
+            }
+            else if (current == '/' && next == '*')
+            {
+                return SkipBlockComment();
             }
             else if (char.IsWhiteSpace(current))
             {
