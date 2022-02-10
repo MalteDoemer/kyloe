@@ -38,6 +38,11 @@
 			"end": "\n"
 		},
 		{
+			"name": "comment.block.kyloe",
+			"begin": "/\\*",
+			"end": "\\*/"
+		},
+		{
 			"name": "constant.numeric.kyloe",
 			"match": "\\b(\\d+)\\b"
 		},

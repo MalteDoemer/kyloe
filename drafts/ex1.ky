@@ -9,11 +9,12 @@ func calculate(a: int, b: int) -> int {
     }
 }
 
-func count(start: int, times: int, inc: int) {
+/* This is a block comment */
+func count(start: int, times: int, inc: int) { 
     let sum = start;
     for i = 0; i < times; i++ {
         println(sum)
-        sum += inc;
+        sum += inc; // increment the sum
     }
 
     println(sum);
