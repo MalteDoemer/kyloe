@@ -38,6 +38,12 @@ namespace Kyloe.Syntax
                 Write(binaryExpressionNode.LeftChild, indent + INCREMENT);
                 Write(binaryExpressionNode.RightChild, indent + INCREMENT);
             }
+            else if (node is ParenthesizedExpressionNode parenthesizedExpressionNode)
+            {
+                writer.Write(indent);
+                writer.WriteLine($"{nameof(ParenthesizedExpressionNode)}: ");
+                Write(parenthesizedExpressionNode.Expression, indent + INCREMENT);
+            }
         }
     }
 }

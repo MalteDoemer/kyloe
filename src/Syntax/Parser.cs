@@ -98,10 +98,11 @@ namespace Kyloe.Syntax
             }
             else if (current.Type == SyntaxTokenType.LeftParen)
             {
-                Advance(); // skip the left parenthesis
+                var leftParen = Advance(); // skip the left parenthesis
                 var expr = ParseExpression();
-                Expect(SyntaxTokenType.RightParen); // skip the right parenthesis
-                return expr;
+                var rightParen = Expect(SyntaxTokenType.RightParen); // skip the right parenthesis
+
+                return new ParenthesizedExpressionNode(leftParen, rightParen, expr);
             }
             else if (current.Type == SyntaxTokenType.Identifier)
             {
