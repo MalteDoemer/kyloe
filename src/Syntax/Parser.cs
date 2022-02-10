@@ -44,7 +44,7 @@ namespace Kyloe.Syntax
 
             // Don't report a new diagnostic if the lexer already did.
             if (current.Type != SyntaxTokenType.Invalid)
-                diagnostics.Add(new UnexpectedTokenError(types, current.Type));
+                diagnostics.Add(new UnexpectedTokenError(types, current));
 
             return Advance();
         }
@@ -110,7 +110,7 @@ namespace Kyloe.Syntax
             else
             {   // Don't report a new diagnostic if the lexer already did.
                 if (current.Type != SyntaxTokenType.Invalid)
-                    diagnostics.Add(new UnexpectedTokenError(current.Type));
+                    diagnostics.Add(new UnexpectedTokenError(current));
 
                 return new MalformedSyntaxNode(Advance());
             }

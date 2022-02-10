@@ -35,8 +35,9 @@ namespace Kyloe.Syntax
 
         private SyntaxToken LexStringLiteral()
         {
+            int quote_start = position;
             var quote = AdvanceBy(1);
-            int start = position;
+            int literal_start = position;
 
             while (current != quote)
             {
@@ -44,19 +45,20 @@ namespace Kyloe.Syntax
 
                 if (current == '\0')
                 {
-                    diagnostics.Add(new NeverClosedStringLiteralError());
-                    return new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
+                    var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(quote_start, position));
+                    diagnostics.Add(new NeverClosedStringLiteralError(token));
+                    return token;
                 }
 
                 AdvanceBy(1);
             }
 
-            int length = position - start;
+            int literal_length = position - literal_start;
 
             AdvanceBy(1); // skip the terminating quote
 
-            var str = text.Substring(start, length);
-            var location = SourceLocation.FromLength(start, length);
+            var str = text.Substring(literal_start, literal_length);
+            var location = SourceLocation.FromBounds(quote_start, position);
 
             return new SyntaxToken(SyntaxTokenType.StringLiteral, location, str);
         }
@@ -264,12 +266,13 @@ namespace Kyloe.Syntax
             }
             else if (current == '\0')
             {
-                return new SyntaxToken(SyntaxTokenType.End, SourceLocation.FromLength(position, 0));
+                return new SyntaxToken(SyntaxTokenType.End, SourceLocation.FromLength(position, 1));
             }
             else
             {
-                diagnostics.Add(new UnknownCharacterError(current));
-                return new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromLength(position, 1), AdvanceBy(1));
+                var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromLength(position, 1), AdvanceBy(1));
+                diagnostics.Add(new UnknownCharacterError(token));
+                return token;
             }
         }
 
