@@ -106,7 +106,7 @@ namespace Kyloe.Syntax
             }
             else if (current.Type == SyntaxTokenType.Identifier)
             {
-                throw new System.NotImplementedException();
+                return ParseNameExpression();
             }
             else
             {   // Don't report a new diagnostic if the lexer already did.
@@ -115,6 +115,20 @@ namespace Kyloe.Syntax
 
                 return new MalformedSyntaxNode(Advance());
             }
+        }
+
+        private SyntaxNode ParseNameExpression()
+        {
+            var name = Advance();
+
+            if (current.Type == SyntaxTokenType.Dot)
+            {
+                var dotToken = Advance();
+                var child = ParseNameExpression();
+                return new MemberAccessNode(name, dotToken, child);
+            }
+            
+            return new NameExpressionNode(name);
         }
     }
 }

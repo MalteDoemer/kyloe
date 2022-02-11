@@ -44,6 +44,25 @@ namespace Kyloe.Syntax
                 writer.WriteLine($"{nameof(ParenthesizedExpressionNode)}: ");
                 Write(parenthesizedExpressionNode.Expression, indent + INCREMENT);
             }
+            else if (node is NameExpressionNode nameExpressionNode)
+            {
+                writer.Write(indent);
+                writer.WriteLine($"{nameof(NameExpressionNode)}: ");
+                writer.Write(indent + INCREMENT);
+                writer.WriteLine(nameExpressionNode.NameToken);
+            }
+            else if (node is MemberAccessNode memberAccessNode)
+            {
+                writer.Write(indent);
+                writer.WriteLine($"{nameof(MemberAccessNode)}: ");
+                writer.Write(indent + INCREMENT);
+                writer.WriteLine(memberAccessNode.NameToken);
+                Write(memberAccessNode.Child, indent + INCREMENT);
+            }
+            else
+            {
+                throw new System.Exception($"Unknown node: {node.GetType()}");
+            }
         }
     }
 }
