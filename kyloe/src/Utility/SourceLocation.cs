@@ -1,6 +1,6 @@
 using System;
 
-namespace Kyloe.Text
+namespace Kyloe.Utility
 {
     struct SourceLocation
     {

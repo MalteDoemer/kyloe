@@ -1,6 +1,6 @@
 using System;
 using Kyloe.Syntax;
-using Kyloe.Text;
+using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {

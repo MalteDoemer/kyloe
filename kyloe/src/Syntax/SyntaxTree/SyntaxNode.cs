@@ -1,5 +1,5 @@
 using System.IO;
-using Kyloe.Text;
+using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using Kyloe.Diagnostics;
-using Kyloe.Text;
+using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {

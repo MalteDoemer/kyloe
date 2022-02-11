@@ -1,4 +1,4 @@
-using Kyloe.Text;
+using Kyloe.Utility;
 using Kyloe.Syntax;
 
 namespace Kyloe.Diagnostics

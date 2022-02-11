@@ -2,7 +2,7 @@
 using System.Text;
 using Kyloe.Diagnostics;
 using Kyloe.Syntax;
-using Kyloe.Text;
+using Kyloe.Utility;
 
 namespace Kyloe
 {
