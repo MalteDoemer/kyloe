@@ -7,18 +7,18 @@ namespace Kyloe.Syntax
 
     class MemberAccessNode : SyntaxNode
     {
-        public MemberAccessNode(SyntaxToken nameToken, SyntaxToken dotToken, SyntaxNode child)
+        public MemberAccessNode(SyntaxNode expression, SyntaxToken dotToken, SyntaxToken nameToken)
         {
+            Expression = expression;
             NameToken = nameToken;
             DotToken = dotToken;
-            Child = child;
         }
 
+        public SyntaxNode Expression { get; }
         public SyntaxToken NameToken { get; }
         public SyntaxToken DotToken { get; }
-        public SyntaxNode Child { get; }
 
-        public override SourceLocation Location => SourceLocation.CreateAround(NameToken.Location, Child.Location);
+        public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, NameToken.Location);
     }
 
 }

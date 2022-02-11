@@ -81,13 +81,27 @@ namespace Kyloe.Syntax
             return type.BinaryOperatorPrecedence() != -1;
         }
 
-        public static bool IsUnaryOperator(this SyntaxTokenType type)
+        public static bool IsPrefixOperator(this SyntaxTokenType type)
         {
             switch (type)
             {
                 case SyntaxTokenType.Bang:
                 case SyntaxTokenType.Tilde:
                     return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsPostfixOperator(this SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.LeftSquare:
+                case SyntaxTokenType.LeftParen:
+                case SyntaxTokenType.Dot:
+                    return true;
+
                 default:
                     return false;
             }

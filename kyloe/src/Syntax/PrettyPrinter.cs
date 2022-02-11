@@ -55,9 +55,14 @@ namespace Kyloe.Syntax
             {
                 writer.Write(indent);
                 writer.WriteLine($"{nameof(MemberAccessNode)}: ");
+                Write(memberAccessNode.Expression, indent + INCREMENT);
                 writer.Write(indent + INCREMENT);
                 writer.WriteLine(memberAccessNode.NameToken);
-                Write(memberAccessNode.Child, indent + INCREMENT);
+            } else if (node is SubscriptExpressionNode subscriptExpressionNode) {
+                writer.Write(indent);
+                writer.WriteLine($"{nameof(SubscriptExpressionNode)}: ");
+                Write(subscriptExpressionNode.LeftNode, indent + INCREMENT);
+                Write(subscriptExpressionNode.Subscript, indent + INCREMENT);
             }
             else
             {

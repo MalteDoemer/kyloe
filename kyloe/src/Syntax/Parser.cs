@@ -64,7 +64,7 @@ namespace Kyloe.Syntax
         private SyntaxNode ParseBinaryExpression(int precedence = SyntaxInfo.MAX_PRECEDENCE)
         {
             if (precedence == 0)
-                return ParseUnaryExpression();
+                return ParsePrefixExpression();
 
             var left = ParseBinaryExpression(precedence - 1);
 
@@ -78,17 +78,49 @@ namespace Kyloe.Syntax
             return left;
         }
 
-        private SyntaxNode ParseUnaryExpression()
+        private SyntaxNode ParsePrefixExpression()
         {
-            if (current.Type.IsUnaryOperator())
+            if (current.Type.IsPrefixOperator())
             {
                 var op = Advance();
-                var child = ParseUnaryExpression();
+                var child = ParsePrefixExpression();
                 return new UnaryExpressionNode(op, child);
             }
 
-            return ParsePrimary();
+            return ParsePostFixExpression();
         }
+
+        private SyntaxNode ParsePostFixExpression()
+        {
+            var node = ParsePrimary();
+
+            while (current.Type.IsPostfixOperator())
+            {
+                if (current.Type == SyntaxTokenType.LeftParen)
+                {
+                    throw new NotImplementedException();
+                }
+                else if (current.Type == SyntaxTokenType.LeftSquare)
+                {
+                    var lsquare = Advance();
+                    var expr = ParseExpression();
+                    var rsqare = Expect(SyntaxTokenType.RightSquare);
+
+                    node = new SubscriptExpressionNode(node, lsquare, expr, rsqare);
+                }
+                else if (current.Type == SyntaxTokenType.Dot)
+                {
+                    var dotToken = Advance();
+                    var nameToken = Expect(SyntaxTokenType.Identifier);
+                    node = new MemberAccessNode(node, dotToken, nameToken);
+                }
+            }
+
+            return node;
+        }
+
+
+
 
         private SyntaxNode ParsePrimary()
         {
@@ -106,7 +138,8 @@ namespace Kyloe.Syntax
             }
             else if (current.Type == SyntaxTokenType.Identifier)
             {
-                return ParseNameExpression();
+                var name = Advance();
+                return new NameExpressionNode(name);
             }
             else
             {   // Don't report a new diagnostic if the lexer already did.
@@ -115,20 +148,6 @@ namespace Kyloe.Syntax
 
                 return new MalformedSyntaxNode(Advance());
             }
-        }
-
-        private SyntaxNode ParseNameExpression()
-        {
-            var name = Advance();
-
-            if (current.Type == SyntaxTokenType.Dot)
-            {
-                var dotToken = Advance();
-                var child = ParseNameExpression();
-                return new MemberAccessNode(name, dotToken, child);
-            }
-            
-            return new NameExpressionNode(name);
         }
     }
 }
