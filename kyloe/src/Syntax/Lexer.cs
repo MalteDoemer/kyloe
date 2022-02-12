@@ -9,11 +9,11 @@ namespace Kyloe.Syntax
     // TODO: make lexer class internal
     public class Lexer
     {
-        private readonly DiagnosticCollecter diagnostics;
+        private readonly DiagnosticCollector diagnostics;
         private readonly TextReader reader;
         private int position;
 
-        public Lexer(TextReader reader, DiagnosticCollecter diagnostics)
+        public Lexer(TextReader reader, DiagnosticCollector diagnostics)
         {
             this.diagnostics = diagnostics;
             this.reader = reader;

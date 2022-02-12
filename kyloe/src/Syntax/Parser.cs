@@ -10,12 +10,12 @@ namespace Kyloe.Syntax
     {
         private Lexer lexer;
 
-        private DiagnosticCollecter diagnostics;
+        private DiagnosticCollector diagnostics;
 
         private SyntaxToken current;
         private SyntaxToken next;
 
-        public Parser(TextReader reader, DiagnosticCollecter diagnostics)
+        public Parser(TextReader reader, DiagnosticCollector diagnostics)
         {
             this.diagnostics = diagnostics;
             lexer = new Lexer(reader, diagnostics);

@@ -12,7 +12,7 @@ namespace Kyc
         {
             Console.WriteLine("Code:");
 
-            var diagnostics = new DiagnosticCollecter();
+            var diagnostics = new DiagnosticCollector();
 
             var parser = new Parser(Console.In, diagnostics);
             var tree = parser.Parse();
@@ -24,7 +24,7 @@ namespace Kyc
 
         }
 
-        private static void PrintDiagnostics(DiagnosticCollecter diagnostics)
+        private static void PrintDiagnostics(DiagnosticCollector diagnostics)
         {
             var prevColor = Console.ForegroundColor;
 
