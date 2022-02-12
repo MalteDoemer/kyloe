@@ -4,7 +4,17 @@ namespace Kyloe.Syntax
 {
     public class PrettyWriter
     {
-        private const string INCREMENT = "    ";
+        private const string CHILD_INDENT = "│   ";
+        private const string LEAF_INDENT = "    ";
+        private const string CHILD_NODE = "├── ";
+        private const string LEAF_NODE = "└── ";
+
+        private enum ChildType
+        {
+            Root,
+            Leaf,
+            Normal,
+        }
 
         private TextWriter writer;
 
@@ -13,87 +23,52 @@ namespace Kyloe.Syntax
             this.writer = writer;
         }
 
-        public void Write(SyntaxNode node, string indent = "")
+
+        public void Write(SyntaxNode root)
         {
-            switch (node.Type)
-            {
-                case SyntaxNodeType.MalformedExpression:
-                    var malformedExpression = (MalformedExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(MalformedExpression)}: {malformedExpression.Token}");
-                    break;
-                case SyntaxNodeType.LiteralExpression:
-                    var literalExpression = (LiteralExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine(literalExpression.LiteralToken);
-                    break;
-                case SyntaxNodeType.UnaryExpression:
-                    var unaryExpression = (UnaryExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(UnaryExpression)}: {unaryExpression.OperatorToken}");
-                    Write(unaryExpression.Child, indent + INCREMENT);
-                    break;
-                case SyntaxNodeType.BinaryExpression:
-                    var binaryExpression = (BinaryExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(BinaryExpression)}: {binaryExpression.OperatorToken}");
-                    Write(binaryExpression.LeftChild, indent + INCREMENT);
-                    Write(binaryExpression.RightChild, indent + INCREMENT);
-                    break;
-                case SyntaxNodeType.ParenthesizedExpression:
-                    var parenthesizedExpression = (ParenthesizedExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(ParenthesizedExpression)}: ");
-                    Write(parenthesizedExpression.Expression, indent + INCREMENT);
-                    break;
-                case SyntaxNodeType.NameExpression:
-                    var nameExpression = (NameExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(NameExpression)}: ");
-                    writer.Write(indent + INCREMENT);
-                    writer.WriteLine(nameExpression.NameToken);
-                    break;
-                case SyntaxNodeType.MemberAccessExpression:
-                    var memberAccessExpression = (MemberAccessExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(MemberAccessExpression)}: ");
-                    Write(memberAccessExpression.Expression, indent + INCREMENT);
-                    writer.Write(indent + INCREMENT);
-                    writer.WriteLine(memberAccessExpression.NameToken);
-                    break;
-                case SyntaxNodeType.SubscriptExpression:
-                    var subscriptExpression = (SubscriptExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(SubscriptExpression)}: ");
-                    Write(subscriptExpression.LeftNode, indent + INCREMENT);
-                    Write(subscriptExpression.Subscript, indent + INCREMENT);
-                    break;
-                case SyntaxNodeType.CallExpression:
-                    var callExpression = (CallExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(CallExpression)}: ");
-                    Write(callExpression.Expression, indent + INCREMENT);
-
-                    if (callExpression.Arguments is not null)
-                    {
-                        Write(callExpression.Arguments, indent + INCREMENT);
-                    }
-                    break;
-                case SyntaxNodeType.ArgumentExpression:
-                    var argumentExpression = (ArgumentExpression)node;
-                    writer.Write(indent);
-                    writer.WriteLine($"{nameof(ArgumentExpression)}: ");
-
-                    var nextIndent = indent + INCREMENT;
-
-                    foreach (var child in argumentExpression.Nodes)
-                    {
-                        Write(child, nextIndent);
-                    }
-                    break;
-                default:
-                    throw new System.Exception($"Unknown node: {node.Type}");
-            }
+            var child = new SyntaxNodeChild(root);
+            WriteChild(child, "", ChildType.Root);
         }
+
+        private void WriteChild(SyntaxNodeChild node, string indent, ChildType thisType)
+        {
+            writer.Write(indent);
+
+            if (thisType == ChildType.Normal)
+                writer.Write(CHILD_NODE);
+            else if (thisType == ChildType.Leaf)
+                writer.Write(LEAF_NODE);
+
+            writer.WriteLine(node.ToString());
+
+            var children = node.GetChildren().GetEnumerator();
+
+            if (children is null)
+                return;
+
+            // initially the IEnumerator points to the element before the first one
+            // so MoveNext() has to be called before accessing Current
+            if (!children.MoveNext())
+                return;
+
+            while (true)
+            {
+                var next = children.Current;
+                bool hasNext = children.MoveNext();
+
+                string nextIndent = "";
+
+                if (thisType == ChildType.Normal)
+                    nextIndent = indent + CHILD_INDENT;
+                else if (thisType == ChildType.Leaf)
+                    nextIndent = indent + LEAF_INDENT;
+
+                WriteChild(next, nextIndent, hasNext ? ChildType.Normal : ChildType.Leaf);
+
+                if (!hasNext)
+                    break;
+            }
+
+        }       
     }
 }
