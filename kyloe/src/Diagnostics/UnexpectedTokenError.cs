@@ -21,6 +21,8 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
+        public override DiagnosticType Type => DiagnosticType.UnexpectedTokenError;
+
         public override SourceLocation? Location => provided.Location;
 
         public override string Message()

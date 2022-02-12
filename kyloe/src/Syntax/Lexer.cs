@@ -109,7 +109,7 @@ namespace Kyloe.Syntax
                 if (current == '\0')
                 {
                     var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
-                    diagnostics.Add(new NeverClosedBlockComment(token));
+                    diagnostics.Add(new NeverClosedBlockCommentError(token));
                     return token;
                 }
                 Skip(1);

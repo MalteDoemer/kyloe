@@ -5,9 +5,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class NeverClosedBlockComment : Diagnostic
+    internal class NeverClosedBlockCommentError : Diagnostic
     {
-        public NeverClosedBlockComment(SyntaxToken token)
+        public NeverClosedBlockCommentError(SyntaxToken token)
         {
             Token = token;
         }
@@ -15,6 +15,8 @@ namespace Kyloe.Diagnostics
         public SyntaxToken Token { get; }
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
+
+        public override DiagnosticType Type => DiagnosticType.NeverClosedBlockCommentError;
 
         public override SourceLocation? Location => Token.Location;
 
