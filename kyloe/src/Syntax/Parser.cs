@@ -1,4 +1,4 @@
-using System;
+using System.IO;
 using System.Diagnostics;
 using System.Collections.Immutable;
 using Kyloe.Diagnostics;
@@ -15,10 +15,10 @@ namespace Kyloe.Syntax
         private SyntaxToken current;
         private SyntaxToken next;
 
-        public Parser(string text, DiagnosticCollecter diagnostics)
+        public Parser(TextReader reader, DiagnosticCollecter diagnostics)
         {
             this.diagnostics = diagnostics;
-            lexer = new Lexer(text, diagnostics);
+            lexer = new Lexer(reader, diagnostics);
             current = lexer.NextToken();
             next = lexer.NextToken();
         }

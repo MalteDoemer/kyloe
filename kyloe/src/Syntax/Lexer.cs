@@ -1,6 +1,8 @@
+using System.IO;
 using System.Collections.Generic;
 using Kyloe.Diagnostics;
 using Kyloe.Utility;
+using System.Text;
 
 namespace Kyloe.Syntax
 {
@@ -8,39 +10,58 @@ namespace Kyloe.Syntax
     public class Lexer
     {
         private readonly DiagnosticCollecter diagnostics;
-        private readonly string text;
+        private readonly TextReader reader;
         private int position;
 
-        public Lexer(string text, DiagnosticCollecter diagnostics)
+        public Lexer(TextReader reader, DiagnosticCollecter diagnostics)
         {
             this.diagnostics = diagnostics;
-            this.text = text;
+            this.reader = reader;
             this.position = 0;
+
+
+            int r1 = reader.Read();
+            current = r1 == -1 ? '\0' : (char)r1;
+
+            int r2 = reader.Read();
+            next = r2 == -1 ? '\0' : (char)r2;
+
         }
 
-        private char current => Peek(0);
+        private char current;
 
-        private char next => Peek(1);
+        private char next;
 
-        private char Peek(int offset)
+        private char Advance()
         {
-            var pos = position + offset;
-            return pos < text.Length ? text[pos] : '\0';
+            if (current == '\0')
+                return '\0';
+
+            char ret = current;
+            current = next;
+            position += 1;
+
+            if (next == '\0')
+                return ret;
+
+            int res = reader.Read();
+            next = res == -1 ? '\0' : (char)res;
+
+            return ret;
         }
 
-        /// Advances the position by offset and returns the current char before the advance.
-        private char AdvanceBy(int offset)
+        private void Skip(int num)
         {
-            char c = current;
-            position += offset;
-            return c;
+            for (int i = 0; i < num; i++)
+                Advance();
         }
 
         private SyntaxToken LexStringLiteral()
         {
-            int quote_start = position;
-            var quote = AdvanceBy(1);
-            int literal_start = position;
+            int start = position;
+            var quote = Advance();
+
+            var builder = new StringBuilder();
 
             while (current != quote)
             {
@@ -48,28 +69,25 @@ namespace Kyloe.Syntax
 
                 if (current == '\0')
                 {
-                    var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(quote_start, position));
+                    var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
                     diagnostics.Add(new NeverClosedStringLiteralError(token));
                     return token;
                 }
 
-                AdvanceBy(1);
+                builder.Append(Advance());
             }
 
-            int literal_length = position - literal_start;
+            Skip(1); // skip the terminating quote
 
-            AdvanceBy(1); // skip the terminating quote
+            var location = SourceLocation.FromBounds(start, position);
 
-            var str = text.Substring(literal_start, literal_length);
-            var location = SourceLocation.FromBounds(quote_start, position);
-
-            return new SyntaxToken(SyntaxTokenType.StringLiteral, location, str);
+            return new SyntaxToken(SyntaxTokenType.StringLiteral, location, builder.ToString());
         }
 
         private SyntaxToken SkipWhiteSpace()
         {
             while (char.IsWhiteSpace(current))
-                AdvanceBy(1);
+                Skip(1);
 
             return NextToken();
         }
@@ -77,7 +95,7 @@ namespace Kyloe.Syntax
         private SyntaxToken SkipLineComment()
         {
             while (!(current == '\n' || current == '\0'))
-                AdvanceBy(1);
+                Skip(1);
 
 
             return NextToken();
@@ -95,10 +113,10 @@ namespace Kyloe.Syntax
                     diagnostics.Add(new NeverClosedBlockComment(token));
                     return token;
                 }
-                AdvanceBy(1);
+                Skip(1);
             }
 
-            AdvanceBy(2); // skip the closing chars: */
+            Skip(2); // skip the closing chars: */
 
             return NextToken();
         }
@@ -118,14 +136,14 @@ namespace Kyloe.Syntax
             {
                 int digit = current - '0';
                 integer = integer * 10 + digit;
-                AdvanceBy(1);
+                Skip(1);
             }
 
             if (!(current == '.' && char.IsNumber(next)))
                 return new SyntaxToken(SyntaxTokenType.IntLiteral, SourceLocation.FromBounds(start, position), integer);
 
 
-            AdvanceBy(1); // skip the decimal point
+            Skip(1); // skip the decimal point
 
             double floatingPoint = integer;
             long factor = 10;
@@ -135,7 +153,7 @@ namespace Kyloe.Syntax
                 int digit = current - '0';
                 floatingPoint += digit / (double)factor;
                 factor *= 10;
-                AdvanceBy(1);
+                Skip(1);
             }
 
             return new SyntaxToken(SyntaxTokenType.FloatLiteral, SourceLocation.FromBounds(start, position), floatingPoint);
@@ -145,15 +163,13 @@ namespace Kyloe.Syntax
         {
             int start = position;
 
+            var builder = new StringBuilder();
+
             while (SyntaxInfo.IsIdentSubsequentChar(current))
-            {
-                AdvanceBy(1);
-            }
+                builder.Append(Advance());
 
-            int length = position - start;
-
-            string ident = text.Substring(start, length);
-            var location = SourceLocation.FromLength(start, length);
+            string ident = builder.ToString();
+            var location = SourceLocation.FromBounds(start, position);
 
             switch (ident)
             {
@@ -275,12 +291,12 @@ namespace Kyloe.Syntax
         {
             if (TryLexDoubleToken() is SyntaxToken doubleToken)
             {
-                AdvanceBy(2);
+                Skip(2);
                 return doubleToken;
             }
             else if (TryLexSingleToken() is SyntaxToken singleToken)
             {
-                AdvanceBy(1);
+                Skip(1);
                 return singleToken;
             }
             else if (current == '/' && next == '/')
@@ -313,7 +329,7 @@ namespace Kyloe.Syntax
             }
             else
             {
-                var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromLength(position, 1), AdvanceBy(1));
+                var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromLength(position, 1), Advance());
                 diagnostics.Add(new UnknownCharacterError(token));
                 return token;
             }

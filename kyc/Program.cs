@@ -10,33 +10,21 @@ namespace Kyc
     {
         public static void Main()
         {
-            while (true)
-            {
-                Console.Write("> ");
-                var input = Console.ReadLine();
+            Console.WriteLine("Code:");
 
-                if (input is null)
-                    return;
+            var diagnostics = new DiagnosticCollecter();
 
-                if (input.StartsWith('$'))
-                {
-                    if (!EvaluteDollarCommand(input)) return;
-                    continue;
-                }
+            var parser = new Parser(Console.In, diagnostics);
+            var tree = parser.Parse();
 
-                var diagnostics = new DiagnosticCollecter();
+            Console.WriteLine();
+            PrintDiagnostics(diagnostics);
+            var writer = new PrettyWriter(Console.Out);
+            writer.Write(tree);
 
-                var parser = new Parser(input, diagnostics);
-                var tree = parser.Parse();
-
-                PrintDiagnostics(input, diagnostics);
-
-                var writer = new PrettyWriter(Console.Out);
-                writer.Write(tree);
-            }
         }
 
-        private static void PrintDiagnostics(string text, DiagnosticCollecter diagnostics)
+        private static void PrintDiagnostics(DiagnosticCollecter diagnostics)
         {
             var prevColor = Console.ForegroundColor;
 
@@ -44,7 +32,7 @@ namespace Kyc
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 foreach (var warning in diagnostics.GetWarnings())
-                    PrintDiagnostic(text, warning);
+                    PrintDiagnostic(warning);
             }
 
             if (diagnostics.HasErrors())
@@ -52,24 +40,15 @@ namespace Kyc
                 Console.ForegroundColor = ConsoleColor.Red;
 
                 foreach (var error in diagnostics.GetErrors())
-                    PrintDiagnostic(text, error);
+                    PrintDiagnostic(error);
             }
 
             Console.ForegroundColor = prevColor;
         }
 
-        private static void PrintDiagnostic(string text, Diagnostic diagnostic)
+        private static void PrintDiagnostic(Diagnostic diagnostic)
         {
-            if (diagnostic.Location is SourceLocation location)
-            {
-                StringBuilder builder = new StringBuilder();
-                Console.WriteLine(text);
-                Console.Write(new string(' ', location.Start));
-                Console.WriteLine(new String('~', location.Length));
-            }
-
             Console.WriteLine(diagnostic.Message());
-            Console.WriteLine();
         }
 
         private static bool EvaluteDollarCommand(string input)
