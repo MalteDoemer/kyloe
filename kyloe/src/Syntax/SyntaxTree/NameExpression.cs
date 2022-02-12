@@ -12,6 +12,8 @@ namespace Kyloe.Syntax
 
         public SyntaxToken NameToken { get; }
 
+        public override SyntaxNodeType Type => SyntaxNodeType.NameExpression;
+
         public override SourceLocation Location => NameToken.Location;
     }
 

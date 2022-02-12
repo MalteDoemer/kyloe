@@ -13,6 +13,8 @@ namespace Kyloe.Syntax
         public SyntaxToken OperatorToken { get; }
         public SyntaxNode Child { get; }
 
+        public override SyntaxNodeType Type => SyntaxNodeType.UnaryExpression;
+
         public override SourceLocation Location => SourceLocation.CreateAround(OperatorToken.Location, Child.Location);
     }
 }

@@ -18,6 +18,8 @@ namespace Kyloe.Syntax
         public SyntaxToken NameToken { get; }
         public SyntaxToken DotToken { get; }
 
+        public override SyntaxNodeType Type => SyntaxNodeType.MemberAccessExpression;
+
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, NameToken.Location);
     }
 

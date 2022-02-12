@@ -16,6 +16,8 @@ namespace Kyloe.Syntax
         public SyntaxToken RightParen { get; }
         public SyntaxNode Expression { get; }
 
+        public override SyntaxNodeType Type => SyntaxNodeType.ParenthesizedExpression;
+
         public override SourceLocation Location => SourceLocation.CreateAround(LeftParen.Location, RightParen.Location);
     }
 

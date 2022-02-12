@@ -20,6 +20,8 @@ namespace Kyloe.Syntax
         public ImmutableArray<SyntaxNode> Nodes { get; }
         public ImmutableArray<SyntaxToken> Commas { get; }
 
+        public override SyntaxNodeType Type => SyntaxNodeType.ArgumentExpression;
+
         public override SourceLocation Location
         {
             get
@@ -30,5 +32,6 @@ namespace Kyloe.Syntax
                     return SourceLocation.CreateAround(Nodes.First().Location, Commas.Last().Location);
             }
         }
+
     }
 }

@@ -15,6 +15,8 @@ namespace Kyloe.Syntax
         public SyntaxNode LeftChild { get; }
         public SyntaxNode RightChild { get; }
 
+        public override SyntaxNodeType Type => SyntaxNodeType.BinaryExpression;
+
         public override SourceLocation Location => SourceLocation.CreateAround(LeftChild.Location, RightChild.Location);
     }
 }

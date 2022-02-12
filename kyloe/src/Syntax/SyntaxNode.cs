@@ -5,6 +5,8 @@ namespace Kyloe.Syntax
 {
     public abstract class SyntaxNode
     {
+        public abstract SyntaxNodeType Type { get; }
+
         public abstract SourceLocation Location { get; }
 
         public override string ToString()
