@@ -6,7 +6,7 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    class MemberAccessExpression : SyntaxNode
+    internal class MemberAccessExpression : SyntaxNode
     {
         public MemberAccessExpression(SyntaxNode expression, SyntaxToken dotToken, SyntaxToken nameToken)
         {
@@ -23,7 +23,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, NameToken.Location);
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(Expression);
             yield return new SyntaxNodeChild(DotToken);

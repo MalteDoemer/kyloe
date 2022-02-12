@@ -6,8 +6,7 @@ using System.Text;
 
 namespace Kyloe.Syntax
 {
-    // TODO: make lexer class internal
-    public class Lexer
+    internal class Lexer
     {
         private readonly DiagnosticCollector diagnostics;
         private readonly TextReader reader;

@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class MalformedExpression : SyntaxNode
+    internal class MalformedExpression : SyntaxNode
     {
         public MalformedExpression(SyntaxToken token)
         {
@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => Token.Location;
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(Token);
         }

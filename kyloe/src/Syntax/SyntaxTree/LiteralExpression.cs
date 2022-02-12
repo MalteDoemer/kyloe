@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class LiteralExpression : SyntaxNode
+    internal class LiteralExpression : SyntaxNode
     {
         public LiteralExpression(SyntaxToken literalToken)
         {
@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => LiteralToken.Location;
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(LiteralToken);
         }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    public class SyntaxNodeChild
+    internal class SyntaxNodeChild
     {
         private readonly SyntaxNode? node;
         private readonly SyntaxToken? token;

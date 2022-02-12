@@ -4,7 +4,7 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    class CallExpression : SyntaxNode
+    internal class CallExpression : SyntaxNode
     {
         public CallExpression(SyntaxNode expression, SyntaxToken leftParen, ArgumentExpression? arguments, SyntaxToken rightParen)
         {
@@ -23,7 +23,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, RightParen.Location);
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(Expression);
             yield return new SyntaxNodeChild(LeftParen);

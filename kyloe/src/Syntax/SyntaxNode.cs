@@ -9,6 +9,6 @@ namespace Kyloe.Syntax
 
         public abstract SourceLocation Location { get; }
 
-        public abstract IEnumerable<SyntaxNodeChild> GetChildren();
+        internal abstract IEnumerable<SyntaxNodeChild> GetChildren();
     }
 }

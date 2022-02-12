@@ -5,7 +5,7 @@ namespace Kyloe.Syntax
 {
 
 
-    class SubscriptExpression : SyntaxNode
+    internal class SubscriptExpression : SyntaxNode
     {
         public SubscriptExpression(SyntaxNode leftNode, SyntaxToken leftSquare, SyntaxNode subscript, SyntaxToken rightSquare)
         {
@@ -24,7 +24,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftNode.Location, RightSquare.Location);
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(LeftNode);
             yield return new SyntaxNodeChild(LeftSquare);

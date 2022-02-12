@@ -5,8 +5,7 @@ using Kyloe.Diagnostics;
 
 namespace Kyloe.Syntax
 {
-    // TODO: make Parser class internal
-    public class Parser
+    internal class Parser
     {
         private Lexer lexer;
 
@@ -15,10 +14,10 @@ namespace Kyloe.Syntax
         private SyntaxToken current;
         private SyntaxToken next;
 
-        public Parser(TextReader reader, DiagnosticCollector diagnostics)
+        public Parser(Lexer lexer, DiagnosticCollector diagnostics)
         {
             this.diagnostics = diagnostics;
-            lexer = new Lexer(reader, diagnostics);
+            this.lexer = lexer;
             current = lexer.NextToken();
             next = lexer.NextToken();
         }

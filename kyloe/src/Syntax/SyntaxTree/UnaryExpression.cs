@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class UnaryExpression : SyntaxNode
+    internal class UnaryExpression : SyntaxNode
     {
         public UnaryExpression(SyntaxToken operatorToken, SyntaxNode expression)
         {
@@ -18,7 +18,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(OperatorToken.Location, Expression.Location);
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(OperatorToken);
             yield return new SyntaxNodeChild(Expression);

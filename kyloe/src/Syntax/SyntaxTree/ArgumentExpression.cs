@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    class ArgumentExpression : SyntaxNode
+    internal class ArgumentExpression : SyntaxNode
     {
         public ArgumentExpression(ImmutableArray<SyntaxNode> nodes, ImmutableArray<SyntaxToken> commas)
         {
@@ -24,7 +24,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(Nodes.First().Location, Nodes.Last().Location);
 
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        internal override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             for (int i = 0; i < Commas.Length; i++)
             {

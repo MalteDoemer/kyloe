@@ -1,6 +1,4 @@
-﻿using System;
-using System.Text;
-using Kyloe.Syntax;
+﻿using Kyloe.Syntax;
 using Kyloe.Diagnostics;
 using Kyloe.Utility;
 
@@ -12,19 +10,14 @@ namespace Kyc
         {
             Console.WriteLine("Code:");
 
-            var diagnostics = new DiagnosticCollector();
-
-            var parser = new Parser(Console.In, diagnostics);
-            var tree = parser.Parse();
-
+            var tree = SyntaxTree.Parse(Console.In);
+            // tree.WriteDiagnosticsTo(Console.Error);
+            PrintDiagnostics(tree.Diagnostics);
             Console.WriteLine();
-            PrintDiagnostics(diagnostics);
-            var writer = new PrettyWriter(Console.Out);
-            writer.Write(tree);
-
+            tree.WriteTreeTo(Console.Out);
         }
 
-        private static void PrintDiagnostics(DiagnosticCollector diagnostics)
+        private static void PrintDiagnostics(DiagnosticResult diagnostics)
         {
             var prevColor = Console.ForegroundColor;
 

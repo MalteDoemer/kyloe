@@ -2,7 +2,7 @@ using System.IO;
 
 namespace Kyloe.Syntax
 {
-    public class PrettyWriter
+    internal class PrettyWriter
     {
         private const string CHILD_INDENT = "│   ";
         private const string LEAF_INDENT = "    ";
@@ -22,7 +22,6 @@ namespace Kyloe.Syntax
         {
             this.writer = writer;
         }
-
 
         public void Write(SyntaxNode root)
         {
