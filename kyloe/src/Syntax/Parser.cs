@@ -4,8 +4,8 @@ using Kyloe.Diagnostics;
 
 namespace Kyloe.Syntax
 {
-
-    class Parser
+    // TODO: make Parser class internal
+    public class Parser
     {
         private Lexer lexer;
 

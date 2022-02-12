@@ -4,7 +4,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    class UnexpectedTokenError : Diagnostic
+    internal class UnexpectedTokenError : Diagnostic
     {
         private readonly SyntaxTokenType[] expected;
         private readonly SyntaxToken provided;

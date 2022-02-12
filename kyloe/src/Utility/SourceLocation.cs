@@ -2,7 +2,7 @@ using System;
 
 namespace Kyloe.Utility
 {
-    struct SourceLocation
+    public struct SourceLocation
     {
         private SourceLocation(int start, int length)
         {

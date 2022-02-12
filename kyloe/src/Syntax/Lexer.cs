@@ -4,7 +4,8 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class Lexer
+    // TODO: make lexer class internal
+    public class Lexer
     {
         private readonly DiagnosticCollecter diagnostics;
         private readonly string text;

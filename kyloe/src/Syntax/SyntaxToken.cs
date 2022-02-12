@@ -2,7 +2,8 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class SyntaxToken
+    // TODO: make SyntaxToken class internal
+    public class SyntaxToken
     {
         public SyntaxToken(SyntaxTokenType type, SourceLocation location, object? value = null)
         {

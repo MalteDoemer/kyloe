@@ -3,7 +3,7 @@ using Kyloe.Syntax;
 
 namespace Kyloe.Diagnostics
 {
-    class NeverClosedStringLiteralError : Diagnostic
+    internal class NeverClosedStringLiteralError : Diagnostic
     {
         private readonly SyntaxToken token;
 

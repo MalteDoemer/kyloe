@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe", "kyloe\kyloe.csproj", "{B6DB25F1-8EF4-4D1B-9921-9D8A196D5D7F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyc", "kyc\kyc.csproj", "{EC40427F-E17B-4636-9A3C-1F4336BA98DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{B6DB25F1-8EF4-4D1B-9921-9D8A196D5D7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6DB25F1-8EF4-4D1B-9921-9D8A196D5D7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6DB25F1-8EF4-4D1B-9921-9D8A196D5D7F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC40427F-E17B-4636-9A3C-1F4336BA98DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC40427F-E17B-4636-9A3C-1F4336BA98DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC40427F-E17B-4636-9A3C-1F4336BA98DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC40427F-E17B-4636-9A3C-1F4336BA98DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

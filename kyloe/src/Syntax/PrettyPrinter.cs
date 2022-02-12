@@ -2,7 +2,7 @@ using System.IO;
 
 namespace Kyloe.Syntax
 {
-    class PrettyWriter
+    public class PrettyWriter
     {
         private const string INCREMENT = "    ";
 

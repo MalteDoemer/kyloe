@@ -1,6 +1,6 @@
 namespace Kyloe.Diagnostics
 {
-    enum DiagnosticType
+    public enum DiagnosticType
     {
         Error,
         Warn,

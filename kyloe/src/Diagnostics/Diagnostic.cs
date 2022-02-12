@@ -2,7 +2,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    abstract class Diagnostic
+    public abstract class Diagnostic
     {
         public abstract DiagnosticType Type { get; }
 

@@ -5,7 +5,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    class NeverClosedBlockComment : Diagnostic
+    internal class NeverClosedBlockComment : Diagnostic
     {
         public NeverClosedBlockComment(SyntaxToken token)
         {

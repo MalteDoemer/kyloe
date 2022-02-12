@@ -3,7 +3,7 @@ using Kyloe.Syntax;
 
 namespace Kyloe.Diagnostics
 {
-    class UnknownCharacterError : Diagnostic
+    internal class UnknownCharacterError : Diagnostic
     {
         private readonly SyntaxToken token;
 

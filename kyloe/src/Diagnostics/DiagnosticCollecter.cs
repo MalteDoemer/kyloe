@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Diagnostics
 {
-    class DiagnosticCollecter
+    public class DiagnosticCollecter
     {
         private readonly List<Diagnostic> diagnostics;
 

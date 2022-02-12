@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    abstract class SyntaxNode
+    public abstract class SyntaxNode
     {
         public abstract SourceLocation Location { get; }
 
