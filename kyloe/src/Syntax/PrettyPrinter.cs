@@ -58,11 +58,36 @@ namespace Kyloe.Syntax
                 Write(memberAccessNode.Expression, indent + INCREMENT);
                 writer.Write(indent + INCREMENT);
                 writer.WriteLine(memberAccessNode.NameToken);
-            } else if (node is SubscriptExpressionNode subscriptExpressionNode) {
+            }
+            else if (node is SubscriptExpressionNode subscriptExpressionNode)
+            {
                 writer.Write(indent);
                 writer.WriteLine($"{nameof(SubscriptExpressionNode)}: ");
                 Write(subscriptExpressionNode.LeftNode, indent + INCREMENT);
                 Write(subscriptExpressionNode.Subscript, indent + INCREMENT);
+            }
+            else if (node is CallExpressionNode callExpressionNode)
+            {
+                writer.Write(indent);
+                writer.WriteLine($"{nameof(CallExpressionNode)}: ");
+                Write(callExpressionNode.Expression, indent + INCREMENT);
+
+                if (callExpressionNode.Arguments is not null)
+                {
+                    Write(callExpressionNode.Arguments, indent + INCREMENT);
+                }
+            }
+            else if (node is ArgumentNode argumentNode)
+            {
+                writer.Write(indent);
+                writer.WriteLine($"{nameof(ArgumentNode)}: ");
+
+                var nextIndent = indent + INCREMENT;
+
+                foreach (var child in argumentNode.Nodes)
+                {
+                    Write(child, nextIndent);
+                }
             }
             else
             {

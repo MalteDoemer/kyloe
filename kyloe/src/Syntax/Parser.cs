@@ -1,5 +1,5 @@
 using System;
-
+using System.Collections.Immutable;
 using Kyloe.Diagnostics;
 
 namespace Kyloe.Syntax
@@ -98,7 +98,15 @@ namespace Kyloe.Syntax
             {
                 if (current.Type == SyntaxTokenType.LeftParen)
                 {
-                    throw new NotImplementedException();
+                    var lparen = Advance();
+
+                    ArgumentNode? arguments = null;
+
+                    if (current.Type != SyntaxTokenType.RightParen)
+                        arguments = ParseArguments();
+
+                    var rparen = Expect(SyntaxTokenType.RightParen);
+                    node = new CallExpressionNode(node, lparen, arguments, rparen);
                 }
                 else if (current.Type == SyntaxTokenType.LeftSquare)
                 {
@@ -119,8 +127,23 @@ namespace Kyloe.Syntax
             return node;
         }
 
+        private ArgumentNode ParseArguments()
+        {
+            var nodes = ImmutableArray.CreateBuilder<SyntaxNode>();
+            var commas = ImmutableArray.CreateBuilder<SyntaxToken>();
 
+            while (true)
+            {
+                nodes.Add(ParseExpression());
 
+                if (current.Type != SyntaxTokenType.Comma)
+                    break;
+
+                commas.Add(Advance());
+            }
+
+            return new ArgumentNode(nodes.ToImmutable(), commas.ToImmutable());
+        }
 
         private SyntaxNode ParsePrimary()
         {
