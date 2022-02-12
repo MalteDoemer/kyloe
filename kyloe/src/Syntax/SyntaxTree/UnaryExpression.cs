@@ -1,20 +1,27 @@
+using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
     class UnaryExpression : SyntaxNode
     {
-        public UnaryExpression(SyntaxToken operatorToken, SyntaxNode child)
+        public UnaryExpression(SyntaxToken operatorToken, SyntaxNode expression)
         {
             OperatorToken = operatorToken;
-            Child = child;
+            Expression = expression;
         }
 
         public SyntaxToken OperatorToken { get; }
-        public SyntaxNode Child { get; }
+        public SyntaxNode Expression { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.UnaryExpression;
 
-        public override SourceLocation Location => SourceLocation.CreateAround(OperatorToken.Location, Child.Location);
+        public override SourceLocation Location => SourceLocation.CreateAround(OperatorToken.Location, Expression.Location);
+
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        {
+            yield return new SyntaxNodeChild(OperatorToken);
+            yield return new SyntaxNodeChild(Expression);
+        }
     }
 }

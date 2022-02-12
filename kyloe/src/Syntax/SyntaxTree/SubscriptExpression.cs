@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
@@ -22,6 +23,14 @@ namespace Kyloe.Syntax
         public override SyntaxNodeType Type => SyntaxNodeType.SubscriptExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftNode.Location, RightSquare.Location);
+
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        {
+            yield return new SyntaxNodeChild(LeftNode);
+            yield return new SyntaxNodeChild(LeftSquare);
+            yield return new SyntaxNodeChild(Subscript);
+            yield return new SyntaxNodeChild(RightSquare);
+        }
     }
 
 }

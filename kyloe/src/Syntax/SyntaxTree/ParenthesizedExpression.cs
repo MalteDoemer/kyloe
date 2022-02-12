@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
@@ -19,6 +20,13 @@ namespace Kyloe.Syntax
         public override SyntaxNodeType Type => SyntaxNodeType.ParenthesizedExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftParen.Location, RightParen.Location);
+
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        {
+            yield return new SyntaxNodeChild(LeftParen);
+            yield return new SyntaxNodeChild(Expression);
+            yield return new SyntaxNodeChild(RightParen);
+        }
     }
 
 }

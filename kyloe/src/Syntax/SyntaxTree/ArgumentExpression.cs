@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
 using Kyloe.Utility;
+using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
@@ -9,10 +10,11 @@ namespace Kyloe.Syntax
     {
         public ArgumentExpression(ImmutableArray<SyntaxNode> nodes, ImmutableArray<SyntaxToken> commas)
         {
-            this.Nodes = nodes;
-            this.Commas = commas;
+            Nodes = nodes;
+            Commas = commas;
 
             Debug.Assert(nodes.Length != 0, "nodes must have at least one element");
+            Debug.Assert(nodes.Length == Commas.Length + 1, "there must be one node more than commas");
         }
 
         public ImmutableArray<SyntaxNode> Nodes { get; }
@@ -20,16 +22,17 @@ namespace Kyloe.Syntax
 
         public override SyntaxNodeType Type => SyntaxNodeType.ArgumentExpression;
 
-        public override SourceLocation Location
-        {
-            get
-            {
-                if (Commas.Length < Nodes.Length)
-                    return SourceLocation.CreateAround(Nodes.First().Location, Nodes.Last().Location);
-                else
-                    return SourceLocation.CreateAround(Nodes.First().Location, Commas.Last().Location);
-            }
-        }
+        public override SourceLocation Location => SourceLocation.CreateAround(Nodes.First().Location, Nodes.Last().Location);
 
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        {
+            for (int i = 0; i < Commas.Length; i++)
+            {
+                yield return new SyntaxNodeChild(Nodes[i]);
+                yield return new SyntaxNodeChild(Commas[i]);
+            }
+
+            yield return new SyntaxNodeChild(Nodes.Last());
+        }
     }
 }

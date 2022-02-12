@@ -1,4 +1,4 @@
-using System.IO;
+using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
@@ -9,14 +9,6 @@ namespace Kyloe.Syntax
 
         public abstract SourceLocation Location { get; }
 
-        public override string ToString()
-        {
-            using (StringWriter writer = new StringWriter())
-            {
-                var prettyWriter = new PrettyWriter(writer);
-                prettyWriter.Write(this);
-                return writer.ToString();
-            }
-        }
+        public abstract IEnumerable<SyntaxNodeChild> GetChildren();
     }
 }

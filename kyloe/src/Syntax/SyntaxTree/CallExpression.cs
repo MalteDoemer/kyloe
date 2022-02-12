@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
@@ -21,6 +22,17 @@ namespace Kyloe.Syntax
         public override SyntaxNodeType Type => SyntaxNodeType.CallExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, RightParen.Location);
+
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        {
+            yield return new SyntaxNodeChild(Expression);
+            yield return new SyntaxNodeChild(LeftParen);
+
+            if (Arguments is not null)
+                yield return new SyntaxNodeChild(Arguments);
+
+            yield return new SyntaxNodeChild(RightParen);
+        }
     }
 
 

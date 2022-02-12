@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
@@ -15,6 +16,11 @@ namespace Kyloe.Syntax
         public override SyntaxNodeType Type => SyntaxNodeType.NameExpression;
 
         public override SourceLocation Location => NameToken.Location;
+
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        {
+            yield return new SyntaxNodeChild(NameToken);
+        }
     }
 
 }

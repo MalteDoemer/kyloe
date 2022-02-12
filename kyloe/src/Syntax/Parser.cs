@@ -72,7 +72,7 @@ namespace Kyloe.Syntax
             {
                 var op = Advance();
                 var right = ParseBinaryExpression(precedence - 1);
-                left = new BinaryExpression(op, left, right);
+                left = new BinaryExpression(left, op, right);
             }
 
             return left;
