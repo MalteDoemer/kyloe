@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Collections.Immutable;
 using System.Linq;
 using Kyloe.Utility;
@@ -11,10 +12,7 @@ namespace Kyloe.Syntax
             this.Nodes = nodes;
             this.Commas = commas;
 
-
-
-            if (nodes.Length == 0)
-                throw new System.ArgumentException("must have at least one element", nameof(nodes));
+            Debug.Assert(nodes.Length != 0, "nodes must have at least one element");
         }
 
         public ImmutableArray<SyntaxNode> Nodes { get; }

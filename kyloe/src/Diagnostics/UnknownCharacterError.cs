@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Kyloe.Utility;
 using Kyloe.Syntax;
 
@@ -10,10 +12,7 @@ namespace Kyloe.Diagnostics
         public UnknownCharacterError(SyntaxToken errorToken)
         {
             this.token = errorToken;
-
-            if (errorToken.Value is not char) {
-                throw new System.ArgumentException("Token must have a character!");
-            }
+            Debug.Assert(errorToken.Value is char, "errorToken.Value must be a char");
         }
 
         public override DiagnosticType Type => DiagnosticType.Error;

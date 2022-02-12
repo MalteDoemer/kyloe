@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Collections.Immutable;
 using Kyloe.Diagnostics;
 
@@ -33,8 +34,7 @@ namespace Kyloe.Syntax
 
         private SyntaxToken Expect(params SyntaxTokenType[] types)
         {
-            if (types.Length == 0)
-                throw new ArgumentException("There must be at least one type");
+            Debug.Assert(types.Length != 0, "There must be at least one type to expect");
 
             foreach (var type in types)
             {
