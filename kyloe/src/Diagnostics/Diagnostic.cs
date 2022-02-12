@@ -4,7 +4,7 @@ namespace Kyloe.Diagnostics
 {
     public abstract class Diagnostic
     {
-        public abstract DiagnosticType Type { get; }
+        public abstract DiagnosticSeverity Severity { get; }
 
         public abstract SourceLocation? Location { get; }
 

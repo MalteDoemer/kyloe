@@ -14,7 +14,7 @@ namespace Kyloe.Diagnostics
 
         public SyntaxToken Token { get; }
 
-        public override DiagnosticType Type => DiagnosticType.Error;
+        public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override SourceLocation? Location => Token.Location;
 

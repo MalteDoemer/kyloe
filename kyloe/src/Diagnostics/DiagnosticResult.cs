@@ -15,8 +15,8 @@ namespace Kyloe.Diagnostics
         }
 
         public IEnumerable<Diagnostic> GetAll() => diagnostics;
-        public IEnumerable<Diagnostic> GetErrors() => diagnostics.Where(d => d.Type == DiagnosticType.Error);
-        public IEnumerable<Diagnostic> GetWarnings() => diagnostics.Where(d => d.Type == DiagnosticType.Warn);
+        public IEnumerable<Diagnostic> GetErrors() => diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error);
+        public IEnumerable<Diagnostic> GetWarnings() => diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warn);
 
         public bool HasDiagnostics() => diagnostics.Count() != 0;
         public bool HasErrors() => GetErrors().Count() != 0;

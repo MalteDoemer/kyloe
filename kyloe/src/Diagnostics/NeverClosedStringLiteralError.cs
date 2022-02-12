@@ -12,7 +12,7 @@ namespace Kyloe.Diagnostics
             this.token = token;
         }
 
-        public override DiagnosticType Type => DiagnosticType.Error;
+        public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override SourceLocation? Location => token.Location;
 

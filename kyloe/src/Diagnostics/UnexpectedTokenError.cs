@@ -19,7 +19,7 @@ namespace Kyloe.Diagnostics
             this.provided = provided;
         }
 
-        public override DiagnosticType Type => DiagnosticType.Error;
+        public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override SourceLocation? Location => provided.Location;
 
