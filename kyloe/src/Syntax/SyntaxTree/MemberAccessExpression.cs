@@ -5,9 +5,9 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    class MemberAccessNode : SyntaxNode
+    class MemberAccessExpression : SyntaxNode
     {
-        public MemberAccessNode(SyntaxNode expression, SyntaxToken dotToken, SyntaxToken nameToken)
+        public MemberAccessExpression(SyntaxNode expression, SyntaxToken dotToken, SyntaxToken nameToken)
         {
             Expression = expression;
             NameToken = nameToken;

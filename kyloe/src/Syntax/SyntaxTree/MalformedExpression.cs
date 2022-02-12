@@ -2,9 +2,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class MalformedSyntaxNode : SyntaxNode
+    class MalformedExpression : SyntaxNode
     {
-        public MalformedSyntaxNode(SyntaxToken token)
+        public MalformedExpression(SyntaxToken token)
         {
             Token = token;
         }

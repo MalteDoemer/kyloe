@@ -3,9 +3,9 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    class NameExpressionNode : SyntaxNode
+    class NameExpression : SyntaxNode
     {
-        public NameExpressionNode(SyntaxToken nameToken)
+        public NameExpression(SyntaxToken nameToken)
         {
             NameToken = nameToken;
         }

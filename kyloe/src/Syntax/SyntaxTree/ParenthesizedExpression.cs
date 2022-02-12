@@ -3,9 +3,9 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    class ParenthesizedExpressionNode : SyntaxNode
+    class ParenthesizedExpression : SyntaxNode
     {
-        public ParenthesizedExpressionNode(SyntaxToken leftParen, SyntaxToken rightParen, SyntaxNode expression)
+        public ParenthesizedExpression(SyntaxToken leftParen, SyntaxToken rightParen, SyntaxNode expression)
         {
             LeftParen = leftParen;
             RightParen = rightParen;

@@ -2,9 +2,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class LiteralSyntaxNode : SyntaxNode
+    class LiteralExpression : SyntaxNode
     {
-        public LiteralSyntaxNode(SyntaxToken literalToken)
+        public LiteralExpression(SyntaxToken literalToken)
         {
             LiteralToken = literalToken;
         }

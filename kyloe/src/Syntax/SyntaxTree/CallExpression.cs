@@ -3,9 +3,9 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    class CallExpressionNode : SyntaxNode
+    class CallExpression : SyntaxNode
     {
-        public CallExpressionNode(SyntaxNode expression, SyntaxToken leftParen, ArgumentNode? arguments, SyntaxToken rightParen)
+        public CallExpression(SyntaxNode expression, SyntaxToken leftParen, ArgumentExpression? arguments, SyntaxToken rightParen)
         {
             Expression = expression;
             LeftParen = leftParen;
@@ -15,7 +15,7 @@ namespace Kyloe.Syntax
 
         public SyntaxNode Expression { get; }
         public SyntaxToken LeftParen { get; }
-        public ArgumentNode? Arguments { get; }
+        public ArgumentExpression? Arguments { get; }
         public SyntaxToken RightParen { get; }
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, RightParen.Location);

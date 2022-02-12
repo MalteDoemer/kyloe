@@ -4,9 +4,9 @@ namespace Kyloe.Syntax
 {
 
 
-    class SubscriptExpressionNode : SyntaxNode
+    class SubscriptExpression : SyntaxNode
     {
-        public SubscriptExpressionNode(SyntaxNode leftNode, SyntaxToken leftSquare, SyntaxNode subscript, SyntaxToken rightSquare)
+        public SubscriptExpression(SyntaxNode leftNode, SyntaxToken leftSquare, SyntaxNode subscript, SyntaxToken rightSquare)
         {
             LeftNode = leftNode;
             LeftSquare = leftSquare;

@@ -2,9 +2,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class BinaryExpressionNode : SyntaxNode
+    class BinaryExpression : SyntaxNode
     {
-        public BinaryExpressionNode(SyntaxToken operatorToken, SyntaxNode leftChild, SyntaxNode rightChild)
+        public BinaryExpression(SyntaxToken operatorToken, SyntaxNode leftChild, SyntaxNode rightChild)
         {
             OperatorToken = operatorToken;
             LeftChild = leftChild;

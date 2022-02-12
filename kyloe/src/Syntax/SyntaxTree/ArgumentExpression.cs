@@ -4,9 +4,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    class ArgumentNode : SyntaxNode
+    class ArgumentExpression : SyntaxNode
     {
-        public ArgumentNode(ImmutableArray<SyntaxNode> nodes, ImmutableArray<SyntaxToken> commas)
+        public ArgumentExpression(ImmutableArray<SyntaxNode> nodes, ImmutableArray<SyntaxToken> commas)
         {
             this.Nodes = nodes;
             this.Commas = commas;

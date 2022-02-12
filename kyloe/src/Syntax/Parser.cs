@@ -72,7 +72,7 @@ namespace Kyloe.Syntax
             {
                 var op = Advance();
                 var right = ParseBinaryExpression(precedence - 1);
-                left = new BinaryExpressionNode(op, left, right);
+                left = new BinaryExpression(op, left, right);
             }
 
             return left;
@@ -84,7 +84,7 @@ namespace Kyloe.Syntax
             {
                 var op = Advance();
                 var child = ParsePrefixExpression();
-                return new UnaryExpressionNode(op, child);
+                return new UnaryExpression(op, child);
             }
 
             return ParsePostFixExpression();
@@ -100,13 +100,13 @@ namespace Kyloe.Syntax
                 {
                     var lparen = Advance();
 
-                    ArgumentNode? arguments = null;
+                    ArgumentExpression? arguments = null;
 
                     if (current.Type != SyntaxTokenType.RightParen)
                         arguments = ParseArguments();
 
                     var rparen = Expect(SyntaxTokenType.RightParen);
-                    node = new CallExpressionNode(node, lparen, arguments, rparen);
+                    node = new CallExpression(node, lparen, arguments, rparen);
                 }
                 else if (current.Type == SyntaxTokenType.LeftSquare)
                 {
@@ -114,20 +114,20 @@ namespace Kyloe.Syntax
                     var expr = ParseExpression();
                     var rsqare = Expect(SyntaxTokenType.RightSquare);
 
-                    node = new SubscriptExpressionNode(node, lsquare, expr, rsqare);
+                    node = new SubscriptExpression(node, lsquare, expr, rsqare);
                 }
                 else if (current.Type == SyntaxTokenType.Dot)
                 {
                     var dotToken = Advance();
                     var nameToken = Expect(SyntaxTokenType.Identifier);
-                    node = new MemberAccessNode(node, dotToken, nameToken);
+                    node = new MemberAccessExpression(node, dotToken, nameToken);
                 }
             }
 
             return node;
         }
 
-        private ArgumentNode ParseArguments()
+        private ArgumentExpression ParseArguments()
         {
             var nodes = ImmutableArray.CreateBuilder<SyntaxNode>();
             var commas = ImmutableArray.CreateBuilder<SyntaxToken>();
@@ -142,14 +142,14 @@ namespace Kyloe.Syntax
                 commas.Add(Advance());
             }
 
-            return new ArgumentNode(nodes.ToImmutable(), commas.ToImmutable());
+            return new ArgumentExpression(nodes.ToImmutable(), commas.ToImmutable());
         }
 
         private SyntaxNode ParsePrimary()
         {
             if (current.Type.IsLiteralToken())
             {
-                return new LiteralSyntaxNode(Advance());
+                return new LiteralExpression(Advance());
             }
             else if (current.Type == SyntaxTokenType.LeftParen)
             {
@@ -157,19 +157,19 @@ namespace Kyloe.Syntax
                 var expr = ParseExpression();
                 var rightParen = Expect(SyntaxTokenType.RightParen); // skip the right parenthesis
 
-                return new ParenthesizedExpressionNode(leftParen, rightParen, expr);
+                return new ParenthesizedExpression(leftParen, rightParen, expr);
             }
             else if (current.Type == SyntaxTokenType.Identifier)
             {
                 var name = Advance();
-                return new NameExpressionNode(name);
+                return new NameExpression(name);
             }
             else
             {   // Don't report a new diagnostic if the lexer already did.
                 if (current.Type != SyntaxTokenType.Invalid)
                     diagnostics.Add(new UnexpectedTokenError(current));
 
-                return new MalformedSyntaxNode(Advance());
+                return new MalformedExpression(Advance());
             }
         }
     }
