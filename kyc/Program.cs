@@ -69,6 +69,7 @@ namespace Kyc
             }
 
             Console.WriteLine(diagnostic.Message());
+            Console.WriteLine();
         }
 
         private static bool EvaluteDollarCommand(string input)
