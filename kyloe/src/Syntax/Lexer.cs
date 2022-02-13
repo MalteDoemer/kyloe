@@ -123,39 +123,49 @@ namespace Kyloe.Syntax
         private SyntaxToken LexNumber()
         {
             int start = position;
-            long integer = 0;
-
-            // First parse the number as an int
-            // but if there is a dot in between
-            // switch to float.
-
-            // TODO: handle non-ascii numbers
+            var builder = new StringBuilder();
 
             while (char.IsNumber(current))
-            {
-                int digit = current - '0';
-                integer = integer * 10 + digit;
-                Skip(1);
-            }
+                builder.Append(Advance());
 
             if (!(current == '.' && char.IsNumber(next)))
-                return new SyntaxToken(SyntaxTokenType.IntLiteral, SourceLocation.FromBounds(start, position), integer);
-
-
-            Skip(1); // skip the decimal point
-
-            double floatingPoint = integer;
-            long factor = 10;
-
-            while (char.IsNumber(current))
             {
-                int digit = current - '0';
-                floatingPoint += digit / (double)factor;
-                factor *= 10;
-                Skip(1);
-            }
+                var location = SourceLocation.FromBounds(start, position);
+                var str = builder.ToString();
 
-            return new SyntaxToken(SyntaxTokenType.FloatLiteral, SourceLocation.FromBounds(start, position), floatingPoint);
+                if (long.TryParse(str, out long value))
+                {
+                    return new SyntaxToken(SyntaxTokenType.IntLiteral, location, value);
+                }
+                else
+                {
+                    var token = new SyntaxToken(SyntaxTokenType.Invalid, location, str);
+                    diagnostics.Add(new InvalidIntLiteralError(token));
+                    return token;
+                }
+
+            }
+            else
+            {
+                builder.Append(Advance()); // add the decimal point
+
+                while (char.IsNumber(current))
+                    builder.Append(Advance());
+
+                var location = SourceLocation.FromBounds(start, position);
+                var str = builder.ToString();
+
+                if (double.TryParse(str, out double value))
+                {
+                    return new SyntaxToken(SyntaxTokenType.FloatLiteral, location, value);
+                }
+                else
+                {
+                    var token = new SyntaxToken(SyntaxTokenType.FloatLiteral, location, str);
+                    diagnostics.Add(new InvalidFloatLiteralError(token));
+                    return token;
+                }
+            }
         }
 
         private SyntaxToken LexIdentOrKeyword()
