@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
@@ -10,5 +11,11 @@ namespace Kyloe.Syntax
         public abstract SourceLocation Location { get; }
 
         internal abstract IEnumerable<SyntaxNodeChild> GetChildren();
+
+        public void WriteTo(TextWriter writer)
+        {
+            var pretty = new TreeWriter(writer);
+            pretty.Write(this);
+        }
     }
 }

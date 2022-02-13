@@ -6,14 +6,18 @@ namespace Kyloe.Syntax
 {
     public class SyntaxTree
     {
+        private readonly SyntaxNode root;
+        private readonly DiagnosticResult diagnostics;
+
         private SyntaxTree(SyntaxNode root, DiagnosticResult diagnostics)
         {
-            Root = root;
-            Diagnostics = diagnostics;
+            this.root = root;
+            this.diagnostics = diagnostics;
         }
 
-        public SyntaxNode Root { get; }
-        public DiagnosticResult Diagnostics { get; }
+        public SyntaxNode GetRoot() => root;
+
+        public DiagnosticResult GetDiagnostics() => diagnostics;
 
         public static SyntaxTree Parse(string text) => Parse(new StringReader(text));
 
@@ -39,13 +43,6 @@ namespace Kyloe.Syntax
             var array = lexer.Tokens().ToImmutableArray();
 
             return (array, collector.ToResult());
-        }
-
-
-        public void WriteTreeTo(TextWriter writer)
-        {
-            var pretty = new PrettyWriter(writer);
-            pretty.Write(Root);
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Kyloe.Syntax;
-using Kyloe.Diagnostics;
-using Kyloe.Utility;
 
 namespace Kyc
 {
@@ -8,40 +6,28 @@ namespace Kyc
     {
         public static void Main()
         {
-            Console.WriteLine("Code:");
-
-            var tree = SyntaxTree.Parse(Console.In);
-            // tree.WriteDiagnosticsTo(Console.Error);
-            PrintDiagnostics(tree.Diagnostics);
-            Console.WriteLine();
-            tree.WriteTreeTo(Console.Out);
-        }
-
-        private static void PrintDiagnostics(DiagnosticResult diagnostics)
-        {
-            var prevColor = Console.ForegroundColor;
-
-            if (diagnostics.HasWarnings())
+            while (true)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                foreach (var warning in diagnostics.GetWarnings())
-                    PrintDiagnostic(warning);
+                Console.Write("> ");
+                var input = Console.ReadLine();
+
+                if (input is null)
+                    return;
+
+                if (input.StartsWith("$"))
+                    if (EvaluteDollarCommand(input))
+                        continue;
+                    else
+                        break;
+
+
+                var tree = SyntaxTree.Parse(input);
+                Console.WriteLine();
+                tree.GetDiagnostics().WriteTo(Console.Out);
+                Console.WriteLine();
+                tree.GetRoot().WriteTo(Console.Out);
+
             }
-
-            if (diagnostics.HasErrors())
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-
-                foreach (var error in diagnostics.GetErrors())
-                    PrintDiagnostic(error);
-            }
-
-            Console.ForegroundColor = prevColor;
-        }
-
-        private static void PrintDiagnostic(Diagnostic diagnostic)
-        {
-            Console.WriteLine(diagnostic.Message());
         }
 
         private static bool EvaluteDollarCommand(string input)

@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Collections.Immutable;
 using System.Collections.Generic;
+using System.IO;
+using System;
 
 namespace Kyloe.Diagnostics
 {
@@ -16,6 +18,18 @@ namespace Kyloe.Diagnostics
 
         public IEnumerable<Diagnostic> GetAll() => diagnostics;
         public IEnumerable<Diagnostic> GetErrors() => diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error);
+
+        public void WriteTo(TextWriter writer)
+        {
+            var colorMode = DiagnosticWriter.ColorMode.None;
+
+            if (object.ReferenceEquals(writer, Console.Out))
+                colorMode = DiagnosticWriter.ColorMode.ConsoleColor;
+
+            var diagnosticWriter = new DiagnosticWriter(writer, colorMode);
+            diagnosticWriter.Write(this);
+        }
+
         public IEnumerable<Diagnostic> GetWarnings() => diagnostics.Where(d => d.Severity == DiagnosticSeverity.Warn);
 
         public bool HasDiagnostics() => diagnostics.Count() != 0;
