@@ -1,6 +1,6 @@
 namespace Kyloe.Syntax
 {
-    static class SyntaxInfo
+    public static class SyntaxInfo
     {
         public static bool IsIdentStartChar(char c)
         {
@@ -104,6 +104,95 @@ namespace Kyloe.Syntax
 
                 default:
                     return false;
+            }
+        }
+
+
+        /// This function returns the string that
+        /// corresponds to the SyntaxTokenType.
+        /// It returns null for more complex tokens such as IntLiteral
+        public static string? GetTokenTypeString(SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.Equals:
+                    return "=";
+                case SyntaxTokenType.PlusEquals:
+                    return "+=";
+                case SyntaxTokenType.MinusEquals:
+                    return "-=";
+                case SyntaxTokenType.StarEquals:
+                    return "*=";
+                case SyntaxTokenType.SlashEquals:
+                    return "/=";
+                case SyntaxTokenType.PercentEquals:
+                    return "%=";
+                case SyntaxTokenType.AmpersandEquals:
+                    return "&=";
+                case SyntaxTokenType.PipeEquals:
+                    return "|=";
+                case SyntaxTokenType.HatEquals:
+                    return "^=";
+                case SyntaxTokenType.Less:
+                    return "<";
+                case SyntaxTokenType.Greater:
+                    return ">";
+                case SyntaxTokenType.DoubleEqual:
+                    return "==";
+                case SyntaxTokenType.LessEqual:
+                    return "<=";
+                case SyntaxTokenType.GreaterEqual:
+                    return ">=";
+                case SyntaxTokenType.NotEqual:
+                    return "!=";
+                case SyntaxTokenType.Plus:
+                    return "+";
+                case SyntaxTokenType.Minus:
+                    return "-";
+                case SyntaxTokenType.Star:
+                    return "*";
+                case SyntaxTokenType.Slash:
+                    return "/";
+                case SyntaxTokenType.Percent:
+                    return "%";
+                case SyntaxTokenType.Ampersand:
+                    return "&";
+                case SyntaxTokenType.DoubleAmpersand:
+                    return "&&";
+                case SyntaxTokenType.Pipe:
+                    return "|";
+                case SyntaxTokenType.DoublePipe:
+                    return "||";
+                case SyntaxTokenType.Hat:
+                    return "^";
+                case SyntaxTokenType.Tilde:
+                    return "~";
+                case SyntaxTokenType.Bang:
+                    return "!";
+                case SyntaxTokenType.RightParen:
+                    return ")";
+                case SyntaxTokenType.LeftParen:
+                    return "(";
+                case SyntaxTokenType.RightSquare:
+                    return "]";
+                case SyntaxTokenType.LeftSquare:
+                    return "[";
+                case SyntaxTokenType.RightBracket:
+                    return "}";
+                case SyntaxTokenType.LeftBracket:
+                    return "{";
+                case SyntaxTokenType.Comma:
+                    return ",";
+                case SyntaxTokenType.Dot:
+                    return ".";
+                case SyntaxTokenType.Colon:
+                    return ":";
+                case SyntaxTokenType.SemiColon:
+                    return ";";
+                case SyntaxTokenType.SmallArrow:
+                    return "->";
+                default:
+                    return null;
             }
         }
     }

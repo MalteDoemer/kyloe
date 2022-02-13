@@ -29,6 +29,19 @@ namespace Kyloe.Syntax
             return new SyntaxTree(tree, result);
         }
 
+        public static (ImmutableArray<SyntaxToken>, DiagnosticResult) Tokenize(string text) => Tokenize(new StringReader(text));
+
+        public static (ImmutableArray<SyntaxToken>, DiagnosticResult) Tokenize(TextReader reader)
+        {
+            var collector = new DiagnosticCollector();
+            var lexer = new Lexer(reader, collector);
+
+            var array = lexer.Tokens().ToImmutableArray();
+
+            return (array, collector.ToResult());
+        }
+
+
         public void WriteTreeTo(TextWriter writer)
         {
             var pretty = new PrettyWriter(writer);
