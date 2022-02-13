@@ -25,6 +25,7 @@ namespace Kyloe.Tests.Tokenization
         [InlineData("/* hello", new DiagnosticType[] { DiagnosticType.NeverClosedBlockCommentError })]
         [InlineData("°/* ", new DiagnosticType[] { DiagnosticType.UnknownCharacterError, DiagnosticType.NeverClosedBlockCommentError })]
         [InlineData("°'  ", new DiagnosticType[] { DiagnosticType.UnknownCharacterError, DiagnosticType.NeverClosedStringLiteralError })]
+        [InlineData("10000000000000000000000000000000000000000000", new DiagnosticType[] { DiagnosticType.InvalidIntLiteralError })]
         public void Test_Tokenization_With_Errors(string text, DiagnosticType[] types)
         {
             var (_, diagnostics) = SyntaxTree.Tokenize(text);
@@ -96,12 +97,58 @@ namespace Kyloe.Tests.Tokenization
                 ("9000000000000000000000000000000.0", 9000000000000000000000000000000.0),
             };
 
+            var boolLiteralData = new List<(string, bool)> {
+                ("true", true),
+                ("false", false),
+            };
+
+            var stringLiteralData = new List<(string, string)> {
+                ("\"\"", ""),
+                ("''", ""),
+
+                ("\"hello\"", "hello"),
+                ("'hello'", "hello"),
+
+                ("\"'\"", "'"),
+                ("'\"'", "\""),
+
+
+                ("\"1234 + 0.05\"", "1234 + 0.05"),
+                ("'1234 + 0.05'", "1234 + 0.05"),
+
+
+                ("\"// not a comment\"", "// not a comment"),
+                ("'// not a comment'", "// not a comment"),
+
+                ("\"hey /* not a block comment */ there\"", "hey /* not a block comment */ there"),
+                ("'hey /* not a block comment */ there'", "hey /* not a block comment */ there"),
+
+
+                ("\"°\"", "°"),
+                ("'°'", "°"),
+
+                ("\"œ\"", "œ"),
+                ("'œ'", "œ"),
+
+                ("\"├\"", "├"),
+                ("'├'", "├"),
+
+                ("\"ض\"", "ض"),
+                ("'ض'", "ض"),
+            };
+
 
             foreach (var (t, l) in intLiteralData)
                 yield return new object[] { t, SyntaxTokenType.IntLiteral, l };
 
             foreach (var (t, d) in floatLiteralData)
                 yield return new object[] { t, SyntaxTokenType.FloatLiteral, d };
+
+            foreach (var (t, b) in boolLiteralData)
+                yield return new object[] { t, SyntaxTokenType.BoolLiteral, b };
+
+            foreach (var (t, s) in stringLiteralData)
+                yield return new object[] { t, SyntaxTokenType.StringLiteral, s };
         }
 
     }
