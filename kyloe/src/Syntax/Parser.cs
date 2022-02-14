@@ -57,7 +57,21 @@ namespace Kyloe.Syntax
 
         public SyntaxNode ParseExpression()
         {
-            return ParseBinaryExpression();
+            return ParseAssignmentExpression();
+        }
+
+        private SyntaxNode ParseAssignmentExpression()
+        {
+            var left = ParseBinaryExpression();
+
+            if (current.Type.IsAssignmentOperator())
+            {
+                var op = Advance();
+                var right = ParseAssignmentExpression();
+                return new AssignmentExpression(left, op, right);
+            }
+
+            return left;
         }
 
         private SyntaxNode ParseBinaryExpression(int precedence = SyntaxInfo.MAX_PRECEDENCE)
@@ -164,7 +178,8 @@ namespace Kyloe.Syntax
                 return new NameExpression(name);
             }
             else
-            {   // Don't report a new diagnostic if the lexer already did.
+            {
+                // Don't report a new diagnostic if the lexer already did.
                 if (current.Type != SyntaxTokenType.Invalid)
                     diagnostics.Add(new UnexpectedTokenError(current));
 

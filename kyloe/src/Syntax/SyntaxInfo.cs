@@ -107,6 +107,25 @@ namespace Kyloe.Syntax
             }
         }
 
+        public static bool IsAssignmentOperator(this SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.Equals:
+                case SyntaxTokenType.PlusEquals:
+                case SyntaxTokenType.MinusEquals:
+                case SyntaxTokenType.StarEquals:
+                case SyntaxTokenType.SlashEquals:
+                case SyntaxTokenType.PercentEquals:
+                case SyntaxTokenType.AmpersandEquals:
+                case SyntaxTokenType.PipeEquals:
+                case SyntaxTokenType.HatEquals:
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
 
         /// This function returns the string that
         /// corresponds to the SyntaxTokenType.

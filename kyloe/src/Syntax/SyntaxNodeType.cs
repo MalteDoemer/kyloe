@@ -14,6 +14,7 @@ namespace Kyloe.Syntax
         SubscriptExpression,
         CallExpression,
         ArgumentExpression,
+        AssignmentExpression,
     }
 
 }
