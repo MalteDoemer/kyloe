@@ -9,6 +9,21 @@ namespace Kyloe.Tests.Parsing
 
     public class ParsingTests
     {
+
+        [Theory]
+        [InlineData("1 + ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("x += ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("(1 ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("hello(1, 2", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("data[36 + 1", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("x.y.", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        public void Test_Parsing_With_Errors(string text, DiagnosticType[] errors) 
+        {
+            var tree = SyntaxTree.Parse(text);
+            DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
+        }
+
+
         [Theory]
         [MemberData(nameof(GetTreeData))]
         public void Test_Tree_Structure(string text, VerifyNode node)
