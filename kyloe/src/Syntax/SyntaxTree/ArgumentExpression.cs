@@ -24,7 +24,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(Nodes.First().Location, Nodes.Last().Location);
 
-        internal override IEnumerable<SyntaxNodeChild> GetChildren()
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             for (int i = 0; i < Commas.Length; i++)
             {

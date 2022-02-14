@@ -23,7 +23,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, NameToken.Location);
 
-        internal override IEnumerable<SyntaxNodeChild> GetChildren()
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(Expression);
             yield return new SyntaxNodeChild(DotToken);

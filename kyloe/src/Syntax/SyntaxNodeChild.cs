@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    internal class SyntaxNodeChild
+    public class SyntaxNodeChild
     {
         private readonly SyntaxNode? node;
         private readonly SyntaxToken? token;
@@ -17,6 +17,13 @@ namespace Kyloe.Syntax
         {
             this.token = token;
         }
+
+        public SyntaxNode? Node => node;
+
+        public SyntaxToken? Token => token;
+
+        public bool IsNode => Node is not null;
+        public bool IsToken => Token is not null;
 
         public override string ToString()
         {

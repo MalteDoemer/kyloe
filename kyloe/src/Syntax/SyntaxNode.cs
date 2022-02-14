@@ -10,7 +10,7 @@ namespace Kyloe.Syntax
 
         public abstract SourceLocation Location { get; }
 
-        internal abstract IEnumerable<SyntaxNodeChild> GetChildren();
+        public abstract IEnumerable<SyntaxNodeChild> GetChildren();
 
         public void WriteTo(TextWriter writer)
         {

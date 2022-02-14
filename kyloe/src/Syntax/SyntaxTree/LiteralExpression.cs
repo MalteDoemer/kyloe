@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
 
         public override SourceLocation Location => LiteralToken.Location;
 
-        internal override IEnumerable<SyntaxNodeChild> GetChildren()
+        public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(LiteralToken);
         }
