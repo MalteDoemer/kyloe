@@ -1,8 +1,8 @@
 
 
 // sums up all the values of an array
-func sum(values: [int]) -> int {
-    let sum = 0;
+func sum(values: [i32]) -> i32 {
+    var sum = 0;
 
     for i = 0; i < values.lenght; i++ {
         sum += values[i];
@@ -12,17 +12,17 @@ func sum(values: [int]) -> int {
 }
 
 func main() {
-    let values1: [int] = [1, 2, 3, 4, 5];
-    let sum1 = sum(values);
+    var values1: [i32] = [1, 2, 3, 4, 5];
+    var sum1 = sum(values);
 
-    let lenght = random(5, 100);
-    let values2 = [int; lenght];
+    var lenght = random(5, 100);
+    var values2: [i32] = [i32; lenght];
 
     for i = 0; i < lenght; i++ {
         values2[i] = random(0, 10);
     }
 
-    let sum2 = sum(values2);
+    var sum2 = sum(values2);
 
     println(sum1);
     println(sum2);

@@ -24,6 +24,6 @@ struct ConsoleMessage {
 }
 
 func main() {
-    let msg = ConsoleMessage("Hello Kyloe");
+    var msg = ConsoleMessage("Hello Kyloe");
     msg.WriteLine();
 }

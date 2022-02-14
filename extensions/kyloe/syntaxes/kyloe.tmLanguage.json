@@ -4,11 +4,11 @@
 	"patterns": [
 		{
 			"name": "keyword.control.kyloe",
-			"match": "\\b(if|else|while|do|for|break|continue|return|match|import|in)\\b"
+			"match": "\\b(if|else|while|do|for|break|continue|return|match|import)\\b"
 		},
 		{
 			"name": "keyword.other.kyloe",
-			"match": "\\b(func|struct|public|private|true|false|const|let|char|byte|short|ushort|int|uint|long|ulong|float|double|string)\\b"
+			"match": "\\b(func|struct|public|private|this|true|false|const|var|char|i8|i16|i32|i64|u8|u16|u32|u64|float|double|bool|string)\\b"
 		},
 		{
 			"name": "string.quoted.double.kyloe",

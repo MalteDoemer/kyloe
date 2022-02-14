@@ -1,7 +1,7 @@
 const globalConstant = 5;
-let globalVariable = 28;
+var globalVariable = 28;
 
-func calculate(a: int, b: int) -> int {
+func calculate(a: i32, b: i32) -> i32 {
     if a == 0 {
         37
     } else {
@@ -10,19 +10,19 @@ func calculate(a: int, b: int) -> int {
 }
 
 /* This is a block comment */
-func count(start: int, times: int, inc: int) { 
-    let sum = start;
+func count(start: i32, times: i32, inc: i32) { 
+    var sum = start;
     for i = 0; i < times; i++ {
-        println(sum)
-        sum += inc; // increment the sum
+        println(sum);
+        sum += inc;
     }
 
     println(sum);
 }
 
 func main() {
-    const x: int = (1 + 2 * 3);
-    let y = calculate(x);
+    const x: i32 = (1 + 2 * 3);
+    var y = calculate(x);
 
     string message = "Value is: ";
     print(message);
