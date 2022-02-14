@@ -101,7 +101,7 @@ namespace Kyloe.Tests
 
         public static VerifyNode MemberAccessExpression(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenType.Dot), new VerifyNode(SyntaxTokenType.Identifier));
+            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenType.Dot), NameExpression());
         }
 
         public static VerifyNode CallExpression(VerifyNode epxr, params VerifyNode[] args)

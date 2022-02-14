@@ -133,7 +133,7 @@ namespace Kyloe.Syntax
                 {
                     var dotToken = Advance();
                     var nameToken = Expect(SyntaxTokenType.Identifier);
-                    node = new MemberAccessExpression(node, dotToken, nameToken);
+                    node = new MemberAccessExpression(node, dotToken, new NameExpression(nameToken));
                 }
             }
 
