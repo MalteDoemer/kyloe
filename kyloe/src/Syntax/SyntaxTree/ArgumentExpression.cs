@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    internal class ArgumentExpression : SyntaxNode
+    internal class ArgumentExpression: SyntaxExpression
     {
         public ArgumentExpression(ImmutableArray<SyntaxNode> nodes, ImmutableArray<SyntaxToken> commas)
         {

@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class AssignmentExpression : SyntaxNode
+    internal class AssignmentExpression: SyntaxExpression
     {
         public AssignmentExpression(SyntaxNode leftNode, SyntaxToken operatorToken, SyntaxNode rightNode)
         {

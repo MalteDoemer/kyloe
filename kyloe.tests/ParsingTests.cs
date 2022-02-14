@@ -19,7 +19,7 @@ namespace Kyloe.Tests.Parsing
         [InlineData("x.y.", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
         public void Test_Parsing_With_Errors(string text, DiagnosticType[] errors) 
         {
-            var tree = SyntaxTree.Parse(text);
+            var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
         }
 
@@ -28,7 +28,7 @@ namespace Kyloe.Tests.Parsing
         [MemberData(nameof(GetTreeData))]
         public void Test_Tree_Structure(string text, VerifyNode node)
         {
-            var tree = SyntaxTree.Parse(text);
+            var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.NoErrors(tree.GetDiagnostics());
             TreeAssert.Verify(tree, node);
         }

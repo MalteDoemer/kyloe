@@ -6,7 +6,7 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    internal class MemberAccessExpression : SyntaxNode
+    internal class MemberAccessExpression: SyntaxExpression
     {
         public MemberAccessExpression(SyntaxNode expression, SyntaxToken dotToken, NameExpression nameExpression)
         {

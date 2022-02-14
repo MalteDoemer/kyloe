@@ -33,6 +33,22 @@ namespace Kyloe.Syntax
             return new SyntaxTree(tree, result);
         }
 
+
+        public static SyntaxTree ParseExpression(string text) => ParseExpression(new StringReader(text));
+
+        public static SyntaxTree ParseExpression(TextReader reader)
+        {
+            var collector = new DiagnosticCollector();
+            var lexer = new Lexer(reader, collector);
+            var parser = new Parser(lexer, collector);
+
+            var tree = parser.ParseExpression();
+            var result = collector.ToResult();
+
+            return new SyntaxTree(tree, result);
+        }
+
+
         public static (ImmutableArray<SyntaxToken>, DiagnosticResult) Tokenize(string text) => Tokenize(new StringReader(text));
 
         public static (ImmutableArray<SyntaxToken>, DiagnosticResult) Tokenize(TextReader reader)

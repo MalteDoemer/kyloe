@@ -50,17 +50,28 @@ namespace Kyloe.Syntax
 
         public SyntaxNode Parse()
         {
-            var expr = ParseExpression();
+            var stmt = ParseStatement();
             Expect(SyntaxTokenType.End);
-            return expr;
+            return stmt;
         }
 
-        public SyntaxNode ParseExpression()
+        public SyntaxStatement ParseStatement()
+        {
+            switch (current.Type)
+            {
+                default:
+                    var expr = ParseExpression();
+                    var semi = Expect(SyntaxTokenType.SemiColon);
+                    return new ExpressionStatement(expr, semi);
+            }
+        }
+
+        public SyntaxExpression ParseExpression()
         {
             return ParseAssignmentExpression();
         }
 
-        private SyntaxNode ParseAssignmentExpression()
+        private SyntaxExpression ParseAssignmentExpression()
         {
             var left = ParseBinaryExpression();
 
@@ -74,7 +85,7 @@ namespace Kyloe.Syntax
             return left;
         }
 
-        private SyntaxNode ParseBinaryExpression(int precedence = SyntaxInfo.MAX_PRECEDENCE)
+        private SyntaxExpression ParseBinaryExpression(int precedence = SyntaxInfo.MAX_PRECEDENCE)
         {
             if (precedence == 0)
                 return ParsePrefixExpression();
@@ -91,7 +102,7 @@ namespace Kyloe.Syntax
             return left;
         }
 
-        private SyntaxNode ParsePrefixExpression()
+        private SyntaxExpression ParsePrefixExpression()
         {
             if (current.Type.IsPrefixOperator())
             {
@@ -103,7 +114,7 @@ namespace Kyloe.Syntax
             return ParsePostFixExpression();
         }
 
-        private SyntaxNode ParsePostFixExpression()
+        private SyntaxExpression ParsePostFixExpression()
         {
             var node = ParsePrimary();
 
@@ -158,7 +169,7 @@ namespace Kyloe.Syntax
             return new ArgumentExpression(nodes.ToImmutable(), commas.ToImmutable());
         }
 
-        private SyntaxNode ParsePrimary()
+        private SyntaxExpression ParsePrimary()
         {
             if (current.Type.IsLiteralToken())
             {

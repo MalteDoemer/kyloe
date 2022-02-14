@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class MalformedExpression : SyntaxNode
+    internal class MalformedExpression: SyntaxExpression
     {
         public MalformedExpression(SyntaxToken token)
         {
