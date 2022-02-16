@@ -54,11 +54,29 @@ namespace Kyloe.Syntax
         {
             switch (current.Type)
             {
+                case SyntaxTokenType.VarKeyword:
+                case SyntaxTokenType.ConstKeyword:
+                    return ParseDeclarationStatement();
                 default:
-                    var expr = ParseExpression();
-                    var semi = Expect(SyntaxTokenType.SemiColon);
-                    return new ExpressionStatement(expr, semi);
+                    return ParseExpressionStatement();
             }
+        }
+
+        private SyntaxStatement ParseDeclarationStatement()
+        {
+            var decl = Advance();
+            var name = Expect(SyntaxTokenType.Identifier);
+            var equals = Expect(SyntaxTokenType.Equals);
+            var expr = ParseExpression();
+            var semi = Expect(SyntaxTokenType.SemiColon);
+            return new DeclarationStatement(decl, name, equals, expr, semi);
+        }
+
+        private SyntaxStatement ParseExpressionStatement()
+        {
+            var expr = ParseExpression();
+            var semi = Expect(SyntaxTokenType.SemiColon);
+            return new ExpressionStatement(expr, semi);
         }
 
         public SyntaxExpression ParseExpression()

@@ -19,6 +19,7 @@ namespace Kyloe.Syntax
 
         // Statements
         ExpressionStatement,
+        DeclarationStatement,
     }
 
 }

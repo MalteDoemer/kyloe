@@ -64,5 +64,9 @@ namespace Kyloe.Syntax
         Colon,
         SemiColon,
         SmallArrow,
+
+        // Keywords
+        VarKeyword,
+        ConstKeyword,
     }
 }
