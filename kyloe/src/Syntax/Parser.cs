@@ -31,21 +31,16 @@ namespace Kyloe.Syntax
             return temp;
         }
 
-        private SyntaxToken Expect(params SyntaxTokenType[] types)
+        private SyntaxToken Expect(SyntaxTokenType type)
         {
-            Debug.Assert(types.Length != 0, "There must be at least one type to expect");
-
-            foreach (var type in types)
-            {
                 if (current.Type == type)
                     return Advance();
-            }
-
+         
             // Don't report a new diagnostic if the lexer already did.
             if (current.Type != SyntaxTokenType.Invalid)
-                diagnostics.Add(new UnexpectedTokenError(types, current));
+                diagnostics.Add(new UnexpectedTokenError(type, current));
 
-            return Advance();
+            return new SyntaxToken(type, current.Location, current.Value);
         }
 
         public SyntaxNode Parse()
@@ -194,7 +189,8 @@ namespace Kyloe.Syntax
                 if (current.Type != SyntaxTokenType.Invalid)
                     diagnostics.Add(new UnexpectedTokenError(current));
 
-                return new MalformedExpression(Advance());
+                // FIXME: can this cause a inifinte loop?
+                return new MalformedExpression(current);
             }
         }
     }

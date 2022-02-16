@@ -13,6 +13,10 @@ namespace Kyloe.Diagnostics
         {
         }
 
+        public UnexpectedTokenError(SyntaxTokenType expected, SyntaxToken provided) : this(new SyntaxTokenType[] { expected }, provided)
+        {
+        }
+
         public UnexpectedTokenError(SyntaxTokenType[] expected, SyntaxToken provided)
         {
             this.expected = expected;
