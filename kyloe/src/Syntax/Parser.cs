@@ -33,9 +33,9 @@ namespace Kyloe.Syntax
 
         private SyntaxToken Expect(SyntaxTokenType type)
         {
-                if (current.Type == type)
-                    return Advance();
-         
+            if (current.Type == type)
+                return Advance();
+
             // Don't report a new diagnostic if the lexer already did.
             if (current.Type != SyntaxTokenType.Invalid)
                 diagnostics.Add(new UnexpectedTokenError(type, current));
@@ -54,12 +54,32 @@ namespace Kyloe.Syntax
         {
             switch (current.Type)
             {
+                case SyntaxTokenType.SemiColon:
+                    return new EmptyStatement(Advance());
+                case SyntaxTokenType.IfKeyword:
+                    return ParseIfStatement();
                 case SyntaxTokenType.VarKeyword:
                 case SyntaxTokenType.ConstKeyword:
                     return ParseDeclarationStatement();
                 default:
                     return ParseExpressionStatement();
             }
+        }
+
+        private SyntaxStatement ParseIfStatement()
+        {
+            var ifToken = Advance();
+            var condition = ParseExpression();
+            var body = ParseStatement();
+
+            if (current.Type == SyntaxTokenType.ElseKeyword)
+            {
+                var elseToken = Advance();
+                var elseBody = ParseStatement();
+                return new IfStatement(ifToken, condition, body, new ElseClause(elseToken, elseBody));
+            }
+
+            return new IfStatement(ifToken, condition, body, null);
         }
 
         private SyntaxStatement ParseDeclarationStatement()

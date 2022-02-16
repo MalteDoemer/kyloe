@@ -68,5 +68,7 @@ namespace Kyloe.Syntax
         // Keywords
         VarKeyword,
         ConstKeyword,
+        IfKeyword,
+        ElseKeyword,
     }
 }

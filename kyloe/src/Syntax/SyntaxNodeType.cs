@@ -20,6 +20,10 @@ namespace Kyloe.Syntax
         // Statements
         ExpressionStatement,
         DeclarationStatement,
+        IfStatement,
+        ElseClause,
+        EmptyStatement,
+        BlockStatement,
     }
 
 }

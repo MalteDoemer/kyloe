@@ -188,6 +188,10 @@ namespace Kyloe.Syntax
                     return new SyntaxToken(SyntaxTokenType.BoolLiteral, location, false);
                 case "var":
                     return new SyntaxToken(SyntaxTokenType.VarKeyword, location);
+                case "if":
+                    return new SyntaxToken(SyntaxTokenType.IfKeyword, location);
+                case "else":
+                    return new SyntaxToken(SyntaxTokenType.ElseKeyword, location);
                 case "const":
                     return new SyntaxToken(SyntaxTokenType.ConstKeyword, location);
                 default:
