@@ -1,5 +1,5 @@
-using System.IO;
 using System.Diagnostics;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Kyloe.Diagnostics;
 
@@ -50,7 +50,14 @@ namespace Kyloe.Syntax
             return stmt;
         }
 
-        public SyntaxStatement ParseStatement()
+        public SyntaxNode ParseExpression()
+        {
+            var expr = ParseExpressionImpl();
+            Expect(SyntaxTokenType.End);
+            return expr;
+        }
+
+        private SyntaxStatement ParseStatement()
         {
             switch (current.Type)
             {
@@ -69,7 +76,7 @@ namespace Kyloe.Syntax
         private SyntaxStatement ParseIfStatement()
         {
             var ifToken = Advance();
-            var condition = ParseExpression();
+            var condition = ParseExpressionImpl();
             var body = ParseStatement();
 
             if (current.Type == SyntaxTokenType.ElseKeyword)
@@ -87,19 +94,19 @@ namespace Kyloe.Syntax
             var decl = Advance();
             var name = Expect(SyntaxTokenType.Identifier);
             var equals = Expect(SyntaxTokenType.Equals);
-            var expr = ParseExpression();
+            var expr = ParseExpressionImpl();
             var semi = Expect(SyntaxTokenType.SemiColon);
             return new DeclarationStatement(decl, name, equals, expr, semi);
         }
 
         private SyntaxStatement ParseExpressionStatement()
         {
-            var expr = ParseExpression();
+            var expr = ParseExpressionImpl();
             var semi = Expect(SyntaxTokenType.SemiColon);
             return new ExpressionStatement(expr, semi);
         }
 
-        public SyntaxExpression ParseExpression()
+        private SyntaxExpression ParseExpressionImpl()
         {
             return ParseAssignmentExpression();
         }
@@ -155,7 +162,7 @@ namespace Kyloe.Syntax
             {
                 if (current.Type == SyntaxTokenType.LeftParen)
                 {
-                    var lparen = Advance();
+                    var lparen = Expect(SyntaxTokenType.LeftParen);
 
                     ArgumentExpression? arguments = null;
 
@@ -167,8 +174,8 @@ namespace Kyloe.Syntax
                 }
                 else if (current.Type == SyntaxTokenType.LeftSquare)
                 {
-                    var lsquare = Advance();
-                    var expr = ParseExpression();
+                    var lsquare = Expect(SyntaxTokenType.LeftSquare);
+                    var expr = ParseExpressionImpl();
                     var rsqare = Expect(SyntaxTokenType.RightSquare);
 
                     node = new SubscriptExpression(node, lsquare, expr, rsqare);
@@ -191,7 +198,7 @@ namespace Kyloe.Syntax
 
             while (true)
             {
-                nodes.Add(ParseExpression());
+                nodes.Add(ParseExpressionImpl());
 
                 if (current.Type != SyntaxTokenType.Comma)
                     break;
@@ -210,9 +217,9 @@ namespace Kyloe.Syntax
             }
             else if (current.Type == SyntaxTokenType.LeftParen)
             {
-                var leftParen = Advance(); // skip the left parenthesis
-                var expr = ParseExpression();
-                var rightParen = Expect(SyntaxTokenType.RightParen); // skip the right parenthesis
+                var leftParen = Expect(SyntaxTokenType.LeftParen);
+                var expr = ParseExpressionImpl();
+                var rightParen = Expect(SyntaxTokenType.RightParen);
 
                 return new ParenthesizedExpression(leftParen, rightParen, expr);
             }
@@ -225,7 +232,7 @@ namespace Kyloe.Syntax
             {
                 // Don't report a new diagnostic if the lexer already did.
                 if (current.Type != SyntaxTokenType.Invalid)
-                    diagnostics.Add(new UnexpectedTokenError(current));
+                    diagnostics.Add(new InvalidExpressionError(current));
 
                 // FIXME: can this cause a inifinte loop?
                 return new MalformedExpression(current);

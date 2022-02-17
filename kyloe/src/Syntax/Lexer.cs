@@ -288,9 +288,9 @@ namespace Kyloe.Syntax
                 case ']':
                     return new SyntaxToken(SyntaxTokenType.RightSquare, location);
                 case '{':
-                    return new SyntaxToken(SyntaxTokenType.LeftBracket, location);
+                    return new SyntaxToken(SyntaxTokenType.LeftCurly, location);
                 case '}':
-                    return new SyntaxToken(SyntaxTokenType.RightBracket, location);
+                    return new SyntaxToken(SyntaxTokenType.RightCurly, location);
                 case ',':
                     return new SyntaxToken(SyntaxTokenType.Comma, location);
                 case '.':

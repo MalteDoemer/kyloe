@@ -31,6 +31,54 @@ namespace Kyloe.Syntax
             }
         }
 
+        public static bool IsOpenBracket(this SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.LeftCurly:
+                case SyntaxTokenType.LeftSquare:
+                case SyntaxTokenType.LeftParen:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsCloseBracket(this SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.RightCurly:
+                case SyntaxTokenType.RightSquare:
+                case SyntaxTokenType.RightParen:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static SyntaxTokenType GetCorrespondingBracket(SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.LeftCurly:
+                    return SyntaxTokenType.RightCurly;
+                case SyntaxTokenType.LeftSquare:
+                    return SyntaxTokenType.RightSquare;
+                case SyntaxTokenType.LeftParen:
+                    return SyntaxTokenType.RightParen;
+                case SyntaxTokenType.RightCurly:
+                    return SyntaxTokenType.LeftCurly;
+                case SyntaxTokenType.RightSquare:
+                    return SyntaxTokenType.LeftSquare;
+                case SyntaxTokenType.RightParen:
+                    return SyntaxTokenType.LeftParen;
+
+                default:
+                    throw new System.Exception($"type was not a bracket: {type}");
+            }
+        }
+
         public const int MAX_PRECEDENCE = 9;
 
         // simmilar to https://en.cppreference.com/w/cpp/language/operator_precedence
@@ -196,9 +244,9 @@ namespace Kyloe.Syntax
                     return "]";
                 case SyntaxTokenType.LeftSquare:
                     return "[";
-                case SyntaxTokenType.RightBracket:
+                case SyntaxTokenType.RightCurly:
                     return "}";
-                case SyntaxTokenType.LeftBracket:
+                case SyntaxTokenType.LeftCurly:
                     return "{";
                 case SyntaxTokenType.Comma:
                     return ",";

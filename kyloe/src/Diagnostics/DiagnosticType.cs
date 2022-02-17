@@ -7,6 +7,7 @@ namespace Kyloe.Diagnostics
         UnexpectedTokenError,
         UnknownCharacterError,
         InvalidIntLiteralError,
-        InvalidFloatLiteralError
+        InvalidFloatLiteralError,
+        InvalidExpressionError
     }
 }

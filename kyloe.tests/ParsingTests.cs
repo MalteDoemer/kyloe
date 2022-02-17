@@ -11,8 +11,8 @@ namespace Kyloe.Tests.Parsing
     {
 
         [Theory]
-        [InlineData("1 + ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
-        [InlineData("x += ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("1 + ", new DiagnosticType[] { DiagnosticType.InvalidExpressionError })]
+        [InlineData("x += ", new DiagnosticType[] { DiagnosticType.InvalidExpressionError })]
         [InlineData("(1 ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
         [InlineData("hello(1, 2", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
         [InlineData("data[36 + 1", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]

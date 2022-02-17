@@ -50,13 +50,13 @@ namespace Kyloe.Syntax
         Tilde,
         Bang,
 
-        // Parentheses
+        // Brackets
         RightParen,
         LeftParen,
         RightSquare,
         LeftSquare,
-        RightBracket,
-        LeftBracket,
+        RightCurly,
+        LeftCurly,
 
         // Punctuation
         Comma,
