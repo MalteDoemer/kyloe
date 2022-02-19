@@ -3,11 +3,11 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class InvalidExpressionError : Diagnostic
+    internal class ExpectedExpressionError : Diagnostic
     {
         private readonly SyntaxToken errorToken;
 
-        public InvalidExpressionError(SyntaxToken errorToken)
+        public ExpectedExpressionError(SyntaxToken errorToken)
         {
             this.errorToken = errorToken;
         }
@@ -20,7 +20,7 @@ namespace Kyloe.Diagnostics
 
         public override string Message()
         {
-            return "Invalid expression.";
+            return "Expected expression.";
         }
     }
 }
