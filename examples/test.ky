@@ -1,2 +1,12 @@
-var x = 5;
-fef
+
+
+{
+    var x = 5;
+    var y = x;
+
+    if x == 5 {
+        println("hey");
+    } else {
+        println("ney");
+    }
+}

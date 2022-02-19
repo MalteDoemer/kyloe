@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Kyloe.Diagnostics;
+using System;
 
 namespace Kyloe.Syntax
 {
@@ -69,6 +70,8 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenType.SemiColon:
                     return new EmptyStatement(Advance());
+                case SyntaxTokenType.LeftCurly:
+                    return ParseBlockStatement();
                 case SyntaxTokenType.IfKeyword:
                     return ParseIfStatement();
                 case SyntaxTokenType.VarKeyword:
@@ -79,16 +82,45 @@ namespace Kyloe.Syntax
             }
         }
 
+        private SyntaxStatement ParseBlockStatement()
+        {
+            var leftCurly = Expect(SyntaxTokenType.LeftCurly);
+            var builder = ImmutableArray.CreateBuilder<SyntaxStatement>();
+
+            while (current.Type != SyntaxTokenType.RightCurly)
+            {
+                var startToken = current;
+                var stmt = ParseStatementImpl();
+                builder.Add(stmt);
+
+                // It could be that no token is consumed because 
+                // of a MalformedExpression in ParsePrimary().
+                // If this was the case we have to skip the token.
+                if (object.ReferenceEquals(startToken, current))
+                    Advance();
+
+
+                if (current.Type == SyntaxTokenType.End)
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            var rightCurly = Expect(SyntaxTokenType.RightCurly);
+
+            return new BlockStatement(leftCurly, builder.ToImmutable(), rightCurly);
+        }
+
         private SyntaxStatement ParseIfStatement()
         {
             var ifToken = Advance();
             var condition = ParseExpressionImpl();
-            var body = ParseStatementImpl();
+            var body = ParseBlockStatement();
 
             if (current.Type == SyntaxTokenType.ElseKeyword)
             {
                 var elseToken = Advance();
-                var elseBody = ParseStatementImpl();
+                var elseBody = ParseBlockStatement();
                 return new IfStatement(ifToken, condition, body, new ElseClause(elseToken, elseBody));
             }
 
