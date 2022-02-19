@@ -11,6 +11,7 @@ namespace Kyloe.Syntax
 
         private DiagnosticCollector diagnostics;
 
+        private bool isCurrentValid;
         private SyntaxToken current;
         private SyntaxToken next;
 
@@ -20,6 +21,7 @@ namespace Kyloe.Syntax
             this.lexer = lexer;
             current = lexer.NextToken();
             next = lexer.NextToken();
+            isCurrentValid = current.Type != SyntaxTokenType.Invalid;
         }
 
         /// Returns the current Token and then advances to the next one.
@@ -28,6 +30,7 @@ namespace Kyloe.Syntax
             var temp = current;
             current = next;
             next = lexer.NextToken();
+            isCurrentValid = current.Type != SyntaxTokenType.Invalid;
             return temp;
         }
 
@@ -37,8 +40,11 @@ namespace Kyloe.Syntax
                 return Advance();
 
             // Don't report a new diagnostic if the lexer already did.
-            if (current.Type != SyntaxTokenType.Invalid)
+            if (isCurrentValid)
+            {
                 diagnostics.Add(new UnexpectedTokenError(type, current));
+                isCurrentValid = false;
+            }
 
             return new SyntaxToken(type, current.Location, current.Value);
         }
@@ -231,10 +237,12 @@ namespace Kyloe.Syntax
             else
             {
                 // Don't report a new diagnostic if the lexer already did.
-                if (current.Type != SyntaxTokenType.Invalid)
-                    diagnostics.Add(new InvalidExpressionError(current));
+                if (isCurrentValid)
+                {
+                    diagnostics.Add(new ExpectedExpressionError(current));
+                    isCurrentValid = false;
+                }
 
-                // FIXME: can this cause a inifinte loop?
                 return new MalformedExpression(current);
             }
         }
