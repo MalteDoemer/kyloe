@@ -35,6 +35,16 @@ namespace Kyloe.Tests.Parsing
             TreeAssert.Verify(tree, node);
         }
 
+
+        [Theory]
+        [MemberData(nameof(GetStatementTreeData))]
+        public void Test_Statement_Tree_Structure(string text, VerifyNode node)
+        {
+            var tree = SyntaxTree.ParseStatement(text);
+            DiagnosticAssert.NoErrors(tree.GetDiagnostics());
+            TreeAssert.Verify(tree, node);
+        }
+
         public static IEnumerable<object[]> GetExpressionErrorData()
         {
             yield return new object[] {
@@ -120,8 +130,6 @@ namespace Kyloe.Tests.Parsing
                 "var x = ;",
                 DiagnosticType.ExpectedExpressionError,
             };
-
-            
         }
 
         public static IEnumerable<object[]> GetExpressionTreeData()
@@ -207,8 +215,43 @@ namespace Kyloe.Tests.Parsing
                 )
             };
 
-
+            yield return new object[] {
+                "x += 3",
+                VerifyNode.AssignmentExpression(
+                    VerifyNode.NameExpression(),
+                    SyntaxTokenType.PlusEquals,
+                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                )
+            };
         }
 
+        public static IEnumerable<object[]> GetStatementTreeData()
+        {
+            yield return new object[] {
+                "x += 3;",
+                VerifyNode.ExpressionStatement(
+                    VerifyNode.AssignmentExpression(
+                        VerifyNode.NameExpression(),
+                        SyntaxTokenType.PlusEquals,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    )
+                )
+            };
+
+            yield return new object[] {
+                "hello(1.2);",
+                VerifyNode.ExpressionStatement(
+                    VerifyNode.CallExpression(
+                        VerifyNode.NameExpression(),
+                        VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
+                    )
+                )
+            };
+
+            yield return new object[] {
+                ";",
+                VerifyNode.EmptyStatement()
+            };
+        }
     }
 }

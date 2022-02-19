@@ -125,6 +125,21 @@ namespace Kyloe.Tests
 
             return new VerifyNode(SyntaxNodeType.CallExpression, epxr, new VerifyNode(SyntaxTokenType.LeftParen), argNode, new VerifyNode(SyntaxTokenType.RightParen));
         }
+
+        public static VerifyNode AssignmentExpression(VerifyNode left, SyntaxTokenType op, VerifyNode right)
+        {
+            return new VerifyNode(SyntaxNodeType.AssignmentExpression, left, new VerifyNode(op), right);
+        }
+
+        public static VerifyNode EmptyStatement()
+        {
+            return new VerifyNode(SyntaxNodeType.EmptyStatement, new VerifyNode(SyntaxTokenType.SemiColon));
+        }
+
+        public static VerifyNode ExpressionStatement(VerifyNode expr)
+        {
+            return new VerifyNode(SyntaxNodeType.ExpressionStatement, expr, new VerifyNode(SyntaxTokenType.SemiColon));
+        }
     }
 
     internal class TreeAssert
