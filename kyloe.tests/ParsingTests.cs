@@ -11,8 +11,13 @@ namespace Kyloe.Tests.Parsing
     {
 
         [Theory]
-        [MemberData(nameof(GetErrorData))]
-        public void Test_Expression_Parsing_With_Errors(string text, params DiagnosticType[] errors)
+        [InlineData("1 + ", new DiagnosticType[] { DiagnosticType.InvalidExpressionError })]
+        [InlineData("x += ", new DiagnosticType[] { DiagnosticType.InvalidExpressionError })]
+        [InlineData("(1 ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("hello(1, 2", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("data[36 + 1", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        [InlineData("x.y.", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
+        public void Test_Parsing_With_Errors(string text, DiagnosticType[] errors) 
         {
             var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
@@ -26,18 +31,6 @@ namespace Kyloe.Tests.Parsing
             var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.NoErrors(tree.GetDiagnostics());
             TreeAssert.Verify(tree, node);
-        }
-
-        public static IEnumerable<object[]> GetErrorData()
-        {
-            yield return new object[] { "1 + ", DiagnosticType.InvalidExpressionError };
-            yield return new object[] { "x += ", DiagnosticType.InvalidExpressionError };
-            yield return new object[] { "(1 ", DiagnosticType.UnexpectedTokenError };
-            yield return new object[] { "1 + 2)", DiagnosticType.UnmatchedClosingBracket };
-            yield return new object[] { "1 + 2)", DiagnosticType.UnmatchedClosingBracket }; 
-            yield return new object[] { "hello(1, 2", DiagnosticType.UnexpectedTokenError };
-            yield return new object[] { "data[36 + 1", DiagnosticType.UnexpectedTokenError };
-            yield return new object[] { "x.y.", DiagnosticType.UnexpectedTokenError };
         }
 
         public static IEnumerable<object[]> GetTreeData()

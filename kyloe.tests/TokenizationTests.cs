@@ -68,12 +68,6 @@ namespace Kyloe.Tests.Tokenization
 
             foreach (var type in typeArray)
             {
-                // Note: 
-                // Close brackets cannot be parsed alone without errors, 
-                // but that is the expected behaviour, so close brackets are excluded here.
-                if (type.IsCloseBracket())
-                    continue;
-
                 var text = SyntaxInfo.GetTokenTypeString(type);
 
                 if (text is not null)
