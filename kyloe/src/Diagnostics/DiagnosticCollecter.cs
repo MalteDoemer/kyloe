@@ -1,14 +1,17 @@
 using System.Collections.Immutable;
+using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
     internal class DiagnosticCollector
     {
         private readonly ImmutableArray<Diagnostic>.Builder diagnostics;
+        private readonly SourceText sourceText;
 
-        public DiagnosticCollector()
+        public DiagnosticCollector(SourceText sourceText)
         {
             diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
+            this.sourceText = sourceText;
         }
 
         public void Add(Diagnostic diagnostic)
@@ -18,7 +21,7 @@ namespace Kyloe.Diagnostics
 
         public DiagnosticResult ToResult()
         {
-            return new DiagnosticResult(diagnostics.ToImmutable());
+            return new DiagnosticResult(sourceText, diagnostics.ToImmutable());
         }
     }
 }

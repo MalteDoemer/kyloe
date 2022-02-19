@@ -3,16 +3,19 @@ using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
 
     public class DiagnosticResult
     {
+        private readonly SourceText sourceText;
         private ImmutableArray<Diagnostic> diagnostics;
 
-        internal DiagnosticResult(ImmutableArray<Diagnostic> diagnostics)
+        internal DiagnosticResult(SourceText sourceText, ImmutableArray<Diagnostic> diagnostics)
         {
+            this.sourceText = sourceText;
             this.diagnostics = diagnostics;
         }
 
@@ -26,7 +29,7 @@ namespace Kyloe.Diagnostics
             if (object.ReferenceEquals(writer, Console.Out))
                 colorMode = DiagnosticWriter.ColorMode.ConsoleColor;
 
-            var diagnosticWriter = new DiagnosticWriter(writer, colorMode);
+            var diagnosticWriter = new DiagnosticWriter(writer, sourceText, colorMode);
             diagnosticWriter.Write(this);
         }
 
