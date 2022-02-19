@@ -8,6 +8,7 @@ namespace Kyloe.Diagnostics
         UnknownCharacterError,
         InvalidIntLiteralError,
         InvalidFloatLiteralError,
-        InvalidExpressionError
+        InvalidExpressionError,
+        UnmatchedClosingBracket
     }
 }

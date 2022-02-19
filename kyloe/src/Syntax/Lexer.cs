@@ -8,12 +8,14 @@ namespace Kyloe.Syntax
 {
     internal class Lexer
     {
+        private readonly Stack<SyntaxToken> bracketStack;
         private readonly DiagnosticCollector diagnostics;
         private readonly TextReader reader;
         private int position;
 
         public Lexer(TextReader reader, DiagnosticCollector diagnostics)
         {
+            this.bracketStack = new Stack<SyntaxToken>();
             this.diagnostics = diagnostics;
             this.reader = reader;
             this.position = 0;
@@ -304,6 +306,42 @@ namespace Kyloe.Syntax
             }
         }
 
+        private SyntaxToken LexOpenBracket(SyntaxToken singleToken)
+        {
+            bracketStack.Push(singleToken);
+            Skip(1);
+            return singleToken;
+        }
+
+        private SyntaxToken LexCloseBracket(SyntaxToken singleToken)
+        {
+            SyntaxToken? openBracket = null;
+
+            if (bracketStack.TryPeek(out var token))
+                openBracket = token;
+
+
+            if (openBracket is null)
+            {
+                var errorToken = new SyntaxToken(SyntaxTokenType.Invalid, singleToken.Location, current);
+                diagnostics.Add(new UnmatchedClosingBracket(errorToken));
+                Skip(1);
+                return errorToken;
+            }
+            else if (SyntaxInfo.GetCorrespondingBracket(openBracket.Type) != singleToken.Type)
+            {
+                var errorToken = new SyntaxToken(SyntaxTokenType.Invalid, singleToken.Location, current);
+                diagnostics.Add(new UnmatchedClosingBracket(errorToken));
+
+                Skip(1);
+                return errorToken;
+            }
+
+            Skip(1);
+            bracketStack.Pop();
+            return singleToken;
+        }
+
         public SyntaxToken NextToken()
         {
             if (TryLexDoubleToken() is SyntaxToken doubleToken)
@@ -313,6 +351,11 @@ namespace Kyloe.Syntax
             }
             else if (TryLexSingleToken() is SyntaxToken singleToken)
             {
+                if (singleToken.Type.IsOpenBracket())
+                    return LexOpenBracket(singleToken);
+                else if (singleToken.Type.IsCloseBracket())
+                    return LexCloseBracket(singleToken);
+
                 Skip(1);
                 return singleToken;
             }
