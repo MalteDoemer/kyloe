@@ -19,6 +19,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => token.Location;
 
-        public override string Message() => "Invalid int literal.";
+        public override string Message() => "invalid int literal";
     }
 }

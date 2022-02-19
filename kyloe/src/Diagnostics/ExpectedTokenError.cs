@@ -5,12 +5,12 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class UnexpectedTokenError : Diagnostic
+    internal class ExpectedTokenError : Diagnostic
     {
         private readonly SyntaxTokenType expected;
         private readonly SyntaxToken provided;
 
-        public UnexpectedTokenError(SyntaxTokenType expected, SyntaxToken provided)
+        public ExpectedTokenError(SyntaxTokenType expected, SyntaxToken provided)
         {
             this.expected = expected;
             this.provided = provided;
@@ -18,7 +18,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.UnexpectedTokenError;
+        public override DiagnosticType Type => DiagnosticType.ExpectedTokenError;
 
         public override SourceLocation? Location => provided.Location;
 
@@ -32,7 +32,7 @@ namespace Kyloe.Diagnostics
                     return type.ToString();
             }
 
-            return $"Expected '{NameOrSymbol(expected)}'.";
+            return $"expected '{NameOrSymbol(expected)}'";
         }
     }
 }

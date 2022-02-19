@@ -5,19 +5,19 @@ namespace Kyloe.Diagnostics
 {
     internal class NeverClosedStringLiteralError : Diagnostic
     {
-        private readonly SyntaxToken token;
+        private readonly SyntaxToken errorToken;
 
-        public NeverClosedStringLiteralError(SyntaxToken token)
+        public NeverClosedStringLiteralError(SyntaxToken errorToken)
         {
-            this.token = token;
+            this.errorToken = errorToken;
         }
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override DiagnosticType Type => DiagnosticType.NeverClosedStringLiteralError;
 
-        public override SourceLocation? Location => token.Location;
+        public override SourceLocation? Location => errorToken.Location;
 
-        public override string Message() => "Never closed string literal.";
+        public override string Message() => "never closed string literal";
     }
 }

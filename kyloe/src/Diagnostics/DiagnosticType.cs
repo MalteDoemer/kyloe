@@ -4,7 +4,7 @@ namespace Kyloe.Diagnostics
     {
         NeverClosedBlockCommentError,
         NeverClosedStringLiteralError,
-        UnexpectedTokenError,
+        ExpectedTokenError,
         UnknownCharacterError,
         InvalidIntLiteralError,
         InvalidFloatLiteralError,

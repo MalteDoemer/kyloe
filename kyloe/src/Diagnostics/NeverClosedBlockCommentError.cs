@@ -7,19 +7,19 @@ namespace Kyloe.Diagnostics
 {
     internal class NeverClosedBlockCommentError : Diagnostic
     {
-        public NeverClosedBlockCommentError(SyntaxToken token)
-        {
-            Token = token;
-        }
+        private readonly SyntaxToken errorToken;
 
-        public SyntaxToken Token { get; }
+        public NeverClosedBlockCommentError(SyntaxToken errorToken)
+        {
+            this.errorToken = errorToken;
+        }
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override DiagnosticType Type => DiagnosticType.NeverClosedBlockCommentError;
 
-        public override SourceLocation? Location => Token.Location;
+        public override SourceLocation? Location => errorToken.Location;
 
-        public override string Message() => "Never closed block comment.";
+        public override string Message() => "never closed block comment";
     }
 }

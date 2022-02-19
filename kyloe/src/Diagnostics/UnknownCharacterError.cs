@@ -7,11 +7,11 @@ namespace Kyloe.Diagnostics
 {
     internal class UnknownCharacterError : Diagnostic
     {
-        private readonly SyntaxToken token;
+        private readonly SyntaxToken errorToken;
 
         public UnknownCharacterError(SyntaxToken errorToken)
         {
-            this.token = errorToken;
+            this.errorToken = errorToken;
             Debug.Assert(errorToken.Value is char, "errorToken.Value must be a char");
         }
 
@@ -19,12 +19,12 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticType Type => DiagnosticType.UnknownCharacterError;
 
-        public override SourceLocation? Location => token.Location;
+        public override SourceLocation? Location => errorToken.Location;
 
         public override string Message()
         {
-            char value = (char)token.Value!;
-            return string.Format("Unknown character: \\u{0:x4}", (int)value);
+            char value = (char)errorToken.Value!;
+            return string.Format("unknown character: \\u{0:x4}", (int)value);
         }
     }
 }

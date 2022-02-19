@@ -39,7 +39,7 @@ namespace Kyloe.Tests.Parsing
         {
             yield return new object[] {
                 "arr[1)]",
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {
@@ -49,12 +49,12 @@ namespace Kyloe.Tests.Parsing
 
             yield return new object[] {
                 "((1)",
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "(1))",
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {
@@ -69,22 +69,22 @@ namespace Kyloe.Tests.Parsing
 
             yield return new object[] {
                 "(1 ",
-                DiagnosticType.UnexpectedTokenError
+                DiagnosticType.ExpectedTokenError
             };
 
             yield return new object[] {
                 "hello(1, 2",
-                DiagnosticType.UnexpectedTokenError
+                DiagnosticType.ExpectedTokenError
             };
 
             yield return new object[] {
                 "data[36 + 1",
-                DiagnosticType.UnexpectedTokenError
+                DiagnosticType.ExpectedTokenError
             };
 
             yield return new object[] {
                 "x.y.",
-                DiagnosticType.UnexpectedTokenError
+                DiagnosticType.ExpectedTokenError
             };
         }
 
@@ -92,12 +92,12 @@ namespace Kyloe.Tests.Parsing
         {
             yield return new object[] {
                 "1",
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "(1",
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {
@@ -108,12 +108,12 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "()",
                 DiagnosticType.ExpectedExpressionError,
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "var ",
-                DiagnosticType.UnexpectedTokenError,
+                DiagnosticType.ExpectedTokenError,
             };
 
             yield return new object[] {

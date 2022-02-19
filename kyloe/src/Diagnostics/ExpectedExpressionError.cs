@@ -18,9 +18,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => errorToken.Location;
 
-        public override string Message()
-        {
-            return "Expected expression.";
-        }
+        public override string Message() => "expected expression";
     }
 }

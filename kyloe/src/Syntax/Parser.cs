@@ -42,7 +42,7 @@ namespace Kyloe.Syntax
             // Don't report a new diagnostic if the lexer already did.
             if (isCurrentValid)
             {
-                diagnostics.Add(new UnexpectedTokenError(type, current));
+                diagnostics.Add(new ExpectedTokenError(type, current));
                 isCurrentValid = false;
             }
 
