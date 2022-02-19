@@ -25,9 +25,9 @@ namespace Kyloe.Syntax
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
-        public static SyntaxTree Parse(string text) => Parse(SourceText.FromText(text));
+        public static SyntaxTree ParseStatement(string text) => ParseStatement(SourceText.FromText(text));
 
-        public static SyntaxTree Parse(SourceText sourceText)
+        public static SyntaxTree ParseStatement(SourceText sourceText)
         {
             using (var reader = sourceText.GetReader())
             {
@@ -35,7 +35,7 @@ namespace Kyloe.Syntax
                 var lexer = new Lexer(reader, collector);
                 var parser = new Parser(lexer, collector);
 
-                var tree = parser.Parse();
+                var tree = parser.ParseStatement();
                 var result = collector.ToResult();
 
                 return new SyntaxTree(tree, sourceText, result);

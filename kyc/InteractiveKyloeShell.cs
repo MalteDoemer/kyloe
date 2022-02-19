@@ -21,7 +21,7 @@ namespace Kyc
                     else
                         break;
 
-                var tree = SyntaxTree.Parse(input);
+                var tree = SyntaxTree.ParseStatement(input);
                 Console.WriteLine();
                 tree.GetDiagnostics().WriteTo(Console.Out);
                 Console.WriteLine();

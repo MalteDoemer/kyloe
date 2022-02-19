@@ -18,6 +18,13 @@ namespace Kyloe.Tests.Parsing
             DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
         }
 
+        [Theory]
+        [MemberData(nameof(GetStatementErrorData))]
+        public void Test_Parsing_Statements_With_Errors(string text, params DiagnosticType[] errors)
+        {
+            var tree = SyntaxTree.ParseStatement(text);
+            DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
+        }
 
         [Theory]
         [MemberData(nameof(GetExpressionTreeData))]
@@ -79,6 +86,42 @@ namespace Kyloe.Tests.Parsing
                 "x.y.",
                 DiagnosticType.UnexpectedTokenError
             };
+        }
+
+        public static IEnumerable<object[]> GetStatementErrorData()
+        {
+            yield return new object[] {
+                "1",
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "(1",
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "a[];",
+                DiagnosticType.ExpectedExpressionError,
+            };
+
+            yield return new object[] {
+                "()",
+                DiagnosticType.ExpectedExpressionError,
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "var ",
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "var x = ;",
+                DiagnosticType.ExpectedExpressionError,
+            };
+
+            
         }
 
         public static IEnumerable<object[]> GetExpressionTreeData()

@@ -63,7 +63,7 @@ namespace Kyc
             try
             {
                 var text = SourceText.FromFile(extra[0]);
-                var tree = SyntaxTree.Parse(text);
+                var tree = SyntaxTree.ParseStatement(text);
 
                 tree.GetDiagnostics().WriteTo(Console.Out);
                 Console.WriteLine();

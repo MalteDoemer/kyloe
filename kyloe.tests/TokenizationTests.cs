@@ -33,7 +33,6 @@ namespace Kyloe.Tests.Tokenization
             DiagnosticAssert.HasAll(diagnostics, types);
         }
 
-
         [Theory]
         [MemberData(nameof(GetSimpleTokenData))]
         public void Test_Simple_Tokens(string text, SyntaxTokenType type)
@@ -61,6 +60,21 @@ namespace Kyloe.Tests.Tokenization
             Assert.Equal(SyntaxTokenType.End, tokens.Last().Type);
         }
 
+        [Theory]
+        [MemberData(nameof(GetCombinedTokenData))]
+        public void Test_Combined_Tokens(string text, SyntaxTokenType t1, SyntaxTokenType t2)
+        {
+            var (tokens, diagnostics) = SyntaxTree.Tokenize(text);
+
+            DiagnosticAssert.NoErrors(diagnostics);
+
+            Assert.Equal(3, tokens.Length);
+
+            Assert.Equal(t1, tokens[0].Type);
+            Assert.Equal(t2, tokens[1].Type);
+            Assert.Equal(SyntaxTokenType.End, tokens.Last().Type);
+        }
+
 
         public static IEnumerable<object[]> GetSimpleTokenData()
         {
@@ -74,7 +88,6 @@ namespace Kyloe.Tests.Tokenization
                     yield return new object[] { text, type };
             }
         }
-
 
         public static IEnumerable<object[]> GetComplexTokenData()
         {
@@ -149,6 +162,70 @@ namespace Kyloe.Tests.Tokenization
 
             foreach (var (t, s) in stringLiteralData)
                 yield return new object[] { t, SyntaxTokenType.StringLiteral, s };
+        }
+
+
+        public static IEnumerable<object[]> GetCombinedTokenData()
+        {
+            var typeArray = System.Enum.GetValues<SyntaxTokenType>();
+
+            foreach (var t1 in typeArray)
+            {
+                foreach (var t2 in typeArray)
+                {
+    
+                    switch (t1, t2)
+                    {
+                        case (SyntaxTokenType.Minus, SyntaxTokenType.Greater):
+                        case (SyntaxTokenType.Plus, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Minus, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Star, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Slash, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Percent, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Ampersand, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Pipe, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Hat, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Bang, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Less, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Greater, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Equals, SyntaxTokenType.Equals):
+                        case (SyntaxTokenType.Ampersand, SyntaxTokenType.Ampersand):
+                        case (SyntaxTokenType.Pipe, SyntaxTokenType.Pipe):
+                        case (SyntaxTokenType.Slash, SyntaxTokenType.Slash):
+                        case (SyntaxTokenType.Slash, SyntaxTokenType.Star):
+                        case (SyntaxTokenType.Slash, SyntaxTokenType.StarEquals):
+                        case (SyntaxTokenType.Slash, SyntaxTokenType.SlashEquals):
+                        case (SyntaxTokenType.Plus, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Minus, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Star, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Slash, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Percent, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Ampersand, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Pipe, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Hat, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Bang, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Less, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Greater, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Minus, SyntaxTokenType.GreaterEqual):
+                        case (SyntaxTokenType.Ampersand, SyntaxTokenType.AmpersandEquals):
+                        case (SyntaxTokenType.Pipe, SyntaxTokenType.PipeEquals):
+                        case (SyntaxTokenType.Equals, SyntaxTokenType.DoubleEqual):
+                        case (SyntaxTokenType.Ampersand, SyntaxTokenType.DoubleAmpersand):
+                        case (SyntaxTokenType.Pipe, SyntaxTokenType.DoublePipe):
+                            continue;
+                        default:
+                            break;
+                    }
+
+                    var text1 = SyntaxInfo.GetTokenTypeString(t1);
+                    var text2 = SyntaxInfo.GetTokenTypeString(t2);
+
+                    if (text1 is null || text2 is null)
+                        continue;
+
+                    yield return new object[] { text1 + text2, t1, t2 };
+                }
+            }
         }
 
     }

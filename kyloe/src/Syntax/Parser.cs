@@ -49,9 +49,9 @@ namespace Kyloe.Syntax
             return new SyntaxToken(type, current.Location, current.Value);
         }
 
-        public SyntaxNode Parse()
+        public SyntaxNode ParseStatement()
         {
-            var stmt = ParseStatement();
+            var stmt = ParseStatementImpl();
             Expect(SyntaxTokenType.End);
             return stmt;
         }
@@ -63,7 +63,7 @@ namespace Kyloe.Syntax
             return expr;
         }
 
-        private SyntaxStatement ParseStatement()
+        private SyntaxStatement ParseStatementImpl()
         {
             switch (current.Type)
             {
@@ -83,12 +83,12 @@ namespace Kyloe.Syntax
         {
             var ifToken = Advance();
             var condition = ParseExpressionImpl();
-            var body = ParseStatement();
+            var body = ParseStatementImpl();
 
             if (current.Type == SyntaxTokenType.ElseKeyword)
             {
                 var elseToken = Advance();
-                var elseBody = ParseStatement();
+                var elseBody = ParseStatementImpl();
                 return new IfStatement(ifToken, condition, body, new ElseClause(elseToken, elseBody));
             }
 
