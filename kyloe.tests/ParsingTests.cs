@@ -11,13 +11,8 @@ namespace Kyloe.Tests.Parsing
     {
 
         [Theory]
-        [InlineData("1 + ", new DiagnosticType[] { DiagnosticType.InvalidExpressionError })]
-        [InlineData("x += ", new DiagnosticType[] { DiagnosticType.InvalidExpressionError })]
-        [InlineData("(1 ", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
-        [InlineData("hello(1, 2", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
-        [InlineData("data[36 + 1", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
-        [InlineData("x.y.", new DiagnosticType[] { DiagnosticType.UnexpectedTokenError })]
-        public void Test_Parsing_With_Errors(string text, DiagnosticType[] errors) 
+        [MemberData(nameof(GetExpressionErrorData))]
+        public void Test_Parsing_Expression_With_Errors(string text, params DiagnosticType[] errors)
         {
             var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
@@ -25,15 +20,68 @@ namespace Kyloe.Tests.Parsing
 
 
         [Theory]
-        [MemberData(nameof(GetTreeData))]
-        public void Test_Tree_Structure(string text, VerifyNode node)
+        [MemberData(nameof(GetExpressionTreeData))]
+        public void Test_Expression_Tree_Structure(string text, VerifyNode node)
         {
             var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.NoErrors(tree.GetDiagnostics());
             TreeAssert.Verify(tree, node);
         }
 
-        public static IEnumerable<object[]> GetTreeData()
+        public static IEnumerable<object[]> GetExpressionErrorData()
+        {
+            yield return new object[] {
+                "arr[1)]",
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "()",
+                DiagnosticType.ExpectedExpressionError,
+            };
+
+            yield return new object[] {
+                "((1)",
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "(1))",
+                DiagnosticType.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "1 + ",
+                DiagnosticType.ExpectedExpressionError
+            };
+
+            yield return new object[] {
+                "x += ",
+                DiagnosticType.ExpectedExpressionError
+            };
+
+            yield return new object[] {
+                "(1 ",
+                DiagnosticType.UnexpectedTokenError
+            };
+
+            yield return new object[] {
+                "hello(1, 2",
+                DiagnosticType.UnexpectedTokenError
+            };
+
+            yield return new object[] {
+                "data[36 + 1",
+                DiagnosticType.UnexpectedTokenError
+            };
+
+            yield return new object[] {
+                "x.y.",
+                DiagnosticType.UnexpectedTokenError
+            };
+        }
+
+        public static IEnumerable<object[]> GetExpressionTreeData()
         {
             yield return new object[] {
                 "1 + 2",
@@ -118,5 +166,6 @@ namespace Kyloe.Tests.Parsing
 
 
         }
+
     }
 }
