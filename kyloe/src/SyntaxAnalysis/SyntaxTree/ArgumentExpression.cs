@@ -6,25 +6,20 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    internal class ArgumentExpression: SyntaxExpression
+    internal class ArgumentExpression
     {
-        public ArgumentExpression(ImmutableArray<SyntaxNode> nodes, ImmutableArray<SyntaxToken> commas)
+        public ArgumentExpression(ImmutableArray<SyntaxExpression> nodes, ImmutableArray<SyntaxToken> commas)
         {
             Nodes = nodes;
             Commas = commas;
 
-            Debug.Assert(nodes.Length != 0, "nodes must have at least one element");
-            Debug.Assert(nodes.Length == Commas.Length + 1, "there must be one node more than commas");
+            Debug.Assert(Nodes.Length == 0 || Nodes.Length == Commas.Length + 1, "Wrong amount of commas passed to a ArgumentExpression");
         }
 
-        public ImmutableArray<SyntaxNode> Nodes { get; }
+        public ImmutableArray<SyntaxExpression> Nodes { get; }
         public ImmutableArray<SyntaxToken> Commas { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.ArgumentExpression;
-
-        public override SourceLocation Location => SourceLocation.CreateAround(Nodes.First().Location, Nodes.Last().Location);
-
-        public override IEnumerable<SyntaxNodeChild> GetChildren()
+        public IEnumerable<SyntaxNodeChild> GetChildren()
         {
             for (int i = 0; i < Commas.Length; i++)
             {
@@ -32,7 +27,10 @@ namespace Kyloe.Syntax
                 yield return new SyntaxNodeChild(Commas[i]);
             }
 
-            yield return new SyntaxNodeChild(Nodes.Last());
+            if (Nodes.Length > 0)
+                yield return new SyntaxNodeChild(Nodes.Last());
         }
+
+        public static ArgumentExpression Empty => new ArgumentExpression(ImmutableArray<SyntaxExpression>.Empty, ImmutableArray<SyntaxToken>.Empty);
     }
 }

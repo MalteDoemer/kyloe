@@ -29,7 +29,8 @@ namespace Kyloe.Syntax
             yield return new SyntaxNodeChild(Body);
 
             if (ElseClause is not null)
-                yield return new SyntaxNodeChild(ElseClause);
+                foreach (var child in ElseClause.GetChildren())
+                    yield return child;
         }
     }
 }

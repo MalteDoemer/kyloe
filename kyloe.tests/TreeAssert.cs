@@ -3,6 +3,7 @@ using System.Linq;
 using System.Diagnostics;
 using Xunit;
 using Kyloe.Syntax;
+using System.Collections.Generic;
 
 namespace Kyloe.Tests
 {
@@ -104,26 +105,25 @@ namespace Kyloe.Tests
             return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenType.Dot), NameExpression());
         }
 
-        public static VerifyNode CallExpression(VerifyNode epxr, params VerifyNode[] args)
+        public static VerifyNode CallExpression(VerifyNode expr, params VerifyNode[] args)
         {
             if (args.Length == 0)
-                return new VerifyNode(SyntaxNodeType.CallExpression, epxr, new VerifyNode(SyntaxTokenType.LeftParen), new VerifyNode(SyntaxTokenType.RightParen));
+                return new VerifyNode(SyntaxNodeType.CallExpression, expr, new VerifyNode(SyntaxTokenType.LeftParen), new VerifyNode(SyntaxTokenType.RightParen));
 
-            var argsAndCommas = new VerifyNode[args.Length * 2 - 1];
+            var children = new List<VerifyNode>();
+            children.Add(expr);
+            children.Add(new VerifyNode(SyntaxTokenType.LeftParen));
 
-            for (int i = 0; i < args.Length; i++)
+            for (int i = 0; i < args.Length - 1; i++)
             {
-                argsAndCommas[i * 2] = args[i];
-                if (i != args.Length - 1)
-                {
-                    argsAndCommas[i * 2 + 1] = new VerifyNode(SyntaxTokenType.Comma);
-                }
+                children.Add(args[i]);
+                children.Add(new VerifyNode(SyntaxTokenType.Comma));
             }
 
-            var argNode = new VerifyNode(SyntaxNodeType.ArgumentExpression, argsAndCommas);
+            children.Add(args.Last());
+            children.Add(new VerifyNode(SyntaxTokenType.RightParen));
 
-
-            return new VerifyNode(SyntaxNodeType.CallExpression, epxr, new VerifyNode(SyntaxTokenType.LeftParen), argNode, new VerifyNode(SyntaxTokenType.RightParen));
+            return new VerifyNode(SyntaxNodeType.CallExpression, children.ToArray());
         }
 
         public static VerifyNode AssignmentExpression(VerifyNode left, SyntaxTokenType op, VerifyNode right)

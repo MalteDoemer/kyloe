@@ -6,7 +6,7 @@ namespace Kyloe.Syntax
 
     internal class CallExpression: SyntaxExpression
     {
-        public CallExpression(SyntaxNode expression, SyntaxToken leftParen, ArgumentExpression? arguments, SyntaxToken rightParen)
+        public CallExpression(SyntaxNode expression, SyntaxToken leftParen, ArgumentExpression arguments, SyntaxToken rightParen)
         {
             Expression = expression;
             LeftParen = leftParen;
@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
 
         public SyntaxNode Expression { get; }
         public SyntaxToken LeftParen { get; }
-        public ArgumentExpression? Arguments { get; }
+        public ArgumentExpression Arguments { get; }
         public SyntaxToken RightParen { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.CallExpression;
@@ -28,8 +28,8 @@ namespace Kyloe.Syntax
             yield return new SyntaxNodeChild(Expression);
             yield return new SyntaxNodeChild(LeftParen);
 
-            if (Arguments is not null)
-                yield return new SyntaxNodeChild(Arguments);
+            foreach (var child in Arguments.GetChildren())
+                yield return child;
 
             yield return new SyntaxNodeChild(RightParen);
         }

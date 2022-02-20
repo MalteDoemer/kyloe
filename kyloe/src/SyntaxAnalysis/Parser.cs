@@ -202,7 +202,7 @@ namespace Kyloe.Syntax
                 {
                     var lparen = Expect(SyntaxTokenType.LeftParen);
 
-                    ArgumentExpression? arguments = null;
+                    var arguments = ArgumentExpression.Empty;
 
                     if (current.Type != SyntaxTokenType.RightParen)
                         arguments = ParseArguments();
@@ -231,12 +231,12 @@ namespace Kyloe.Syntax
 
         private ArgumentExpression ParseArguments()
         {
-            var nodes = ImmutableArray.CreateBuilder<SyntaxNode>();
+            var expressions = ImmutableArray.CreateBuilder<SyntaxExpression>();
             var commas = ImmutableArray.CreateBuilder<SyntaxToken>();
 
             while (true)
             {
-                nodes.Add(ParseExpressionImpl());
+                expressions.Add(ParseExpressionImpl());
 
                 if (current.Type != SyntaxTokenType.Comma)
                     break;
@@ -244,7 +244,7 @@ namespace Kyloe.Syntax
                 commas.Add(Advance());
             }
 
-            return new ArgumentExpression(nodes.ToImmutable(), commas.ToImmutable());
+            return new ArgumentExpression(expressions.ToImmutable(), commas.ToImmutable());
         }
 
         private SyntaxExpression ParsePrimary()

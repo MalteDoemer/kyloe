@@ -14,14 +14,12 @@ namespace Kyloe.Syntax
         MemberAccessExpression,
         SubscriptExpression,
         CallExpression,
-        ArgumentExpression,
         AssignmentExpression,
 
         // Statements
         ExpressionStatement,
         DeclarationStatement,
         IfStatement,
-        ElseClause,
         EmptyStatement,
         BlockStatement,
     }
