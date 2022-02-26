@@ -3,18 +3,18 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class AssignmentExpression: SyntaxExpression
+    internal class AssignmentExpression : SyntaxExpression
     {
-        public AssignmentExpression(SyntaxNode leftNode, SyntaxToken operatorToken, SyntaxNode rightNode)
+        public AssignmentExpression(SyntaxExpression leftNode, SyntaxToken operatorToken, SyntaxExpression rightNode)
         {
             LeftNode = leftNode;
             OperatorToken = operatorToken;
             RightNode = rightNode;
         }
 
-        public SyntaxNode LeftNode { get; }
+        public SyntaxExpression LeftNode { get; }
         public SyntaxToken OperatorToken { get; }
-        public SyntaxNode RightNode { get; }
+        public SyntaxExpression RightNode { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.AssignmentExpression;
 

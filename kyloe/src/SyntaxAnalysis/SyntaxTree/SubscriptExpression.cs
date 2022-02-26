@@ -7,7 +7,7 @@ namespace Kyloe.Syntax
 
     internal class SubscriptExpression: SyntaxExpression
     {
-        public SubscriptExpression(SyntaxNode leftNode, SyntaxToken leftSquare, SyntaxNode subscript, SyntaxToken rightSquare)
+        public SubscriptExpression(SyntaxExpression leftNode, SyntaxToken leftSquare, SyntaxExpression subscript, SyntaxToken rightSquare)
         {
             LeftNode = leftNode;
             LeftSquare = leftSquare;
@@ -15,9 +15,9 @@ namespace Kyloe.Syntax
             RightSquare = rightSquare;
         }
 
-        public SyntaxNode LeftNode { get; }
+        public SyntaxExpression LeftNode { get; }
         public SyntaxToken LeftSquare { get; }
-        public SyntaxNode Subscript { get; }
+        public SyntaxExpression Subscript { get; }
         public SyntaxToken RightSquare { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.SubscriptExpression;

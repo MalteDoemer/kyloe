@@ -259,7 +259,7 @@ namespace Kyloe.Syntax
                 var expr = ParseExpressionImpl();
                 var rightParen = Expect(SyntaxTokenType.RightParen);
 
-                return new ParenthesizedExpression(leftParen, rightParen, expr);
+                return new ParenthesizedExpression(leftParen, expr, rightParen);
             }
             else if (current.Type == SyntaxTokenType.Identifier)
             {

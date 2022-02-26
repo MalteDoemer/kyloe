@@ -4,18 +4,18 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    internal class ParenthesizedExpression: SyntaxExpression
+    internal class ParenthesizedExpression : SyntaxExpression
     {
-        public ParenthesizedExpression(SyntaxToken leftParen, SyntaxToken rightParen, SyntaxNode expression)
+        public ParenthesizedExpression(SyntaxToken leftParen, SyntaxExpression expression, SyntaxToken rightParen)
         {
             LeftParen = leftParen;
-            RightParen = rightParen;
             Expression = expression;
+            RightParen = rightParen;
         }
 
         public SyntaxToken LeftParen { get; }
+        public SyntaxExpression Expression { get; }
         public SyntaxToken RightParen { get; }
-        public SyntaxNode Expression { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.ParenthesizedExpression;
 

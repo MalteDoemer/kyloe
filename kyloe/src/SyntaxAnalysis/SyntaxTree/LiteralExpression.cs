@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class LiteralExpression: SyntaxExpression
+    internal class LiteralExpression : SyntaxExpression
     {
         public LiteralExpression(SyntaxToken literalToken)
         {

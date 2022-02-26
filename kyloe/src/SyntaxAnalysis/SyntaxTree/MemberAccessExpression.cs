@@ -6,16 +6,16 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    internal class MemberAccessExpression: SyntaxExpression
+    internal class MemberAccessExpression : SyntaxExpression
     {
-        public MemberAccessExpression(SyntaxNode expression, SyntaxToken dotToken, NameExpression nameExpression)
+        public MemberAccessExpression(SyntaxExpression expression, SyntaxToken dotToken, NameExpression nameExpression)
         {
             Expression = expression;
             DotToken = dotToken;
             NameExpression = nameExpression;
         }
 
-        public SyntaxNode Expression { get; }
+        public SyntaxExpression Expression { get; }
         public SyntaxToken DotToken { get; }
         public NameExpression NameExpression { get; }
 

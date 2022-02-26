@@ -4,9 +4,9 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    internal class CallExpression: SyntaxExpression
+    internal class CallExpression : SyntaxExpression
     {
-        public CallExpression(SyntaxNode expression, SyntaxToken leftParen, ArgumentExpression arguments, SyntaxToken rightParen)
+        public CallExpression(SyntaxExpression expression, SyntaxToken leftParen, ArgumentExpression arguments, SyntaxToken rightParen)
         {
             Expression = expression;
             LeftParen = leftParen;
@@ -14,7 +14,7 @@ namespace Kyloe.Syntax
             RightParen = rightParen;
         }
 
-        public SyntaxNode Expression { get; }
+        public SyntaxExpression Expression { get; }
         public SyntaxToken LeftParen { get; }
         public ArgumentExpression Arguments { get; }
         public SyntaxToken RightParen { get; }

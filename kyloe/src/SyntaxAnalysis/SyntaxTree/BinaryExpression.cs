@@ -3,18 +3,18 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class BinaryExpression: SyntaxExpression
+    internal class BinaryExpression : SyntaxExpression
     {
-        public BinaryExpression(SyntaxNode leftChild, SyntaxToken operatorToken, SyntaxNode rightChild)
+        public BinaryExpression(SyntaxExpression leftChild, SyntaxToken operatorToken, SyntaxExpression rightChild)
         {
             LeftChild = leftChild;
             OperatorToken = operatorToken;
             RightChild = rightChild;
         }
 
-        public SyntaxNode LeftChild { get; }
+        public SyntaxExpression LeftChild { get; }
         public SyntaxToken OperatorToken { get; }
-        public SyntaxNode RightChild { get; }
+        public SyntaxExpression RightChild { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.BinaryExpression;
 

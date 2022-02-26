@@ -4,7 +4,7 @@ using Kyloe.Utility;
 namespace Kyloe.Syntax
 {
 
-    internal class NameExpression: SyntaxExpression
+    internal class NameExpression : SyntaxExpression
     {
         public NameExpression(SyntaxToken nameToken)
         {
