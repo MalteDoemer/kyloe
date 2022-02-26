@@ -1,15 +1,20 @@
-using Kyloe.Syntax;
-using Kyloe.Diagnostics;
 using System;
+using Kyloe.Syntax;
+using Mono.Cecil;
+
+using System.Diagnostics;
+using Kyloe.Diagnostics;
 
 namespace Kyloe.Semantics
 {
     internal class Binder
     {
-        private DiagnosticCollector diagnostics;
+        private readonly TypeSystem typeSystem;
+        private readonly DiagnosticCollector diagnostics;
 
-        public Binder(DiagnosticCollector diagnostics)
+        public Binder(TypeSystem typeSystem, DiagnosticCollector diagnostics)
         {
+            this.typeSystem = typeSystem;
             this.diagnostics = diagnostics;
         }
 
@@ -85,7 +90,11 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindLiteralExpression(LiteralExpression expr)
         {
-            throw new NotImplementedException();
+            var type = SemanticInfo.GetTypeFromLiteral(typeSystem, expr.LiteralToken.Type);
+            var value = expr.LiteralToken.Value;
+            Debug.Assert(value is not null, "Literal token should always have a value!");
+
+            return new BoundLiteralExpression(type, value);
         }
 
         private BoundExpression BindMalformedExpression(MalformedExpression expr)
