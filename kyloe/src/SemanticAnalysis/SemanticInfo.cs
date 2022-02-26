@@ -48,8 +48,14 @@ namespace Kyloe.Semantics
             }
         }
 
-        public static TypeReference? GetBinaryOperationResult(TypeReference lhs, BinaryOperation op, TypeReference rhs)
+        internal static BoundResultType? GetBinaryOperationResult(BoundResultType leftResult, BinaryOperation op, BoundResultType rightResult)
         {
+            if (!leftResult.IsTypeValue || !rightResult.IsTypeValue)
+                return BoundResultType.ErrorResult;
+
+            var lhs = leftResult.TypeValue;
+            var rhs = rightResult.TypeValue;
+
             if (lhs.IsPrimitive)
             {
                 if (lhs != rhs)
@@ -74,7 +80,7 @@ namespace Kyloe.Semantics
                             case MetadataType.UInt64:
                             case MetadataType.Single:
                             case MetadataType.Double:
-                                return lhs;
+                                return leftResult;
                             default:
                                 return null;
                         }
@@ -92,7 +98,7 @@ namespace Kyloe.Semantics
                             case MetadataType.UInt16:
                             case MetadataType.UInt32:
                             case MetadataType.UInt64:
-                                return lhs;
+                                return leftResult;
                             default:
                                 return null;
                         }
@@ -102,7 +108,7 @@ namespace Kyloe.Semantics
                         switch (lhs.MetadataType)
                         {
                             case MetadataType.Boolean:
-                                return lhs;
+                                return leftResult;
                             default:
                                 return null;
                         }
@@ -113,7 +119,7 @@ namespace Kyloe.Semantics
                     case BinaryOperation.GreaterThanOrEqual:
                     case BinaryOperation.Equal:
                     case BinaryOperation.NotEqual:
-                        return lhs.Module.TypeSystem.Boolean;
+                        return new BoundResultType(lhs.Module.TypeSystem.Boolean, isValue: true);
 
                     default:
                         throw new System.Exception($"Unexpected operation: {op}");
@@ -136,13 +142,43 @@ namespace Kyloe.Semantics
                 if (method is null)
                     return null;
                 else
-                    return method.ReturnType;
+                    return new BoundResultType(method.ReturnType, isValue: true);
             }
         }
 
-
-        public static TypeReference? GetUnaryOperationResult(UnaryOperation op, TypeReference type)
+        internal static BinaryOperation GetBinaryOperation(SyntaxTokenType type)
         {
+            switch (type)
+            {
+                case SyntaxTokenType.Less: return BinaryOperation.LessThan;
+                case SyntaxTokenType.Greater: return BinaryOperation.GreaterThan;
+                case SyntaxTokenType.DoubleEqual: return BinaryOperation.Equal;
+                case SyntaxTokenType.LessEqual: return BinaryOperation.LessThanOrEqual;
+                case SyntaxTokenType.GreaterEqual: return BinaryOperation.GreaterThanOrEqual;
+                case SyntaxTokenType.NotEqual: return BinaryOperation.NotEqual;
+                case SyntaxTokenType.Plus: return BinaryOperation.Addition;
+                case SyntaxTokenType.Minus: return BinaryOperation.Subtraction;
+                case SyntaxTokenType.Star: return BinaryOperation.Multiplication;
+                case SyntaxTokenType.Slash: return BinaryOperation.Division;
+                case SyntaxTokenType.Percent: return BinaryOperation.Modulo;
+                case SyntaxTokenType.Ampersand: return BinaryOperation.BitwiseAnd;
+                case SyntaxTokenType.DoubleAmpersand: return BinaryOperation.LogicalAnd;
+                case SyntaxTokenType.Pipe: return BinaryOperation.BitwiseOr;
+                case SyntaxTokenType.DoublePipe: return BinaryOperation.LogicalOr;
+                case SyntaxTokenType.Hat: return BinaryOperation.BitwiseXor;
+                default:
+                    throw new System.Exception($"Unexpected binary operation type {type}");
+            }
+        }
+        
+
+        internal static BoundResultType? GetUnaryOperationResult(UnaryOperation op, BoundResultType result)
+        {
+            if (!result.IsTypeValue)
+                return null;
+
+            var type = result.TypeValue;
+
             if (type.IsPrimitive)
             {
                 switch (op)
@@ -156,7 +192,7 @@ namespace Kyloe.Semantics
                             case MetadataType.Int64:
                             case MetadataType.Single:
                             case MetadataType.Double:
-                                return type;
+                                return result;
                             default:
                                 return null;
                         }
@@ -173,7 +209,7 @@ namespace Kyloe.Semantics
                             case MetadataType.UInt16:
                             case MetadataType.UInt32:
                             case MetadataType.UInt64:
-                                return type;
+                                return result;
                             default:
                                 return null;
                         }
@@ -182,7 +218,7 @@ namespace Kyloe.Semantics
                         switch (type.MetadataType)
                         {
                             case MetadataType.Boolean:
-                                return type;
+                                return result;
                             default:
                                 return null;
                         }
@@ -207,7 +243,7 @@ namespace Kyloe.Semantics
                 if (method is null)
                     return null;
                 else
-                    return method.ReturnType;
+                    return new BoundResultType(method.ReturnType, isValue: true);
             }
         }
     }

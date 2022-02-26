@@ -18,6 +18,17 @@ namespace Kyloe.Semantics
             this.diagnostics = diagnostics;
         }
 
+        private BoundResultType ExpectTypeValue(SyntaxExpression original, BoundResultType result)
+        {
+            if (result.IsTypeValue)
+                return result;
+
+            if (!result.IsError)
+                diagnostics.Add(new ExpectedValueError(original));
+
+            return BoundResultType.ErrorResult;
+        }
+
 
         public BoundExpression BindExpression(SyntaxExpression expr)
         {
@@ -80,7 +91,21 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindBinaryExpression(BinaryExpression expr)
         {
-            throw new NotImplementedException();
+            var left = BindExpression(expr.LeftChild);
+            var right = BindExpression(expr.RightChild);
+            var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Type);
+
+            var leftType = ExpectTypeValue(expr.LeftChild, left.Result);
+            var rightType = ExpectTypeValue(expr.RightChild, right.Result);
+
+            var resultType = SemanticInfo.GetBinaryOperationResult(leftType, op, rightType);
+
+            if (resultType is not null)
+                return new BoundBinaryExpression(left, op, right, resultType);
+
+            diagnostics.Add(new UnsupportedBinaryOperation(expr, leftType, rightType));
+
+            return new BoundBinaryExpression(left, op, right, BoundResultType.ErrorResult);
         }
 
         private BoundExpression BindUnaryExpression(UnaryExpression expr)

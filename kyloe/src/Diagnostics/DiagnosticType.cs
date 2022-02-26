@@ -8,6 +8,8 @@ namespace Kyloe.Diagnostics
         UnknownCharacterError,
         InvalidIntLiteralError,
         InvalidFloatLiteralError,
-        ExpectedExpressionError
+        ExpectedExpressionError,
+        ExpectedValueError,
+        UnsupportedBinaryOperation
     }
 }
