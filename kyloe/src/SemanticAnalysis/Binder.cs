@@ -144,12 +144,12 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindBinaryExpression(BinaryExpression expr)
         {
-            var left = BindExpression(expr.LeftChild);
-            var right = BindExpression(expr.RightChild);
+            var left = BindExpression(expr.LeftExpression);
+            var right = BindExpression(expr.RightExpression);
             var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Type);
 
-            var leftType = ExpectTypeValue(expr.LeftChild, left.Result);
-            var rightType = ExpectTypeValue(expr.RightChild, right.Result);
+            var leftType = ExpectTypeValue(expr.LeftExpression, left.Result);
+            var rightType = ExpectTypeValue(expr.RightExpression, right.Result);
 
             var resultType = SemanticInfo.GetBinaryOperationResult(leftType, op, rightType);
 
@@ -163,18 +163,18 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindUnaryExpression(UnaryExpression expr)
         {
-            var child = BindExpression(expr.Expression);
+            var childExpression = BindExpression(expr.Expression);
             var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Type);
 
-            var type = ExpectTypeValue(expr.Expression, child.Result);
+            var type = ExpectTypeValue(expr.Expression, childExpression.Result);
             var resultType = SemanticInfo.GetUnaryOperationResult(op, type);
 
             if (resultType is not null)
-                return new BoundUnaryExpression(child, op, resultType);
+                return new BoundUnaryExpression(childExpression, op, resultType);
 
             diagnostics.Add(new UnsupportedUnaryOperation(expr, type));
 
-            return new BoundUnaryExpression(child, op, BoundResultType.ErrorResult);
+            return new BoundUnaryExpression(childExpression, op, BoundResultType.ErrorResult);
         }
 
         private BoundExpression BindLiteralExpression(LiteralExpression expr)

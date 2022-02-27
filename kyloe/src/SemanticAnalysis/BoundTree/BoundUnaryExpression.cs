@@ -4,14 +4,14 @@ namespace Kyloe.Semantics
     {
         private readonly BoundResultType resultType;
 
-        public BoundUnaryExpression(BoundExpression child, UnaryOperation operation, BoundResultType resultType)
+        public BoundUnaryExpression(BoundExpression expression, UnaryOperation operation, BoundResultType resultType)
         {
-            Child = child;
+            Expression = expression;
             Operation = operation;
             this.resultType = resultType;
         }
 
-        public BoundExpression Child { get; }
+        public BoundExpression Expression { get; }
         public UnaryOperation Operation { get; }
 
         public override BoundResultType Result => resultType;

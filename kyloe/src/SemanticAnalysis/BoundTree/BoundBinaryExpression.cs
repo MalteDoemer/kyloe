@@ -4,17 +4,17 @@ namespace Kyloe.Semantics
     {
         private readonly BoundResultType resultType;
 
-        public BoundBinaryExpression(BoundExpression leftChild, BinaryOperation operation, BoundExpression rightChild, BoundResultType resultType)
+        public BoundBinaryExpression(BoundExpression leftExpression, BinaryOperation operation, BoundExpression rightExpression, BoundResultType resultType)
         {
-            LeftChild = leftChild;
+            LeftExpression = leftExpression;
             Operation = operation;
-            RightChild = rightChild;
+            RightExpression = rightExpression;
             this.resultType = resultType;
         }
 
-        public BoundExpression LeftChild { get; }
+        public BoundExpression LeftExpression { get; }
         public BinaryOperation Operation { get; }
-        public BoundExpression RightChild { get; }
+        public BoundExpression RightExpression { get; }
 
         public override BoundResultType Result => resultType;
 

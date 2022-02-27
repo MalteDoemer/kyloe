@@ -5,26 +5,26 @@ namespace Kyloe.Syntax
 {
     internal class BinaryExpression : SyntaxExpression
     {
-        public BinaryExpression(SyntaxExpression leftChild, SyntaxToken operatorToken, SyntaxExpression rightChild)
+        public BinaryExpression(SyntaxExpression leftExpression, SyntaxToken operatorToken, SyntaxExpression rightExpression)
         {
-            LeftChild = leftChild;
+            LeftExpression = leftExpression;
             OperatorToken = operatorToken;
-            RightChild = rightChild;
+            RightExpression = rightExpression;
         }
 
-        public SyntaxExpression LeftChild { get; }
+        public SyntaxExpression LeftExpression { get; }
         public SyntaxToken OperatorToken { get; }
-        public SyntaxExpression RightChild { get; }
+        public SyntaxExpression RightExpression { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.BinaryExpression;
 
-        public override SourceLocation Location => SourceLocation.CreateAround(LeftChild.Location, RightChild.Location);
+        public override SourceLocation Location => SourceLocation.CreateAround(LeftExpression.Location, RightExpression.Location);
 
         public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
-            yield return new SyntaxNodeChild(LeftChild);
+            yield return new SyntaxNodeChild(LeftExpression);
             yield return new SyntaxNodeChild(OperatorToken);
-            yield return new SyntaxNodeChild(RightChild);
+            yield return new SyntaxNodeChild(RightExpression);
         }
     }
 }

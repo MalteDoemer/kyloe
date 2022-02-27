@@ -190,8 +190,8 @@ namespace Kyloe.Syntax
             if (current.Type.IsPrefixOperator())
             {
                 var op = Advance();
-                var child = ParsePrefixExpression();
-                return new UnaryExpression(op, child);
+                var expr = ParsePrefixExpression();
+                return new UnaryExpression(op, expr);
             }
 
             return ParsePostFixExpression();
