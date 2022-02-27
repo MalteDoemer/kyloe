@@ -5,14 +5,14 @@ namespace Kyloe.Syntax
 {
     internal class UnaryExpression: SyntaxExpression
     {
-        public UnaryExpression(SyntaxToken operatorToken, SyntaxNode expression)
+        public UnaryExpression(SyntaxToken operatorToken, SyntaxExpression expression)
         {
             OperatorToken = operatorToken;
             Expression = expression;
         }
 
         public SyntaxToken OperatorToken { get; }
-        public SyntaxNode Expression { get; }
+        public SyntaxExpression Expression { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.UnaryExpression;
 
