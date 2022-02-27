@@ -135,6 +135,38 @@ namespace Kyloe.Tests.Parsing
         public static IEnumerable<object[]> GetExpressionTreeData()
         {
             yield return new object[] {
+                "-1",
+                VerifyNode.UnaryExpression(
+                    SyntaxTokenType.Minus,
+                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                )
+            };
+
+            yield return new object[] {
+                "10.5 + -47.1",
+                VerifyNode.BinaryExpression(
+                    VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral), 
+                    SyntaxTokenType.Plus, 
+                    VerifyNode.UnaryExpression(
+                        SyntaxTokenType.Minus,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
+                    )
+                )
+            };
+
+            yield return new object[] {
+                "1 - -1",
+                VerifyNode.BinaryExpression(
+                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral), 
+                    SyntaxTokenType.Minus, 
+                    VerifyNode.UnaryExpression(
+                        SyntaxTokenType.Minus,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    )
+                )
+            };
+
+            yield return new object[] {
                 "1 + 2",
                 VerifyNode.BinaryExpression(
                     VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),

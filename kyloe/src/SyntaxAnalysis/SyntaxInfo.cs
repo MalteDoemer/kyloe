@@ -135,6 +135,7 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenType.Bang:
                 case SyntaxTokenType.Tilde:
+                case SyntaxTokenType.Minus:
                     return true;
                 default:
                     return false;
