@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Kyloe.Utility;
 
@@ -17,6 +18,11 @@ namespace Kyloe.Diagnostics
         public void Add(Diagnostic diagnostic)
         {
             diagnostics.Add(diagnostic);
+        }
+
+        public void AddRange(IEnumerable<Diagnostic> range)
+        {
+            diagnostics.AddRange(range);
         }
 
         public DiagnosticResult ToResult()

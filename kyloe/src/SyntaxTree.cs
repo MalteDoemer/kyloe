@@ -1,10 +1,11 @@
 using System.Collections.Immutable;
 using System.IO;
 
+using Kyloe.Syntax;
 using Kyloe.Utility;
 using Kyloe.Diagnostics;
 
-namespace Kyloe.Syntax
+namespace Kyloe
 {
     public class SyntaxTree
     {

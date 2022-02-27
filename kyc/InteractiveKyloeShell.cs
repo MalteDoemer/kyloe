@@ -1,4 +1,4 @@
-using Kyloe.Syntax;
+using Kyloe;
 
 namespace Kyc
 {
@@ -21,11 +21,15 @@ namespace Kyc
                     else
                         break;
 
+                
+
                 var tree = SyntaxTree.ParseStatement(input);
+                var compilation = Compilation.Compile(tree);
+
                 Console.WriteLine();
-                tree.GetDiagnostics().WriteTo(Console.Out);
-                Console.WriteLine();
-                tree.GetRoot().WriteTo(Console.Out);
+                compilation.GetDiagnostics().WriteTo(Console.Out);
+                // Console.WriteLine();
+                // tree.GetRoot().WriteTo(Console.Out);
 
             }
         }

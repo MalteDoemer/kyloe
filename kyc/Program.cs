@@ -1,4 +1,4 @@
-﻿using Kyloe.Syntax;
+﻿using Kyloe;
 using Kyloe.Utility;
 using Mono.Options;
 

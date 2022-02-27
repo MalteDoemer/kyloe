@@ -3,6 +3,7 @@ namespace Kyloe.Semantics
     public enum BoundNodeType
     {
         BoundLiteralExpression,
-        BoundBinaryExpression
+        BoundBinaryExpression,
+        BoundExpressionStatement
     }
 }

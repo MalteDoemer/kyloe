@@ -29,6 +29,59 @@ namespace Kyloe.Semantics
             return BoundResultType.ErrorResult;
         }
 
+        public BoundNode Bind(SyntaxNode node)
+        {
+            if (node is SyntaxStatement statement)
+                return BindStatement(statement);
+            else if (node is SyntaxExpression expression)
+                return BindExpression(expression);
+            else throw new Exception($"Unexpected SyntaxNode: {node.GetType()}");
+        }
+
+        public BoundStatement BindStatement(SyntaxStatement stmt)
+        {
+            switch (stmt.Type)
+            {
+                case SyntaxNodeType.ExpressionStatement:
+                    return BindExpressionStatement((ExpressionStatement)stmt);
+                case SyntaxNodeType.DeclarationStatement:
+                    return BindDeclarationStatement((DeclarationStatement)stmt);
+                case SyntaxNodeType.IfStatement:
+                    return BindIfStatement((IfStatement)stmt);
+                case SyntaxNodeType.EmptyStatement:
+                    return BindEmptyStatement((EmptyStatement)stmt);
+                case SyntaxNodeType.BlockStatement:
+                    return BindBlockStatement((BlockStatement)stmt);
+                default:
+                    throw new Exception($"Unexpected SyntaxStatement: {stmt.Type}");
+            }
+        }
+
+        private BoundStatement BindBlockStatement(BlockStatement stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundStatement BindEmptyStatement(EmptyStatement stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundStatement BindIfStatement(IfStatement stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundStatement BindDeclarationStatement(DeclarationStatement stmt)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundStatement BindExpressionStatement(ExpressionStatement stmt)
+        {
+            var expr = BindExpression(stmt.Expression);
+            return new BoundExpressionStatement(expr);
+        }
 
         public BoundExpression BindExpression(SyntaxExpression expr)
         {
