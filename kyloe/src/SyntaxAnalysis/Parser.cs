@@ -50,14 +50,19 @@ namespace Kyloe.Syntax
             return new SyntaxToken(type, current.Location, current.Value);
         }
 
-        public SyntaxNode ParseStatement()
+        public SyntaxNode Parse() 
+        {
+            return ParseStatement();
+        }
+
+        public SyntaxStatement ParseStatement()
         {
             var stmt = ParseStatementImpl();
             Expect(SyntaxTokenType.End);
             return stmt;
         }
 
-        public SyntaxNode ParseExpression()
+        public SyntaxExpression ParseExpression()
         {
             var expr = ParseExpressionImpl();
             Expect(SyntaxTokenType.End);

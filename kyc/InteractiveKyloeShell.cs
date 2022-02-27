@@ -22,15 +22,9 @@ namespace Kyc
                         break;
 
                 
-
-                var tree = SyntaxTree.ParseStatement(input);
-                var compilation = Compilation.Compile(tree);
-
+                var compilation = Compilation.Compile(input);
                 Console.WriteLine();
                 compilation.GetDiagnostics().WriteTo(Console.Out);
-                // Console.WriteLine();
-                // tree.GetRoot().WriteTo(Console.Out);
-
             }
         }
 

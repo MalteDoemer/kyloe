@@ -2,6 +2,8 @@ using Mono.Cecil;
 using Kyloe.Semantics;
 using System;
 using Kyloe.Diagnostics;
+using Kyloe.Utility;
+using Kyloe.Syntax;
 
 namespace Kyloe
 {
@@ -20,16 +22,19 @@ namespace Kyloe
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
-        public static Compilation Compile(SyntaxTree tree)
+        public static Compilation Compile(string text) => Compile(SourceText.FromText(text));
+
+        public static Compilation Compile(SourceText text)
         {
             var assemblyName = new AssemblyNameDefinition("test", new Version(0, 1));
             var assembly = AssemblyDefinition.CreateAssembly(assemblyName, "<test>", ModuleKind.Dll);
 
-            var collector = new DiagnosticCollector(tree.GetSourceText());
-            collector.AddRange(tree.GetDiagnostics().GetAll());
+            var collector = new DiagnosticCollector(text);
+            var lexer = new Lexer(text.GetReader(), collector);
+            var parser = new Parser(lexer, collector);
+            var rootNode = parser.Parse();
             var binder = new Binder(assembly.MainModule.TypeSystem, collector);
-
-            var result = binder.Bind(tree.GetRoot());
+            var result = binder.Bind(rootNode);
 
             return new Compilation(assembly, collector.ToResult(), result);
         }

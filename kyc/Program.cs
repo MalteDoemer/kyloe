@@ -63,11 +63,8 @@ namespace Kyc
             try
             {
                 var text = SourceText.FromFile(extra[0]);
-                var tree = SyntaxTree.ParseStatement(text);
-
-                tree.GetDiagnostics().WriteTo(Console.Out);
-                Console.WriteLine();
-                tree.GetRoot().WriteTo(Console.Out);
+                var compilation = Compilation.Compile(text);
+                compilation.GetDiagnostics().WriteTo(Console.Out);
             }
             catch (IOException ioException)
             {
