@@ -167,10 +167,9 @@ namespace Kyloe.Semantics
                 case SyntaxTokenType.DoublePipe: return BinaryOperation.LogicalOr;
                 case SyntaxTokenType.Hat: return BinaryOperation.BitwiseXor;
                 default:
-                    throw new System.Exception($"Unexpected binary operation type {type}");
+                    throw new System.Exception($"Unexpected binary operation type: {type}");
             }
         }
-        
 
         internal static BoundResultType? GetUnaryOperationResult(UnaryOperation op, BoundResultType result)
         {
@@ -244,6 +243,18 @@ namespace Kyloe.Semantics
                     return null;
                 else
                     return new BoundResultType(method.ReturnType, isValue: true);
+            }
+        }
+
+        internal static UnaryOperation GetUnaryOperation(SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.Tilde: return UnaryOperation.BitwiseNot;
+                case SyntaxTokenType.Bang: return UnaryOperation.LogicalNot;
+                case SyntaxTokenType.Minus: return UnaryOperation.Negation;
+                default:
+                    throw new System.Exception($"Unexpected unary operation type: {type}");
             }
         }
     }

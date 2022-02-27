@@ -163,7 +163,18 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindUnaryExpression(UnaryExpression expr)
         {
-            throw new NotImplementedException();
+            var child = BindExpression(expr.Expression);
+            var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Type);
+
+            var type = ExpectTypeValue(expr.Expression, child.Result);
+            var resultType = SemanticInfo.GetUnaryOperationResult(op, type);
+
+            if (resultType is not null)
+                return new BoundUnaryExpression(child, op, resultType);
+
+            diagnostics.Add(new UnsupportedUnaryOperation(expr, type));
+
+            return new BoundUnaryExpression(child, op, BoundResultType.ErrorResult);
         }
 
         private BoundExpression BindLiteralExpression(LiteralExpression expr)
@@ -177,7 +188,7 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindMalformedExpression(MalformedExpression expr)
         {
-            throw new NotImplementedException();
+            return new BoundInvalidExpression();
         }
     }
 }

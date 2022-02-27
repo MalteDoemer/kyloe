@@ -10,6 +10,7 @@ namespace Kyloe.Diagnostics
         InvalidFloatLiteralError,
         ExpectedExpressionError,
         ExpectedValueError,
-        UnsupportedBinaryOperation
+        UnsupportedBinaryOperation,
+        UnsupportedUnaryOperation
     }
 }

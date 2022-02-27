@@ -4,6 +4,8 @@ namespace Kyloe.Semantics
     {
         BoundLiteralExpression,
         BoundBinaryExpression,
-        BoundExpressionStatement
+        BoundExpressionStatement,
+        BoundInvalidExpression,
+        BoundUnaryExpression
     }
 }
