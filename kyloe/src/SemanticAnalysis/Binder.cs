@@ -4,6 +4,7 @@ using Mono.Cecil;
 
 using System.Diagnostics;
 using Kyloe.Diagnostics;
+using System.Collections.Immutable;
 
 namespace Kyloe.Semantics
 {
@@ -59,12 +60,17 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindBlockStatement(BlockStatement stmt)
         {
-            throw new NotImplementedException();
+            var builder = ImmutableArray.CreateBuilder<BoundStatement>();
+
+            foreach (var statement in stmt.Statements)
+                builder.Add(BindStatement(statement));
+
+            return new BoundBlockStatement(builder.ToImmutable());
         }
 
         private BoundStatement BindEmptyStatement(EmptyStatement stmt)
         {
-            throw new NotImplementedException();
+            return new BoundEmptyStatement();
         }
 
         private BoundStatement BindIfStatement(IfStatement stmt)
@@ -139,7 +145,7 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpression expr)
         {
-            throw new NotImplementedException();
+            return BindExpression(expr.Expression);
         }
 
         private BoundExpression BindBinaryExpression(BinaryExpression expr)
