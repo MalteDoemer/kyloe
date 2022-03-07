@@ -1,4 +1,4 @@
-namespace Symobls
+namespace Kyloe.Utility
 {
     public class NotInitializedException : System.Exception
     {

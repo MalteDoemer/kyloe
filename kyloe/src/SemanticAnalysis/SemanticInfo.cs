@@ -1,18 +1,19 @@
+using System;
 using System.Linq;
+using Kyloe.Symbols;
 using Kyloe.Syntax;
-using Mono.Cecil;
 
 namespace Kyloe.Semantics
 {
     public static class SemanticInfo
     {
-        public static TypeReference GetTypeFromLiteral(TypeSystem typeSystem, SyntaxTokenType tokenType)
+        public static ITypeSymbol GetTypeFromLiteral(TypeSystem typeSystem, SyntaxTokenType tokenType)
         {
             switch (tokenType)
             {
-                case SyntaxTokenType.IntLiteral: return typeSystem.Int64;
+                case SyntaxTokenType.IntLiteral: return typeSystem.I64;
                 case SyntaxTokenType.FloatLiteral: return typeSystem.Double;
-                case SyntaxTokenType.BoolLiteral: return typeSystem.Boolean;
+                case SyntaxTokenType.BoolLiteral: return typeSystem.Bool;
                 case SyntaxTokenType.StringLiteral: return typeSystem.String;
                 default:
                     throw new System.Exception($"Unexpected literal type: {tokenType}");
@@ -54,102 +55,77 @@ namespace Kyloe.Semantics
             }
         }
 
-        internal static BoundResultType? GetBinaryOperationResult(BoundResultType leftResult, BinaryOperation op, BoundResultType rightResult)
+        internal static BoundResultType? GetBinaryOperationResult(BoundResultType leftType, BinaryOperation op, BoundResultType rightType)
         {
-            if (!leftResult.IsTypeValue || !rightResult.IsTypeValue)
+
+            Console.WriteLine(leftType);
+            Console.WriteLine(rightType);
+
+            if (leftType.IsError || rightType.IsError)
                 return BoundResultType.ErrorResult;
 
-            var lhs = leftResult.TypeValue;
-            var rhs = rightResult.TypeValue;
+            if (leftType.IsName || rightType.IsName)
+                return null;
 
-            if (lhs.IsPrimitive)
-            {
-                if (lhs != rhs)
-                    return null;
+            if (!(leftType.Symbol is ITypeSymbol left) || !(rightType.Symbol is ITypeSymbol right))
+                return null;
 
-                switch (op)
-                {
-                    case BinaryOperation.Addition:
-                    case BinaryOperation.Subtraction:
-                    case BinaryOperation.Multiplication:
-                    case BinaryOperation.Division:
-                    case BinaryOperation.Modulo:
-                        switch (lhs.MetadataType)
-                        {
-                            case MetadataType.SByte:
-                            case MetadataType.Int16:
-                            case MetadataType.Int32:
-                            case MetadataType.Int64:
-                            case MetadataType.Byte:
-                            case MetadataType.UInt16:
-                            case MetadataType.UInt32:
-                            case MetadataType.UInt64:
-                            case MetadataType.Single:
-                            case MetadataType.Double:
-                                return leftResult;
-                            default:
-                                return null;
-                        }
+            var name = GetBinaryOperationMethodName(op);
 
-                    case BinaryOperation.BitwiseAnd:
-                    case BinaryOperation.BitwiseOr:
-                    case BinaryOperation.BitwiseXor:
-                        switch (lhs.MetadataType)
-                        {
-                            case MetadataType.SByte:
-                            case MetadataType.Int16:
-                            case MetadataType.Int32:
-                            case MetadataType.Int64:
-                            case MetadataType.Byte:
-                            case MetadataType.UInt16:
-                            case MetadataType.UInt32:
-                            case MetadataType.UInt64:
-                                return leftResult;
-                            default:
-                                return null;
-                        }
+            if (name is null)
+                throw new NotImplementedException();
 
-                    case BinaryOperation.LogicalAnd:
-                    case BinaryOperation.LogicalOr:
-                        switch (lhs.MetadataType)
-                        {
-                            case MetadataType.Boolean:
-                                return leftResult;
-                            default:
-                                return null;
-                        }
+            var methods = left.LookupMembers(name).Where(
+                member => member is IMethodSymbol method &&
+                method.IsOperator &&
+                method.Parameters.Count() == 2 &&
+                method.Parameters.First().Type == left &&
+                method.Parameters.Last().Type == right
+            );
 
-                    case BinaryOperation.LessThan:
-                    case BinaryOperation.GreaterThan:
-                    case BinaryOperation.LessThanOrEqual:
-                    case BinaryOperation.GreaterThanOrEqual:
-                    case BinaryOperation.Equal:
-                    case BinaryOperation.NotEqual:
-                        return new BoundResultType(lhs.Module.TypeSystem.Boolean, isValue: true);
+            if (methods.Count() > 1)
+                Console.WriteLine($"Note: Found multiple methods for an operator: op={op}, left={left}, right={right}");
 
-                    default:
-                        throw new System.Exception($"Unexpected operation: {op}");
-                }
-            }
-            else
-            {
-                var methodName = GetBinaryOperationMethodName(op);
+            var method = methods.FirstOrDefault() as IMethodSymbol;
 
-                var methods = lhs.Resolve().Methods.Where(m =>
-                                            m.IsSpecialName &&
-                                            m.IsStatic &&
-                                            m.Name == methodName &&
-                                            m.Parameters.Count == 2 &&
-                                            m.Parameters[0].ParameterType == lhs &&
-                                            m.Parameters[1].ParameterType == rhs);
+            if (method is null)
+                return null;
 
-                var method = methods.FirstOrDefault();
+            return new BoundResultType(method.ReturnType, true);
+        }
 
-                if (method is null)
-                    return null;
-                else
-                    return new BoundResultType(method.ReturnType, isValue: true);
-            }
+        internal static BoundResultType? GetUnaryOperationResult(UnaryOperation op, BoundResultType result)
+        {
+            if (result.IsError)
+                return BoundResultType.ErrorResult;
+            
+            if (result.IsName)
+                return null;
+
+            if (!(result is ITypeSymbol type))
+                return null;
+
+            var name = GetUnaryOperationMethodName(op);
+
+            if (name is null)
+                throw new NotImplementedException();
+
+            var methods = type.LookupMembers(name).Where(
+                member => member is IMethodSymbol method &&
+                method.IsOperator &&
+                method.Parameters.Count() == 1 &&
+                method.Parameters.First().Type == type
+            );
+
+            if (methods.Count() > 1)
+                Console.WriteLine($"Note: Found multiple methods for a unary operator: op={op}, type={type}");
+
+            var method = methods.FirstOrDefault() as IMethodSymbol;
+
+            if (method is null)
+                return null;
+
+            return new BoundResultType(method.ReturnType, true);
         }
 
         internal static BinaryOperation GetBinaryOperation(SyntaxTokenType type)
@@ -174,81 +150,6 @@ namespace Kyloe.Semantics
                 case SyntaxTokenType.Hat: return BinaryOperation.BitwiseXor;
                 default:
                     throw new System.Exception($"Unexpected binary operation type: {type}");
-            }
-        }
-
-        internal static BoundResultType? GetUnaryOperationResult(UnaryOperation op, BoundResultType result)
-        {
-            if (!result.IsTypeValue)
-                return null;
-
-            var type = result.TypeValue;
-
-            if (type.IsPrimitive)
-            {
-                switch (op)
-                {
-                    case UnaryOperation.Negation:
-                        switch (type.MetadataType)
-                        {
-                            case MetadataType.SByte:
-                            case MetadataType.Int16:
-                            case MetadataType.Int32:
-                            case MetadataType.Int64:
-                            case MetadataType.Single:
-                            case MetadataType.Double:
-                                return result;
-                            default:
-                                return null;
-                        }
-
-
-                    case UnaryOperation.BitwiseNot:
-                        switch (type.MetadataType)
-                        {
-                            case MetadataType.SByte:
-                            case MetadataType.Int16:
-                            case MetadataType.Int32:
-                            case MetadataType.Int64:
-                            case MetadataType.Byte:
-                            case MetadataType.UInt16:
-                            case MetadataType.UInt32:
-                            case MetadataType.UInt64:
-                                return result;
-                            default:
-                                return null;
-                        }
-
-                    case UnaryOperation.LogicalNot:
-                        switch (type.MetadataType)
-                        {
-                            case MetadataType.Boolean:
-                                return result;
-                            default:
-                                return null;
-                        }
-
-                    default:
-                        return null;
-                }
-            }
-            else
-            {
-                var methodName = GetUnaryOperationMethodName(op);
-
-                var methods = type.Resolve().Methods.Where(m =>
-                                            m.IsSpecialName &&
-                                            m.IsStatic &&
-                                            m.Name == methodName &&
-                                            m.Parameters.Count == 1 &&
-                                            m.Parameters[0].ParameterType == type);
-
-                var method = methods.FirstOrDefault();
-
-                if (method is null)
-                    return null;
-                else
-                    return new BoundResultType(method.ReturnType, isValue: true);
             }
         }
 

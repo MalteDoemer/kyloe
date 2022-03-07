@@ -1,4 +1,4 @@
-using Mono.Cecil;
+using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
@@ -6,7 +6,7 @@ namespace Kyloe.Semantics
     {
         private readonly BoundResultType resultType;
 
-        public BoundLiteralExpression(TypeReference literalType, object value)
+        public BoundLiteralExpression(ITypeSymbol literalType, object value)
         {
             resultType = new BoundResultType(literalType, isValue: true);
             Value = value;

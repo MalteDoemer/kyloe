@@ -4,8 +4,9 @@ using Mono.Cecil;
 using System.Linq;
 using System.Collections.Generic;
 using Kyloe.Semantics;
+using Kyloe.Utility;
 
-namespace Symobls
+namespace Kyloe.Symbols
 {
     public class TypeSystem
     {
@@ -130,6 +131,7 @@ namespace Symobls
                          .SetReturnType(ret)
                          .AddParameter(new ParameterSymbol("left").SetType(left))
                          .AddParameter(new ParameterSymbol("right").SetType(right))
+                         .SetOperator(true)
                          .SetBuiltinOperator(true);
 
             return method;
@@ -145,6 +147,7 @@ namespace Symobls
             var method = new MethodSymbol(name)
                          .SetReturnType(ret)
                          .AddParameter(new ParameterSymbol("arg").SetType(arg))
+                         .SetOperator(true)
                          .SetBuiltinOperator(true);
 
             return method;
@@ -207,6 +210,7 @@ namespace Symobls
         private sealed class MethodSymbol : IMethodSymbol
         {
             private ITypeSymbol? returnType;
+            private bool isOperator;
             private bool isBuiltinOperator;
 
             private readonly Dictionary<string, ParameterSymbol> parameters;
@@ -214,7 +218,6 @@ namespace Symobls
             public MethodSymbol(string name)
             {
                 Name = name;
-                isBuiltinOperator = false;
                 parameters = new Dictionary<string, ParameterSymbol>();
             }
 
@@ -228,9 +231,17 @@ namespace Symobls
 
             public bool IsBuiltinOperator => isBuiltinOperator;
 
+            public bool IsOperator => isOperator;
+
             public MethodSymbol SetReturnType(ITypeSymbol type)
             {
                 returnType = type;
+                return this;
+            }
+
+            public MethodSymbol SetOperator(bool op)
+            {
+                isOperator = op;
                 return this;
             }
 

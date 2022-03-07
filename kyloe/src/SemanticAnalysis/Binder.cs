@@ -1,6 +1,6 @@
 using System;
 using Kyloe.Syntax;
-using Mono.Cecil;
+using Kyloe.Symbols;
 
 using System.Diagnostics;
 using Kyloe.Diagnostics;
@@ -21,7 +21,7 @@ namespace Kyloe.Semantics
 
         private BoundResultType ExpectTypeValue(SyntaxExpression original, BoundResultType result)
         {
-            if (result.IsTypeValue)
+            if (result.IsValue)
                 return result;
 
             if (!result.IsError)

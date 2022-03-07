@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Symobls
+namespace Kyloe.Symbols
 {
 
     public enum SymbolKind
@@ -39,6 +39,7 @@ namespace Symobls
         ITypeSymbol ReturnType { get; }
         IEnumerable<IParameterSymbol> Parameters { get; }
 
+        bool IsOperator { get; }
         bool IsBuiltinOperator { get; }
     }
 

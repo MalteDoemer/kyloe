@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using Mono.Cecil;
+using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
@@ -7,16 +7,14 @@ namespace Kyloe.Semantics
     {
         enum Kind
         {
-            Namespace,
-            TypeValue,
-            TypeName,
+            Value,
+            Name,
             Error,
         }
 
         public static readonly BoundResultType ErrorResult = new BoundResultType(Kind.Error);
 
-        private readonly Namespace? @namespace;
-        private readonly TypeReference? typeReference;
+        private readonly ISymbol? symbol;
         private readonly Kind kind;
 
         private BoundResultType(Kind kind)
@@ -24,45 +22,21 @@ namespace Kyloe.Semantics
             this.kind = kind;
         }
 
-        public BoundResultType(Namespace @namespace) : this(Kind.Namespace)
+        public BoundResultType(ISymbol symbol, bool isValue) : this(isValue ? Kind.Value : Kind.Name)
         {
-            this.@namespace = @namespace;
+            this.symbol = symbol;
         }
 
-        public BoundResultType(TypeReference typeReference, bool isValue) : this(isValue ? Kind.TypeValue : Kind.TypeName)
-        {
-            this.typeReference = typeReference;
-        }
-
-        public bool IsNamespace => kind == Kind.Namespace;
-        public bool IsTypeName => kind == Kind.TypeName;
-        public bool IsTypeValue => kind == Kind.TypeValue;
+        public bool IsName => kind == Kind.Name;
+        public bool IsValue => kind == Kind.Value;
         public bool IsError => kind == Kind.Error;
 
-        public Namespace Namespace
+        public ISymbol Symbol
         {
             get
             {
-                Debug.Assert(IsNamespace);
-                return @namespace!;
-            }
-        }
-
-        public TypeReference TypeName
-        {
-            get
-            {
-                Debug.Assert(IsTypeName);
-                return typeReference!;
-            }
-        }
-
-        public TypeReference TypeValue
-        {
-            get
-            {
-                Debug.Assert(IsTypeValue);
-                return typeReference!;
+                Debug.Assert(!IsError); 
+                return symbol!;
             }
         }
 
@@ -71,11 +45,9 @@ namespace Kyloe.Semantics
         {
             switch (kind)
             {
-                case Kind.Namespace:
-                    return Namespace.ToString();
-                case Kind.TypeName:
-                case Kind.TypeValue:
-                    return typeReference!.FullName;
+                case Kind.Name:
+                case Kind.Value:
+                    return Symbol.Name;
                 case Kind.Error:
                     return "<error-type>";
                 default:
