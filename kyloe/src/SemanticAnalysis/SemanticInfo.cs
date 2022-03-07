@@ -43,6 +43,12 @@ namespace Kyloe.Semantics
                 case BinaryOperation.BitwiseAnd: return "op_BitwiseAnd";
                 case BinaryOperation.BitwiseOr: return "op_BitwiseOr";
                 case BinaryOperation.BitwiseXor: return "op_ExclusiveOr";
+                case BinaryOperation.Equal: return "op_Equality";
+                case BinaryOperation.NotEqual: return "op_Inequality";
+                case BinaryOperation.LessThanOrEqual: return "op_LessThanOrEqual";
+                case BinaryOperation.GreaterThanOrEqual: return "op_GreaterThanOrEqual";
+                case BinaryOperation.LessThan: return "op_LessThan";
+                case BinaryOperation.GreaterThan: return "op_GreaterThan";
                 default:
                     return null;
             }
