@@ -98,7 +98,7 @@ namespace Kyloe.Semantics
             if (result.IsName)
                 return null;
 
-            if (!(result is ITypeSymbol type))
+            if (!(result.Symbol is ITypeSymbol type))
                 return null;
 
             var name = GetUnaryOperationMethodName(op);
