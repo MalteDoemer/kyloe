@@ -57,10 +57,6 @@ namespace Kyloe.Semantics
 
         internal static BoundResultType? GetBinaryOperationResult(BoundResultType leftType, BinaryOperation op, BoundResultType rightType)
         {
-
-            Console.WriteLine(leftType);
-            Console.WriteLine(rightType);
-
             if (leftType.IsError || rightType.IsError)
                 return BoundResultType.ErrorResult;
 
