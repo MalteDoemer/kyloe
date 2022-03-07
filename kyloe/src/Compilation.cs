@@ -29,6 +29,8 @@ namespace Kyloe
             var assemblyName = new AssemblyNameDefinition("test", new Version(0, 1));
             var assembly = AssemblyDefinition.CreateAssembly(assemblyName, "<test>", ModuleKind.Dll);
 
+            var typeSystem = Symobls.TypeSystem.Create(assembly);
+
             var collector = new DiagnosticCollector(text);
             var lexer = new Lexer(text.GetReader(), collector);
             var parser = new Parser(lexer, collector);
