@@ -48,49 +48,62 @@ namespace Kyloe.Symbols
             var boolType = GetOrDeclareType(rootNamespace, ts.Boolean);
             var stringType = GetOrDeclareType(rootNamespace, ts.String);
 
-            boolType.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.LogicalNot, boolType, boolType));
-
             AddNegation(i8Type);
             AddBasicArithmeticOperations(i8Type);
             AddBitwiseOperations(i8Type);
             AddComparisonOperations(i8Type, boolType);
+            AddEqualityOperations(i8Type, boolType);
 
             AddNegation(i16Type);
             AddBasicArithmeticOperations(i16Type);
             AddBitwiseOperations(i16Type);
             AddComparisonOperations(i16Type, boolType);
+            AddEqualityOperations(i16Type, boolType);
 
             AddNegation(i32Type);
             AddBasicArithmeticOperations(i32Type);
             AddBitwiseOperations(i32Type);
             AddComparisonOperations(i32Type, boolType);
+            AddEqualityOperations(i32Type, boolType);
 
             AddNegation(i64Type);
             AddBasicArithmeticOperations(i64Type);
             AddBitwiseOperations(i64Type);
             AddComparisonOperations(i64Type, boolType);
+            AddEqualityOperations(i64Type, boolType);
 
             AddBasicArithmeticOperations(u8Type);
             AddBitwiseOperations(u8Type);
             AddComparisonOperations(u8Type, boolType);
+            AddEqualityOperations(u8Type, boolType);
 
             AddBasicArithmeticOperations(u16Type);
             AddBitwiseOperations(u16Type);
             AddComparisonOperations(u16Type, boolType);
+            AddEqualityOperations(u16Type, boolType);
 
             AddBasicArithmeticOperations(u32Type);
             AddBitwiseOperations(u32Type);
             AddComparisonOperations(u32Type, boolType);
+            AddEqualityOperations(u32Type, boolType);
 
             AddBasicArithmeticOperations(u64Type);
             AddBitwiseOperations(u64Type);
             AddComparisonOperations(u64Type, boolType);
+            AddEqualityOperations(u64Type, boolType);
 
+            AddNegation(floatType);
             AddBasicArithmeticOperations(floatType);
             AddComparisonOperations(floatType, boolType);
+            AddEqualityOperations(floatType, boolType);
 
+            AddNegation(doubleType);
             AddBasicArithmeticOperations(doubleType);
             AddComparisonOperations(doubleType, boolType);
+            AddEqualityOperations(doubleType, boolType);
+
+            AddEqualityOperations(boolType, boolType);
+            AddLogicalNot(boolType);
 
             // TODO: char and string
 
@@ -175,14 +188,23 @@ namespace Kyloe.Symbols
             type.AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.LessThan, booleanType, type, type))
                 .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.LessThanOrEqual, booleanType, type, type))
                 .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.GreaterThan, booleanType, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.GreaterThanOrEqual, booleanType, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.NotEqual, booleanType, type, type))
+                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.GreaterThanOrEqual, booleanType, type, type));
+        }
+
+        private static void AddEqualityOperations(TypeSymbol type, TypeSymbol booleanType)
+        {
+            type.AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.NotEqual, booleanType, type, type))
                 .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Equal, booleanType, type, type));
         }
 
         private static void AddNegation(TypeSymbol type)
         {
             type.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.Negation, type, type));
+        }
+
+        private static void AddLogicalNot(TypeSymbol type)
+        {
+            type.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.LogicalNot, type, type));
         }
 
         private sealed class ParameterSymbol : IParameterSymbol
@@ -205,6 +227,8 @@ namespace Kyloe.Symbols
                 this.type = type;
                 return this;
             }
+
+            public override string ToString() => Name;
         }
 
         private sealed class MethodSymbol : IMethodSymbol
@@ -272,6 +296,8 @@ namespace Kyloe.Symbols
 
                 return parameter;
             }
+
+            public override string ToString() => Name;
         }
 
         private sealed class TypeSymbol : ITypeSymbol
@@ -313,6 +339,8 @@ namespace Kyloe.Symbols
 
                 return this;
             }
+
+            public override string ToString() => Name;
         }
 
         private sealed class NamespaceSymbol : INamespaceSymbol
@@ -390,6 +418,8 @@ namespace Kyloe.Symbols
 
                 return type;
             }
+
+            public override string ToString() => Name;
         }
 
 
