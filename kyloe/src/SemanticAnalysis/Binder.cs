@@ -19,13 +19,29 @@ namespace Kyloe.Semantics
             this.diagnostics = diagnostics;
         }
 
-        private BoundResultType ExpectTypeValue(SyntaxExpression original, BoundResultType result)
+        private BoundResultType ExpectValue(SyntaxExpression original, BoundResultType result)
         {
             if (result.IsValue)
                 return result;
 
             if (!result.IsError)
                 diagnostics.Add(new ExpectedValueError(original));
+
+            return BoundResultType.ErrorResult;
+        }
+
+        private BoundResultType ExpectValueType(SyntaxExpression original, BoundResultType result, ITypeSymbol type)
+        {
+            var res = ExpectValue(original, result);
+
+            if (res.IsError)
+                return res;
+
+            if (res.Symbol == type)
+                return res;
+
+
+            diagnostics.Add(new MissmatchedTypeError(original, type, res.Symbol));
 
             return BoundResultType.ErrorResult;
         }
@@ -75,7 +91,14 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindIfStatement(IfStatement stmt)
         {
-            throw new NotImplementedException();
+            var condition = BindExpression(stmt.Condition);
+            ExpectValueType(stmt.Condition, condition.Result, typeSystem.Bool);
+
+            var body = BindStatement(stmt.Body);
+            var elseClasue = stmt.ElseClause == null ? null : BindStatement(stmt.ElseClause.Body);
+
+            return new BoundIfStatement(condition, body, elseClasue);
+
         }
 
         private BoundStatement BindDeclarationStatement(DeclarationStatement stmt)
@@ -154,8 +177,8 @@ namespace Kyloe.Semantics
             var right = BindExpression(expr.RightExpression);
             var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Type);
 
-            var leftType = ExpectTypeValue(expr.LeftExpression, left.Result);
-            var rightType = ExpectTypeValue(expr.RightExpression, right.Result);
+            var leftType = ExpectValue(expr.LeftExpression, left.Result);
+            var rightType = ExpectValue(expr.RightExpression, right.Result);
 
             var resultType = SemanticInfo.GetBinaryOperationResult(leftType, op, rightType);
 
@@ -172,7 +195,7 @@ namespace Kyloe.Semantics
             var childExpression = BindExpression(expr.Expression);
             var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Type);
 
-            var type = ExpectTypeValue(expr.Expression, childExpression.Result);
+            var type = ExpectValue(expr.Expression, childExpression.Result);
             var resultType = SemanticInfo.GetUnaryOperationResult(op, type);
 
             if (resultType is not null)

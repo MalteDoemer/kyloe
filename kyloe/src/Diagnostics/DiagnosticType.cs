@@ -11,6 +11,7 @@ namespace Kyloe.Diagnostics
         ExpectedExpressionError,
         ExpectedValueError,
         UnsupportedBinaryOperation,
-        UnsupportedUnaryOperation
+        UnsupportedUnaryOperation,
+        MissmatchedTypeError
     }
 }

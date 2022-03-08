@@ -8,6 +8,7 @@ namespace Kyloe.Semantics
         BoundInvalidExpression,
         BoundUnaryExpression,
         BoundEmptyStatement,
-        BoundBlockStatement
+        BoundBlockStatement,
+        BoundIfStatement
     }
 }
