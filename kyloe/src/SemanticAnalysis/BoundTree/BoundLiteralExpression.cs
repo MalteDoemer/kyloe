@@ -4,18 +4,18 @@ namespace Kyloe.Semantics
 {
     internal class BoundLiteralExpression : BoundExpression
     {
-        private readonly BoundResultType resultType;
-
-        public BoundLiteralExpression(ITypeSymbol literalType, object value)
+        public BoundLiteralExpression(ISymbol result, object value)
         {
-            resultType = new BoundResultType(literalType, isValue: true);
+            ResultSymbol = result;
             Value = value;
         }
 
         public object Value { get; }
 
-        public override BoundResultType Result => resultType;
+        public override ISymbol ResultSymbol { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundLiteralExpression;
+
+        public override bool IsValue => true;
     }
 }

@@ -1,4 +1,5 @@
 using Kyloe.Semantics;
+using Kyloe.Symbols;
 using Kyloe.Syntax;
 using Kyloe.Utility;
 
@@ -7,9 +8,9 @@ namespace Kyloe.Diagnostics
     internal class UnsupportedUnaryOperation : Diagnostic
     {
         private readonly UnaryExpression expression;
-        private readonly BoundResultType type;
+        private readonly ISymbol type;
 
-        public UnsupportedUnaryOperation(UnaryExpression expression, BoundResultType type)
+        public UnsupportedUnaryOperation(UnaryExpression expression, ISymbol type)
         {
             this.expression = expression;
             this.type = type;

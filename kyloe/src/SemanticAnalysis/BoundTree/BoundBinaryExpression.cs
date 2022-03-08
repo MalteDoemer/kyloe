@@ -1,23 +1,25 @@
+using Kyloe.Symbols;
+
 namespace Kyloe.Semantics
 {
     internal class BoundBinaryExpression : BoundExpression
     {
-        private readonly BoundResultType resultType;
-
-        public BoundBinaryExpression(BoundExpression leftExpression, BinaryOperation operation, BoundExpression rightExpression, BoundResultType resultType)
+        public BoundBinaryExpression(BoundExpression leftExpression, BinaryOperation operation, BoundExpression rightExpression, ISymbol result)
         {
             LeftExpression = leftExpression;
             Operation = operation;
             RightExpression = rightExpression;
-            this.resultType = resultType;
+            ResultSymbol = result;
         }
 
         public BoundExpression LeftExpression { get; }
         public BinaryOperation Operation { get; }
         public BoundExpression RightExpression { get; }
 
-        public override BoundResultType Result => resultType;
+        public override ISymbol ResultSymbol { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundBinaryExpression;
+
+        public override bool IsValue => true;
     }
 }

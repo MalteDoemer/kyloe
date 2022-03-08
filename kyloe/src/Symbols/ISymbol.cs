@@ -9,12 +9,17 @@ namespace Kyloe.Symbols
         TypeSymbol,
         MethodSymbol,
         ParameterSymbol,
+        ErrorSymbol,
     }
 
     public interface ISymbol
     {
         string Name { get; }
         SymbolKind Kind { get; }
+    }
+
+    public interface IErrorSymbol : ISymbol
+    {
     }
 
     public interface ISymbolContainer

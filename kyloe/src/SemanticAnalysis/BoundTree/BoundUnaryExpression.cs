@@ -1,21 +1,23 @@
+using Kyloe.Symbols;
+
 namespace Kyloe.Semantics
 {
     internal class BoundUnaryExpression : BoundExpression
     {
-        private readonly BoundResultType resultType;
-
-        public BoundUnaryExpression(BoundExpression expression, UnaryOperation operation, BoundResultType resultType)
+        public BoundUnaryExpression(BoundExpression expression, UnaryOperation operation, ISymbol result)
         {
             Expression = expression;
             Operation = operation;
-            this.resultType = resultType;
+            ResultSymbol = result;
         }
 
         public BoundExpression Expression { get; }
         public UnaryOperation Operation { get; }
 
-        public override BoundResultType Result => resultType;
+        public override ISymbol ResultSymbol { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundUnaryExpression;
+
+        public override bool IsValue => true;
     }
 }

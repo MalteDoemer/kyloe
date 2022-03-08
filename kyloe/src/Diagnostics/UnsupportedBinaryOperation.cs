@@ -1,4 +1,5 @@
 using Kyloe.Semantics;
+using Kyloe.Symbols;
 using Kyloe.Syntax;
 using Kyloe.Utility;
 using Mono.Cecil;
@@ -8,10 +9,10 @@ namespace Kyloe.Diagnostics
     internal class UnsupportedBinaryOperation : Diagnostic
     {
         private readonly BinaryExpression expression;
-        private readonly BoundResultType leftType;
-        private readonly BoundResultType rightType;
+        private readonly ISymbol leftType;
+        private readonly ISymbol rightType;
 
-        public UnsupportedBinaryOperation(BinaryExpression expression, BoundResultType leftType, BoundResultType rightType)
+        public UnsupportedBinaryOperation(BinaryExpression expression, ISymbol leftType, ISymbol rightType)
         {
             this.leftType = leftType;
             this.expression = expression;

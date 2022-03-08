@@ -5,6 +5,7 @@ using Kyloe.Symbols;
 using System.Diagnostics;
 using Kyloe.Diagnostics;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Kyloe.Semantics
 {
@@ -19,31 +20,17 @@ namespace Kyloe.Semantics
             this.diagnostics = diagnostics;
         }
 
-        private BoundResultType ExpectValue(SyntaxExpression original, BoundResultType result)
+        private ISymbol ExpectType(SyntaxExpression original, ISymbol result, ITypeSymbol expected)
         {
-            if (result.IsValue)
+            if (result is IErrorSymbol)
                 return result;
 
-            if (!result.IsError)
-                diagnostics.Add(new ExpectedValueError(original));
+            if (result == expected)
+                return result;
 
-            return BoundResultType.ErrorResult;
-        }
+            diagnostics.Add(new MissmatchedTypeError(original, expected, result));
 
-        private BoundResultType ExpectValueType(SyntaxExpression original, BoundResultType result, ITypeSymbol type)
-        {
-            var res = ExpectValue(original, result);
-
-            if (res.IsError)
-                return res;
-
-            if (res.Symbol == type)
-                return res;
-
-
-            diagnostics.Add(new MissmatchedTypeError(original, type, res.Symbol));
-
-            return BoundResultType.ErrorResult;
+            return typeSystem.Error;
         }
 
         public BoundNode Bind(SyntaxNode node)
@@ -92,7 +79,7 @@ namespace Kyloe.Semantics
         private BoundStatement BindIfStatement(IfStatement stmt)
         {
             var condition = BindExpression(stmt.Condition);
-            ExpectValueType(stmt.Condition, condition.Result, typeSystem.Bool);
+            ExpectType(stmt.Condition, condition.ResultSymbol, typeSystem.Bool);
 
             var body = BindStatement(stmt.Body);
             var elseClasue = stmt.ElseClause == null ? null : BindStatement(stmt.ElseClause.Body);
@@ -176,18 +163,14 @@ namespace Kyloe.Semantics
             var left = BindExpression(expr.LeftExpression);
             var right = BindExpression(expr.RightExpression);
             var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Type);
-
-            var leftType = ExpectValue(expr.LeftExpression, left.Result);
-            var rightType = ExpectValue(expr.RightExpression, right.Result);
-
-            var resultType = SemanticInfo.GetBinaryOperationResult(leftType, op, rightType);
+            var resultType = GetBinaryOperationResult(left, op, right);
 
             if (resultType is not null)
                 return new BoundBinaryExpression(left, op, right, resultType);
 
-            diagnostics.Add(new UnsupportedBinaryOperation(expr, leftType, rightType));
+            diagnostics.Add(new UnsupportedBinaryOperation(expr, left.ResultSymbol, right.ResultSymbol));
 
-            return new BoundBinaryExpression(left, op, right, BoundResultType.ErrorResult);
+            return new BoundBinaryExpression(left, op, right, typeSystem.Error);
         }
 
         private BoundExpression BindUnaryExpression(UnaryExpression expr)
@@ -195,15 +178,14 @@ namespace Kyloe.Semantics
             var childExpression = BindExpression(expr.Expression);
             var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Type);
 
-            var type = ExpectValue(expr.Expression, childExpression.Result);
-            var resultType = SemanticInfo.GetUnaryOperationResult(op, type);
+            var resultType = GetUnaryOperationResult(op, childExpression);
 
             if (resultType is not null)
                 return new BoundUnaryExpression(childExpression, op, resultType);
 
-            diagnostics.Add(new UnsupportedUnaryOperation(expr, type));
+            diagnostics.Add(new UnsupportedUnaryOperation(expr, childExpression.ResultSymbol));
 
-            return new BoundUnaryExpression(childExpression, op, BoundResultType.ErrorResult);
+            return new BoundUnaryExpression(childExpression, op, typeSystem.Error);
         }
 
         private BoundExpression BindLiteralExpression(LiteralExpression expr)
@@ -217,7 +199,74 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindMalformedExpression(MalformedExpression expr)
         {
-            return new BoundInvalidExpression();
+            return new BoundInvalidExpression(typeSystem);
+        }
+
+
+        private ISymbol? GetBinaryOperationResult(BoundExpression left, BinaryOperation op, BoundExpression right)
+        {
+            if (!left.IsValue || !right.IsValue) 
+                return null;
+
+            if (left.ResultSymbol is IErrorSymbol || right.ResultSymbol is IErrorSymbol)
+                return typeSystem.Error;
+
+            if (!(left.ResultSymbol is ITypeSymbol leftType) || !(right.ResultSymbol is ITypeSymbol rightType))
+                return null;
+
+            var name = SemanticInfo.GetBinaryOperationMethodName(op);
+
+            if (name is null)
+                throw new NotImplementedException();
+
+            var methods = leftType.LookupMembers(name).Where(
+                member => member is IMethodSymbol method &&
+                method.IsOperator &&
+                method.Parameters.Count() == 2 &&
+                method.Parameters.First().Type == leftType &&
+                method.Parameters.Last().Type == rightType
+            );
+
+            if (methods.Count() > 1)
+                Console.WriteLine($"Note: Found multiple methods for an operator: op={op}, left={leftType}, right={rightType}");
+
+            var method = methods.FirstOrDefault() as IMethodSymbol;
+
+            if (method is null)
+                return null;
+
+            return method.ReturnType;
+        }
+
+        private ISymbol? GetUnaryOperationResult(UnaryOperation op, BoundExpression expr)
+        {
+            if (expr.ResultSymbol is IErrorSymbol)
+                return typeSystem.Error;
+
+            if (!(expr.ResultSymbol is ITypeSymbol type))
+                return null;
+
+            var name = SemanticInfo.GetUnaryOperationMethodName(op);
+
+            if (name is null)
+                throw new NotImplementedException();
+
+            var methods = type.LookupMembers(name).Where(
+                member => member is IMethodSymbol method &&
+                method.IsOperator &&
+                method.Parameters.Count() == 1 &&
+                method.Parameters.First().Type == type
+            );
+
+            if (methods.Count() > 1)
+                Console.WriteLine($"Note: Found multiple methods for a unary operator: op={op}, type={type}");
+
+            var method = methods.FirstOrDefault() as IMethodSymbol;
+
+            if (method is null)
+                return null;
+
+            return method.ReturnType;
         }
     }
 }

@@ -13,6 +13,8 @@ namespace Kyloe.Symbols
 
         public INamespaceSymbol RootNamespace { get; }
 
+        public IErrorSymbol Error { get; }
+
         public ITypeSymbol Char { get; }
         public ITypeSymbol I8 { get; }
         public ITypeSymbol I16 { get; }
@@ -108,6 +110,7 @@ namespace Kyloe.Symbols
             // TODO: char and string
 
             RootNamespace = rootNamespace;
+            Error = new ErrorSymbol();
             Char = charType;
             I8 = i8Type;
             I16 = i16Type;
@@ -205,6 +208,13 @@ namespace Kyloe.Symbols
         private static void AddLogicalNot(TypeSymbol type)
         {
             type.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.LogicalNot, type, type));
+        }
+
+        private sealed class ErrorSymbol : IErrorSymbol
+        {
+            public string Name => "<error>";
+
+            public SymbolKind Kind => SymbolKind.ErrorSymbol;
         }
 
         private sealed class ParameterSymbol : IParameterSymbol
