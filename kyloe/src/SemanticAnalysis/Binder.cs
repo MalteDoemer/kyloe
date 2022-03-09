@@ -87,66 +87,6 @@ namespace Kyloe.Semantics
             return (bound, bound.ResultSymbol);
         }
 
-
-        // private BoundExpression BindExpressionAndExpectValue(SyntaxExpression expr, out ITypeSymbol result)
-        // {
-        //     var bound = BindExpression(expr);
-
-        //     if (bound.ResultSymbol is IErrorTypeSymbol)
-        //     {
-        //         result = typeSystem.Error;
-        //         return bound;
-        //     }
-
-        //     if (bound.IsValue && bound.ResultSymbol is ITypeSymbol typeSymbol)
-        //     {
-        //         result = typeSymbol;
-        //         return bound;
-        //     }
-
-        //     diagnostics.Add(new ExpectedValueError(expr));
-
-        //     result = typeSystem.Error;
-        //     return bound;
-        // }
-
-        // private BoundExpression BindExpressionAndExpectLValue(SyntaxExpression expr, out ITypeSymbol result)
-        // {
-        //     var bound = BindExpression(expr);
-
-        //     if (bound.ResultSymbol is IErrorTypeSymbol)
-        //     {
-        //         result = typeSystem.Error;
-        //         return bound;
-        //     }
-
-        //     if (bound.IsLValue && bound.ResultSymbol is ITypeSymbol typeSymbol)
-        //     {
-        //         result = typeSymbol;
-        //         return bound;
-        //     }
-
-        //     diagnostics.Add(new ExpectedLValueError(expr));
-
-        //     result = typeSystem.Error;
-        //     return bound;
-        // }
-
-        // private BoundExpression BindExpressionAndExpectType(SyntaxExpression expr, ITypeSymbol expectedType)
-        // {
-        //     var bound = BindExpression(expr);
-
-        //     if (bound.ResultSymbol is IErrorTypeSymbol || expectedType is IErrorTypeSymbol)
-        //         return bound;
-
-        //     if (!bound.IsValue)
-        //         diagnostics.Add(new ExpectedValueError(expr));
-        //     else if (bound.ResultSymbol != expectedType)
-        //         diagnostics.Add(new MissmatchedTypeError(expr, expectedType, bound.ResultSymbol));
-
-        //     return bound;
-        // }
-
         public BoundNode Bind(SyntaxNode node)
         {
             if (node is SyntaxStatement statement)
