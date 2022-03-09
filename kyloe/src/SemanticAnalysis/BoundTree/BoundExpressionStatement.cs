@@ -1,6 +1,6 @@
 namespace Kyloe.Semantics
 {
-    internal class BoundExpressionStatement : BoundStatement
+    internal sealed class BoundExpressionStatement : BoundStatement
     {
         public BoundExpressionStatement(BoundExpression expression)
         {

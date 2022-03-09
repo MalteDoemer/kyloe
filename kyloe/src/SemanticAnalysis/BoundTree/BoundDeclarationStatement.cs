@@ -2,7 +2,7 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
-    internal class BoundDeclarationStatement : BoundStatement
+    internal sealed class BoundDeclarationStatement : BoundStatement
     {
         public BoundDeclarationStatement(ILocalVariableSymbol variableSymbol, BoundExpression initializationExpression)
         {

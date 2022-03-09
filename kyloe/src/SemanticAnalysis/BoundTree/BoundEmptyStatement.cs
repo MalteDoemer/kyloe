@@ -1,6 +1,6 @@
 namespace Kyloe.Semantics
 {
-    internal class BoundIfStatement : BoundStatement
+    internal sealed class BoundIfStatement : BoundStatement
     {
         public BoundIfStatement(BoundExpression condition, BoundStatement body, BoundStatement? elseBody = null)
         {

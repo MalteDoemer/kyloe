@@ -2,7 +2,7 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
-    internal class BoundInvalidExpression : BoundExpression
+    internal sealed class BoundInvalidExpression : BoundExpression
     {
         private readonly ITypeSymbol errorSymbol;
 

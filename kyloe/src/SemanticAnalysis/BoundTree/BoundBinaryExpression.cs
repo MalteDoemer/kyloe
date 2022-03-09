@@ -2,7 +2,7 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
-    internal class BoundBinaryExpression : BoundExpression
+    internal sealed class BoundBinaryExpression : BoundExpression
     {
         public BoundBinaryExpression(BoundExpression leftExpression, BinaryOperation operation, BoundExpression rightExpression, ITypeSymbol result)
         {

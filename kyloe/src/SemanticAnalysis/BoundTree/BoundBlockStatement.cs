@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace Kyloe.Semantics 
 {
-    internal class BoundBlockStatement : BoundStatement
+    internal sealed class BoundBlockStatement : BoundStatement
     {
         public BoundBlockStatement(ImmutableArray<BoundStatement> statements)
         {
