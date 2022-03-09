@@ -44,6 +44,50 @@ namespace Kyloe.Tests.Binding
                 "~'f'",
                 DiagnosticType.UnsupportedUnaryOperation,
             };
+
+            yield return new object[] {
+                "if (1) {}",
+                DiagnosticType.MissmatchedTypeError,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5;
+                    var y = x + 'hi';
+                }",
+                DiagnosticType.UnsupportedBinaryOperation,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5;
+
+                    {
+                        var x = 6;
+                    }
+
+                    var x = 1;
+                }",
+                DiagnosticType.RedefinedLocalVariableError,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = x;
+                }",
+                DiagnosticType.NonExistantNameError,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5;
+                    var z = x + y;
+                }",
+                DiagnosticType.NonExistantNameError,
+            };
+
+
+
         }
 
         public static IEnumerable<object[]> GetNoErrorData()
@@ -80,6 +124,60 @@ namespace Kyloe.Tests.Binding
                 "!(5 == 6);"
             };
 
+            yield return new object[] {
+                "{}"
+            };
+
+            yield return new object[] {
+                ";"
+            };
+
+            yield return new object[] {
+                "{;}"
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 1;
+                }"
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 1;
+                    var y = 'hi';
+                    var z = 1 + x;
+                }"
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 1;
+                    {
+                        var x = 2;
+                        {
+                            var x = 3;
+                            var y = x + 1;
+                        }
+
+                        var y = x + 1;
+                    }
+
+                    var y = x + 1;
+                }"
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5;
+
+                    if (x == 5) {
+                        1 + 2;
+                    } else {
+                        
+                    }
+                }"
+            };
         }
 
     }
