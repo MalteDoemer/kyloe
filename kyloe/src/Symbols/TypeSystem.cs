@@ -9,7 +9,7 @@ namespace Kyloe.Symbols
         public INamespaceSymbol RootNamespace { get; }
 
         public IErrorTypeSymbol Error { get; }
-
+        public ITypeSymbol Empty { get; }
         public ITypeSymbol Char { get; }
         public ITypeSymbol I8 { get; }
         public ITypeSymbol I16 { get; }
@@ -44,6 +44,7 @@ namespace Kyloe.Symbols
             var doubleType = GetOrDeclareType(rootNamespace, ts.Double);
             var boolType = GetOrDeclareType(rootNamespace, ts.Boolean);
             var stringType = GetOrDeclareType(rootNamespace, ts.String);
+            var emtpyType = GetOrDeclareType(rootNamespace, ts.Void);
 
             AddNegation(i8Type);
             AddBasicArithmeticOperations(i8Type);
@@ -106,6 +107,7 @@ namespace Kyloe.Symbols
 
             RootNamespace = rootNamespace;
             Error = new ErrorTypeSymbol();
+            Empty = emtpyType;
             Char = charType;
             I8 = i8Type;
             I16 = i16Type;

@@ -15,6 +15,8 @@ namespace Kyloe.Semantics
 
         public abstract ValueCategory ValueCategory { get; }
 
-        public bool IsValue => ValueCategory == ValueCategory.LValue || ValueCategory == ValueCategory.RValue;
+        public bool IsValue => ValueCategory != ValueCategory.None;
+
+        public bool IsLValue => ValueCategory == ValueCategory.LValue;
     }
 }

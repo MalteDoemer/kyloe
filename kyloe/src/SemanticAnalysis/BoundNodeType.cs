@@ -11,6 +11,7 @@ namespace Kyloe.Semantics
         BoundBlockStatement,
         BoundIfStatement,
         BoundDeclarationStatement,
-        BoundLocalVariableExpression
+        BoundLocalVariableExpression,
+        BoundAssignmentExpression
     }
 }

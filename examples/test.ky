@@ -1,12 +1,5 @@
 {
     var x = 5;
 
-    var y = x + 20;
-
-
-    var str = "hi";
-
-
-    5 + fett;
-
+    1 + 2 += 3;
 }

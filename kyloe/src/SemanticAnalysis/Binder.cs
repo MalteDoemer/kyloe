@@ -59,42 +59,93 @@ namespace Kyloe.Semantics
             this.locals = new LocalVariableScopeStack();
         }
 
-        private BoundExpression BindExpressionAndExpectValue(SyntaxExpression expr, out ITypeSymbol result)
+        private (BoundExpression, ISymbol) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeLValue, ITypeSymbol? expectedType = null)
         {
             var bound = BindExpression(expr);
 
             if (bound.ResultSymbol is IErrorTypeSymbol)
+                return (bound, typeSystem.Error);
+
+            if (mustBeValue && !bound.IsValue)
             {
-                result = typeSystem.Error;
-                return bound;
-            }
-
-            if (bound.IsValue && bound.ResultSymbol is ITypeSymbol typeSymbol)
-            {
-                result = typeSymbol;
-                return bound;
-            }
-
-            diagnostics.Add(new ExpectedValueError(expr));
-
-            result = typeSystem.Error;
-            return bound;
-        }
-
-        private BoundExpression BindExpressionAndExpectType(SyntaxExpression expr, ITypeSymbol expectedType)
-        {
-            var bound = BindExpression(expr);
-
-            if (bound.ResultSymbol is IErrorTypeSymbol)
-                return bound;
-
-            if (!bound.IsValue)
                 diagnostics.Add(new ExpectedValueError(expr));
-            else if (bound.ResultSymbol != expectedType)
-                diagnostics.Add(new MissmatchedTypeError(expr, expectedType, bound.ResultSymbol));
+                return (bound, typeSystem.Error);
+            }
 
-            return bound;
+            if (mustBeLValue && !bound.IsLValue)
+            {
+                diagnostics.Add(new ExpectedLValueError(expr));
+                return (bound, typeSystem.Error);
+            }
+
+            if (expectedType is not null && expectedType is not IErrorTypeSymbol && expectedType != bound.ResultSymbol)
+            {
+                diagnostics.Add(new MissmatchedTypeError(expr, expectedType, bound.ResultSymbol));
+                return (bound, typeSystem.Error);
+            }
+
+            return (bound, bound.ResultSymbol);
         }
+
+
+        // private BoundExpression BindExpressionAndExpectValue(SyntaxExpression expr, out ITypeSymbol result)
+        // {
+        //     var bound = BindExpression(expr);
+
+        //     if (bound.ResultSymbol is IErrorTypeSymbol)
+        //     {
+        //         result = typeSystem.Error;
+        //         return bound;
+        //     }
+
+        //     if (bound.IsValue && bound.ResultSymbol is ITypeSymbol typeSymbol)
+        //     {
+        //         result = typeSymbol;
+        //         return bound;
+        //     }
+
+        //     diagnostics.Add(new ExpectedValueError(expr));
+
+        //     result = typeSystem.Error;
+        //     return bound;
+        // }
+
+        // private BoundExpression BindExpressionAndExpectLValue(SyntaxExpression expr, out ITypeSymbol result)
+        // {
+        //     var bound = BindExpression(expr);
+
+        //     if (bound.ResultSymbol is IErrorTypeSymbol)
+        //     {
+        //         result = typeSystem.Error;
+        //         return bound;
+        //     }
+
+        //     if (bound.IsLValue && bound.ResultSymbol is ITypeSymbol typeSymbol)
+        //     {
+        //         result = typeSymbol;
+        //         return bound;
+        //     }
+
+        //     diagnostics.Add(new ExpectedLValueError(expr));
+
+        //     result = typeSystem.Error;
+        //     return bound;
+        // }
+
+        // private BoundExpression BindExpressionAndExpectType(SyntaxExpression expr, ITypeSymbol expectedType)
+        // {
+        //     var bound = BindExpression(expr);
+
+        //     if (bound.ResultSymbol is IErrorTypeSymbol || expectedType is IErrorTypeSymbol)
+        //         return bound;
+
+        //     if (!bound.IsValue)
+        //         diagnostics.Add(new ExpectedValueError(expr));
+        //     else if (bound.ResultSymbol != expectedType)
+        //         diagnostics.Add(new MissmatchedTypeError(expr, expectedType, bound.ResultSymbol));
+
+        //     return bound;
+        // }
 
         public BoundNode Bind(SyntaxNode node)
         {
@@ -145,7 +196,7 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindIfStatement(IfStatement stmt)
         {
-            var condition = BindExpressionAndExpectType(stmt.Condition, typeSystem.Bool);
+            var (condition, _) = BindAndExpect(stmt.Condition, mustBeValue: true, mustBeLValue: false, typeSystem.Bool);
 
             var body = BindStatement(stmt.Body);
             var elseClasue = stmt.ElseClause == null ? null : BindStatement(stmt.ElseClause.Body);
@@ -155,10 +206,11 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindDeclarationStatement(DeclarationStatement stmt)
         {
-            var expr = BindExpressionAndExpectValue(stmt.AssignmentExpression, out var type);
+            var (expr, type) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeLValue: false);
+
             string name = ExtractName(stmt.NameToken);
 
-            if (!locals.TryDeclareLocal(name, type))
+            if (!locals.TryDeclareLocal(name, (ITypeSymbol)type))
                 diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
 
             var symbol = locals.LookupLocal(name)!;
@@ -203,7 +255,31 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindAssignmentExpression(AssignmentExpression expr)
         {
-            throw new NotImplementedException();
+            var (left, leftType) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeLValue: true);
+            var (right, rightType) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeLValue: false);
+
+            var operation = SemanticInfo.GetAssignmentOperation(expr.OperatorToken.Type);
+
+            if (leftType is IErrorTypeSymbol || rightType is IErrorTypeSymbol)
+                return new BoundAssignmentExpression(typeSystem, left, operation, right);
+
+            if (operation == AssignmentOperation.Assign)
+            {
+                if (leftType != rightType)
+                    diagnostics.Add(new MissmatchedTypeError(expr, leftType, rightType));
+            }
+            else
+            {
+                var binaryOperation = SemanticInfo.GetBinaryOperationForAssignment(operation);
+                var binaryOperationResult = GetBinaryOperationResult(left, binaryOperation, right);
+
+                if (binaryOperationResult is null)
+                    diagnostics.Add(new UnsupportedAssignmentOperation(expr, leftType, rightType));
+                else if (binaryOperationResult != leftType)
+                    diagnostics.Add(new MissmatchedTypeError(expr, leftType, binaryOperationResult));
+            }
+
+            return new BoundAssignmentExpression(typeSystem, left, operation, right);
         }
 
         private BoundExpression BindCallExpression(CallExpression expr)

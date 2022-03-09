@@ -91,5 +91,42 @@ namespace Kyloe.Semantics
                     throw new System.Exception($"Unexpected unary operation type: {type}");
             }
         }
+
+        internal static AssignmentOperation GetAssignmentOperation(SyntaxTokenType type)
+        {
+            switch (type)
+            {
+                case SyntaxTokenType.Equals: return AssignmentOperation.Assign;
+                case SyntaxTokenType.PlusEquals: return AssignmentOperation.AddAssign;
+                case SyntaxTokenType.MinusEquals: return AssignmentOperation.SubAssign;
+                case SyntaxTokenType.StarEquals: return AssignmentOperation.MulAssign;
+                case SyntaxTokenType.SlashEquals: return AssignmentOperation.DivAssign;
+                case SyntaxTokenType.PercentEquals: return AssignmentOperation.ModAssign;
+                case SyntaxTokenType.AmpersandEquals: return AssignmentOperation.AndAssign;
+                case SyntaxTokenType.PipeEquals: return AssignmentOperation.OrAssign;
+                case SyntaxTokenType.HatEquals: return AssignmentOperation.XorAssign;
+
+                default:
+                    throw new System.Exception($"Unexpected assignment operation type: {type}");
+            }
+        }
+
+        internal static BinaryOperation GetBinaryOperationForAssignment(AssignmentOperation op)
+        {
+            switch (op)
+            {
+                case AssignmentOperation.AddAssign: return BinaryOperation.Addition;
+                case AssignmentOperation.SubAssign: return BinaryOperation.Subtraction;
+                case AssignmentOperation.MulAssign: return BinaryOperation.Multiplication;
+                case AssignmentOperation.DivAssign: return BinaryOperation.Division;
+                case AssignmentOperation.ModAssign: return BinaryOperation.Modulo;
+                case AssignmentOperation.AndAssign: return BinaryOperation.BitwiseAnd;
+                case AssignmentOperation.OrAssign: return BinaryOperation.BitwiseOr;
+                case AssignmentOperation.XorAssign: return BinaryOperation.BitwiseXor;
+
+                default:
+                    throw new Exception($"no corresponding binary operation for assignment: {op}");
+            }
+        }
     }
 }

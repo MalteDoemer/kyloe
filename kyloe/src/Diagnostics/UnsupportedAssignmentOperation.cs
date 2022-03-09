@@ -1,27 +1,25 @@
-using Kyloe.Semantics;
 using Kyloe.Symbols;
 using Kyloe.Syntax;
 using Kyloe.Utility;
-using Mono.Cecil;
 
 namespace Kyloe.Diagnostics
 {
-    internal sealed class UnsupportedBinaryOperation : Diagnostic
+    internal sealed class UnsupportedAssignmentOperation : Diagnostic
     {
-        private readonly BinaryExpression expression;
+        private readonly AssignmentExpression expression;
         private readonly ISymbol leftType;
         private readonly ISymbol rightType;
 
-        public UnsupportedBinaryOperation(BinaryExpression expression, ISymbol leftType, ISymbol rightType)
+        public UnsupportedAssignmentOperation(AssignmentExpression expression, ISymbol leftType, ISymbol rightType)
         {
-            this.leftType = leftType;
             this.expression = expression;
+            this.leftType = leftType;
             this.rightType = rightType;
         }
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.UnsupportedBinaryOperation;
+        public override DiagnosticType Type => DiagnosticType.UnsupportedAssignmentOperation;
 
         public override SourceLocation? Location => expression.Location;
 

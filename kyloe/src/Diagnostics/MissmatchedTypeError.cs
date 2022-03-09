@@ -7,13 +7,13 @@ namespace Kyloe.Diagnostics
     internal sealed class MissmatchedTypeError : Diagnostic
     {
         private readonly SyntaxExpression expression;
-        private readonly ITypeSymbol expectedType;
+        private readonly ISymbol expected;
         private readonly ISymbol provided;
 
-        public MissmatchedTypeError(SyntaxExpression expression, ITypeSymbol expectedType, ISymbol provided)
+        public MissmatchedTypeError(SyntaxExpression expression, ISymbol expected, ISymbol provided)
         {
             this.expression = expression;
-            this.expectedType = expectedType;
+            this.expected = expected;
             this.provided = provided;
         }
 
@@ -23,6 +23,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"expected '{expectedType}' got '{provided}'";
+        public override string Message() => $"expected '{expected}' got '{provided}'";
     }
 }
