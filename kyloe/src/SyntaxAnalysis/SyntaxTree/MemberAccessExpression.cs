@@ -5,26 +5,26 @@ namespace Kyloe.Syntax
 {
     internal sealed class MemberAccessExpression : SyntaxExpression
     {
-        public MemberAccessExpression(SyntaxExpression expression, SyntaxToken dotToken, NameExpression nameExpression)
+        public MemberAccessExpression(SyntaxExpression expression, SyntaxToken dotToken, IdentifierExpression identifierExpression)
         {
             Expression = expression;
             DotToken = dotToken;
-            NameExpression = nameExpression;
+            IdentifierExpression = identifierExpression;
         }
 
         public SyntaxExpression Expression { get; }
         public SyntaxToken DotToken { get; }
-        public NameExpression NameExpression { get; }
+        public IdentifierExpression IdentifierExpression { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.MemberAccessExpression;
 
-        public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, NameExpression.Location);
+        public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, IdentifierExpression.Location);
 
         public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(Expression);
             yield return new SyntaxNodeChild(DotToken);
-            yield return new SyntaxNodeChild(NameExpression);
+            yield return new SyntaxNodeChild(IdentifierExpression);
         }
     }
 }

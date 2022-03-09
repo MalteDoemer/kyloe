@@ -90,9 +90,9 @@ namespace Kyloe.Tests
             return new VerifyNode(SyntaxNodeType.ParenthesizedExpression, new VerifyNode(SyntaxTokenType.LeftParen), expr, new VerifyNode(SyntaxTokenType.RightParen));
         }
 
-        public static VerifyNode NameExpression()
+        public static VerifyNode IdentifierExpression()
         {
-            return new VerifyNode(SyntaxNodeType.NameExpression, new VerifyNode(SyntaxTokenType.Identifier));
+            return new VerifyNode(SyntaxNodeType.IdentifierExpression, new VerifyNode(SyntaxTokenType.Identifier));
         }
 
         public static VerifyNode SubscriptExpression(VerifyNode expr, VerifyNode index)
@@ -102,7 +102,7 @@ namespace Kyloe.Tests
 
         public static VerifyNode MemberAccessExpression(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenType.Dot), NameExpression());
+            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenType.Dot), IdentifierExpression());
         }
 
         public static VerifyNode CallExpression(VerifyNode expr, params VerifyNode[] args)

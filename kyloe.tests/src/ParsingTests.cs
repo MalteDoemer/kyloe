@@ -207,7 +207,7 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "arr[5]",
                 VerifyNode.SubscriptExpression(
-                    VerifyNode.NameExpression(),
+                    VerifyNode.IdentifierExpression(),
                     VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
                 )
             };
@@ -215,7 +215,7 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "x.y",
                 VerifyNode.MemberAccessExpression(
-                    VerifyNode.NameExpression()
+                    VerifyNode.IdentifierExpression()
                 )
             };
 
@@ -224,7 +224,7 @@ namespace Kyloe.Tests.Parsing
                 VerifyNode.MemberAccessExpression(
                     VerifyNode.MemberAccessExpression(
                         VerifyNode.SubscriptExpression(
-                            VerifyNode.NameExpression(),
+                            VerifyNode.IdentifierExpression(),
                             VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
                         )
                     )
@@ -234,14 +234,14 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "hello()",
                 VerifyNode.CallExpression(
-                    VerifyNode.NameExpression()
+                    VerifyNode.IdentifierExpression()
                 )
             };
 
             yield return new object[] {
                 "hello(1, 'hello')",
                 VerifyNode.CallExpression(
-                    VerifyNode.NameExpression(),
+                    VerifyNode.IdentifierExpression(),
                     VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
                     VerifyNode.LiteralExpression(SyntaxTokenType.StringLiteral)
                 )
@@ -250,7 +250,7 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "x += 3",
                 VerifyNode.AssignmentExpression(
-                    VerifyNode.NameExpression(),
+                    VerifyNode.IdentifierExpression(),
                     SyntaxTokenType.PlusEquals,
                     VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
                 )
@@ -263,7 +263,7 @@ namespace Kyloe.Tests.Parsing
                 "x += 3;",
                 VerifyNode.ExpressionStatement(
                     VerifyNode.AssignmentExpression(
-                        VerifyNode.NameExpression(),
+                        VerifyNode.IdentifierExpression(),
                         SyntaxTokenType.PlusEquals,
                         VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
                     )
@@ -274,7 +274,7 @@ namespace Kyloe.Tests.Parsing
                 "hello(1.2);",
                 VerifyNode.ExpressionStatement(
                     VerifyNode.CallExpression(
-                        VerifyNode.NameExpression(),
+                        VerifyNode.IdentifierExpression(),
                         VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
                     )
                 )

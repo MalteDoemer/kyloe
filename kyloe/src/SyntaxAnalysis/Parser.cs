@@ -227,7 +227,7 @@ namespace Kyloe.Syntax
                 {
                     var dotToken = Advance();
                     var nameToken = Expect(SyntaxTokenType.Identifier);
-                    node = new MemberAccessExpression(node, dotToken, new NameExpression(nameToken));
+                    node = new MemberAccessExpression(node, dotToken, new IdentifierExpression(nameToken));
                 }
             }
 
@@ -269,7 +269,7 @@ namespace Kyloe.Syntax
             else if (current.Type == SyntaxTokenType.Identifier)
             {
                 var name = Advance();
-                return new NameExpression(name);
+                return new IdentifierExpression(name);
             }
             else
             {

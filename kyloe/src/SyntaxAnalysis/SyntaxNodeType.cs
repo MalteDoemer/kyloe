@@ -10,7 +10,7 @@ namespace Kyloe.Syntax
         UnaryExpression,
         BinaryExpression,
         ParenthesizedExpression,
-        NameExpression,
+        IdentifierExpression,
         MemberAccessExpression,
         SubscriptExpression,
         CallExpression,

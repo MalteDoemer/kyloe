@@ -3,16 +3,16 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal sealed class NameExpression : SyntaxExpression
+    internal sealed class IdentifierExpression : SyntaxExpression
     {
-        public NameExpression(SyntaxToken nameToken)
+        public IdentifierExpression(SyntaxToken nameToken)
         {
             NameToken = nameToken;
         }
 
         public SyntaxToken NameToken { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.NameExpression;
+        public override SyntaxNodeType Type => SyntaxNodeType.IdentifierExpression;
 
         public override SourceLocation Location => NameToken.Location;
 

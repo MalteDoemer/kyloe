@@ -180,8 +180,8 @@ namespace Kyloe.Semantics
                     return BindBinaryExpression((BinaryExpression)expr);
                 case SyntaxNodeType.ParenthesizedExpression:
                     return BindParenthesizedExpression((ParenthesizedExpression)expr);
-                case SyntaxNodeType.NameExpression:
-                    return BindNameExpression((NameExpression)expr);
+                case SyntaxNodeType.IdentifierExpression:
+                    return BindIdentifierExpression((IdentifierExpression)expr);
                 case SyntaxNodeType.MemberAccessExpression:
                     return BindMemberAccessExpression((MemberAccessExpression)expr);
                 case SyntaxNodeType.SubscriptExpression:
@@ -239,7 +239,7 @@ namespace Kyloe.Semantics
             throw new NotImplementedException();
         }
 
-        private BoundExpression BindNameExpression(NameExpression expr)
+        private BoundExpression BindIdentifierExpression(IdentifierExpression expr)
         {
             var name = ExtractName(expr.NameToken);
 
