@@ -4,15 +4,16 @@ namespace Kyloe.Symbols
     {
         private sealed class LocalVariableSymbol : ILocalVariableSymbol
         {
-            public LocalVariableSymbol(string name, ITypeSymbol type)
+            public LocalVariableSymbol(string name, ITypeSymbol type, bool isConst)
             {
                 Name = name;
                 Type = type;
+                IsConst = isConst;
             }
 
             public string Name { get; }
-
             public ITypeSymbol Type { get; }
+            public bool IsConst { get; }
 
             public SymbolKind Kind => SymbolKind.LocalVariableSymbol;
 

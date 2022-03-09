@@ -30,9 +30,9 @@ namespace Kyloe.Semantics
             scopes.Pop();
         }
 
-        public bool TryDeclareLocal(string name, ITypeSymbol type)
+        public bool TryDeclareLocal(string name, ITypeSymbol type, bool isConst)
         {
-            return scopes.Peek().TryDeclareLocal(name, type);
+            return scopes.Peek().TryDeclareLocal(name, type, isConst);
         }
 
         public ILocalVariableSymbol? LookupLocal(string name)
@@ -146,11 +146,13 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindDeclarationStatement(DeclarationStatement stmt)
         {
+            bool isConst = stmt.DeclerationToken.Type == SyntaxTokenType.ConstKeyword;
+
             var (expr, type) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeLValue: false);
 
             string name = ExtractName(stmt.NameToken);
 
-            if (!locals.TryDeclareLocal(name, (ITypeSymbol)type))
+            if (!locals.TryDeclareLocal(name, (ITypeSymbol)type, isConst))
                 diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
 
             var symbol = locals.LookupLocal(name)!;

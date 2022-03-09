@@ -15,6 +15,6 @@ namespace Kyloe.Semantics
 
         public override BoundNodeType Type => BoundNodeType.BoundLocalVariableExpression;
 
-        public override ValueCategory ValueCategory => ValueCategory.LValue;
+        public override ValueCategory ValueCategory => VariableSymbol.IsConst ? ValueCategory.RValue : ValueCategory.LValue;
     }
 }

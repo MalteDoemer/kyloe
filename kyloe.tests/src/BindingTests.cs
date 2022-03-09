@@ -127,6 +127,14 @@ namespace Kyloe.Tests.Binding
                 DiagnosticType.ExpectedValueError,
                 DiagnosticType.ExpectedValueError,
             };
+
+            yield return new object[] {
+                @"{
+                    const x = 1;
+                    x = 2;
+                }",
+                DiagnosticType.ExpectedLValueError,
+            };
         }
 
         public static IEnumerable<object[]> GetNoErrorData()
@@ -187,9 +195,23 @@ namespace Kyloe.Tests.Binding
 
             yield return new object[] {
                 @"{
+                    const x = 1;
+                }"
+            };
+
+            yield return new object[] {
+                @"{
                     var x = 1;
                     var y = 'hi';
                     var z = 1 + x;
+                }"
+            };
+
+            yield return new object[] {
+                @"{
+                    const x = 1;
+                    const y = 'hi';
+                    const z = 1 + x;
                 }"
             };
 
@@ -203,7 +225,7 @@ namespace Kyloe.Tests.Binding
                             var y = x + 1;
                         }
 
-                        var y = x + 1;
+                        const y = x + 1;
                     }
 
                     var y = x + 1;
