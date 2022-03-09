@@ -164,6 +164,10 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "'hi' == 'hey';"
+            };
+
+            yield return new object[] {
                 "{}"
             };
 

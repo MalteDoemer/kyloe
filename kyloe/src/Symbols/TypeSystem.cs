@@ -1,6 +1,8 @@
 using System;
 using Mono.Cecil;
 using Kyloe.Semantics;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Kyloe.Symbols
 {
@@ -24,6 +26,10 @@ namespace Kyloe.Symbols
         public ITypeSymbol Bool { get; }
         public ITypeSymbol String { get; }
 
+        public static TypeSystem Create(AssemblyDefinition mainAssembly)
+        {
+            return new TypeSystem(mainAssembly);
+        }
 
         private TypeSystem(AssemblyDefinition mainAssembly)
         {
@@ -46,64 +52,45 @@ namespace Kyloe.Symbols
             var stringType = GetOrDeclareType(rootNamespace, ts.String);
             var emtpyType = GetOrDeclareType(rootNamespace, ts.Void);
 
-            AddNegation(i8Type);
-            AddBasicArithmeticOperations(i8Type);
-            AddBitwiseOperations(i8Type);
-            AddComparisonOperations(i8Type, boolType);
-            AddEqualityOperations(i8Type, boolType);
+            TypeSymbol GetBuiltinType(BuiltinType type)
+            {
+                switch (type)
+                {
+                    case BuiltinType.Char: return charType!;
+                    case BuiltinType.I8: return i8Type!;
+                    case BuiltinType.I16: return i16Type!;
+                    case BuiltinType.I32: return i32Type!;
+                    case BuiltinType.I64: return i64Type!;
+                    case BuiltinType.U8: return u8Type!;
+                    case BuiltinType.U16: return u16Type!;
+                    case BuiltinType.U32: return u32Type!;
+                    case BuiltinType.U64: return u64Type!;
+                    case BuiltinType.Float: return floatType!;
+                    case BuiltinType.Double: return doubleType!;
+                    case BuiltinType.Bool: return boolType!;
+                    case BuiltinType.String: return stringType!;
+                    default: throw new Exception($"unexpected builtin type: {type}");
+                }
+            }
 
-            AddNegation(i16Type);
-            AddBasicArithmeticOperations(i16Type);
-            AddBitwiseOperations(i16Type);
-            AddComparisonOperations(i16Type, boolType);
-            AddEqualityOperations(i16Type, boolType);
+            foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
+            {
+                var left = GetBuiltinType(binary.lhs);
+                var right = GetBuiltinType(binary.rhs);
+                var ret = GetBuiltinType(binary.ret);
 
-            AddNegation(i32Type);
-            AddBasicArithmeticOperations(i32Type);
-            AddBitwiseOperations(i32Type);
-            AddComparisonOperations(i32Type, boolType);
-            AddEqualityOperations(i32Type, boolType);
+                foreach (var op in binary.ops)
+                    left.AddMethod(CreateBuiltinBinaryOperator(op, ret, left, right));
+            }
 
-            AddNegation(i64Type);
-            AddBasicArithmeticOperations(i64Type);
-            AddBitwiseOperations(i64Type);
-            AddComparisonOperations(i64Type, boolType);
-            AddEqualityOperations(i64Type, boolType);
+            foreach (var unary in BuiltinOperatorInfo.UnaryOperations)
+            {
+                var arg = GetBuiltinType(unary.arg);
+                var ret = GetBuiltinType(unary.ret);
 
-            AddBasicArithmeticOperations(u8Type);
-            AddBitwiseOperations(u8Type);
-            AddComparisonOperations(u8Type, boolType);
-            AddEqualityOperations(u8Type, boolType);
-
-            AddBasicArithmeticOperations(u16Type);
-            AddBitwiseOperations(u16Type);
-            AddComparisonOperations(u16Type, boolType);
-            AddEqualityOperations(u16Type, boolType);
-
-            AddBasicArithmeticOperations(u32Type);
-            AddBitwiseOperations(u32Type);
-            AddComparisonOperations(u32Type, boolType);
-            AddEqualityOperations(u32Type, boolType);
-
-            AddBasicArithmeticOperations(u64Type);
-            AddBitwiseOperations(u64Type);
-            AddComparisonOperations(u64Type, boolType);
-            AddEqualityOperations(u64Type, boolType);
-
-            AddNegation(floatType);
-            AddBasicArithmeticOperations(floatType);
-            AddComparisonOperations(floatType, boolType);
-            AddEqualityOperations(floatType, boolType);
-
-            AddNegation(doubleType);
-            AddBasicArithmeticOperations(doubleType);
-            AddComparisonOperations(doubleType, boolType);
-            AddEqualityOperations(doubleType, boolType);
-
-            AddEqualityOperations(boolType, boolType);
-            AddLogicalNot(boolType);
-
-            // TODO: char and string
+                foreach (var op in unary.ops)
+                    arg.AddMethod(CreateBuiltinUnaryOperator(op, ret, arg));
+            }
 
             RootNamespace = rootNamespace;
             Error = new ErrorTypeSymbol();
@@ -166,50 +153,130 @@ namespace Kyloe.Symbols
             return method;
         }
 
-        private static void AddBasicArithmeticOperations(TypeSymbol type)
+        private enum BuiltinType
         {
-            type.AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Addition, type, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Subtraction, type, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Multiplication, type, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Division, type, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Modulo, type, type, type));
+            Char,
+            I8,
+            I16,
+            I32,
+            I64,
+            U8,
+            U16,
+            U32,
+            U64,
+            Float,
+            Double,
+            Bool,
+            String,
         }
 
-        private static void AddBitwiseOperations(TypeSymbol type)
+        private static class BuiltinOperatorInfo
         {
-            type.AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.BitwiseAnd, type, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.BitwiseOr, type, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.BitwiseXor, type, type, type))
-                .AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.BitwiseNot, type, type));
-        }
+            public static readonly ImmutableArray<BinaryOperation> ArithmeticOperations = ImmutableArray.Create<BinaryOperation>
+            (
+                BinaryOperation.Addition,
+                BinaryOperation.Subtraction,
+                BinaryOperation.Multiplication,
+                BinaryOperation.Division,
+                BinaryOperation.Modulo
+            );
 
-        private static void AddComparisonOperations(TypeSymbol type, TypeSymbol booleanType)
-        {
-            type.AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.LessThan, booleanType, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.LessThanOrEqual, booleanType, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.GreaterThan, booleanType, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.GreaterThanOrEqual, booleanType, type, type));
-        }
 
-        private static void AddEqualityOperations(TypeSymbol type, TypeSymbol booleanType)
-        {
-            type.AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.NotEqual, booleanType, type, type))
-                .AddMethod(CreateBuiltinBinaryOperator(BinaryOperation.Equal, booleanType, type, type));
-        }
+            public static readonly ImmutableArray<BinaryOperation> BitwiseOperations = ImmutableArray.Create<BinaryOperation>
+            (
+                BinaryOperation.BitwiseAnd,
+                BinaryOperation.BitwiseOr,
+                BinaryOperation.BitwiseXor
+            );
 
-        private static void AddNegation(TypeSymbol type)
-        {
-            type.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.Negation, type, type));
-        }
+            public static readonly ImmutableArray<BinaryOperation> EqualityOperations = ImmutableArray.Create<BinaryOperation>
+            (
+                BinaryOperation.Equal,
+                BinaryOperation.NotEqual
+            );
 
-        private static void AddLogicalNot(TypeSymbol type)
-        {
-            type.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.LogicalNot, type, type));
-        }
+            public static readonly ImmutableArray<BinaryOperation> ComparisonOperations = ImmutableArray.Create<BinaryOperation>
+            (
+                BinaryOperation.LessThan,
+                BinaryOperation.GreaterThan,
+                BinaryOperation.LessThanOrEqual,
+                BinaryOperation.GreaterThanOrEqual
+            );
 
-        public static TypeSystem Create(AssemblyDefinition mainAssembly)
-        {
-            return new TypeSystem(mainAssembly);
+            public static readonly ImmutableArray<UnaryOperation> Negation = ImmutableArray.Create<UnaryOperation>
+            (
+                UnaryOperation.Negation
+            );
+
+            public static readonly ImmutableArray<UnaryOperation> BitwiseNot = ImmutableArray.Create<UnaryOperation>
+            (
+                UnaryOperation.BitwiseNot
+            );
+
+            public static readonly ImmutableArray<UnaryOperation> LogicalNot = ImmutableArray.Create<UnaryOperation>
+            (
+                UnaryOperation.LogicalNot
+            );
+
+            public static readonly ImmutableArray<UnaryOperation> NegationAndBitwiseNot = Negation.Concat(BitwiseNot).ToImmutableArray();
+
+            public static readonly ImmutableArray<BinaryOperation> EqualityAndComparisonOperations = EqualityOperations.Concat(ComparisonOperations).ToImmutableArray();
+
+            public static readonly ImmutableArray<BinaryOperation> ArithmeticAndBitwiseOperations = ArithmeticOperations.Concat(BitwiseOperations).ToImmutableArray();
+
+            public static readonly ImmutableArray<(ImmutableArray<BinaryOperation> ops, BuiltinType ret, BuiltinType lhs, BuiltinType rhs)> BinaryOperations = ImmutableArray.Create<(ImmutableArray<BinaryOperation>, BuiltinType, BuiltinType, BuiltinType)>
+            (
+                (ArithmeticAndBitwiseOperations, BuiltinType.I8, BuiltinType.I8, BuiltinType.I8),
+                (ArithmeticAndBitwiseOperations, BuiltinType.I16, BuiltinType.I16, BuiltinType.I16),
+                (ArithmeticAndBitwiseOperations, BuiltinType.I32, BuiltinType.I32, BuiltinType.I32),
+                (ArithmeticAndBitwiseOperations, BuiltinType.I64, BuiltinType.I64, BuiltinType.I64),
+
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I8, BuiltinType.I8),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I16, BuiltinType.I16),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I32, BuiltinType.I32),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I64, BuiltinType.I64),
+
+
+                (ArithmeticAndBitwiseOperations, BuiltinType.U8, BuiltinType.U8, BuiltinType.U8),
+                (ArithmeticAndBitwiseOperations, BuiltinType.U16, BuiltinType.U16, BuiltinType.U16),
+                (ArithmeticAndBitwiseOperations, BuiltinType.U32, BuiltinType.U32, BuiltinType.U32),
+                (ArithmeticAndBitwiseOperations, BuiltinType.U64, BuiltinType.U64, BuiltinType.U64),
+
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U8, BuiltinType.U8),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U16, BuiltinType.U16),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U32, BuiltinType.U32),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U64, BuiltinType.U64),
+
+                (ArithmeticOperations, BuiltinType.Float, BuiltinType.Float, BuiltinType.Float),
+                (ArithmeticOperations, BuiltinType.Double, BuiltinType.Double, BuiltinType.Double),
+
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.Float, BuiltinType.Float),
+                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.Double, BuiltinType.Double),
+
+                (EqualityOperations, BuiltinType.Bool, BuiltinType.Bool, BuiltinType.Bool),
+                (EqualityOperations, BuiltinType.Bool, BuiltinType.Char, BuiltinType.Char),
+                (EqualityOperations, BuiltinType.Bool, BuiltinType.String, BuiltinType.String)
+
+
+            );
+
+            public static readonly ImmutableArray<(ImmutableArray<UnaryOperation> ops, BuiltinType ret, BuiltinType arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<UnaryOperation> ops, BuiltinType ret, BuiltinType arg)>
+            (
+                (NegationAndBitwiseNot, BuiltinType.I8, BuiltinType.I8),
+                (NegationAndBitwiseNot, BuiltinType.I16, BuiltinType.I16),
+                (NegationAndBitwiseNot, BuiltinType.I32, BuiltinType.I32),
+                (NegationAndBitwiseNot, BuiltinType.I64, BuiltinType.I64),
+
+                (BitwiseNot, BuiltinType.U8, BuiltinType.U8),
+                (BitwiseNot, BuiltinType.U16, BuiltinType.U16),
+                (BitwiseNot, BuiltinType.U32, BuiltinType.U32),
+                (BitwiseNot, BuiltinType.U64, BuiltinType.U64),
+
+                (Negation, BuiltinType.Float, BuiltinType.Float),
+                (Negation, BuiltinType.Double, BuiltinType.Double),
+
+                (LogicalNot, BuiltinType.Bool, BuiltinType.Bool)
+            );
         }
     }
 }
