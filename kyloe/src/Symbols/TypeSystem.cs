@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Kyloe.Semantics;
 using Kyloe.Utility;
+using System.Collections.Immutable;
 
 namespace Kyloe.Symbols
 {
@@ -13,7 +14,7 @@ namespace Kyloe.Symbols
 
         public INamespaceSymbol RootNamespace { get; }
 
-        public IErrorSymbol Error { get; }
+        public IErrorTypeSymbol Error { get; }
 
         public ITypeSymbol Char { get; }
         public ITypeSymbol I8 { get; }
@@ -110,7 +111,7 @@ namespace Kyloe.Symbols
             // TODO: char and string
 
             RootNamespace = rootNamespace;
-            Error = new ErrorSymbol();
+            Error = new ErrorTypeSymbol();
             Char = charType;
             I8 = i8Type;
             I16 = i16Type;
@@ -208,13 +209,6 @@ namespace Kyloe.Symbols
         private static void AddLogicalNot(TypeSymbol type)
         {
             type.AddMethod(CreateBuiltinUnaryOperator(UnaryOperation.LogicalNot, type, type));
-        }
-
-        private sealed class ErrorSymbol : IErrorSymbol
-        {
-            public string Name => "<error>";
-
-            public SymbolKind Kind => SymbolKind.ErrorSymbol;
         }
 
         private sealed class ParameterSymbol : IParameterSymbol
@@ -328,6 +322,8 @@ namespace Kyloe.Symbols
 
             public IEnumerable<ISymbol> Members => Methods;
 
+            public bool IsErrorType => false;
+
             public IEnumerable<ISymbol> LookupMembers(string name)
             {
                 if (methods.TryGetValue(name, out var list))
@@ -352,6 +348,22 @@ namespace Kyloe.Symbols
 
             public override string ToString() => Name;
         }
+
+        private sealed class ErrorTypeSymbol : IErrorTypeSymbol
+        {
+            public string Name => "<error>";
+
+            public bool IsErrorType => true;
+
+            public SymbolKind Kind => SymbolKind.ErrorSymbol;
+
+            public IEnumerable<IMethodSymbol> Methods => ImmutableArray<IMethodSymbol>.Empty;
+
+            public IEnumerable<ISymbol> Members => ImmutableArray<ISymbol>.Empty;
+
+            public IEnumerable<ISymbol> LookupMembers(string name) => ImmutableArray<ISymbol>.Empty;
+        }
+
 
         private sealed class NamespaceSymbol : INamespaceSymbol
         {

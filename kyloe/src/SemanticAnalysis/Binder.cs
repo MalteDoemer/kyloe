@@ -4,33 +4,96 @@ using Kyloe.Symbols;
 
 using System.Diagnostics;
 using Kyloe.Diagnostics;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace Kyloe.Semantics
 {
+    internal class LocalVariableScopeStack
+    {
+        private readonly Stack<LocalVariableScope> scopes;
+
+        public LocalVariableScopeStack()
+        {
+            scopes = new Stack<LocalVariableScope>();
+            scopes.Push(new LocalVariableScope());
+        }
+
+        public void EnterNewScope()
+        {
+            scopes.Push(new LocalVariableScope());
+        }
+
+        public void ExitCurrentScope()
+        {
+            scopes.Pop();
+        }
+
+        public bool TryDeclareLocal(string name, ITypeSymbol type)
+        {
+            return scopes.Peek().TryDeclareLocal(name, type);
+        }
+
+        public ILocalVariableSymbol? LookupLocal(string name)
+        {
+            foreach (var scope in scopes)
+                if (scope.TryGetLocal(name) is ILocalVariableSymbol symbol)
+                    return symbol;
+
+            return null;
+        }
+    }
+
+
     internal class Binder
     {
         private readonly TypeSystem typeSystem;
         private readonly DiagnosticCollector diagnostics;
+        private readonly LocalVariableScopeStack locals;
 
         public Binder(TypeSystem typeSystem, DiagnosticCollector diagnostics)
         {
             this.typeSystem = typeSystem;
             this.diagnostics = diagnostics;
+            this.locals = new LocalVariableScopeStack();
         }
 
-        private ISymbol ExpectType(SyntaxExpression original, ISymbol result, ITypeSymbol expected)
+        private BoundExpression BindExpressionAndExpectValue(SyntaxExpression expr, out ITypeSymbol result)
         {
-            if (result is IErrorSymbol)
-                return result;
+            var bound = BindExpression(expr);
 
-            if (result == expected)
-                return result;
+            if (bound.ResultSymbol is IErrorTypeSymbol)
+            {
+                result = typeSystem.Error;
+                return bound;
+            }
 
-            diagnostics.Add(new MissmatchedTypeError(original, expected, result));
+            if (bound.IsValue && bound.ResultSymbol is ITypeSymbol typeSymbol)
+            {
+                result = typeSymbol;
+                return bound;
+            }
 
-            return typeSystem.Error;
+            diagnostics.Add(new ExpectedValueError(expr));
+
+            result = typeSystem.Error;
+            return bound;
+        }
+
+        private BoundExpression BindExpressionAndExpectType(SyntaxExpression expr, ITypeSymbol expectedType)
+        {
+            var bound = BindExpression(expr);
+
+            if (bound.ResultSymbol is IErrorTypeSymbol)
+                return bound;
+
+            if (!bound.IsValue)
+                diagnostics.Add(new ExpectedValueError(expr));
+            else if (bound.ResultSymbol != expectedType)
+                diagnostics.Add(new MissmatchedTypeError(expr, expectedType, bound.ResultSymbol));
+
+            return bound;
         }
 
         public BoundNode Bind(SyntaxNode node)
@@ -65,8 +128,12 @@ namespace Kyloe.Semantics
         {
             var builder = ImmutableArray.CreateBuilder<BoundStatement>();
 
+            locals.EnterNewScope();
+
             foreach (var statement in stmt.Statements)
                 builder.Add(BindStatement(statement));
+
+            locals.ExitCurrentScope();
 
             return new BoundBlockStatement(builder.ToImmutable());
         }
@@ -78,19 +145,25 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindIfStatement(IfStatement stmt)
         {
-            var condition = BindExpression(stmt.Condition);
-            ExpectType(stmt.Condition, condition.ResultSymbol, typeSystem.Bool);
+            var condition = BindExpressionAndExpectType(stmt.Condition, typeSystem.Bool);
 
             var body = BindStatement(stmt.Body);
             var elseClasue = stmt.ElseClause == null ? null : BindStatement(stmt.ElseClause.Body);
 
             return new BoundIfStatement(condition, body, elseClasue);
-
         }
 
         private BoundStatement BindDeclarationStatement(DeclarationStatement stmt)
         {
-            throw new NotImplementedException();
+            var expr = BindExpressionAndExpectValue(stmt.AssignmentExpression, out var type);
+            string name = ExtractName(stmt.NameToken);
+
+            if (!locals.TryDeclareLocal(name, type))
+                diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
+
+            var symbol = locals.LookupLocal(name)!;
+
+            return new BoundDeclarationStatement(symbol, expr);
         }
 
         private BoundStatement BindExpressionStatement(ExpressionStatement stmt)
@@ -150,7 +223,17 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindNameExpression(NameExpression expr)
         {
-            throw new NotImplementedException();
+            var name = ExtractName(expr.NameToken);
+
+            var local = locals.LookupLocal(name);
+
+            if (local is null)
+            {
+                diagnostics.Add(new NonExistantNameError(expr.NameToken));
+                return new BoundInvalidExpression(typeSystem);
+            }
+
+            return new BoundLocalVariableExpression(local);
         }
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpression expr)
@@ -202,13 +285,21 @@ namespace Kyloe.Semantics
             return new BoundInvalidExpression(typeSystem);
         }
 
-
-        private ISymbol? GetBinaryOperationResult(BoundExpression left, BinaryOperation op, BoundExpression right)
+        private static string ExtractName(SyntaxToken nameToken)
         {
-            if (!left.IsValue || !right.IsValue) 
+            Debug.Assert(nameToken.Type == SyntaxTokenType.Identifier);
+            Debug.Assert(nameToken.Value is string, $"value of name token wasn't a string: value={nameToken.Value}");
+
+            var name = (string)nameToken.Value;
+            return name;
+        }
+
+        private ITypeSymbol? GetBinaryOperationResult(BoundExpression left, BinaryOperation op, BoundExpression right)
+        {
+            if (!left.IsValue || !right.IsValue)
                 return null;
 
-            if (left.ResultSymbol is IErrorSymbol || right.ResultSymbol is IErrorSymbol)
+            if (left.ResultSymbol is IErrorTypeSymbol || right.ResultSymbol is IErrorTypeSymbol)
                 return typeSystem.Error;
 
             if (!(left.ResultSymbol is ITypeSymbol leftType) || !(right.ResultSymbol is ITypeSymbol rightType))
@@ -238,9 +329,9 @@ namespace Kyloe.Semantics
             return method.ReturnType;
         }
 
-        private ISymbol? GetUnaryOperationResult(UnaryOperation op, BoundExpression expr)
+        private ITypeSymbol? GetUnaryOperationResult(UnaryOperation op, BoundExpression expr)
         {
-            if (expr.ResultSymbol is IErrorSymbol)
+            if (expr.ResultSymbol is IErrorTypeSymbol)
                 return typeSystem.Error;
 
             if (!(expr.ResultSymbol is ITypeSymbol type))

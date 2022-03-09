@@ -12,6 +12,8 @@ namespace Kyloe.Diagnostics
         ExpectedValueError,
         UnsupportedBinaryOperation,
         UnsupportedUnaryOperation,
-        MissmatchedTypeError
+        MissmatchedTypeError,
+        RedefinedLocalVariableError,
+        NonExistantNameError
     }
 }

@@ -1,7 +1,12 @@
 {
-    if (true == false) {
-        1 + 2;
-    } else {
-        3 + 6;
-    }
+    var x = 5;
+
+    var y = x + 20;
+
+
+    var str = "hi";
+
+
+    5 + fett;
+
 }

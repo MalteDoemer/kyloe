@@ -9,6 +9,7 @@ namespace Kyloe.Symbols
         TypeSymbol,
         MethodSymbol,
         ParameterSymbol,
+        LocalVariableSymbol,
         ErrorSymbol,
     }
 
@@ -16,10 +17,6 @@ namespace Kyloe.Symbols
     {
         string Name { get; }
         SymbolKind Kind { get; }
-    }
-
-    public interface IErrorSymbol : ISymbol
-    {
     }
 
     public interface ISymbolContainer
@@ -39,6 +36,10 @@ namespace Kyloe.Symbols
         IEnumerable<IMethodSymbol> Methods { get; }
     }
 
+    public interface IErrorTypeSymbol : ITypeSymbol
+    {
+    }
+
     public interface IMethodSymbol : ISymbol
     {
         ITypeSymbol ReturnType { get; }
@@ -49,6 +50,11 @@ namespace Kyloe.Symbols
     }
 
     public interface IParameterSymbol : ISymbol
+    {
+        ITypeSymbol Type { get; }
+    }
+
+    public interface ILocalVariableSymbol : ISymbol
     {
         ITypeSymbol Type { get; }
     }
