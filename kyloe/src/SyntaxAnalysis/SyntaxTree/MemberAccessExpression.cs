@@ -1,12 +1,9 @@
-
-
 using System.Collections.Generic;
 using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-
-    internal class MemberAccessExpression : SyntaxExpression
+    internal sealed class MemberAccessExpression : SyntaxExpression
     {
         public MemberAccessExpression(SyntaxExpression expression, SyntaxToken dotToken, NameExpression nameExpression)
         {
@@ -30,5 +27,4 @@ namespace Kyloe.Syntax
             yield return new SyntaxNodeChild(NameExpression);
         }
     }
-
 }

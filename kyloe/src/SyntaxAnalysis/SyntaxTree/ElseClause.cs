@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    internal class ElseClause
+    internal sealed class ElseClause
     {
         public ElseClause(SyntaxToken elseToken, SyntaxStatement body)
         {

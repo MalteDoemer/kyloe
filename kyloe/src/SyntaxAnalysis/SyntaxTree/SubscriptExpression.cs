@@ -3,9 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-
-
-    internal class SubscriptExpression: SyntaxExpression
+    internal sealed class SubscriptExpression : SyntaxExpression
     {
         public SubscriptExpression(SyntaxExpression leftNode, SyntaxToken leftSquare, SyntaxExpression subscript, SyntaxToken rightSquare)
         {
@@ -32,5 +30,4 @@ namespace Kyloe.Syntax
             yield return new SyntaxNodeChild(RightSquare);
         }
     }
-
 }

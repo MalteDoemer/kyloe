@@ -3,8 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-
-    internal class ParenthesizedExpression : SyntaxExpression
+    internal sealed class ParenthesizedExpression : SyntaxExpression
     {
         public ParenthesizedExpression(SyntaxToken leftParen, SyntaxExpression expression, SyntaxToken rightParen)
         {

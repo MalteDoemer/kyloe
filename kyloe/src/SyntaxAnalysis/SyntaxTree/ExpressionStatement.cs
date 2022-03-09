@@ -3,8 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-
-    internal class ExpressionStatement : SyntaxStatement
+    internal sealed class ExpressionStatement : SyntaxStatement
     {
         public ExpressionStatement(SyntaxExpression expression, SyntaxToken semicolon)
         {
@@ -25,5 +24,4 @@ namespace Kyloe.Syntax
             yield return new SyntaxNodeChild(Semicolon);
         }
     }
-
 }

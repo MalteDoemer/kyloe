@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class UnaryExpression: SyntaxExpression
+    internal sealed class UnaryExpression : SyntaxExpression
     {
         public UnaryExpression(SyntaxToken operatorToken, SyntaxExpression expression)
         {

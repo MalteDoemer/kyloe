@@ -4,7 +4,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class BlockStatement : SyntaxStatement
+    internal sealed class BlockStatement : SyntaxStatement
     {
         public BlockStatement(SyntaxToken leftCurly, ImmutableArray<SyntaxStatement> statements, SyntaxToken rightCurly)
         {

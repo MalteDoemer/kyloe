@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal class EmptyStatement : SyntaxStatement
+    internal sealed class EmptyStatement : SyntaxStatement
     {
         public EmptyStatement(SyntaxToken semicolon)
         {

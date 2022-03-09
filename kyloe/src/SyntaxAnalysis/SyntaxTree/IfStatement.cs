@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    internal class IfStatement : SyntaxStatement
+    internal sealed class IfStatement : SyntaxStatement
     {
         public IfStatement(SyntaxToken ifToken, SyntaxExpression condition, SyntaxStatement body, ElseClause? elseClause)
         {

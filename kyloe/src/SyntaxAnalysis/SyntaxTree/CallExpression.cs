@@ -3,8 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-
-    internal class CallExpression : SyntaxExpression
+    internal sealed class CallExpression : SyntaxExpression
     {
         public CallExpression(SyntaxExpression expression, SyntaxToken leftParen, ArgumentExpression arguments, SyntaxToken rightParen)
         {
@@ -34,6 +33,4 @@ namespace Kyloe.Syntax
             yield return new SyntaxNodeChild(RightParen);
         }
     }
-
-
 }
