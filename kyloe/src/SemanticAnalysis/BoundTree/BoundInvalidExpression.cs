@@ -15,6 +15,6 @@ namespace Kyloe.Semantics
 
         public override BoundNodeType Type => BoundNodeType.BoundInvalidExpression;
 
-        public override bool IsValue => true;
+        public override ValueCategory ValueCategory => ValueCategory.None;
     }
 }
