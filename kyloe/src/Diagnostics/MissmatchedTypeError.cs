@@ -23,6 +23,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"expected '{expected}' got '{provided}'";
+        public override string Message() => $"missmatched types, expected '{expected}' got '{provided}'";
     }
 }

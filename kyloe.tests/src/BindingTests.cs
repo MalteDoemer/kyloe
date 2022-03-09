@@ -86,8 +86,47 @@ namespace Kyloe.Tests.Binding
                 DiagnosticType.NonExistantNameError,
             };
 
+            yield return new object[] {
+                @"{
+                    var x = 5;
+                    x = 'f';
+                }",
+                DiagnosticType.MissmatchedTypeError,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5;
+                    x += 'f';
+                }",
+                DiagnosticType.UnsupportedAssignmentOperation,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5.2;
+                    x %= true;
+                }",
+                DiagnosticType.UnsupportedAssignmentOperation,
+            };
+
+            yield return new object[] {
+                @"{
+                    1 % 8 = 5;
+                }",
+                DiagnosticType.ExpectedLValueError,
+            };
 
 
+            yield return new object[] {
+                @"{
+                    var x = 1;
+                    var y = x = 3;
+                    var z = x += 2;
+                }",
+                DiagnosticType.ExpectedValueError,
+                DiagnosticType.ExpectedValueError,
+            };
         }
 
         public static IEnumerable<object[]> GetNoErrorData()
@@ -172,9 +211,22 @@ namespace Kyloe.Tests.Binding
                     var x = 5;
 
                     if (x == 5) {
-                        1 + 2;
+                        x = 1;
                     } else {
-                        
+                        x = 2;
+                    }
+                }"
+            };
+
+            yield return new object[] {
+                @"{
+                    var num1 = 5.6;
+                    var num2 = num1 + 1.0;
+
+                    if (num1 == num2) {
+                        num1 = 0.0;
+                    } else {
+                        num1 += num2 - 5.0;
                     }
                 }"
             };
