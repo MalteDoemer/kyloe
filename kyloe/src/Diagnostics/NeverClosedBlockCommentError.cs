@@ -5,7 +5,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class NeverClosedBlockCommentError : Diagnostic
+    internal sealed class NeverClosedBlockCommentError : Diagnostic
     {
         private readonly SyntaxToken errorToken;
 

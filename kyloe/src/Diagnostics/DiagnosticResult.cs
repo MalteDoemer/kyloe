@@ -8,7 +8,7 @@ using Kyloe.Utility;
 namespace Kyloe.Diagnostics
 {
 
-    public class DiagnosticResult
+    public sealed class DiagnosticResult
     {
         private readonly SourceText sourceText;
         private ImmutableArray<Diagnostic> diagnostics;

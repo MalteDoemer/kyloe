@@ -5,7 +5,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class UnsupportedUnaryOperation : Diagnostic
+    internal sealed class UnsupportedUnaryOperation : Diagnostic
     {
         private readonly UnaryExpression expression;
         private readonly ISymbol type;

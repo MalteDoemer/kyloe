@@ -5,7 +5,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class ExpectedTokenError : Diagnostic
+    internal sealed class ExpectedTokenError : Diagnostic
     {
         private readonly SyntaxTokenType expected;
         private readonly SyntaxToken provided;

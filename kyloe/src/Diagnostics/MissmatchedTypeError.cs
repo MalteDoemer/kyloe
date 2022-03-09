@@ -4,7 +4,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics 
 {
-    internal class MissmatchedTypeError : Diagnostic
+    internal sealed class MissmatchedTypeError : Diagnostic
     {
         private readonly SyntaxExpression expression;
         private readonly ITypeSymbol expectedType;

@@ -6,7 +6,7 @@ using Mono.Cecil;
 
 namespace Kyloe.Diagnostics
 {
-    internal class UnsupportedBinaryOperation : Diagnostic
+    internal sealed class UnsupportedBinaryOperation : Diagnostic
     {
         private readonly BinaryExpression expression;
         private readonly ISymbol leftType;

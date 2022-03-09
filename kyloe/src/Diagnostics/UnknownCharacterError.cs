@@ -5,7 +5,7 @@ using Kyloe.Syntax;
 
 namespace Kyloe.Diagnostics
 {
-    internal class UnknownCharacterError : Diagnostic
+    internal sealed class UnknownCharacterError : Diagnostic
     {
         private readonly SyntaxToken errorToken;
 

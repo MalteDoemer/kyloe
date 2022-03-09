@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics 
 {
-    internal class NonExistantNameError : Diagnostic
+    internal sealed class NonExistantNameError : Diagnostic
     {   
         private readonly SyntaxToken nameToken;
 

@@ -4,7 +4,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class DiagnosticCollector
+    internal sealed class DiagnosticCollector
     {
         private readonly ImmutableArray<Diagnostic>.Builder diagnostics;
         private readonly SourceText sourceText;

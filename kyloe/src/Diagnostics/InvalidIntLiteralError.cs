@@ -4,7 +4,7 @@ using Kyloe.Utility;
 namespace Kyloe.Diagnostics
 {
 
-    internal class InvalidIntLiteralError : Diagnostic
+    internal sealed class InvalidIntLiteralError : Diagnostic
     {
         private readonly SyntaxToken token;
 

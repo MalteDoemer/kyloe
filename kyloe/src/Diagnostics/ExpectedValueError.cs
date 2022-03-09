@@ -3,7 +3,7 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal class ExpectedValueError : Diagnostic
+    internal sealed class ExpectedValueError : Diagnostic
     {
         private readonly SyntaxExpression expression;
 
