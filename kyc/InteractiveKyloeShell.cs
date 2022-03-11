@@ -21,10 +21,11 @@ namespace Kyc
                     else
                         break;
 
-                
-                var compilation = Compilation.Compile(input);
+                var tree = SyntaxTree.ParseStatement(input);
                 Console.WriteLine();
-                compilation.GetDiagnostics().WriteTo(Console.Out);
+                tree.GetDiagnostics().WriteTo(Console.Out);
+                Console.WriteLine();
+                tree.GetRoot().WriteTo(Console.Out);
             }
         }
 

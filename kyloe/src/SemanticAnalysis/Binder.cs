@@ -148,16 +148,47 @@ namespace Kyloe.Semantics
         {
             bool isConst = stmt.DeclerationToken.Type == SyntaxTokenType.ConstKeyword;
 
-            var (expr, type) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeLValue: false);
+            var (expr, symbol) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeLValue: false);
+            var exprType = (ITypeSymbol)symbol;
+
+            ITypeSymbol varType;
+
+            if (stmt.TypeClause is not null)
+            {
+                varType = BindTypeClause(stmt.TypeClause);
+
+                if (varType is not IErrorTypeSymbol && varType != exprType)
+                {
+                    diagnostics.Add(new MissmatchedTypeError(stmt.AssignmentExpression, varType, exprType));
+                    varType = typeSystem.Error;
+                }
+            }
+            else
+            {
+                varType = exprType;
+            }
 
             string name = ExtractName(stmt.NameToken);
 
-            if (!locals.TryDeclareLocal(name, (ITypeSymbol)type, isConst))
+            if (!locals.TryDeclareLocal(name, exprType, isConst))
                 diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
 
-            var symbol = locals.LookupLocal(name)!;
+            var localVariable = locals.LookupLocal(name)!;
 
-            return new BoundDeclarationStatement(symbol, expr);
+            return new BoundDeclarationStatement(localVariable, expr);
+        }
+
+        private ITypeSymbol BindTypeClause(TypeClause typeClause)
+        {
+            var expr = BindExpression(typeClause.NameExpression);
+
+            if (expr is BoundTypeNameExpression typeNameExpression)
+                return typeNameExpression.TypeSymbol;
+
+            if (expr.ResultSymbol is not IErrorTypeSymbol)
+                diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
+
+            return typeSystem.Error;
         }
 
         private BoundStatement BindExpressionStatement(ExpressionStatement stmt)
@@ -243,15 +274,14 @@ namespace Kyloe.Semantics
         {
             var name = ExtractName(expr.NameToken);
 
-            var local = locals.LookupLocal(name);
+            if (BuiltinTypeFromName(name) is ITypeSymbol builtinType)
+                return new BoundTypeNameExpression(builtinType);
 
-            if (local is null)
-            {
-                diagnostics.Add(new NonExistantNameError(expr.NameToken));
-                return new BoundInvalidExpression(typeSystem);
-            }
+            if (locals.LookupLocal(name) is ILocalVariableSymbol localVariableSymbol)
+                return new BoundLocalVariableExpression(localVariableSymbol);
 
-            return new BoundLocalVariableExpression(local);
+            diagnostics.Add(new NonExistantNameError(expr.NameToken));
+            return new BoundInvalidExpression(typeSystem);
         }
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpression expr)
@@ -310,6 +340,28 @@ namespace Kyloe.Semantics
 
             var name = (string)nameToken.Value;
             return name;
+        }
+
+        private ITypeSymbol? BuiltinTypeFromName(string name)
+        {
+            switch (name)
+            {
+                case "char": return typeSystem.Char;
+                case "i8": return typeSystem.I8;
+                case "i16": return typeSystem.I16;
+                case "i32": return typeSystem.I32;
+                case "i64": return typeSystem.I64;
+                case "u8": return typeSystem.U8;
+                case "u16": return typeSystem.U16;
+                case "u32": return typeSystem.U32;
+                case "u64": return typeSystem.U64;
+                case "float": return typeSystem.Float;
+                case "double": return typeSystem.Double;
+                case "bool": return typeSystem.Bool;
+                case "string": return typeSystem.String;
+
+                default: return null;
+            }
         }
 
         private ITypeSymbol? GetBinaryOperationResult(BoundExpression left, BinaryOperation op, BoundExpression right)

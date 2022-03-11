@@ -16,6 +16,7 @@ namespace Kyloe.Diagnostics
         RedefinedLocalVariableError,
         NonExistantNameError,
         ExpectedLValueError,
-        UnsupportedAssignmentOperation
+        UnsupportedAssignmentOperation,
+        ExpectedTypeNameError
     }
 }

@@ -50,7 +50,7 @@ namespace Kyloe.Syntax
             return new SyntaxToken(type, current.Location, current.Value);
         }
 
-        public SyntaxNode Parse() 
+        public SyntaxNode Parse()
         {
             return ParseStatement();
         }
@@ -136,10 +136,34 @@ namespace Kyloe.Syntax
         {
             var decl = Advance();
             var name = Expect(SyntaxTokenType.Identifier);
+
+            TypeClause? typeClause = null;
+
+            if (current.Type == SyntaxTokenType.Colon)
+                typeClause = ParseTypeClause();
+
             var equals = Expect(SyntaxTokenType.Equals);
             var expr = ParseExpressionImpl();
             var semi = Expect(SyntaxTokenType.SemiColon);
-            return new DeclarationStatement(decl, name, equals, expr, semi);
+            return new DeclarationStatement(decl, name, typeClause, equals, expr, semi);
+        }
+
+        private TypeClause? ParseTypeClause()
+        {
+            var colonToken = Expect(SyntaxTokenType.Colon);
+
+            var identifierToken = Expect(SyntaxTokenType.Identifier);
+
+            SyntaxExpression node = new IdentifierExpression(identifierToken);
+
+            while (current.Type == SyntaxTokenType.Dot)
+            {
+                var dotToken = Advance();
+                var nameToken = Expect(SyntaxTokenType.Identifier);
+                node = new MemberAccessExpression(node, dotToken, new IdentifierExpression(nameToken));
+            }
+
+            return new TypeClause(colonToken, node);
         }
 
         private SyntaxStatement ParseExpressionStatement()
