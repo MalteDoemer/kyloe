@@ -2,7 +2,7 @@ using Kyloe.Symbols;
 using Kyloe.Syntax;
 using Kyloe.Utility;
 
-namespace Kyloe.Diagnostics 
+namespace Kyloe.Diagnostics
 {
     internal sealed class MissmatchedTypeError : Diagnostic
     {

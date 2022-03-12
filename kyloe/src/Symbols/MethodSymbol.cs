@@ -9,6 +9,7 @@ namespace Kyloe.Symbols
         private sealed class MethodSymbol : IMethodSymbol
         {
             private ITypeSymbol? returnType;
+            private bool isStatic;
             private bool isOperator;
             private bool isBuiltinOperator;
 
@@ -32,6 +33,8 @@ namespace Kyloe.Symbols
 
             public bool IsOperator => isOperator;
 
+            public bool IsStatic => isStatic;
+
             public MethodSymbol SetReturnType(ITypeSymbol type)
             {
                 returnType = type;
@@ -47,6 +50,12 @@ namespace Kyloe.Symbols
             public MethodSymbol SetBuiltinOperator(bool builtin)
             {
                 isBuiltinOperator = builtin;
+                return this;
+            }
+
+            public MethodSymbol SetStatic(bool isStatic) 
+            {
+                this.isStatic = isStatic;
                 return this;
             }
 

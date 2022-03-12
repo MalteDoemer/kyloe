@@ -13,6 +13,10 @@ namespace Kyloe.Semantics
         BoundDeclarationStatement,
         BoundLocalVariableExpression,
         BoundAssignmentExpression,
-        BoundTypeNameExpression
+        BoundTypeNameExpression,
+        BoundInvalidMemberAccessExpression,
+        BoundTypeNameMemberAccessExpression,
+        BoundNamespaceMemberAccessExpression,
+        BoundNamespaceExpression
     }
 }

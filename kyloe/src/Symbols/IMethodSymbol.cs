@@ -9,5 +9,6 @@ namespace Kyloe.Symbols
 
         bool IsOperator { get; }
         bool IsBuiltinOperator { get; }
+        bool IsStatic { get; }
     }
 }

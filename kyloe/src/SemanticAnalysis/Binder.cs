@@ -180,10 +180,14 @@ namespace Kyloe.Semantics
 
         private ITypeSymbol BindTypeClause(TypeClause typeClause)
         {
+            // TODO: make BoundTypeClause class 
+
             var expr = BindExpression(typeClause.NameExpression);
 
-            if (expr is BoundTypeNameExpression typeNameExpression)
-                return typeNameExpression.TypeSymbol;
+            if (expr is BoundTypeNameExpression typeName)
+                return typeName.TypeSymbol;
+            else if (expr is BoundTypeNameMemberAccessExpression typeNameMemberAccess)
+                return typeNameMemberAccess.TypeSymbol;
 
             if (expr.ResultSymbol is not IErrorTypeSymbol)
                 diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
@@ -267,22 +271,112 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindMemberAccessExpression(MemberAccessExpression expr)
         {
-            throw new NotImplementedException();
+            var right = BindExpression(expr.Expression);
+            var name = ExtractName(expr.IdentifierExpression.NameToken);
+
+            if (right.ResultSymbol is IErrorTypeSymbol)
+                return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
+
+            if (!(right.ResultSymbol is ISymbolContainer symbolContainer))
+            {
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
+                return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
+            }
+
+            var members = symbolContainer.LookupMembers(name);
+
+            if (members.Count() == 0)
+            {
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
+                return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
+            }
+
+            if (right.IsValue)
+            {
+                // allowed members:
+                // - non-static methods
+                // - non-static fields => TODO
+                // - non-static properties => TODO
+
+                var instanceMethods = members
+                    .Where(member => member.Kind == SymbolKind.MethodSymbol)
+                    .Cast<IMethodSymbol>()
+                    .Where(method => !method.IsStatic);
+
+                throw new System.NotImplementedException();
+            }
+            else
+            {
+                // allowed members:
+                // - static methods
+                // - static fields => TODO
+                // - static properties => TODO
+                // - type names
+                // - namespaces
+
+                var staticMethods = members
+                    .Where(member => member.Kind == SymbolKind.MethodSymbol)
+                    .Cast<IMethodSymbol>()
+                    .Where(method => !method.IsStatic);
+
+                var typeNames = members
+                    .Where(member => member.Kind == SymbolKind.TypeSymbol)
+                    .Cast<ITypeSymbol>();
+
+                var namespaces = members
+                    .Where(member => member.Kind == SymbolKind.NamespaceSymbol)
+                    .Cast<INamespaceSymbol>();
+
+                int staticMethodCount = staticMethods.Count();
+                int typeNameCount = typeNames.Count();
+                int namespaceCount = namespaces.Count();
+
+                if (staticMethodCount > 0)
+                {
+                    Debug.Assert(typeNameCount == 0 && namespaceCount == 0);
+
+                    throw new System.NotImplementedException();
+                }
+
+                if (typeNameCount > 0)
+                {
+                    Debug.Assert(namespaceCount == 0 && typeNameCount == 1);
+                    return new BoundTypeNameMemberAccessExpression(typeNames.First(), right, name);
+                }
+
+                if (namespaceCount > 0)
+                {
+                    Debug.Assert(namespaceCount == 1);
+                    return new BoundNamespaceMemberAccessExpression(namespaces.First(), right, name);
+                }
+
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
+                return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
+            }
         }
 
         private BoundExpression BindIdentifierExpression(IdentifierExpression expr)
         {
             var name = ExtractName(expr.NameToken);
 
+            if (locals.LookupLocal(name) is ILocalVariableSymbol localVariableSymbol)
+                return new BoundLocalVariableExpression(localVariableSymbol);
+
             if (BuiltinTypeFromName(name) is ITypeSymbol builtinType)
                 return new BoundTypeNameExpression(builtinType);
 
-            if (locals.LookupLocal(name) is ILocalVariableSymbol localVariableSymbol)
-                return new BoundLocalVariableExpression(localVariableSymbol);
+            if (LookupGlobalNamespace(name) is ISymbol symbol)
+            {
+                if (symbol is ITypeSymbol typeSymbol)
+                    return new BoundTypeNameExpression(typeSymbol);
+                else if (symbol is INamespaceSymbol namespaceSymbol)
+                    return new BoundNamespaceExpression(namespaceSymbol);
+            }
 
             diagnostics.Add(new NonExistantNameError(expr.NameToken));
             return new BoundInvalidExpression(typeSystem);
         }
+
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpression expr)
         {
@@ -341,6 +435,14 @@ namespace Kyloe.Semantics
             var name = (string)nameToken.Value;
             return name;
         }
+
+        private ISymbol? LookupGlobalNamespace(string name)
+        {
+            var members = typeSystem.RootNamespace.LookupMembers(name);
+            Debug.Assert(members.Count() <= 1);
+            return members.FirstOrDefault();
+        }
+
 
         private ITypeSymbol? BuiltinTypeFromName(string name)
         {

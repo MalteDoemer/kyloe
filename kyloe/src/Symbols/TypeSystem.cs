@@ -131,6 +131,7 @@ namespace Kyloe.Symbols
                          .SetReturnType(ret)
                          .AddParameter(new ParameterSymbol("left").SetType(left))
                          .AddParameter(new ParameterSymbol("right").SetType(right))
+                         .SetStatic(true)
                          .SetOperator(true)
                          .SetBuiltinOperator(true);
 
@@ -148,6 +149,7 @@ namespace Kyloe.Symbols
                          .SetReturnType(ret)
                          .AddParameter(new ParameterSymbol("arg").SetType(arg))
                          .SetOperator(true)
+                         .SetStatic(true)
                          .SetBuiltinOperator(true);
 
             return method;

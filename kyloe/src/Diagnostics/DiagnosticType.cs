@@ -17,6 +17,9 @@ namespace Kyloe.Diagnostics
         NonExistantNameError,
         ExpectedLValueError,
         UnsupportedAssignmentOperation,
-        ExpectedTypeNameError
+        ExpectedTypeNameError,
+        RestrictedMemberAccessError,
+        MemberNotFoundError,
+        MemberAccessError
     }
 }
