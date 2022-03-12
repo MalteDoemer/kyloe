@@ -152,10 +152,12 @@ namespace Kyloe.Semantics
             var exprType = (ITypeSymbol)symbol;
 
             ITypeSymbol varType;
+            BoundTypeClause? typeClause = null;
 
             if (stmt.TypeClause is not null)
             {
-                varType = BindTypeClause(stmt.TypeClause);
+                typeClause = BindTypeClause(stmt.TypeClause);
+                varType = typeClause.TypeSymbol;
 
                 if (varType is not IErrorTypeSymbol && varType != exprType)
                 {
@@ -170,29 +172,27 @@ namespace Kyloe.Semantics
 
             string name = ExtractName(stmt.NameToken);
 
-            if (!locals.TryDeclareLocal(name, exprType, isConst))
+            if (!locals.TryDeclareLocal(name, varType, isConst))
                 diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
 
             var localVariable = locals.LookupLocal(name)!;
 
-            return new BoundDeclarationStatement(localVariable, expr);
+            return new BoundDeclarationStatement(localVariable, typeClause, expr);
         }
 
-        private ITypeSymbol BindTypeClause(TypeClause typeClause)
+        private BoundTypeClause BindTypeClause(TypeClause typeClause)
         {
-            // TODO: make BoundTypeClause class 
-
             var expr = BindExpression(typeClause.NameExpression);
 
             if (expr is BoundTypeNameExpression typeName)
-                return typeName.TypeSymbol;
+                return new BoundTypeClause(expr, typeName.TypeSymbol);
             else if (expr is BoundTypeNameMemberAccessExpression typeNameMemberAccess)
-                return typeNameMemberAccess.TypeSymbol;
+                return new BoundTypeClause(expr, typeNameMemberAccess.TypeSymbol);
 
             if (expr.ResultSymbol is not IErrorTypeSymbol)
                 diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
 
-            return typeSystem.Error;
+            return new BoundTypeClause(expr, typeSystem.Error);
         }
 
         private BoundStatement BindExpressionStatement(ExpressionStatement stmt)
