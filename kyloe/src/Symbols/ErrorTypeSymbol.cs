@@ -17,6 +17,10 @@ namespace Kyloe.Symbols
 
             public IEnumerable<ISymbol> Members => ImmutableArray<ISymbol>.Empty;
 
+            public AccessModifiers AccessModifiers => throw new System.NotImplementedException();
+
+            public bool Equals(ISymbol? other) => other is IErrorTypeSymbol;
+
             public IEnumerable<ISymbol> LookupMembers(string name) => ImmutableArray<ISymbol>.Empty;
         }
     }

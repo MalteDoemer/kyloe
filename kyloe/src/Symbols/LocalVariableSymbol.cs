@@ -17,6 +17,8 @@ namespace Kyloe.Symbols
 
             public SymbolKind Kind => SymbolKind.LocalVariableSymbol;
 
+            public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
+
             public override string ToString() => Name;
         }
     }

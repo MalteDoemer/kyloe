@@ -59,6 +59,17 @@ namespace Kyloe.Semantics
             this.locals = new LocalVariableScopeStack();
         }
 
+        private bool IsTypeMissmatch(ITypeSymbol? expectedType, ITypeSymbol? rightType)
+        {
+            if (expectedType is null)
+                return false;
+
+            if (expectedType is IErrorTypeSymbol || rightType is IErrorTypeSymbol)
+                return false;
+
+            return !expectedType.Equals(rightType);
+        }
+
         private (BoundExpression, ISymbol) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeLValue, ITypeSymbol? expectedType = null)
         {
             var bound = BindExpression(expr);
@@ -78,9 +89,9 @@ namespace Kyloe.Semantics
                 return (bound, typeSystem.Error);
             }
 
-            if (expectedType is not null && expectedType is not IErrorTypeSymbol && expectedType != bound.ResultSymbol)
+            if (IsTypeMissmatch(expectedType, bound.ResultSymbol as ITypeSymbol))
             {
-                diagnostics.Add(new MissmatchedTypeError(expr, expectedType, bound.ResultSymbol));
+                diagnostics.Add(new MissmatchedTypeError(expr, expectedType!, bound.ResultSymbol));
                 return (bound, typeSystem.Error);
             }
 
@@ -159,7 +170,7 @@ namespace Kyloe.Semantics
                 typeClause = BindTypeClause(stmt.TypeClause);
                 varType = typeClause.TypeSymbol;
 
-                if (varType is not IErrorTypeSymbol && varType != exprType)
+                if (IsTypeMissmatch(varType, exprType))
                 {
                     diagnostics.Add(new MissmatchedTypeError(stmt.AssignmentExpression, varType, exprType));
                     varType = typeSystem.Error;
@@ -232,17 +243,17 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindAssignmentExpression(AssignmentExpression expr)
         {
-            var (left, leftType) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeLValue: true);
-            var (right, rightType) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeLValue: false);
+            var (left, leftSymbol) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeLValue: true);
+            var (right, rightSymbol) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeLValue: false);
+
+            var leftType = (ITypeSymbol)leftSymbol;
+            var rightType = (ITypeSymbol)rightSymbol;
 
             var operation = SemanticInfo.GetAssignmentOperation(expr.OperatorToken.Type);
 
-            if (leftType is IErrorTypeSymbol || rightType is IErrorTypeSymbol)
-                return new BoundAssignmentExpression(typeSystem, left, operation, right);
-
             if (operation == AssignmentOperation.Assign)
             {
-                if (leftType != rightType)
+                if (IsTypeMissmatch(leftType, rightType))
                     diagnostics.Add(new MissmatchedTypeError(expr, leftType, rightType));
             }
             else
@@ -252,7 +263,7 @@ namespace Kyloe.Semantics
 
                 if (binaryOperationResult is null)
                     diagnostics.Add(new UnsupportedAssignmentOperation(expr, leftType, rightType));
-                else if (binaryOperationResult != leftType)
+                else if (IsTypeMissmatch(leftType, binaryOperationResult))
                     diagnostics.Add(new MissmatchedTypeError(expr, leftType, binaryOperationResult));
             }
 
@@ -317,7 +328,7 @@ namespace Kyloe.Semantics
                 var staticMethods = members
                     .Where(member => member.Kind == SymbolKind.MethodSymbol)
                     .Cast<IMethodSymbol>()
-                    .Where(method => !method.IsStatic);
+                    .Where(method => method.IsStatic);
 
                 var typeNames = members
                     .Where(member => member.Kind == SymbolKind.TypeSymbol)
@@ -376,7 +387,6 @@ namespace Kyloe.Semantics
             diagnostics.Add(new NonExistantNameError(expr.NameToken));
             return new BoundInvalidExpression(typeSystem);
         }
-
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpression expr)
         {
@@ -443,7 +453,6 @@ namespace Kyloe.Semantics
             return members.FirstOrDefault();
         }
 
-
         private ITypeSymbol? BuiltinTypeFromName(string name)
         {
             switch (name)
@@ -468,11 +477,11 @@ namespace Kyloe.Semantics
 
         private ITypeSymbol? GetBinaryOperationResult(BoundExpression left, BinaryOperation op, BoundExpression right)
         {
-            if (!left.IsValue || !right.IsValue)
-                return null;
-
             if (left.ResultSymbol is IErrorTypeSymbol || right.ResultSymbol is IErrorTypeSymbol)
                 return typeSystem.Error;
+
+            if (!left.IsValue || !right.IsValue)
+                return null;
 
             if (!(left.ResultSymbol is ITypeSymbol leftType) || !(right.ResultSymbol is ITypeSymbol rightType))
                 return null;
@@ -486,8 +495,8 @@ namespace Kyloe.Semantics
                 member => member is IMethodSymbol method &&
                 method.IsOperator &&
                 method.Parameters.Count() == 2 &&
-                method.Parameters.First().Type == leftType &&
-                method.Parameters.Last().Type == rightType
+                method.Parameters.First().Type.Equals(leftType) &&
+                method.Parameters.Last().Type.Equals(rightType)
             );
 
             if (methods.Count() > 1)
@@ -506,6 +515,9 @@ namespace Kyloe.Semantics
             if (expr.ResultSymbol is IErrorTypeSymbol)
                 return typeSystem.Error;
 
+            if (!expr.IsValue)
+                return null;
+
             if (!(expr.ResultSymbol is ITypeSymbol type))
                 return null;
 
@@ -518,7 +530,7 @@ namespace Kyloe.Semantics
                 member => member is IMethodSymbol method &&
                 method.IsOperator &&
                 method.Parameters.Count() == 1 &&
-                method.Parameters.First().Type == type
+                method.Parameters.First().Type.Equals(type)
             );
 
             if (methods.Count() > 1)

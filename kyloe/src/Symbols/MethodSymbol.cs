@@ -82,6 +82,8 @@ namespace Kyloe.Symbols
             }
 
             public override string ToString() => Name;
+
+            public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
         }
     }
 }

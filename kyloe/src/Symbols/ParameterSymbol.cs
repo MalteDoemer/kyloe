@@ -19,6 +19,8 @@ namespace Kyloe.Symbols
 
             public SymbolKind Kind => SymbolKind.ParameterSymbol;
 
+            public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
+
             public ParameterSymbol SetType(ITypeSymbol type)
             {
                 this.type = type;
