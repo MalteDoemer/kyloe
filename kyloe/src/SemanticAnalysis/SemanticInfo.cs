@@ -32,6 +32,19 @@ namespace Kyloe.Semantics
             }
         }
 
+        public static bool IsUnaryOperationMethodName(string name)
+        {
+            switch (name)
+            {
+                case "op_UnaryNegation":
+                case "op_OnesComplement":
+                case "op_LogicalNot":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static string? GetBinaryOperationMethodName(BinaryOperation operation)
         {
             switch (operation)
@@ -54,6 +67,31 @@ namespace Kyloe.Semantics
                     return null;
             }
         }
+
+        public static bool IsBinaryOperationMethodName(string name)
+        {
+            switch (name)
+            {
+                case "op_Addition":
+                case "op_Subtraction":
+                case "op_Multiply":
+                case "op_Division":
+                case "op_Modulus":
+                case "op_BitwiseAnd":
+                case "op_BitwiseOr":
+                case "op_ExclusiveOr":
+                case "op_Equality":
+                case "op_Inequality":
+                case "op_LessThanOrEqual":
+                case "op_GreaterThanOrEqual":
+                case "op_LessThan":
+                case "op_GreaterThan":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
 
         internal static BinaryOperation GetBinaryOperation(SyntaxTokenType type)
         {
