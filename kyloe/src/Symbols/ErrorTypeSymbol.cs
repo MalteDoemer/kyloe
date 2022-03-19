@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
@@ -5,23 +6,40 @@ namespace Kyloe.Symbols
 {
     public partial class TypeSystem
     {
-        private sealed class ErrorTypeSymbol : IErrorTypeSymbol
+        private sealed class ErrorTypeSymbol : TypeSymbol, IErrorTypeSymbol
         {
-            public string Name => "<error>";
+            public override string Name => "<error>";
 
-            public bool IsErrorType => true;
+            public override SymbolKind Kind => SymbolKind.ErrorTypeSymbol;
 
-            public SymbolKind Kind => SymbolKind.ErrorSymbol;
+            public override AccessModifiers AccessModifiers => throw new System.NotImplementedException();
 
-            public IEnumerable<IMethodSymbol> Methods => ImmutableArray<IMethodSymbol>.Empty;
+            public override IEnumerable<IMethodSymbol> Methods => ImmutableArray<IMethodSymbol>.Empty;
 
-            public IEnumerable<ISymbol> Members => ImmutableArray<ISymbol>.Empty;
+            public override IEnumerable<IFieldSymbol> Fields => ImmutableArray<IFieldSymbol>.Empty;
 
-            public AccessModifiers AccessModifiers => throw new System.NotImplementedException();
+            public override IEnumerable<ISymbol> Members => ImmutableArray<ISymbol>.Empty;
 
-            public bool Equals(ISymbol? other) => other is IErrorTypeSymbol;
+            public override IEnumerable<IClassTypeSymbol> NestedClasses => ImmutableArray<IClassTypeSymbol>.Empty;
 
-            public IEnumerable<ISymbol> LookupMembers(string name) => ImmutableArray<ISymbol>.Empty;
+            public override bool Equals(ISymbol? other) => other is IErrorTypeSymbol;
+
+            public override IEnumerable<ISymbol> LookupMembers(string name) => ImmutableArray<ISymbol>.Empty;
+
+            public override TypeSymbol AddMethod(MethodSymbol method)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override TypeSymbol AddNestedClass(ClassTypeSymbol nestedClass)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override TypeSymbol SetAccessModifiers(AccessModifiers modifiers)
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }
