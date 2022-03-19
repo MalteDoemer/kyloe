@@ -1,49 +1,55 @@
+using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Kyloe.Symbols
 {
     public partial class TypeSystem
     {
-        private abstract class TypeSymbol : ITypeSymbol
+        private sealed class TypeSymbol : ITypeSymbol
         {
-            public abstract string Name { get; }
-            public abstract SymbolKind Kind { get; }
-            public abstract AccessModifiers AccessModifiers { get; }
-            public abstract IEnumerable<IMethodSymbol> Methods { get; }
-            public abstract IEnumerable<IFieldSymbol> Fields { get; }
-            public abstract IEnumerable<IClassTypeSymbol> NestedClasses { get; }
-            public abstract IEnumerable<ISymbol> Members { get; }
+            private readonly Dictionary<string, List<MethodSymbol>> methods;
 
-            public abstract bool Equals(ISymbol? other);
-            public abstract IEnumerable<ISymbol> LookupMembers(string name);
+            public TypeSymbol(string name)
+            {
+                Name = name;
+                methods = new Dictionary<string, List<MethodSymbol>>();
+            }
 
-            /// <Summary>
-            /// Sets the access modifiers and returns this.
-            /// </Summary>
-            /// /// <Exceptions>
-            /// System.NotSupportedException():
-            ///     If the type does not support adding methods.
-            /// </Exceptions>
-            public abstract TypeSymbol SetAccessModifiers(AccessModifiers modifiers);
+            public string Name { get; }
 
-            /// <Summary>
-            /// Adds the method and returns this.
-            /// </Summary>
-            /// <Exceptions>
-            /// System.NotSupportedException():
-            ///     If the type does not support adding methods.
-            /// </Exceptions>
-            public abstract TypeSymbol AddMethod(MethodSymbol method);
+            public SymbolKind Kind => SymbolKind.TypeSymbol;
 
-            /// <Summary>
-            /// Adds the nested class and returns this.
-            /// </Summary>
-            /// System.NotSupportedException():
-            ///     If the type does not support adding nested classes.
-            /// </Exceptions>
-            public abstract TypeSymbol AddNestedClass(ClassTypeSymbol nestedClass);
+            public IEnumerable<IMethodSymbol> Methods => methods.Values.SelectMany(list => list);
 
+            public IEnumerable<ISymbol> Members => Methods;
+
+            public bool IsErrorType => false;
+
+            public IEnumerable<ISymbol> LookupMembers(string name)
+            {
+                if (methods.TryGetValue(name, out var list))
+                    foreach (var method in list)
+                        yield return method;
+            }
+
+            public TypeSymbol AddMethod(MethodSymbol method)
+            {
+                if (methods.TryGetValue(method.Name, out var list))
+                {
+                    list.Add(method);
+                }
+                else
+                {
+                    methods[method.Name] = new List<MethodSymbol>();
+                    methods[method.Name].Add(method);
+                }
+
+                return this;
+            }
+
+            public override string ToString() => Name;
+
+            public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
         }
     }
 }

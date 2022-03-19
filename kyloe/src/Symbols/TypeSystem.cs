@@ -1,7 +1,8 @@
 using System;
 using Mono.Cecil;
 using Kyloe.Semantics;
-using System.Diagnostics;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Kyloe.Symbols
 {
@@ -36,20 +37,20 @@ namespace Kyloe.Symbols
 
             var rootNamespace = new NamespaceSymbol("");
 
-            var charType = GetOrDeclareType(rootNamespace, ts.Char.Resolve());
-            var i8Type = GetOrDeclareType(rootNamespace, ts.SByte.Resolve());
-            var i16Type = GetOrDeclareType(rootNamespace, ts.Int16.Resolve());
-            var i32Type = GetOrDeclareType(rootNamespace, ts.Int32.Resolve());
-            var i64Type = GetOrDeclareType(rootNamespace, ts.Int64.Resolve());
-            var u8Type = GetOrDeclareType(rootNamespace, ts.Byte.Resolve());
-            var u16Type = GetOrDeclareType(rootNamespace, ts.UInt16.Resolve());
-            var u32Type = GetOrDeclareType(rootNamespace, ts.UInt32.Resolve());
-            var u64Type = GetOrDeclareType(rootNamespace, ts.UInt64.Resolve());
-            var floatType = GetOrDeclareType(rootNamespace, ts.Single.Resolve());
-            var doubleType = GetOrDeclareType(rootNamespace, ts.Double.Resolve());
-            var boolType = GetOrDeclareType(rootNamespace, ts.Boolean.Resolve());
-            var stringType = GetOrDeclareType(rootNamespace, ts.String.Resolve());
-            var emtpyType = GetOrDeclareType(rootNamespace, ts.Void.Resolve());
+            var charType = GetOrDeclareType(rootNamespace, ts.Char);
+            var i8Type = GetOrDeclareType(rootNamespace, ts.SByte);
+            var i16Type = GetOrDeclareType(rootNamespace, ts.Int16);
+            var i32Type = GetOrDeclareType(rootNamespace, ts.Int32);
+            var i64Type = GetOrDeclareType(rootNamespace, ts.Int64);
+            var u8Type = GetOrDeclareType(rootNamespace, ts.Byte);
+            var u16Type = GetOrDeclareType(rootNamespace, ts.UInt16);
+            var u32Type = GetOrDeclareType(rootNamespace, ts.UInt32);
+            var u64Type = GetOrDeclareType(rootNamespace, ts.UInt64);
+            var floatType = GetOrDeclareType(rootNamespace, ts.Single);
+            var doubleType = GetOrDeclareType(rootNamespace, ts.Double);
+            var boolType = GetOrDeclareType(rootNamespace, ts.Boolean);
+            var stringType = GetOrDeclareType(rootNamespace, ts.String);
+            var emtpyType = GetOrDeclareType(rootNamespace, ts.Void);
 
             TypeSymbol GetBuiltinType(BuiltinType type)
             {
@@ -111,121 +112,12 @@ namespace Kyloe.Symbols
 
         private static TypeSymbol GetOrDeclareType(NamespaceSymbol rootNamespace, TypeReference reference)
         {
-            if (reference.IsArray)
-            {
-                var arrayRef = (ArrayType)reference;
-                var elementType = GetOrDeclareType(rootNamespace, arrayRef.ElementType);
-                return new ArrayTypeSymbol(elementType);
-            }
-            else if (reference.IsByReference)
-            {
+            var current = rootNamespace;
 
-                throw new System.NotImplementedException();
-            }
-            else if (reference.IsFunctionPointer)
-            {
-                throw new System.NotImplementedException();
-            }
-            else if (reference.IsPointer)
-            {
-                throw new System.NotImplementedException();
-            }
-            else if (reference.IsNested)
-            {
-                var declaringType = GetOrDeclareType(rootNamespace, reference.DeclaringType);
-                return declaringType.GetOrAddNestedType(reference.Name);
-            }
-            else
-            {
-                var current = rootNamespace;
+            foreach (var ns in reference.Namespace.Split("."))
+                current = current.GetOrAddNamespace(ns);
 
-                foreach (var ns in reference.Namespace.Split("."))
-                    current = current.GetOrAddNamespace(ns);
-
-                return current.GetOrAddTypeSymbol(reference.Name);
-            }
-        }
-
-        private static TypeSymbol DefineTypeRecursive(NamespaceSymbol rootNamespace, TypeDefinition typeDefinition)
-        {
-            var symbol = GetOrDeclareType(rootNamespace, typeDefinition);
-            return DefineTypeSymbol(rootNamespace, typeDefinition, symbol);
-
-            // switch (symbol.Kind)
-            // {
-            //     case SymbolKind.TypeSymbol:
-            //         return DefineTypeSymbol(rootNamespace, typeDefinition, (TypeSymbol)symbol);
-            //     default:
-            //         throw new Exception($"unexpected symbol kind: {symbol.Kind}");
-            // }
-        }
-
-        private static TypeSymbol DefineTypeSymbol(NamespaceSymbol rootNamespace, TypeDefinition typeDefinition, TypeSymbol symbol)
-        {
-            symbol.SetAccessModifiers(GetAccessModifiersForType(typeDefinition));
-
-            foreach (var nestedType in typeDefinition.NestedTypes)
-            {
-                if (nestedType.HasGenericParameters)
-                    continue;
-                var type = DefineTypeRecursive(rootNamespace, nestedType);
-            }
-
-            foreach (var methodDefinition in typeDefinition.Methods)
-            {
-                if (methodDefinition.HasGenericParameters)
-                    continue;
-
-                symbol.AddMethod(CreateMethod(rootNamespace, methodDefinition));
-            }
-
-            return symbol;
-        }
-
-        private static bool IsOperator(MethodDefinition methodDefinition)
-        {
-            return methodDefinition.IsSpecialName
-                && (SemanticInfo.IsBinaryOperationMethodName(methodDefinition.Name)
-                || SemanticInfo.IsUnaryOperationMethodName(methodDefinition.Name));
-        }
-
-        private static AccessModifiers GetAccessModifiersForType(TypeDefinition typeDefinition)
-        {
-            if (typeDefinition.IsPublic)
-                return AccessModifiers.Public;
-            else if (typeDefinition.IsNotPublic)
-                return AccessModifiers.Internal;
-            else if (typeDefinition.IsNestedPublic)
-                return AccessModifiers.Public;
-            else if (typeDefinition.IsNestedPrivate)
-                return AccessModifiers.Private;
-            else if (typeDefinition.IsNestedAssembly)
-                return AccessModifiers.Internal;
-            else if (typeDefinition.IsNestedFamily)
-                return AccessModifiers.Protected;
-            else if (typeDefinition.IsNestedFamilyOrAssembly)
-                return AccessModifiers.InternalOrProtected;
-            else if (typeDefinition.IsNestedFamilyAndAssembly)
-                return AccessModifiers.InternalAndProtected;
-
-            throw new ArgumentException(nameof(typeDefinition), $"Invalid type: {typeDefinition}");
-        }
-
-        private static MethodSymbol CreateMethod(NamespaceSymbol rootNamespace, MethodDefinition methodDefinition)
-        {
-            var method = new MethodSymbol(methodDefinition.Name);
-
-            method.SetReturnType(GetOrDeclareType(rootNamespace, methodDefinition.ReturnType));
-            method.SetStatic(methodDefinition.IsStatic);
-            method.SetOperator(IsOperator(methodDefinition));
-
-            foreach (var paramDefinition in methodDefinition.Parameters)
-            {
-                var parameter = new ParameterSymbol(paramDefinition.Name);
-                parameter.SetType(GetOrDeclareType(rootNamespace, paramDefinition.ParameterType));
-            }
-
-            return method;
+            return current.GetOrAddTypeSymbol(reference.Name);
         }
 
         private static MethodSymbol CreateBuiltinBinaryOperator(BinaryOperation op, TypeSymbol ret, TypeSymbol left, TypeSymbol right)

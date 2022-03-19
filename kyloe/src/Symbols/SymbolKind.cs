@@ -1,13 +1,12 @@
 namespace Kyloe.Symbols
 {
-    public enum  SymbolKind
+    public enum SymbolKind
     {
         NamespaceSymbol,
+        TypeSymbol,
         MethodSymbol,
         ParameterSymbol,
         LocalVariableSymbol,
-        ErrorTypeSymbol,
-        ArrayTypeSymbol,
-        ClassTypeSymbol,
+        ErrorSymbol,
     }
 }
