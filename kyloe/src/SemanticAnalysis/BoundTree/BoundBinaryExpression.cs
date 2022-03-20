@@ -12,13 +12,10 @@ namespace Kyloe.Semantics
             ResultType = result;
         }
 
-        public ITypeSymbol ResultType { get; }
+        public override ITypeSymbol ResultType { get; }
         public BoundExpression LeftExpression { get; }
         public BoundOperation Operation { get; }
         public BoundExpression RightExpression { get; }
-
-
-        public override ISymbol ResultSymbol => ResultType;
 
         public override BoundNodeType Type => BoundNodeType.BoundBinaryExpression;
 

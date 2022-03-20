@@ -19,6 +19,7 @@ namespace Kyloe.Symbols
 
     public interface IClassTypeSymbol : ITypeSymbol
     {
+        IEnumerable<IMethodSymbol> Constructors { get; }
         IEnumerable<IClassTypeSymbol> NestedClasses { get; }
     }
 }

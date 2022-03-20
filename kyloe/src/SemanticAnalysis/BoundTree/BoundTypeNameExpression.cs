@@ -11,7 +11,7 @@ namespace Kyloe.Semantics
 
         public ITypeSymbol TypeSymbol { get; }
 
-        public override ISymbol ResultSymbol => TypeSymbol;
+        public override ITypeSymbol ResultType => TypeSymbol;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

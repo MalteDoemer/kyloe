@@ -4,14 +4,13 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundInvalidExpression : BoundExpression
     {
-        private readonly ITypeSymbol errorSymbol;
 
         public BoundInvalidExpression(TypeSystem typeSystem)
         {
-            errorSymbol = typeSystem.Error;
+            ResultType = typeSystem.Error;
         }
 
-        public override ISymbol ResultSymbol => errorSymbol;
+        public override ITypeSymbol ResultType { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundInvalidExpression;
 

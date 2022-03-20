@@ -9,14 +9,14 @@ namespace Kyloe.Semantics
             LeftExpression = leftExpression;
             Operation = operation;
             RightExpression = rightExpression;
-            ResultSymbol = typeSystem.Empty;
+            ResultType = typeSystem.Empty;
         }
 
         public BoundExpression LeftExpression { get; }
         public AssignmentOperation Operation { get; }
         public BoundExpression RightExpression { get; }
 
-        public override ISymbol ResultSymbol { get; }
+        public override ITypeSymbol ResultType { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

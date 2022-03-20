@@ -11,9 +11,7 @@ namespace Kyloe.Semantics
         }
 
         public object Value { get; }
-        public ITypeSymbol ResultType { get; }
-
-        public override ISymbol ResultSymbol => ResultType;
+        public override ITypeSymbol ResultType { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundLiteralExpression;
 

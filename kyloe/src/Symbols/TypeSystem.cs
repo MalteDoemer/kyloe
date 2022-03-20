@@ -191,6 +191,8 @@ namespace Kyloe.Symbols
                            .SetReadonly(field.IsInitOnly)
                            .SetStatic(field.IsStatic)
                            .SetType(GetOrDeclareType(field.FieldType));
+
+                type.AddField(fieldSymbol);
             }
 
             foreach (var property in definition.Properties)
@@ -215,11 +217,45 @@ namespace Kyloe.Symbols
 
                 propertySymbol.SetStatic(property.HasThis)
                               .SetType(GetOrDeclareType(property.PropertyType));
+
+                type.AddProperty(propertySymbol);
             }
 
             foreach (var method in definition.Methods)
             {
-                // TODO
+                if (method.IsSpecialName)
+                {
+                    if (method.Name == ".ctor" || method.Name == ".cctor")
+                    {
+                        type.AddCtor(CreateMethodSymbol(method));
+                    }
+                    else if (SemanticInfo.GetOperationFromMethodName(method.Name) is BoundOperation op)
+                    {
+                        var methodSymbol = CreateMethodSymbol(method);
+                        var operationSymbol = new OperationSymbol(op);
+
+                        operationSymbol.SetUnderlyingMethod(methodSymbol)
+                                       .SetAccessModifiers(methodSymbol.AccessModifiers)
+                                       .SetBuiltin(false);
+
+                        type.AddOperation(operationSymbol);
+                    }
+                    else if (method.IsGetter || method.IsSetter)
+                    {
+                        continue;
+                    }
+                    else if (method.Name == "op_Implicit") 
+                    {
+                        
+                        continue;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"found unhandled special named method: {method}");
+                        continue;
+                    }
+                }
+                type.AddMethod(CreateMethodSymbol(method));
             }
 
             return type;
@@ -346,7 +382,7 @@ namespace Kyloe.Symbols
 
 
             var operation = new OperationSymbol(op)
-                        .SetUnerlyingMethod(method)
+                        .SetUnderlyingMethod(method)
                         .SetBuiltin(true);
 
             return operation;
@@ -362,7 +398,7 @@ namespace Kyloe.Symbols
                         .SetStatic(true);
 
             var operation = new OperationSymbol(op)
-                        .SetUnerlyingMethod(method)
+                        .SetUnderlyingMethod(method)
                         .SetBuiltin(true);
 
             return operation;

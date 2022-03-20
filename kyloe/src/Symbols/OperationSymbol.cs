@@ -37,7 +37,7 @@ namespace Kyloe.Symbols
                 return this;
             }
 
-            public OperationSymbol SetUnerlyingMethod(IMethodSymbol method)
+            public OperationSymbol SetUnderlyingMethod(IMethodSymbol method)
             {
                 this.underlyingMethod = method;
                 return this;

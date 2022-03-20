@@ -11,7 +11,7 @@ namespace Kyloe.Semantics
 
         public ILocalVariableSymbol VariableSymbol { get; }
 
-        public override ISymbol ResultSymbol => VariableSymbol.Type;
+        public override ITypeSymbol ResultType => VariableSymbol.Type;
 
         public override BoundNodeType Type => BoundNodeType.BoundLocalVariableExpression;
 

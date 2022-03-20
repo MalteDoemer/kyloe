@@ -9,6 +9,7 @@ namespace Kyloe.Symbols
         {
             protected AccessModifiers accessModifiers;
 
+            protected readonly Dictionary<string, List<MethodSymbol>> constructors;
             protected readonly Dictionary<string, ClassTypeSymbol> nestedClasses;
             protected readonly Dictionary<string, List<OperationSymbol>> operations;
             protected readonly Dictionary<string, List<MethodSymbol>> methods;
@@ -18,6 +19,7 @@ namespace Kyloe.Symbols
             public TypeSymbolBase(string name)
             {
                 Name = name;
+                constructors = new Dictionary<string, List<MethodSymbol>>();
                 nestedClasses = new Dictionary<string, ClassTypeSymbol>();
                 operations = new Dictionary<string, List<OperationSymbol>>();
                 methods = new Dictionary<string, List<MethodSymbol>>();
@@ -39,7 +41,9 @@ namespace Kyloe.Symbols
 
             public IEnumerable<IFieldSymbol> Fields => fields.Values;
 
-            public IEnumerable<IMemberSymbol> Members => NestedClasses.Cast<IMemberSymbol>().Concat(Operations).Concat(Methods).Concat(Properties).Concat(Fields);
+            public IEnumerable<IMethodSymbol> Constructors => constructors.Values.SelectMany(list => list);
+
+            public IEnumerable<IMemberSymbol> Members => NestedClasses.Cast<IMemberSymbol>().Concat(Operations).Concat(Constructors).Concat(Methods).Concat(Properties).Concat(Fields);
 
             public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
 
@@ -91,6 +95,22 @@ namespace Kyloe.Symbols
                     var list = new List<MethodSymbol>();
                     list.Add(method);
                     methods.Add(method.Name, list);
+                }
+
+                return this;
+            }
+
+            public TypeSymbolBase AddCtor(MethodSymbol ctor)
+            {
+                if (constructors.TryGetValue(ctor.Name, out var ctorList))
+                {
+                    ctorList.Add(ctor);
+                }
+                else
+                {
+                    var list = new List<MethodSymbol>();
+                    list.Add(ctor);
+                    constructors.Add(ctor.Name, list);
                 }
 
                 return this;

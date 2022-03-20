@@ -13,9 +13,8 @@ namespace Kyloe.Semantics
 
         public BoundExpression Expression { get; }
         public BoundOperation Operation { get; }
-        public ITypeSymbol ResultType { get; }
-
-        public override ISymbol ResultSymbol => ResultType;
+        
+        public override ITypeSymbol ResultType { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundUnaryExpression;
 

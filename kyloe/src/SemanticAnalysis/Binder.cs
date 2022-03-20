@@ -70,11 +70,11 @@ namespace Kyloe.Semantics
             return !expectedType.Equals(rightType);
         }
 
-        private (BoundExpression, ISymbol) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeLValue, ITypeSymbol? expectedType = null)
+        private (BoundExpression, ITypeSymbol) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeLValue, ITypeSymbol? expectedType = null)
         {
             var bound = BindExpression(expr);
 
-            if (bound.ResultSymbol is IErrorTypeSymbol)
+            if (bound.ResultType is IErrorTypeSymbol)
                 return (bound, typeSystem.Error);
 
             if (mustBeValue && !bound.IsValue)
@@ -89,13 +89,13 @@ namespace Kyloe.Semantics
                 return (bound, typeSystem.Error);
             }
 
-            if (IsTypeMissmatch(expectedType, bound.ResultSymbol as ITypeSymbol))
+            if (IsTypeMissmatch(expectedType, bound.ResultType))
             {
-                diagnostics.Add(new MissmatchedTypeError(expr, expectedType!, bound.ResultSymbol));
+                diagnostics.Add(new MissmatchedTypeError(expr, expectedType!, bound.ResultType));
                 return (bound, typeSystem.Error);
             }
 
-            return (bound, bound.ResultSymbol);
+            return (bound, bound.ResultType);
         }
 
         public BoundNode Bind(SyntaxNode node)
@@ -200,7 +200,7 @@ namespace Kyloe.Semantics
             else if (expr is BoundTypeNameMemberAccessExpression typeNameMemberAccess)
                 return new BoundTypeClause(expr, typeNameMemberAccess.TypeSymbol);
 
-            if (expr.ResultSymbol is not IErrorTypeSymbol)
+            if (expr.ResultType is not IErrorTypeSymbol)
                 diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
 
             return new BoundTypeClause(expr, typeSystem.Error);
@@ -285,20 +285,28 @@ namespace Kyloe.Semantics
             var right = BindExpression(expr.Expression);
             var name = ExtractName(expr.IdentifierExpression.NameToken);
 
-            if (right.ResultSymbol is IErrorTypeSymbol)
+            if (right.ResultType is IErrorTypeSymbol)
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
 
-            if (!(right.ResultSymbol is IMemberContainer symbolContainer))
+            IMemberContainer memberContainer;
+
+            if (right is BoundNamespaceExpression nsExpression)
+                memberContainer = nsExpression.NamespaceSymbol;
+            else if (right is BoundNamespaceMemberAccessExpression namespaceMemberAccessExpression)
+                memberContainer = namespaceMemberAccessExpression.NamespaceSymbol;
+            else if (right.ResultType is IMemberContainer m)
+                memberContainer = m;
+            else
             {
-                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultType, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
             }
 
-            var members = symbolContainer.LookupMembers(name);
+            var members = memberContainer.LookupMembers(name);
 
             if (members.Count() == 0)
             {
-                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultType, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
             }
 
@@ -330,6 +338,16 @@ namespace Kyloe.Semantics
                     .Cast<IMethodSymbol>()
                     .Where(method => method.IsStatic);
 
+                var staticFields = members
+                    .Where(member => member.Kind == SymbolKind.FieldSymbol)
+                    .Cast<IFieldSymbol>()
+                    .Where(field => field.IsStatic);
+
+                var staticProperties = members
+                    .Where(member => member.Kind == SymbolKind.PropertySymbol)
+                    .Cast<IPropertySymbol>()
+                    .Where(property => property.IsStatic);
+
                 var typeNames = members
                     .Where(member => member.Kind == SymbolKind.ClassTypeSymbol)
                     .Cast<ITypeSymbol>();
@@ -339,29 +357,38 @@ namespace Kyloe.Semantics
                     .Cast<INamespaceSymbol>();
 
                 int staticMethodCount = staticMethods.Count();
+                int staticFieldCount = staticFields.Count();
+                int staticPropertyCount = staticProperties.Count();
                 int typeNameCount = typeNames.Count();
                 int namespaceCount = namespaces.Count();
 
                 if (staticMethodCount > 0)
                 {
-                    Debug.Assert(typeNameCount == 0 && namespaceCount == 0);
+                    throw new System.NotImplementedException();
+                }
 
+                if (staticFieldCount > 0)
+                {
+                    Debug.Assert(staticFieldCount == 1);
+                    return new BoundFieldMemberAccessExpression(staticFields.First(), right, name);
+                }
+
+                if (staticPropertyCount > 0)
+                {
                     throw new System.NotImplementedException();
                 }
 
                 if (typeNameCount > 0)
                 {
-                    Debug.Assert(namespaceCount == 0 && typeNameCount == 1);
                     return new BoundTypeNameMemberAccessExpression(typeNames.First(), right, name);
                 }
 
                 if (namespaceCount > 0)
                 {
-                    Debug.Assert(namespaceCount == 1);
-                    return new BoundNamespaceMemberAccessExpression(namespaces.First(), right, name);
+                    return new BoundNamespaceMemberAccessExpression(typeSystem, namespaces.First(), right, name);
                 }
 
-                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultType, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
             }
         }
@@ -381,7 +408,7 @@ namespace Kyloe.Semantics
                 if (symbol is ITypeSymbol typeSymbol)
                     return new BoundTypeNameExpression(typeSymbol);
                 else if (symbol is INamespaceSymbol namespaceSymbol)
-                    return new BoundNamespaceExpression(namespaceSymbol);
+                    return new BoundNamespaceExpression(typeSystem, namespaceSymbol);
             }
 
             diagnostics.Add(new NonExistantNameError(expr.NameToken));
@@ -403,7 +430,7 @@ namespace Kyloe.Semantics
             if (resultType is not null)
                 return new BoundBinaryExpression(left, op, right, resultType);
 
-            diagnostics.Add(new UnsupportedBinaryOperation(expr, left.ResultSymbol, right.ResultSymbol));
+            diagnostics.Add(new UnsupportedBinaryOperation(expr, left.ResultType, right.ResultType));
 
             return new BoundBinaryExpression(left, op, right, typeSystem.Error);
         }
@@ -418,7 +445,7 @@ namespace Kyloe.Semantics
             if (resultType is not null)
                 return new BoundUnaryExpression(childExpression, op, resultType);
 
-            diagnostics.Add(new UnsupportedUnaryOperation(expr, childExpression.ResultSymbol));
+            diagnostics.Add(new UnsupportedUnaryOperation(expr, childExpression.ResultType));
 
             return new BoundUnaryExpression(childExpression, op, typeSystem.Error);
         }
@@ -479,14 +506,18 @@ namespace Kyloe.Semantics
         {
             Debug.Assert(op.IsBinaryOperation());
 
-            if (left.ResultSymbol is IErrorTypeSymbol || right.ResultSymbol is IErrorTypeSymbol)
+            var leftType = left.ResultType;
+            var rightType = right.ResultType;
+
+            if (leftType is IErrorTypeSymbol || rightType is IErrorTypeSymbol)
                 return typeSystem.Error;
 
             if (!left.IsValue || !right.IsValue)
                 return null;
 
-            if (!(left.ResultSymbol is ITypeSymbol leftType) || !(right.ResultSymbol is ITypeSymbol rightType))
-                return null;
+
+            // if (!(left.ResultSymbol is ITypeSymbol leftType) || !(right.ResultSymbol is ITypeSymbol rightType))
+            //     return null;
 
             var name = SemanticInfo.GetMethodNameFromOperation(op);
 
@@ -517,13 +548,12 @@ namespace Kyloe.Semantics
         {
             Debug.Assert(op.IsUnaryOperation());
 
-            if (expr.ResultSymbol is IErrorTypeSymbol)
+            var type = expr.ResultType;
+
+            if (type is IErrorTypeSymbol)
                 return typeSystem.Error;
 
             if (!expr.IsValue)
-                return null;
-
-            if (!(expr.ResultSymbol is ITypeSymbol type))
                 return null;
 
             var name = SemanticInfo.GetMethodNameFromOperation(op);
