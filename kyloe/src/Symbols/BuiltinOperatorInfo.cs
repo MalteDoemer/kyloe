@@ -25,59 +25,59 @@ namespace Kyloe.Symbols
 
         private static class BuiltinOperatorInfo
         {
-            public static readonly ImmutableArray<BinaryOperation> ArithmeticOperations = ImmutableArray.Create<BinaryOperation>
+            public static readonly ImmutableArray<BoundOperation> ArithmeticOperations = ImmutableArray.Create<BoundOperation>
             (
-                BinaryOperation.Addition,
-                BinaryOperation.Subtraction,
-                BinaryOperation.Multiplication,
-                BinaryOperation.Division,
-                BinaryOperation.Modulo
+                BoundOperation.Addition,
+                BoundOperation.Subtraction,
+                BoundOperation.Multiplication,
+                BoundOperation.Division,
+                BoundOperation.Modulo
             );
 
 
-            public static readonly ImmutableArray<BinaryOperation> BitwiseOperations = ImmutableArray.Create<BinaryOperation>
+            public static readonly ImmutableArray<BoundOperation> BitwiseOperations = ImmutableArray.Create<BoundOperation>
             (
-                BinaryOperation.BitwiseAnd,
-                BinaryOperation.BitwiseOr,
-                BinaryOperation.BitwiseXor
+                BoundOperation.BitwiseAnd,
+                BoundOperation.BitwiseOr,
+                BoundOperation.BitwiseXor
             );
 
-            public static readonly ImmutableArray<BinaryOperation> EqualityOperations = ImmutableArray.Create<BinaryOperation>
+            public static readonly ImmutableArray<BoundOperation> EqualityOperations = ImmutableArray.Create<BoundOperation>
             (
-                BinaryOperation.Equal,
-                BinaryOperation.NotEqual
+                BoundOperation.Equal,
+                BoundOperation.NotEqual
             );
 
-            public static readonly ImmutableArray<BinaryOperation> ComparisonOperations = ImmutableArray.Create<BinaryOperation>
+            public static readonly ImmutableArray<BoundOperation> ComparisonOperations = ImmutableArray.Create<BoundOperation>
             (
-                BinaryOperation.LessThan,
-                BinaryOperation.GreaterThan,
-                BinaryOperation.LessThanOrEqual,
-                BinaryOperation.GreaterThanOrEqual
+                BoundOperation.LessThan,
+                BoundOperation.GreaterThan,
+                BoundOperation.LessThanOrEqual,
+                BoundOperation.GreaterThanOrEqual
             );
 
-            public static readonly ImmutableArray<UnaryOperation> Negation = ImmutableArray.Create<UnaryOperation>
+            public static readonly ImmutableArray<BoundOperation> Negation = ImmutableArray.Create<BoundOperation>
             (
-                UnaryOperation.Negation
+                BoundOperation.Negation
             );
 
-            public static readonly ImmutableArray<UnaryOperation> BitwiseNot = ImmutableArray.Create<UnaryOperation>
+            public static readonly ImmutableArray<BoundOperation> BitwiseNot = ImmutableArray.Create<BoundOperation>
             (
-                UnaryOperation.BitwiseNot
+                BoundOperation.BitwiseNot
             );
 
-            public static readonly ImmutableArray<UnaryOperation> LogicalNot = ImmutableArray.Create<UnaryOperation>
+            public static readonly ImmutableArray<BoundOperation> LogicalNot = ImmutableArray.Create<BoundOperation>
             (
-                UnaryOperation.LogicalNot
+                BoundOperation.LogicalNot
             );
 
-            public static readonly ImmutableArray<UnaryOperation> NegationAndBitwiseNot = Negation.Concat(BitwiseNot).ToImmutableArray();
+            public static readonly ImmutableArray<BoundOperation> NegationAndBitwiseNot = Negation.Concat(BitwiseNot).ToImmutableArray();
 
-            public static readonly ImmutableArray<BinaryOperation> EqualityAndComparisonOperations = EqualityOperations.Concat(ComparisonOperations).ToImmutableArray();
+            public static readonly ImmutableArray<BoundOperation> EqualityAndComparisonOperations = EqualityOperations.Concat(ComparisonOperations).ToImmutableArray();
 
-            public static readonly ImmutableArray<BinaryOperation> ArithmeticAndBitwiseOperations = ArithmeticOperations.Concat(BitwiseOperations).ToImmutableArray();
+            public static readonly ImmutableArray<BoundOperation> ArithmeticAndBitwiseOperations = ArithmeticOperations.Concat(BitwiseOperations).ToImmutableArray();
 
-            public static readonly ImmutableArray<(ImmutableArray<BinaryOperation> ops, BuiltinType ret, BuiltinType lhs, BuiltinType rhs)> BinaryOperations = ImmutableArray.Create<(ImmutableArray<BinaryOperation>, BuiltinType, BuiltinType, BuiltinType)>
+            public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinType ret, BuiltinType lhs, BuiltinType rhs)> BinaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation>, BuiltinType, BuiltinType, BuiltinType)>
             (
                 (ArithmeticAndBitwiseOperations, BuiltinType.I8, BuiltinType.I8, BuiltinType.I8),
                 (ArithmeticAndBitwiseOperations, BuiltinType.I16, BuiltinType.I16, BuiltinType.I16),
@@ -113,7 +113,7 @@ namespace Kyloe.Symbols
 
             );
 
-            public static readonly ImmutableArray<(ImmutableArray<UnaryOperation> ops, BuiltinType ret, BuiltinType arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<UnaryOperation> ops, BuiltinType ret, BuiltinType arg)>
+            public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinType ret, BuiltinType arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation> ops, BuiltinType ret, BuiltinType arg)>
             (
                 (NegationAndBitwiseNot, BuiltinType.I8, BuiltinType.I8),
                 (NegationAndBitwiseNot, BuiltinType.I16, BuiltinType.I16),

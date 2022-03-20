@@ -10,12 +10,12 @@ namespace Kyloe.Symbols
         {
             private readonly Dictionary<string, NamespaceSymbol> namespaces;
 
-            private readonly Dictionary<string, TypeSymbol> types;
+            private readonly Dictionary<string, ClassTypeSymbol> types;
 
             public NamespaceSymbol(string name)
             {
                 Name = name;
-                types = new Dictionary<string, TypeSymbol>();
+                types = new Dictionary<string, ClassTypeSymbol>();
                 namespaces = new Dictionary<string, NamespaceSymbol>();
             }
 
@@ -27,9 +27,11 @@ namespace Kyloe.Symbols
 
             public IEnumerable<INamespaceSymbol> Namespaces => namespaces.Values;
 
-            public IEnumerable<ISymbol> Members => namespaces.Values.Cast<ISymbol>().Concat(types.Values);
+            public IEnumerable<IMemberSymbol> Members => namespaces.Values.Cast<IMemberSymbol>().Concat(types.Values);
 
-            public IEnumerable<ISymbol> LookupMembers(string name)
+            public AccessModifiers AccessModifiers => AccessModifiers.Public;
+
+            public IEnumerable<IMemberSymbol> LookupMembers(string name)
             {
                 if (namespaces.TryGetValue(name, out var @namespace))
                     yield return @namespace;
@@ -60,23 +62,23 @@ namespace Kyloe.Symbols
                 return @namespace;
             }
 
-            public NamespaceSymbol AddTypeSymbol(TypeSymbol type)
+            public NamespaceSymbol AddClassType(ClassTypeSymbol type)
             {
                 types.Add(type.Name, type);
                 return this;
             }
 
-            public TypeSymbol? GetTypeSymbol(string name)
+            public ClassTypeSymbol? GetClassType(string name)
             {
                 return types.GetValueOrDefault(name);
             }
 
-            public TypeSymbol GetOrAddTypeSymbol(string name)
+            public ClassTypeSymbol GetOrAddClassType(string name)
             {
                 if (types.TryGetValue(name, out var res))
                     return res;
 
-                var type = new TypeSymbol(name);
+                var type = new ClassTypeSymbol(name);
                 types.Add(name, type);
 
                 return type;

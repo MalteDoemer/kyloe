@@ -2,13 +2,11 @@ using System.Collections.Generic;
 
 namespace Kyloe.Symbols
 {
-    public interface IMethodSymbol : ISymbol
+    public interface IMethodSymbol : IMemberSymbol
     {
         ITypeSymbol ReturnType { get; }
         IEnumerable<IParameterSymbol> Parameters { get; }
 
-        bool IsOperator { get; }
-        bool IsBuiltinOperator { get; }
         bool IsStatic { get; }
     }
 }

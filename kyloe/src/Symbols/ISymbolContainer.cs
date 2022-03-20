@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 namespace Kyloe.Symbols
 {
-    public interface ISymbolContainer
+    public interface IMemberContainer
     {
-        IEnumerable<ISymbol> Members { get; }
-        IEnumerable<ISymbol> LookupMembers(string name);
+        IEnumerable<IMemberSymbol> Members { get; }
+        IEnumerable<IMemberSymbol> LookupMembers(string name);
     }
 }

@@ -9,9 +9,8 @@ namespace Kyloe.Symbols
         private sealed class MethodSymbol : IMethodSymbol
         {
             private ITypeSymbol? returnType;
+            private AccessModifiers accessModifiers;
             private bool isStatic;
-            private bool isOperator;
-            private bool isBuiltinOperator;
 
             private readonly Dictionary<string, ParameterSymbol> parameters;
 
@@ -25,13 +24,11 @@ namespace Kyloe.Symbols
 
             public SymbolKind Kind => SymbolKind.MethodSymbol;
 
+            public AccessModifiers AccessModifiers => accessModifiers;
+
             public ITypeSymbol ReturnType => returnType ?? throw new NotInitializedException(nameof(returnType));
 
             public IEnumerable<IParameterSymbol> Parameters => parameters.Values;
-
-            public bool IsBuiltinOperator => isBuiltinOperator;
-
-            public bool IsOperator => isOperator;
 
             public bool IsStatic => isStatic;
 
@@ -41,15 +38,9 @@ namespace Kyloe.Symbols
                 return this;
             }
 
-            public MethodSymbol SetOperator(bool op)
+            public MethodSymbol SetAccessModifiers(AccessModifiers modifiers)
             {
-                isOperator = op;
-                return this;
-            }
-
-            public MethodSymbol SetBuiltinOperator(bool builtin)
-            {
-                isBuiltinOperator = builtin;
+                this.accessModifiers = modifiers;
                 return this;
             }
 

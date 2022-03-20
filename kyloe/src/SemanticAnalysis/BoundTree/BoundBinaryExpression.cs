@@ -4,7 +4,7 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundBinaryExpression : BoundExpression
     {
-        public BoundBinaryExpression(BoundExpression leftExpression, BinaryOperation operation, BoundExpression rightExpression, ITypeSymbol result)
+        public BoundBinaryExpression(BoundExpression leftExpression, BoundOperation operation, BoundExpression rightExpression, ITypeSymbol result)
         {
             LeftExpression = leftExpression;
             Operation = operation;
@@ -14,7 +14,7 @@ namespace Kyloe.Semantics
 
         public ITypeSymbol ResultType { get; }
         public BoundExpression LeftExpression { get; }
-        public BinaryOperation Operation { get; }
+        public BoundOperation Operation { get; }
         public BoundExpression RightExpression { get; }
 
 

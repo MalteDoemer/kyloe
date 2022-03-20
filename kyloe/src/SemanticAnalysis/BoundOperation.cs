@@ -1,6 +1,6 @@
 namespace Kyloe.Semantics
 {
-    public enum BinaryOperation
+    public enum BoundOperation 
     {
         Addition,
         Subtraction,
@@ -18,5 +18,9 @@ namespace Kyloe.Semantics
         GreaterThanOrEqual,
         Equal,
         NotEqual,
+
+        Negation,
+        BitwiseNot,
+        LogicalNot,
     }
 }

@@ -258,7 +258,7 @@ namespace Kyloe.Semantics
             }
             else
             {
-                var binaryOperation = SemanticInfo.GetBinaryOperationForAssignment(operation);
+                var binaryOperation = SemanticInfo.GetOperationForAssignment(operation);
                 var binaryOperationResult = GetBinaryOperationResult(left, binaryOperation, right);
 
                 if (binaryOperationResult is null)
@@ -288,7 +288,7 @@ namespace Kyloe.Semantics
             if (right.ResultSymbol is IErrorTypeSymbol)
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
 
-            if (!(right.ResultSymbol is ISymbolContainer symbolContainer))
+            if (!(right.ResultSymbol is IMemberContainer symbolContainer))
             {
                 diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
@@ -331,7 +331,7 @@ namespace Kyloe.Semantics
                     .Where(method => method.IsStatic);
 
                 var typeNames = members
-                    .Where(member => member.Kind == SymbolKind.TypeSymbol)
+                    .Where(member => member.Kind == SymbolKind.ClassTypeSymbol)
                     .Cast<ITypeSymbol>();
 
                 var namespaces = members
@@ -475,8 +475,10 @@ namespace Kyloe.Semantics
             }
         }
 
-        private ITypeSymbol? GetBinaryOperationResult(BoundExpression left, BinaryOperation op, BoundExpression right)
+        private ITypeSymbol? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
         {
+            Debug.Assert(op.IsBinaryOperation());
+
             if (left.ResultSymbol is IErrorTypeSymbol || right.ResultSymbol is IErrorTypeSymbol)
                 return typeSystem.Error;
 
@@ -486,23 +488,24 @@ namespace Kyloe.Semantics
             if (!(left.ResultSymbol is ITypeSymbol leftType) || !(right.ResultSymbol is ITypeSymbol rightType))
                 return null;
 
-            var name = SemanticInfo.GetBinaryOperationMethodName(op);
+            var name = SemanticInfo.GetMethodNameFromOperation(op);
 
-            if (name is null)
-                throw new NotImplementedException();
-
-            var methods = leftType.LookupMembers(name).Where(
-                member => member is IMethodSymbol method &&
-                method.IsOperator &&
-                method.Parameters.Count() == 2 &&
-                method.Parameters.First().Type.Equals(leftType) &&
-                method.Parameters.Last().Type.Equals(rightType)
-            );
+            var methods = leftType
+                .LookupMembers(name)
+                .Where(member => member is IOperationSymbol)
+                .Cast<IOperationSymbol>()
+                .Where(operation => operation.Operation == op)
+                .Select(operation => operation.UnderlyingMethod)
+                .Where(
+                    method => method.Parameters.Count() == 2 &&
+                    method.Parameters.First().Type.Equals(leftType) &&
+                    method.Parameters.Last().Type.Equals(rightType)
+                );
 
             if (methods.Count() > 1)
-                Console.WriteLine($"Note: Found multiple methods for an operator: op={op}, left={leftType}, right={rightType}");
+                throw new Exception($"Found multiple methods for an operator: op={op}, left={leftType}, right={rightType}");
 
-            var method = methods.FirstOrDefault() as IMethodSymbol;
+            var method = methods.FirstOrDefault();
 
             if (method is null)
                 return null;
@@ -510,8 +513,10 @@ namespace Kyloe.Semantics
             return method.ReturnType;
         }
 
-        private ITypeSymbol? GetUnaryOperationResult(UnaryOperation op, BoundExpression expr)
+        private ITypeSymbol? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
         {
+            Debug.Assert(op.IsUnaryOperation());
+
             if (expr.ResultSymbol is IErrorTypeSymbol)
                 return typeSystem.Error;
 
@@ -521,22 +526,23 @@ namespace Kyloe.Semantics
             if (!(expr.ResultSymbol is ITypeSymbol type))
                 return null;
 
-            var name = SemanticInfo.GetUnaryOperationMethodName(op);
+            var name = SemanticInfo.GetMethodNameFromOperation(op);
 
-            if (name is null)
-                throw new NotImplementedException();
-
-            var methods = type.LookupMembers(name).Where(
-                member => member is IMethodSymbol method &&
-                method.IsOperator &&
-                method.Parameters.Count() == 1 &&
-                method.Parameters.First().Type.Equals(type)
-            );
+            var methods = type
+                .LookupMembers(name)
+                .Where(member => member is IOperationSymbol)
+                .Cast<IOperationSymbol>()
+                .Where(operation => operation.Operation == op)
+                .Select(operation => operation.UnderlyingMethod)
+                .Where(
+                    method => method.Parameters.Count() == 1 &&
+                    method.Parameters.First().Type.Equals(type)
+                );
 
             if (methods.Count() > 1)
-                Console.WriteLine($"Note: Found multiple methods for a unary operator: op={op}, type={type}");
+                throw new Exception($"Found multiple methods for an operator: op={op}, type={type}");
 
-            var method = methods.FirstOrDefault() as IMethodSymbol;
+            var method = methods.FirstOrDefault();
 
             if (method is null)
                 return null;
