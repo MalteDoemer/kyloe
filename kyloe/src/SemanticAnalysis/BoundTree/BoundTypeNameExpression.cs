@@ -1,17 +1,17 @@
 using Kyloe.Symbols;
 
-namespace Kyloe.Semantics 
+namespace Kyloe.Semantics
 {
     internal sealed class BoundTypeNameExpression : BoundExpression
     {
         public BoundTypeNameExpression(ITypeSymbol typeSymbol)
         {
-            TypeSymbol = typeSymbol;
+            ResultType = typeSymbol;
         }
 
-        public ITypeSymbol TypeSymbol { get; }
+        public override ITypeSymbol ResultType { get; }
 
-        public override ITypeSymbol ResultType => TypeSymbol;
+        public override ISymbol ResultSymbol => ResultType;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

@@ -70,7 +70,7 @@ namespace Kyloe.Semantics
             return !expectedType.Equals(rightType);
         }
 
-        private (BoundExpression, ITypeSymbol) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeLValue, ITypeSymbol? expectedType = null)
+        private (BoundExpression, ITypeSymbol) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeModifiable, ITypeSymbol? expectedType = null)
         {
             var bound = BindExpression(expr);
 
@@ -83,9 +83,9 @@ namespace Kyloe.Semantics
                 return (bound, typeSystem.Error);
             }
 
-            if (mustBeLValue && !bound.IsLValue)
+            if (mustBeModifiable && !bound.IsModifiableValue)
             {
-                diagnostics.Add(new ExpectedLValueError(expr));
+                diagnostics.Add(new ExpectedModifiableValueError(expr));
                 return (bound, typeSystem.Error);
             }
 
@@ -147,7 +147,7 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindIfStatement(IfStatement stmt)
         {
-            var (condition, _) = BindAndExpect(stmt.Condition, mustBeValue: true, mustBeLValue: false, typeSystem.Bool);
+            var (condition, _) = BindAndExpect(stmt.Condition, mustBeValue: true, mustBeModifiable: false, typeSystem.Bool);
 
             var body = BindStatement(stmt.Body);
             var elseClasue = stmt.ElseClause == null ? null : BindStatement(stmt.ElseClause.Body);
@@ -159,7 +159,7 @@ namespace Kyloe.Semantics
         {
             bool isConst = stmt.DeclerationToken.Type == SyntaxTokenType.ConstKeyword;
 
-            var (expr, symbol) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeLValue: false);
+            var (expr, symbol) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeModifiable: false);
             var exprType = (ITypeSymbol)symbol;
 
             ITypeSymbol varType;
@@ -195,10 +195,10 @@ namespace Kyloe.Semantics
         {
             var expr = BindExpression(typeClause.NameExpression);
 
-            if (expr is BoundTypeNameExpression typeName)
-                return new BoundTypeClause(expr, typeName.TypeSymbol);
-            else if (expr is BoundTypeNameMemberAccessExpression typeNameMemberAccess)
-                return new BoundTypeClause(expr, typeNameMemberAccess.TypeSymbol);
+            var exprNodeType = expr.Type;
+
+            if (exprNodeType == BoundNodeType.BoundTypeNameExpression || exprNodeType == BoundNodeType.BoundTypeNameMemberAccessExpression)
+                return new BoundTypeClause(expr, expr.ResultType);
 
             if (expr.ResultType is not IErrorTypeSymbol)
                 diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
@@ -243,8 +243,8 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindAssignmentExpression(AssignmentExpression expr)
         {
-            var (left, leftSymbol) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeLValue: true);
-            var (right, rightSymbol) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeLValue: false);
+            var (left, leftSymbol) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeModifiable: true);
+            var (right, rightSymbol) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeModifiable: false);
 
             var leftType = (ITypeSymbol)leftSymbol;
             var rightType = (ITypeSymbol)rightSymbol;
@@ -288,17 +288,9 @@ namespace Kyloe.Semantics
             if (right.ResultType is IErrorTypeSymbol)
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
 
-            IMemberContainer memberContainer;
-
-            if (right is BoundNamespaceExpression nsExpression)
-                memberContainer = nsExpression.NamespaceSymbol;
-            else if (right is BoundNamespaceMemberAccessExpression namespaceMemberAccessExpression)
-                memberContainer = namespaceMemberAccessExpression.NamespaceSymbol;
-            else if (right.ResultType is IMemberContainer m)
-                memberContainer = m;
-            else
+            if (!(right.ResultSymbol is IMemberContainer memberContainer))
             {
-                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultType, name));
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
             }
 
@@ -306,7 +298,7 @@ namespace Kyloe.Semantics
 
             if (members.Count() == 0)
             {
-                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultType, name));
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
             }
 
@@ -370,12 +362,13 @@ namespace Kyloe.Semantics
                 if (staticFieldCount > 0)
                 {
                     Debug.Assert(staticFieldCount == 1);
-                    return new BoundFieldMemberAccessExpression(staticFields.First(), right, name);
+                    return new BoundFieldAccessExpression(staticFields.First(), right, name);
                 }
 
                 if (staticPropertyCount > 0)
                 {
-                    throw new System.NotImplementedException();
+                    Debug.Assert(staticPropertyCount == 1);
+                    return new BoundPropertyAccessExpression(staticProperties.First(), right, name);
                 }
 
                 if (typeNameCount > 0)
@@ -388,7 +381,7 @@ namespace Kyloe.Semantics
                     return new BoundNamespaceMemberAccessExpression(typeSystem, namespaces.First(), right, name);
                 }
 
-                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultType, name));
+                diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
             }
         }

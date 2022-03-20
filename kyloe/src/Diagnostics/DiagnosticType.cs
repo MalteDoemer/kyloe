@@ -15,7 +15,7 @@ namespace Kyloe.Diagnostics
         MissmatchedTypeError,
         RedefinedLocalVariableError,
         NonExistantNameError,
-        ExpectedLValueError,
+        ExpectedModifiableValueError,
         UnsupportedAssignmentOperation,
         ExpectedTypeNameError,
         RestrictedMemberAccessError,

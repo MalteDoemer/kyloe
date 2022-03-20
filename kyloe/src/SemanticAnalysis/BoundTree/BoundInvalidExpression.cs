@@ -12,6 +12,8 @@ namespace Kyloe.Semantics
 
         public override ITypeSymbol ResultType { get; }
 
+        public override ISymbol ResultSymbol => ResultType;
+
         public override BoundNodeType Type => BoundNodeType.BoundInvalidExpression;
 
         public override ValueCategory ValueCategory => ValueCategory.None;

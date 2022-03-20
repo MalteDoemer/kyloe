@@ -13,8 +13,10 @@ namespace Kyloe.Semantics
         public object Value { get; }
         public override ITypeSymbol ResultType { get; }
 
+        public override ISymbol ResultSymbol => ResultType;
+
         public override BoundNodeType Type => BoundNodeType.BoundLiteralExpression;
 
-        public override ValueCategory ValueCategory => ValueCategory.RValue;
+        public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }
 }

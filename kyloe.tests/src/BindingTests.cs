@@ -114,7 +114,7 @@ namespace Kyloe.Tests.Binding
                 @"{
                     1 % 8 = 5;
                 }",
-                DiagnosticType.ExpectedLValueError,
+                DiagnosticType.ExpectedModifiableValueError,
             };
 
 
@@ -133,7 +133,7 @@ namespace Kyloe.Tests.Binding
                     const x = 1;
                     x = 2;
                 }",
-                DiagnosticType.ExpectedLValueError,
+                DiagnosticType.ExpectedModifiableValueError,
             };
         }
 

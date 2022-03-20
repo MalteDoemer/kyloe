@@ -2,6 +2,8 @@ using System;
 using Mono.Cecil;
 using Kyloe.Semantics;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Kyloe.Symbols
 {
@@ -34,6 +36,8 @@ namespace Kyloe.Symbols
         {
             var ts = mainAssembly.MainModule.TypeSystem;
 
+            var tsAssembly = ts.Int32.Resolve().Module.Assembly;
+
             arrayTypes = new Dictionary<ITypeSymbol, ArrayTypeSymbol>();
             byRefTypes = new Dictionary<ITypeSymbol, ByRefTypeSymbol>();
             pointerTypes = new Dictionary<ITypeSymbol, PointerTypeSymbol>();
@@ -41,20 +45,23 @@ namespace Kyloe.Symbols
             rootNamespace = new NamespaceSymbol("");
             error = new ErrorTypeSymbol();
 
-            emptyType = (ClassTypeSymbol)DefineType(ts.Void);
-            charType = (ClassTypeSymbol)DefineType(ts.Char);
-            i8Type = (ClassTypeSymbol)DefineType(ts.SByte);
-            i16Type = (ClassTypeSymbol)DefineType(ts.Int16);
-            i32Type = (ClassTypeSymbol)DefineType(ts.Int32);
-            i64Type = (ClassTypeSymbol)DefineType(ts.Int64);
-            u8Type = (ClassTypeSymbol)DefineType(ts.Byte);
-            u16Type = (ClassTypeSymbol)DefineType(ts.UInt16);
-            u32Type = (ClassTypeSymbol)DefineType(ts.UInt32);
-            u64Type = (ClassTypeSymbol)DefineType(ts.UInt64);
-            floatType = (ClassTypeSymbol)DefineType(ts.Single);
-            doubleType = (ClassTypeSymbol)DefineType(ts.Double);
-            boolType = (ClassTypeSymbol)DefineType(ts.Boolean);
-            stringType = (ClassTypeSymbol)DefineType(ts.String);
+            emptyType = (ClassTypeSymbol)GetOrDeclareType(ts.Void);
+            charType = (ClassTypeSymbol)GetOrDeclareType(ts.Char);
+            i8Type = (ClassTypeSymbol)GetOrDeclareType(ts.SByte);
+            i16Type = (ClassTypeSymbol)GetOrDeclareType(ts.Int16);
+            i32Type = (ClassTypeSymbol)GetOrDeclareType(ts.Int32);
+            i64Type = (ClassTypeSymbol)GetOrDeclareType(ts.Int64);
+            u8Type = (ClassTypeSymbol)GetOrDeclareType(ts.Byte);
+            u16Type = (ClassTypeSymbol)GetOrDeclareType(ts.UInt16);
+            u32Type = (ClassTypeSymbol)GetOrDeclareType(ts.UInt32);
+            u64Type = (ClassTypeSymbol)GetOrDeclareType(ts.UInt64);
+            floatType = (ClassTypeSymbol)GetOrDeclareType(ts.Single);
+            doubleType = (ClassTypeSymbol)GetOrDeclareType(ts.Double);
+            boolType = (ClassTypeSymbol)GetOrDeclareType(ts.Boolean);
+            stringType = (ClassTypeSymbol)GetOrDeclareType(ts.String);
+
+            foreach (var type in tsAssembly.Modules.SelectMany(mod => mod.Types).Where(type => type.IsPublic))
+                DefineType(type);
 
             foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
             {
@@ -121,7 +128,7 @@ namespace Kyloe.Symbols
                 var arrayRef = (ArrayType)reference;
 
                 if (!arrayRef.IsVector)
-                    throw new System.NotImplementedException();
+                    return error;
 
                 return CreateArrayType(GetOrDeclareType(arrayRef.ElementType));
             }
@@ -137,7 +144,8 @@ namespace Kyloe.Symbols
             }
             else if (reference.IsFunctionPointer)
             {
-                throw new System.NotImplementedException();
+                // var fnptr = (FunctionPointerType)reference;
+                return error;
             }
             else if (reference.IsNested)
             {
@@ -175,12 +183,15 @@ namespace Kyloe.Symbols
 
             foreach (var nesetedType in definition.NestedTypes)
             {
+                if (nesetedType.IsNotPublic)
+                    continue;
+
                 DefineType(nesetedType);
             }
 
             foreach (var field in definition.Fields)
             {
-                if (field.IsCompilerControlled || field.IsSpecialName || field.IsRuntimeSpecialName || field.IsWindowsRuntimeProjection)
+                if (field.IsSpecialName && !field.IsRuntimeSpecialName)
                 {
                     Console.WriteLine($"Found special field: {field}, compiler={field.IsCompilerControlled}, special={field.IsSpecialName}, rt_special={field.IsRuntimeSpecialName}, windows={field.IsWindowsRuntimeProjection}");
                     continue;
@@ -197,26 +208,40 @@ namespace Kyloe.Symbols
 
             foreach (var property in definition.Properties)
             {
-                if (property.IsSpecialName || property.IsRuntimeSpecialName || property.IsWindowsRuntimeProjection)
+                if (property.IsSpecialName && !property.IsRuntimeSpecialName)
                 {
                     Console.WriteLine($"Found special property: {property}, special={property.IsSpecialName}, rt_special={property.IsRuntimeSpecialName}, windows={property.IsWindowsRuntimeProjection}");
                     continue;
                 }
-
+                
                 var propertySymbol = new PropertySymbol(property.Name);
 
                 if (property.GetMethod is null && property.SetMethod is null)
                     throw new Exception($"Property has neither get nor set method: {property}");
 
                 if (property.GetMethod is not null)
-                    propertySymbol.SetGetterMethod(CreateMethodSymbol(property.GetMethod));
+                {
+                    var getMethod = CreateMethodSymbol(property.GetMethod);
+                    if (getMethod is null)
+                        continue;
+                    propertySymbol.SetGetterMethod(getMethod);
+                }
 
                 if (property.SetMethod is not null)
-                    propertySymbol.SetSetterMethod(CreateMethodSymbol(property.SetMethod));
+                {
+                    var setMethod = CreateMethodSymbol(property.SetMethod);
+                    if (setMethod is null)
+                        continue;
+                    propertySymbol.SetSetterMethod(setMethod);
+                }
 
+                var propType = GetOrDeclareType(property.PropertyType);
 
-                propertySymbol.SetStatic(property.HasThis)
-                              .SetType(GetOrDeclareType(property.PropertyType));
+                if (propType is IErrorTypeSymbol)
+                    continue;
+
+                propertySymbol.SetStatic(!property.HasThis)
+                              .SetType(propType);
 
                 type.AddProperty(propertySymbol);
             }
@@ -227,11 +252,18 @@ namespace Kyloe.Symbols
                 {
                     if (method.Name == ".ctor" || method.Name == ".cctor")
                     {
-                        type.AddCtor(CreateMethodSymbol(method));
+                        var methodSymbol = CreateMethodSymbol(method);
+                        if (methodSymbol is null)
+                            continue;
+                        type.AddCtor(methodSymbol);
                     }
                     else if (SemanticInfo.GetOperationFromMethodName(method.Name) is BoundOperation op)
                     {
                         var methodSymbol = CreateMethodSymbol(method);
+
+                        if (methodSymbol is null)
+                            continue;
+
                         var operationSymbol = new OperationSymbol(op);
 
                         operationSymbol.SetUnderlyingMethod(methodSymbol)
@@ -244,18 +276,21 @@ namespace Kyloe.Symbols
                     {
                         continue;
                     }
-                    else if (method.Name == "op_Implicit") 
+                    else if (method.Name == "op_Implicit" || method.Name == "op_Explicit" || method.Name.StartsWith("add_") || method.Name.StartsWith("remove_"))
                     {
-                        
                         continue;
                     }
-                    else
+                    else if (!method.IsRuntimeSpecialName)
                     {
                         Console.WriteLine($"found unhandled special named method: {method}");
                         continue;
                     }
                 }
-                type.AddMethod(CreateMethodSymbol(method));
+
+                var sym = CreateMethodSymbol(method);
+                if (sym is null)
+                    continue;
+                type.AddMethod(sym);
             }
 
             return type;
@@ -295,18 +330,28 @@ namespace Kyloe.Symbols
             return pointerType;
         }
 
-        private MethodSymbol CreateMethodSymbol(MethodDefinition method)
+        private MethodSymbol? CreateMethodSymbol(MethodDefinition method)
         {
             var methodSymbol = new MethodSymbol(method.Name);
+            var returnType = GetOrDeclareType(method.ReturnType);
+
+            if (returnType is IErrorTypeSymbol)
+                return null;
+
             methodSymbol
                 .SetAccessModifiers(GetAccessModifiers(method))
-                .SetReturnType(GetOrDeclareType(method.ReturnType))
+                .SetReturnType(returnType)
                 .SetStatic(method.IsStatic);
 
             foreach (var param in method.Parameters)
             {
                 var paramSymbol = new ParameterSymbol(param.Name);
-                paramSymbol.SetType(GetOrDeclareType(param.ParameterType));
+                var paramType = GetOrDeclareType(param.ParameterType);
+
+                if (paramType is IErrorTypeSymbol)
+                    return null;
+
+                paramSymbol.SetType(paramType);
             }
 
             return methodSymbol;

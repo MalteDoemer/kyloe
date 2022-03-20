@@ -4,8 +4,8 @@ namespace Kyloe.Semantics
 {
     internal enum ValueCategory
     {
-        LValue,
-        RValue,
+        ModifiableValue,
+        ReadableValue,
         None,
     }
 
@@ -13,10 +13,13 @@ namespace Kyloe.Semantics
     {
         public abstract ITypeSymbol ResultType { get; }
 
+        public abstract ISymbol ResultSymbol { get; }
+
+        // TODO: make this context specific for things like private set properties or readonly fields in the constructor
         public abstract ValueCategory ValueCategory { get; }
 
         public bool IsValue => ValueCategory != ValueCategory.None;
 
-        public bool IsLValue => ValueCategory == ValueCategory.LValue;
+        public bool IsModifiableValue => ValueCategory == ValueCategory.ModifiableValue;
     }
 }

@@ -2,9 +2,31 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
-    internal sealed class BoundFieldMemberAccessExpression : BoundExpression
+    internal sealed class BoundPropertyAccessExpression : BoundExpression
     {
-        public BoundFieldMemberAccessExpression(IFieldSymbol fieldSymbol, BoundExpression expression, string name)
+        public BoundPropertyAccessExpression(IPropertySymbol propertySymbol, BoundExpression expression, string name)
+        {
+            PropertySymbol = propertySymbol;
+            Expression = expression;
+            Name = name;
+        }
+
+        public IPropertySymbol PropertySymbol { get; }
+        public BoundExpression Expression { get; }
+        public string Name { get; }
+
+        public override ITypeSymbol ResultType => PropertySymbol.Type;
+
+        public override ISymbol ResultSymbol => PropertySymbol;
+
+        public override ValueCategory ValueCategory => PropertySymbol.SetterMethod is not null && PropertySymbol.SetterMethod.AccessModifiers == AccessModifiers.Public ? ValueCategory.ModifiableValue : ValueCategory.ReadableValue;
+
+        public override BoundNodeType Type => BoundNodeType.BoundPropertyMemberAccessExpression;
+    }
+
+    internal sealed class BoundFieldAccessExpression : BoundExpression
+    {
+        public BoundFieldAccessExpression(IFieldSymbol fieldSymbol, BoundExpression expression, string name)
         {
             FieldSymbol = fieldSymbol;
             Expression = expression;
@@ -17,7 +39,9 @@ namespace Kyloe.Semantics
 
         public override ITypeSymbol ResultType => FieldSymbol.Type;
 
-        public override ValueCategory ValueCategory => FieldSymbol.IsReadonly ? ValueCategory.RValue : ValueCategory.LValue;
+        public override ISymbol ResultSymbol => FieldSymbol;
+
+        public override ValueCategory ValueCategory => FieldSymbol.IsReadonly ? ValueCategory.ReadableValue : ValueCategory.ModifiableValue;
 
         public override BoundNodeType Type => BoundNodeType.BoundFieldMemberAccessExpression;
     }
@@ -38,6 +62,8 @@ namespace Kyloe.Semantics
 
         public override ITypeSymbol ResultType { get; }
 
+        public override ISymbol ResultSymbol => NamespaceSymbol;
+
         public override ValueCategory ValueCategory => ValueCategory.None;
 
         public override BoundNodeType Type => BoundNodeType.BoundNamespaceMemberAccessExpression;
@@ -47,16 +73,17 @@ namespace Kyloe.Semantics
     {
         public BoundTypeNameMemberAccessExpression(ITypeSymbol typeSymbol, BoundExpression expression, string name)
         {
-            TypeSymbol = typeSymbol;
+            ResultType = typeSymbol;
             Expression = expression;
             Name = name;
         }
 
-        public ITypeSymbol TypeSymbol { get; }
         public BoundExpression Expression { get; }
         public string Name { get; }
 
-        public override ITypeSymbol ResultType => TypeSymbol;
+        public override ITypeSymbol ResultType { get; }
+
+        public override ISymbol ResultSymbol => ResultType;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 
@@ -76,6 +103,8 @@ namespace Kyloe.Semantics
         public string Name { get; }
 
         public override ITypeSymbol ResultType { get; }
+
+        public override ISymbol ResultSymbol => ResultType;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

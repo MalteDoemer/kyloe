@@ -14,5 +14,6 @@ namespace Kyloe.Symbols
         ArrayTypeSymbol,
         ByRefTypeSymbol,
         PointerTypeSymbol,
+        FunctionPointerSymbol,
     }
 }
