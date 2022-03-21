@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Kyloe.Symbols
 {
-    public partial class TypeSystem
+    internal partial class TypeSystem
     {
         private enum BuiltinType
         {

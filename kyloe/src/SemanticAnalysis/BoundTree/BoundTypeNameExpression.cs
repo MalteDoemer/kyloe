@@ -4,14 +4,14 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundTypeNameExpression : BoundExpression
     {
-        public BoundTypeNameExpression(ITypeSymbol typeSymbol)
+        public BoundTypeNameExpression(TypeNameSymbol typeName)
         {
-            ResultType = typeSymbol;
+            TypeName = typeName;
         }
 
-        public override ITypeSymbol ResultType { get; }
+        public TypeNameSymbol TypeName { get; }
 
-        public override ISymbol ResultSymbol => ResultType;
+        public override TypeSpecifier ResultType => TypeName.Type;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

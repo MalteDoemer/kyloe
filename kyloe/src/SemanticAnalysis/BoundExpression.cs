@@ -11,11 +11,8 @@ namespace Kyloe.Semantics
 
     internal abstract class BoundExpression : BoundNode
     {
-        public abstract ITypeSymbol ResultType { get; }
+        public abstract TypeSpecifier ResultType { get; }
 
-        public abstract ISymbol ResultSymbol { get; }
-
-        // TODO: make this context specific for things like private set properties or readonly fields in the constructor
         public abstract ValueCategory ValueCategory { get; }
 
         public bool IsValue => ValueCategory != ValueCategory.None;

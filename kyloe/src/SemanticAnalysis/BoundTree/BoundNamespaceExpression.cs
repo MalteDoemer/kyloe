@@ -4,17 +4,14 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundNamespaceExpression : BoundExpression
     {
-        public BoundNamespaceExpression(TypeSystem typeSystem, INamespaceSymbol namespaceSymbol)
+        public BoundNamespaceExpression(TypeSystem typeSystem, NamespaceSymbol namespaceSymbol)
         {
             NamespaceSymbol = namespaceSymbol;
-            ResultType = typeSystem.Empty;
         }
 
-        public INamespaceSymbol NamespaceSymbol { get; }
+        public NamespaceSymbol NamespaceSymbol { get; }
 
-        public override ITypeSymbol ResultType { get; }
-
-        public override ISymbol ResultSymbol => NamespaceSymbol;
+        public override TypeSpecifier ResultType => NamespaceSymbol.Type;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

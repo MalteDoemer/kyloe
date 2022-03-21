@@ -2,17 +2,16 @@ using Kyloe.Semantics;
 using Kyloe.Symbols;
 using Kyloe.Syntax;
 using Kyloe.Utility;
-using Mono.Cecil;
 
 namespace Kyloe.Diagnostics
 {
     internal sealed class UnsupportedBinaryOperation : Diagnostic
     {
         private readonly BinaryExpression expression;
-        private readonly ISymbol leftType;
-        private readonly ISymbol rightType;
+        private readonly TypeSpecifier leftType;
+        private readonly TypeSpecifier rightType;
 
-        public UnsupportedBinaryOperation(BinaryExpression expression, ISymbol leftType, ISymbol rightType)
+        public UnsupportedBinaryOperation(BinaryExpression expression, TypeSpecifier leftType, TypeSpecifier rightType)
         {
             this.leftType = leftType;
             this.expression = expression;
@@ -25,6 +24,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with types '{leftType}' and '{rightType}'";
+        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
     }
 }

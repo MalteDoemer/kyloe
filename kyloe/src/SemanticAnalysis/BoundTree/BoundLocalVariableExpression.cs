@@ -4,16 +4,14 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundLocalVariableExpression : BoundExpression
     {
-        public BoundLocalVariableExpression(ILocalVariableSymbol variableSymbol)
+        public BoundLocalVariableExpression(LocalVariableSymbol variableSymbol)
         {
             VariableSymbol = variableSymbol;
         }
 
-        public ILocalVariableSymbol VariableSymbol { get; }
+        public LocalVariableSymbol VariableSymbol { get; }
 
-        public override ITypeSymbol ResultType => VariableSymbol.Type;
-
-        public override ISymbol ResultSymbol => VariableSymbol;
+        public override TypeSpecifier ResultType => VariableSymbol.Type;
 
         public override BoundNodeType Type => BoundNodeType.BoundLocalVariableExpression;
 

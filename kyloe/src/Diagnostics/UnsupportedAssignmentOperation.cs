@@ -7,10 +7,10 @@ namespace Kyloe.Diagnostics
     internal sealed class UnsupportedAssignmentOperation : Diagnostic
     {
         private readonly AssignmentExpression expression;
-        private readonly ISymbol leftType;
-        private readonly ISymbol rightType;
+        private readonly TypeSpecifier leftType;
+        private readonly TypeSpecifier rightType;
 
-        public UnsupportedAssignmentOperation(AssignmentExpression expression, ISymbol leftType, ISymbol rightType)
+        public UnsupportedAssignmentOperation(AssignmentExpression expression, TypeSpecifier leftType, TypeSpecifier rightType)
         {
             this.expression = expression;
             this.leftType = leftType;
@@ -23,6 +23,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with types '{leftType}' and '{rightType}'";
+        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
     }
 }

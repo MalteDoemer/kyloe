@@ -4,13 +4,13 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundTypeClause 
     {
-        public BoundTypeClause(BoundExpression expression, ITypeSymbol typeSymbol)
+        public BoundTypeClause(BoundExpression expression, TypeSpecifier type)
         {
             Expression = expression;
-            TypeSymbol = typeSymbol;
+            Type = type;
         }
 
         public BoundExpression Expression { get; }
-        public ITypeSymbol TypeSymbol { get; }
+        public TypeSpecifier Type { get; }
     }
 }

@@ -7,10 +7,10 @@ namespace Kyloe.Diagnostics
     internal sealed class MemberAccessError : Diagnostic
     {
         private readonly SyntaxExpression expression;
-        private readonly ISymbol resultSymbol;
+        private readonly Symbol resultSymbol;
         private readonly string memberName;
 
-        public MemberAccessError(SyntaxExpression expression, ISymbol resultSymbol, string memberName)
+        public MemberAccessError(SyntaxExpression expression, Symbol resultSymbol, string memberName)
         {
             this.expression = expression;
             this.resultSymbol = resultSymbol;
@@ -29,10 +29,10 @@ namespace Kyloe.Diagnostics
     internal sealed class MemberNotFoundError : Diagnostic
     {
         private readonly SyntaxExpression expression;
-        private readonly ISymbol resultSymbol;
+        private readonly Symbol resultSymbol;
         private readonly string memberName;
 
-        public MemberNotFoundError(SyntaxExpression expression, ISymbol resultSymbol, string memberName)
+        public MemberNotFoundError(SyntaxExpression expression, Symbol resultSymbol, string memberName)
         {
             this.expression = expression;
             this.resultSymbol = resultSymbol;

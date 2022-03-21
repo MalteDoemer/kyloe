@@ -7,9 +7,9 @@ namespace Kyloe.Diagnostics
     internal sealed class RestrictedMemberAccessError : Diagnostic
     {
         private readonly SyntaxExpression expression;
-        private readonly ISymbol resultSymbol;
+        private readonly Symbol resultSymbol;
 
-        public RestrictedMemberAccessError(SyntaxExpression expression, ISymbol resultSymbol)
+        public RestrictedMemberAccessError(SyntaxExpression expression, Symbol resultSymbol)
         {
             this.expression = expression;
             this.resultSymbol = resultSymbol;

@@ -1,385 +1,249 @@
+
 using System;
-using Mono.Cecil;
-using Kyloe.Semantics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 
 namespace Kyloe.Symbols
 {
-    public partial class TypeSystem
+    internal partial class TypeSystem
     {
-        private Dictionary<ITypeSymbol, ArrayTypeSymbol> arrayTypes;
-        private Dictionary<ITypeSymbol, ByRefTypeSymbol> byRefTypes;
-        private Dictionary<ITypeSymbol, PointerTypeSymbol> pointerTypes;
+        public NamespaceType RootNamespace { get; }
+        public ErrorType Error { get; }
+        public ClassType Empty { get; }
+        public ClassType Char { get; }
+        public ClassType I8 { get; }
+        public ClassType I16 { get; }
+        public ClassType I32 { get; }
+        public ClassType I64 { get; }
+        public ClassType U8 { get; }
+        public ClassType U16 { get; }
+        public ClassType U32 { get; }
+        public ClassType U64 { get; }
+        public ClassType Float { get; }
+        public ClassType Double { get; }
+        public ClassType Bool { get; }
+        public ClassType String { get; }
 
+        public static TypeSystem Create(Mono.Cecil.AssemblyDefinition mainAssembly)
+        {
+            return new TypeSystem(mainAssembly, Array.Empty<Mono.Cecil.AssemblyDefinition>());
+        }
 
-        private NamespaceSymbol rootNamespace;
-        private ErrorTypeSymbol error;
-
-        private ClassTypeSymbol emptyType;
-        private ClassTypeSymbol charType;
-        private ClassTypeSymbol i8Type;
-        private ClassTypeSymbol i16Type;
-        private ClassTypeSymbol i32Type;
-        private ClassTypeSymbol i64Type;
-        private ClassTypeSymbol u8Type;
-        private ClassTypeSymbol u16Type;
-        private ClassTypeSymbol u32Type;
-        private ClassTypeSymbol u64Type;
-        private ClassTypeSymbol floatType;
-        private ClassTypeSymbol doubleType;
-        private ClassTypeSymbol boolType;
-        private ClassTypeSymbol stringType;
-
-        private TypeSystem(AssemblyDefinition mainAssembly)
+        private TypeSystem(Mono.Cecil.AssemblyDefinition mainAssembly, Mono.Cecil.AssemblyDefinition[] assemblyDefinitions)
         {
             var ts = mainAssembly.MainModule.TypeSystem;
 
-            var tsAssembly = ts.Int32.Resolve().Module.Assembly;
+            RootNamespace = new NamespaceType("", null);
+            Error = new ErrorType();
 
-            arrayTypes = new Dictionary<ITypeSymbol, ArrayTypeSymbol>();
-            byRefTypes = new Dictionary<ITypeSymbol, ByRefTypeSymbol>();
-            pointerTypes = new Dictionary<ITypeSymbol, PointerTypeSymbol>();
+            Empty = (ClassType)GetOrDeclareType(ts.Void);
+            Char = (ClassType)GetOrDeclareType(ts.Char);
+            I8 = (ClassType)GetOrDeclareType(ts.SByte);
+            I16 = (ClassType)GetOrDeclareType(ts.Int16);
+            I32 = (ClassType)GetOrDeclareType(ts.Int32);
+            I64 = (ClassType)GetOrDeclareType(ts.Int64);
+            U8 = (ClassType)GetOrDeclareType(ts.Byte);
+            U16 = (ClassType)GetOrDeclareType(ts.UInt16);
+            U32 = (ClassType)GetOrDeclareType(ts.UInt32);
+            U64 = (ClassType)GetOrDeclareType(ts.UInt64);
+            Float = (ClassType)GetOrDeclareType(ts.Single);
+            Double = (ClassType)GetOrDeclareType(ts.Double);
+            Bool = (ClassType)GetOrDeclareType(ts.Boolean);
+            String = (ClassType)GetOrDeclareType(ts.String);
 
-            rootNamespace = new NamespaceSymbol("");
-            error = new ErrorTypeSymbol();
-
-            emptyType = (ClassTypeSymbol)GetOrDeclareType(ts.Void);
-            charType = (ClassTypeSymbol)GetOrDeclareType(ts.Char);
-            i8Type = (ClassTypeSymbol)GetOrDeclareType(ts.SByte);
-            i16Type = (ClassTypeSymbol)GetOrDeclareType(ts.Int16);
-            i32Type = (ClassTypeSymbol)GetOrDeclareType(ts.Int32);
-            i64Type = (ClassTypeSymbol)GetOrDeclareType(ts.Int64);
-            u8Type = (ClassTypeSymbol)GetOrDeclareType(ts.Byte);
-            u16Type = (ClassTypeSymbol)GetOrDeclareType(ts.UInt16);
-            u32Type = (ClassTypeSymbol)GetOrDeclareType(ts.UInt32);
-            u64Type = (ClassTypeSymbol)GetOrDeclareType(ts.UInt64);
-            floatType = (ClassTypeSymbol)GetOrDeclareType(ts.Single);
-            doubleType = (ClassTypeSymbol)GetOrDeclareType(ts.Double);
-            boolType = (ClassTypeSymbol)GetOrDeclareType(ts.Boolean);
-            stringType = (ClassTypeSymbol)GetOrDeclareType(ts.String);
-
-            foreach (var type in tsAssembly.Modules.SelectMany(mod => mod.Types).Where(type => type.IsPublic))
-                DefineType(type);
-
-            foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
-            {
-                var left = GetBuiltinType(binary.lhs);
-                var right = GetBuiltinType(binary.rhs);
-                var ret = GetBuiltinType(binary.ret);
-
-                foreach (var op in binary.ops)
-                    left.AddOperation(CreateBuiltinBinaryOperation(op, ret, left, right));
-            }
-
-            foreach (var unary in BuiltinOperatorInfo.UnaryOperations)
-            {
-                var arg = GetBuiltinType(unary.arg);
-                var ret = GetBuiltinType(unary.ret);
-
-                foreach (var op in unary.ops)
-                    arg.AddOperation(CreateBuiltinUnaryOperation(op, ret, arg));
-            }
         }
 
-        public INamespaceSymbol RootNamespace => rootNamespace;
-        public IErrorTypeSymbol Error => error;
-        public ITypeSymbol Empty => emptyType;
-        public ITypeSymbol Char => charType;
-        public ITypeSymbol I8 => i8Type;
-        public ITypeSymbol I16 => i16Type;
-        public ITypeSymbol I32 => i32Type;
-        public ITypeSymbol I64 => i64Type;
-        public ITypeSymbol U8 => u8Type;
-        public ITypeSymbol U16 => u16Type;
-        public ITypeSymbol U32 => u32Type;
-        public ITypeSymbol U64 => u64Type;
-        public ITypeSymbol Float => floatType;
-        public ITypeSymbol Double => doubleType;
-        public ITypeSymbol Bool => boolType;
-        public ITypeSymbol String => stringType;
-
-        private ClassTypeSymbol GetBuiltinType(BuiltinType type)
-        {
-            switch (type)
-            {
-                case BuiltinType.Char: return charType;
-                case BuiltinType.I8: return i8Type;
-                case BuiltinType.I16: return i16Type;
-                case BuiltinType.I32: return i32Type;
-                case BuiltinType.I64: return i64Type;
-                case BuiltinType.U8: return u8Type;
-                case BuiltinType.U16: return u16Type;
-                case BuiltinType.U32: return u32Type;
-                case BuiltinType.U64: return u64Type;
-                case BuiltinType.Float: return floatType;
-                case BuiltinType.Double: return doubleType;
-                case BuiltinType.Bool: return boolType;
-                case BuiltinType.String: return stringType;
-                default: throw new Exception($"unexpected builtin type: {type}");
-            }
-        }
-
-        private ITypeSymbol GetOrDeclareType(TypeReference reference)
+        private TypeSpecifier GetOrDeclareType(Mono.Cecil.TypeReference reference)
         {
             if (reference.IsArray)
             {
-                var arrayRef = (ArrayType)reference;
+                var arrayRef = (Mono.Cecil.ArrayType)reference;
 
                 if (!arrayRef.IsVector)
-                    return error;
+                    return Error;
 
-                return CreateArrayType(GetOrDeclareType(arrayRef.ElementType));
+                var elementType = GetOrDeclareType(arrayRef.ElementType);
+                return new ArrayType(elementType);
+
             }
             else if (reference.IsByReference)
             {
-                var byRef = (ByReferenceType)reference;
-                return CreateByRefType(GetOrDeclareType(byRef.ElementType));
+                var byRef = (Mono.Cecil.ByReferenceType)reference;
+
+                var elementType = GetOrDeclareType(byRef.ElementType);
+                return new ByRefType(elementType);
             }
             else if (reference.IsPointer)
             {
-                var pointer = (PointerType)reference;
-                return CreatePointerType(GetOrDeclareType(pointer.ElementType));
+                var pointer = (Mono.Cecil.PointerType)reference;
+                var elementType = GetOrDeclareType(pointer.ElementType);
+                return new PointerType(elementType);
             }
             else if (reference.IsFunctionPointer)
             {
-                // var fnptr = (FunctionPointerType)reference;
-                return error;
+                return Error;
             }
             else if (reference.IsNested)
             {
-                var outerType = GetOrDeclareType(reference.DeclaringType) as ClassTypeSymbol;
+                var parent = (ClassType)GetOrDeclareType(reference.DeclaringType);
 
-                if (outerType is null)
-                    throw new Exception($"Declaring outer type '{reference.DeclaringType}' of the nested type '{reference}' didn't result in a ClassTypeSymbol.");
+                var sym = parent.Scope.LookupSymbol(reference.Name);
 
-                return outerType.GetOrAddNestedClass(reference.Name);
+                if (sym is null)
+                {
+                    var classType = new ClassType(reference.Name, GetAccessModifiers(reference.Resolve()), parent);
+                    parent.Scope.DeclareSymbol(new Symbols.TypeNameSymbol(classType));
+                    return classType;
+                }
+
+                return sym.Type;
             }
             else
             {
-                var current = rootNamespace;
+                var currentNS = RootNamespace;
 
                 foreach (var ns in reference.Namespace.Split("."))
-                    current = current.GetOrAddNamespace(ns);
-
-                return current.GetOrAddClassType(reference.Name);
-            }
-        }
-
-        private ITypeSymbol DefineType(TypeReference reference)
-        {
-            var type = GetOrDeclareType(reference);
-
-            if (type.Kind == SymbolKind.ClassTypeSymbol)
-                return DefineClassTypeSymbol((ClassTypeSymbol)type, reference);
-
-            return type;
-        }
-
-        private ITypeSymbol DefineClassTypeSymbol(ClassTypeSymbol type, TypeReference reference)
-        {
-            var definition = reference.Resolve();
-
-            foreach (var nesetedType in definition.NestedTypes)
-            {
-                if (nesetedType.IsNotPublic)
-                    continue;
-
-                DefineType(nesetedType);
-            }
-
-            foreach (var field in definition.Fields)
-            {
-                if (field.IsSpecialName && !field.IsRuntimeSpecialName)
                 {
-                    Console.WriteLine($"Found special field: {field}, compiler={field.IsCompilerControlled}, special={field.IsSpecialName}, rt_special={field.IsRuntimeSpecialName}, windows={field.IsWindowsRuntimeProjection}");
-                    continue;
-                }
+                    var next = currentNS.Scope.LookupSymbol(ns);
 
-                var fieldSymbol = new FieldSymbol(field.Name);
-                fieldSymbol.SetAccessModifiers(GetAccessModifiers(field))
-                           .SetReadonly(field.IsInitOnly)
-                           .SetStatic(field.IsStatic)
-                           .SetType(GetOrDeclareType(field.FieldType));
-
-                type.AddField(fieldSymbol);
-            }
-
-            foreach (var property in definition.Properties)
-            {
-                if (property.IsSpecialName && !property.IsRuntimeSpecialName)
-                {
-                    Console.WriteLine($"Found special property: {property}, special={property.IsSpecialName}, rt_special={property.IsRuntimeSpecialName}, windows={property.IsWindowsRuntimeProjection}");
-                    continue;
-                }
-                
-                var propertySymbol = new PropertySymbol(property.Name);
-
-                if (property.GetMethod is null && property.SetMethod is null)
-                    throw new Exception($"Property has neither get nor set method: {property}");
-
-                if (property.GetMethod is not null)
-                {
-                    var getMethod = CreateMethodSymbol(property.GetMethod);
-                    if (getMethod is null)
-                        continue;
-                    propertySymbol.SetGetterMethod(getMethod);
-                }
-
-                if (property.SetMethod is not null)
-                {
-                    var setMethod = CreateMethodSymbol(property.SetMethod);
-                    if (setMethod is null)
-                        continue;
-                    propertySymbol.SetSetterMethod(setMethod);
-                }
-
-                var propType = GetOrDeclareType(property.PropertyType);
-
-                if (propType is IErrorTypeSymbol)
-                    continue;
-
-                propertySymbol.SetStatic(!property.HasThis)
-                              .SetType(propType);
-
-                type.AddProperty(propertySymbol);
-            }
-
-            foreach (var method in definition.Methods)
-            {
-                if (method.IsSpecialName)
-                {
-                    if (method.Name == ".ctor" || method.Name == ".cctor")
+                    if (next is null)
                     {
-                        var methodSymbol = CreateMethodSymbol(method);
-                        if (methodSymbol is null)
-                            continue;
-                        type.AddCtor(methodSymbol);
+                        var newNS = new NamespaceType(ns, currentNS);
+                        currentNS.Scope.DeclareSymbol(new Symbols.NamespaceSymbol(newNS));
+                        currentNS = newNS;
                     }
-                    else if (SemanticInfo.GetOperationFromMethodName(method.Name) is BoundOperation op)
+                    else
                     {
-                        var methodSymbol = CreateMethodSymbol(method);
-
-                        if (methodSymbol is null)
-                            continue;
-
-                        var operationSymbol = new OperationSymbol(op);
-
-                        operationSymbol.SetUnderlyingMethod(methodSymbol)
-                                       .SetAccessModifiers(methodSymbol.AccessModifiers)
-                                       .SetBuiltin(false);
-
-                        type.AddOperation(operationSymbol);
-                    }
-                    else if (method.IsGetter || method.IsSetter)
-                    {
-                        continue;
-                    }
-                    else if (method.Name == "op_Implicit" || method.Name == "op_Explicit" || method.Name.StartsWith("add_") || method.Name.StartsWith("remove_"))
-                    {
-                        continue;
-                    }
-                    else if (!method.IsRuntimeSpecialName)
-                    {
-                        Console.WriteLine($"found unhandled special named method: {method}");
-                        continue;
+                        currentNS = (NamespaceType)next.Type;
                     }
                 }
 
-                var sym = CreateMethodSymbol(method);
+                var sym = currentNS.Scope.LookupSymbol(reference.Name);
+
                 if (sym is null)
-                    continue;
-                type.AddMethod(sym);
+                {
+                    var typeDef = reference.Resolve();
+                    var classType = new ClassType(reference.Name, GetAccessModifiers(typeDef), currentNS);
+                    currentNS.Scope.DeclareSymbol(new Symbols.TypeNameSymbol(classType));
+                    return classType;
+                }
+
+                return sym.Type;
             }
-
-            return type;
         }
 
-        public IArrayTypeSymbol CreateArrayType(ITypeSymbol type)
+        private void DefineType(Mono.Cecil.TypeReference reference)
         {
-            // TODO: add System.Array methods
-            // TODO: add indexing operation
-
-            if (arrayTypes.TryGetValue(type, out var array))
-                return array;
-
-            var arrayType = new ArrayTypeSymbol(type);
-            arrayTypes.Add(type, arrayType);
-            return arrayType;
-        }
-
-        public IByRefTypeSymbol CreateByRefType(ITypeSymbol type)
-        {
-            if (byRefTypes.TryGetValue(type, out var byRef))
-                return byRef;
-
-            var byRefType = new ByRefTypeSymbol(type);
-            byRefTypes.Add(type, byRefType);
-            return byRefType;
-        }
-
-        public IPointerTypeSymbol CreatePointerType(ITypeSymbol type)
-        {
-            // TODO: add pointer operations
-            if (pointerTypes.TryGetValue(type, out var pointer))
-                return pointer;
-
-            var pointerType = new PointerTypeSymbol(type);
-            pointerTypes.Add(type, pointerType);
-            return pointerType;
-        }
-
-        private MethodSymbol? CreateMethodSymbol(MethodDefinition method)
-        {
-            var methodSymbol = new MethodSymbol(method.Name);
-            var returnType = GetOrDeclareType(method.ReturnType);
-
-            if (returnType is IErrorTypeSymbol)
-                return null;
-
-            methodSymbol
-                .SetAccessModifiers(GetAccessModifiers(method))
-                .SetReturnType(returnType)
-                .SetStatic(method.IsStatic);
-
-            foreach (var param in method.Parameters)
+            if (GetOrDeclareType(reference) is ClassType classType)
             {
-                var paramSymbol = new ParameterSymbol(param.Name);
-                var paramType = GetOrDeclareType(param.ParameterType);
+                var definition = reference.Resolve();
 
-                if (paramType is IErrorTypeSymbol)
-                    return null;
+                foreach (var nested in definition.NestedTypes)
+                {
+                    if (nested.IsNotPublic || nested.HasGenericParameters)
+                        continue;
 
-                paramSymbol.SetType(paramType);
+                    DefineType(nested);
+                }
+
+                foreach (var field in definition.Fields)
+                {
+                    var fieldSymbol = new Symbols.FieldSymbol(
+                        field.Name,
+                        GetOrDeclareType(field.FieldType),
+                        field.IsInitOnly,
+                        field.IsStatic,
+                        GetAccessModifiers(field)
+                    );
+
+                    classType.Scope.DeclareSymbol(fieldSymbol);
+                }
+
+                foreach (var property in definition.Properties)
+                {
+                    var getMethod = property.GetMethod is null ? null : CreateMethodType(property.GetMethod);
+                    var setMethod = property.SetMethod is null ? null : CreateMethodType(property.SetMethod);
+
+                    var propertySymbol = new Symbols.PropertySymbol(
+                        name: property.Name,
+                        type: GetOrDeclareType(property.PropertyType),
+                        isStatic: !property.HasThis,
+                        getMethod: getMethod,
+                        setMethod: setMethod
+                    );
+
+                    classType.Scope.DeclareSymbol(propertySymbol);
+                }
+
+                var methodDictionary = new Dictionary<string, MethodGroupType>();
+
+                foreach (var method in definition.Methods)
+                {
+                    if (method.HasGenericParameters)
+                        continue;
+
+                    var methodType = CreateMethodType(method);
+
+                    if (methodDictionary.TryGetValue(method.Name, out var methodGroup))
+                        methodGroup.Methods.Add(methodType);
+                    else
+                    {
+                        var group = new MethodGroupType(method.Name, classType);
+                        group.Methods.Add(methodType);
+                        methodDictionary.Add(method.Name, group);
+                    }
+                }
+
+                foreach (var group in methodDictionary.Values)
+                {
+                    classType.Scope.DeclareSymbol(new Symbols.MethodGroupSymbol(group));
+                }
             }
-
-            return methodSymbol;
         }
 
-        private AccessModifiers GetAccessModifiers(TypeDefinition property)
+        private MethodType CreateMethodType(Mono.Cecil.MethodDefinition methodDef)
         {
-            if (property.IsPublic)
+
+            var method = new MethodType(
+                name: methodDef.Name,
+                accessModifiers: GetAccessModifiers(methodDef),
+                parent: GetOrDeclareType(methodDef.DeclaringType),
+                isStatic: methodDef.IsStatic,
+                returnType: GetOrDeclareType(methodDef.ReturnType)
+            );
+
+            foreach (var param in methodDef.Parameters)
+            {
+                var type = GetOrDeclareType(param.ParameterType);
+                method.ParameterTypes.Add(type);
+            }
+
+            return method;
+        }
+
+        private AccessModifiers GetAccessModifiers(Mono.Cecil.TypeDefinition type)
+        {
+            if (type.IsPublic)
                 return AccessModifiers.Public;
-            else if (property.IsNotPublic)
+            else if (type.IsNotPublic)
                 return AccessModifiers.Internal;
-            else if (property.IsNestedPublic)
+            else if (type.IsNestedPublic)
                 return AccessModifiers.Public;
-            else if (property.IsNestedPrivate)
+            else if (type.IsNestedPrivate)
                 return AccessModifiers.Private;
-            else if (property.IsNestedFamily)
+            else if (type.IsNestedFamily)
                 return AccessModifiers.Protected;
-            else if (property.IsNestedAssembly)
+            else if (type.IsNestedAssembly)
                 return AccessModifiers.Internal;
-            else if (property.IsNestedFamilyOrAssembly)
+            else if (type.IsNestedFamilyOrAssembly)
                 return AccessModifiers.InternalOrProtected;
-            else if (property.IsNestedFamilyAndAssembly)
+            else if (type.IsNestedFamilyAndAssembly)
                 return AccessModifiers.InternalAndProtected;
 
-            throw new Exception($"Invalid access modifiers for property: '{property}'");
+            throw new Exception($"Invalid access modifiers for type: '{type}'");
         }
 
-        private AccessModifiers GetAccessModifiers(FieldDefinition field)
+        private AccessModifiers GetAccessModifiers(Mono.Cecil.FieldDefinition field)
         {
             if (field.IsPublic)
                 return AccessModifiers.Public;
@@ -397,7 +261,7 @@ namespace Kyloe.Symbols
             throw new Exception($"Invalid access modifiers for field: '{field}'");
         }
 
-        private AccessModifiers GetAccessModifiers(MethodDefinition method)
+        private AccessModifiers GetAccessModifiers(Mono.Cecil.MethodDefinition method)
         {
             if (method.IsPublic)
                 return AccessModifiers.Public;
@@ -415,197 +279,7 @@ namespace Kyloe.Symbols
             throw new Exception($"Invalid access modifiers for method: '{method}'");
         }
 
-        private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, ITypeSymbol ret, ITypeSymbol left, ITypeSymbol right)
-        {
-            var name = SemanticInfo.GetMethodNameFromOperation(op);
-
-            var method = new MethodSymbol(name)
-                        .SetReturnType(ret)
-                        .AddParameter(new ParameterSymbol("left").SetType(left))
-                        .AddParameter(new ParameterSymbol("right").SetType(right))
-                        .SetStatic(true);
 
 
-            var operation = new OperationSymbol(op)
-                        .SetUnderlyingMethod(method)
-                        .SetBuiltin(true);
-
-            return operation;
-        }
-
-        private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, ITypeSymbol ret, ITypeSymbol type)
-        {
-            var name = SemanticInfo.GetMethodNameFromOperation(op);
-
-            var method = new MethodSymbol(name)
-                        .SetReturnType(ret)
-                        .AddParameter(new ParameterSymbol("arg").SetType(type))
-                        .SetStatic(true);
-
-            var operation = new OperationSymbol(op)
-                        .SetUnderlyingMethod(method)
-                        .SetBuiltin(true);
-
-            return operation;
-        }
-
-        public static TypeSystem Create(AssemblyDefinition mainAssembly)
-        {
-            return new TypeSystem(mainAssembly);
-        }
     }
-
-
-    /*
-    public partial class TypeSystem
-    {
-        public INamespaceSymbol RootNamespace { get; }
-
-        public IErrorTypeSymbol Error { get; }
-        public ITypeSymbol Empty { get; }
-        public ITypeSymbol Char { get; }
-        public ITypeSymbol I8 { get; }
-        public ITypeSymbol I16 { get; }
-        public ITypeSymbol I32 { get; }
-        public ITypeSymbol I64 { get; }
-        public ITypeSymbol U8 { get; }
-        public ITypeSymbol U16 { get; }
-        public ITypeSymbol U32 { get; }
-        public ITypeSymbol U64 { get; }
-        public ITypeSymbol Float { get; }
-        public ITypeSymbol Double { get; }
-        public ITypeSymbol Bool { get; }
-        public ITypeSymbol String { get; }
-
-        public static TypeSystem Create(AssemblyDefinition mainAssembly)
-        {
-            return new TypeSystem(mainAssembly);
-        }
-
-        private TypeSystem(AssemblyDefinition mainAssembly)
-        {
-            var ts = mainAssembly.MainModule.TypeSystem;
-
-            var rootNamespace = new NamespaceSymbol("");
-
-            var charType = GetOrDeclareType(rootNamespace, ts.Char);
-            var i8Type = GetOrDeclareType(rootNamespace, ts.SByte);
-            var i16Type = GetOrDeclareType(rootNamespace, ts.Int16);
-            var i32Type = GetOrDeclareType(rootNamespace, ts.Int32);
-            var i64Type = GetOrDeclareType(rootNamespace, ts.Int64);
-            var u8Type = GetOrDeclareType(rootNamespace, ts.Byte);
-            var u16Type = GetOrDeclareType(rootNamespace, ts.UInt16);
-            var u32Type = GetOrDeclareType(rootNamespace, ts.UInt32);
-            var u64Type = GetOrDeclareType(rootNamespace, ts.UInt64);
-            var floatType = GetOrDeclareType(rootNamespace, ts.Single);
-            var doubleType = GetOrDeclareType(rootNamespace, ts.Double);
-            var boolType = GetOrDeclareType(rootNamespace, ts.Boolean);
-            var stringType = GetOrDeclareType(rootNamespace, ts.String);
-            var emtpyType = GetOrDeclareType(rootNamespace, ts.Void);
-
-            TypeSymbol GetBuiltinType(BuiltinType type)
-            {
-                switch (type)
-                {
-                    case BuiltinType.Char: return charType!;
-                    case BuiltinType.I8: return i8Type!;
-                    case BuiltinType.I16: return i16Type!;
-                    case BuiltinType.I32: return i32Type!;
-                    case BuiltinType.I64: return i64Type!;
-                    case BuiltinType.U8: return u8Type!;
-                    case BuiltinType.U16: return u16Type!;
-                    case BuiltinType.U32: return u32Type!;
-                    case BuiltinType.U64: return u64Type!;
-                    case BuiltinType.Float: return floatType!;
-                    case BuiltinType.Double: return doubleType!;
-                    case BuiltinType.Bool: return boolType!;
-                    case BuiltinType.String: return stringType!;
-                    default: throw new Exception($"unexpected builtin type: {type}");
-                }
-            }
-
-            foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
-            {
-                var left = GetBuiltinType(binary.lhs);
-                var right = GetBuiltinType(binary.rhs);
-                var ret = GetBuiltinType(binary.ret);
-
-                foreach (var op in binary.ops)
-                    left.AddMethod(CreateBuiltinBinaryOperator(op, ret, left, right));
-            }
-
-            foreach (var unary in BuiltinOperatorInfo.UnaryOperations)
-            {
-                var arg = GetBuiltinType(unary.arg);
-                var ret = GetBuiltinType(unary.ret);
-
-                foreach (var op in unary.ops)
-                    arg.AddMethod(CreateBuiltinUnaryOperator(op, ret, arg));
-            }
-
-            RootNamespace = rootNamespace;
-            Error = new ErrorTypeSymbol();
-            Empty = emtpyType;
-            Char = charType;
-            I8 = i8Type;
-            I16 = i16Type;
-            I32 = i32Type;
-            I64 = i64Type;
-            U8 = u8Type;
-            U16 = u16Type;
-            U32 = u32Type;
-            U64 = u64Type;
-            Float = floatType;
-            Double = doubleType;
-            Bool = boolType;
-            String = stringType;
-        }
-
-        private static TypeSymbol GetOrDeclareType(NamespaceSymbol rootNamespace, TypeReference reference)
-        {
-            var current = rootNamespace;
-
-            foreach (var ns in reference.Namespace.Split("."))
-                current = current.GetOrAddNamespace(ns);
-
-            return current.GetOrAddTypeSymbol(reference.Name);
-        }
-
-        private static MethodSymbol CreateBuiltinBinaryOperator(BoundOperation op, TypeSymbol ret, TypeSymbol left, TypeSymbol right)
-        {
-            var name = SemanticInfo.GetMethodNameFromOperation(op);
-
-            if (name is null)
-                throw new ArgumentException(nameof(op), "op has no corresponding method");
-
-            var method = new MethodSymbol(name)
-                         .SetReturnType(ret)
-                         .AddParameter(new ParameterSymbol("left").SetType(left))
-                         .AddParameter(new ParameterSymbol("right").SetType(right))
-                         .SetStatic(true)
-                         .SetOperator(true)
-                         .SetBuiltinOperator(true);
-
-            return method;
-        }
-
-        private static MethodSymbol CreateBuiltinUnaryOperator(BoundOperation op, TypeSymbol ret, TypeSymbol arg)
-        {
-            var name = SemanticInfo.GetMethodNameFromOperation(op);
-
-            if (name is null)
-                throw new ArgumentException(nameof(op), "op has no corresponding method");
-
-            var method = new MethodSymbol(name)
-                         .SetReturnType(ret)
-                         .AddParameter(new ParameterSymbol("arg").SetType(arg))
-                         .SetOperator(true)
-                         .SetStatic(true)
-                         .SetBuiltinOperator(true);
-
-            return method;
-        }
-
-
-    }*/
 }
