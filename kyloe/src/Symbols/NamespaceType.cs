@@ -21,6 +21,17 @@ namespace Kyloe.Symbols
 
         public override bool Equals(TypeSpecifier? other) => object.ReferenceEquals(this, other);
 
-        public override string FullName() => (Parent is null ? "" : Parent.FullName() + ".") + Name;
+        public override string FullName()
+        {
+            if (Parent is null)
+                return "";
+
+            var parentName = Parent.FullName();
+
+            if (parentName == "")
+                return Name;
+
+            return parentName + "." + Name;
+        }
     }
 }

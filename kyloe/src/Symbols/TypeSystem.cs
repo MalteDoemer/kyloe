@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kyloe.Semantics;
 
 namespace Kyloe.Symbols
@@ -32,6 +33,7 @@ namespace Kyloe.Symbols
         private TypeSystem(Mono.Cecil.AssemblyDefinition mainAssembly, Mono.Cecil.AssemblyDefinition[] assemblyDefinitions)
         {
             var ts = mainAssembly.MainModule.TypeSystem;
+            var systemAssembly = ts.Boolean.Resolve().Module.Assembly;
 
             RootNamespace = new NamespaceType("", null);
             Error = new ErrorType();
@@ -51,6 +53,21 @@ namespace Kyloe.Symbols
             Bool = (ClassType)GetOrDeclareType(ts.Boolean);
             String = (ClassType)GetOrDeclareType(ts.String);
 
+            foreach (var type in systemAssembly.Modules.SelectMany(mod => mod.Types))
+            {
+                if (type.HasGenericParameters || type.IsNotPublic)
+                    continue;
+
+                DefineType(type);
+            }
+
+            foreach (var type in assemblyDefinitions.SelectMany(asm => asm.Modules).SelectMany(mod => mod.Types))
+            {
+                if (type.HasGenericParameters || type.IsNotPublic)
+                    continue;
+
+                DefineType(type);
+            }
 
             foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
             {

@@ -23,6 +23,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"cannot access the member '{memberName}' from '{resultType}'";
+        public override string Message() => $"cannot access the member '{memberName}' from '{resultType.FullName()}'";
     }
 }
