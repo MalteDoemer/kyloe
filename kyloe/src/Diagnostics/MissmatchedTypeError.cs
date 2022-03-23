@@ -19,7 +19,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.MissmatchedTypeError;
+        public override DiagnosticKind Kind => DiagnosticKind.MissmatchedTypeError;
 
         public override SourceLocation? Location => expression.Location;
 

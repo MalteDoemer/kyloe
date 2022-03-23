@@ -15,7 +15,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.InvalidIntLiteralError;
+        public override DiagnosticKind Kind => DiagnosticKind.InvalidIntLiteralError;
 
         public override SourceLocation? Location => token.Location;
 

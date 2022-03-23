@@ -8,7 +8,7 @@ namespace Kyloe.Tests.Binding
     {
         [Theory]
         [MemberData(nameof(GetErrorData))]
-        public void Test_Binding_With_Errors(string text, params DiagnosticType[] errors)
+        public void Test_Binding_With_Errors(string text, params DiagnosticKind[] errors)
         {
             var compilation = Compilation.Compile(text);
             DiagnosticAssert.HasAll(compilation.GetDiagnostics(), errors);
@@ -27,27 +27,27 @@ namespace Kyloe.Tests.Binding
         {
             yield return new object[] {
                 "1 + 1.5;",
-                DiagnosticType.UnsupportedBinaryOperation,
+                DiagnosticKind.UnsupportedBinaryOperation,
             };
 
             yield return new object[] {
                 "-1.2 + true;",
-                DiagnosticType.UnsupportedBinaryOperation,
+                DiagnosticKind.UnsupportedBinaryOperation,
             };
 
             yield return new object[] {
                 "-true == false;",
-                DiagnosticType.UnsupportedUnaryOperation,
+                DiagnosticKind.UnsupportedUnaryOperation,
             };
 
             yield return new object[] {
                 "~'f'",
-                DiagnosticType.UnsupportedUnaryOperation,
+                DiagnosticKind.UnsupportedUnaryOperation,
             };
 
             yield return new object[] {
                 "if (1) {}",
-                DiagnosticType.MissmatchedTypeError,
+                DiagnosticKind.MissmatchedTypeError,
             };
 
             yield return new object[] {
@@ -55,7 +55,7 @@ namespace Kyloe.Tests.Binding
                     var x = 5;
                     var y = x + 'hi';
                 }",
-                DiagnosticType.UnsupportedBinaryOperation,
+                DiagnosticKind.UnsupportedBinaryOperation,
             };
 
             yield return new object[] {
@@ -68,14 +68,14 @@ namespace Kyloe.Tests.Binding
 
                     var x = 1;
                 }",
-                DiagnosticType.RedefinedLocalVariableError,
+                DiagnosticKind.RedefinedLocalVariableError,
             };
 
             yield return new object[] {
                 @"{
                     var x = x;
                 }",
-                DiagnosticType.NonExistantNameError,
+                DiagnosticKind.NonExistantNameError,
             };
 
             yield return new object[] {
@@ -83,7 +83,7 @@ namespace Kyloe.Tests.Binding
                     var x = 5;
                     var z = x + y;
                 }",
-                DiagnosticType.NonExistantNameError,
+                DiagnosticKind.NonExistantNameError,
             };
 
             yield return new object[] {
@@ -91,7 +91,7 @@ namespace Kyloe.Tests.Binding
                     var x = 5;
                     x = 'f';
                 }",
-                DiagnosticType.MissmatchedTypeError,
+                DiagnosticKind.MissmatchedTypeError,
             };
 
             yield return new object[] {
@@ -99,7 +99,7 @@ namespace Kyloe.Tests.Binding
                     var x = 5;
                     x += 'f';
                 }",
-                DiagnosticType.UnsupportedAssignmentOperation,
+                DiagnosticKind.UnsupportedAssignmentOperation,
             };
 
             yield return new object[] {
@@ -107,14 +107,14 @@ namespace Kyloe.Tests.Binding
                     var x = 5.2;
                     x %= true;
                 }",
-                DiagnosticType.UnsupportedAssignmentOperation,
+                DiagnosticKind.UnsupportedAssignmentOperation,
             };
 
             yield return new object[] {
                 @"{
                     1 % 8 = 5;
                 }",
-                DiagnosticType.ExpectedModifiableValueError,
+                DiagnosticKind.ExpectedModifiableValueError,
             };
 
 
@@ -124,8 +124,8 @@ namespace Kyloe.Tests.Binding
                     var y = x = 3;
                     var z = x += 2;
                 }",
-                DiagnosticType.ExpectedValueError,
-                DiagnosticType.ExpectedValueError,
+                DiagnosticKind.ExpectedValueError,
+                DiagnosticKind.ExpectedValueError,
             };
 
             yield return new object[] {
@@ -133,7 +133,7 @@ namespace Kyloe.Tests.Binding
                     const x = 1;
                     x = 2;
                 }",
-                DiagnosticType.ExpectedModifiableValueError,
+                DiagnosticKind.ExpectedModifiableValueError,
             };
         }
 

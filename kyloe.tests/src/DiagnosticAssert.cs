@@ -23,10 +23,10 @@ namespace Kyloe.Tests
             Assert.Empty(result.GetWarnings());
         }
 
-        public static void HasAll(DiagnosticResult result, params DiagnosticType[] types)
+        public static void HasAll(DiagnosticResult result, params DiagnosticKind[] kinds)
         {
-            foreach (var type in types)
-                Assert.Contains(result.GetAll(), d => d.Type == type);
+            foreach (var kind in kinds)
+                Assert.Contains(result.GetAll(), d => d.Kind == kind);
         }
     }
 

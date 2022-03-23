@@ -20,13 +20,13 @@ namespace Kyloe.Tests.Tokenization
         }
 
         [Theory]
-        [InlineData("°", new DiagnosticType[] { DiagnosticType.UnknownCharacterError })]
-        [InlineData("\"hello", new DiagnosticType[] { DiagnosticType.NeverClosedStringLiteralError })]
-        [InlineData("/* hello", new DiagnosticType[] { DiagnosticType.NeverClosedBlockCommentError })]
-        [InlineData("°/* ", new DiagnosticType[] { DiagnosticType.UnknownCharacterError, DiagnosticType.NeverClosedBlockCommentError })]
-        [InlineData("°'  ", new DiagnosticType[] { DiagnosticType.UnknownCharacterError, DiagnosticType.NeverClosedStringLiteralError })]
-        [InlineData("10000000000000000000000000000000000000000000", new DiagnosticType[] { DiagnosticType.InvalidIntLiteralError })]
-        public void Test_Tokenization_With_Errors(string text, DiagnosticType[] types)
+        [InlineData("°", new DiagnosticKind[] { DiagnosticKind.UnknownCharacterError })]
+        [InlineData("\"hello", new DiagnosticKind[] { DiagnosticKind.NeverClosedStringLiteralError })]
+        [InlineData("/* hello", new DiagnosticKind[] { DiagnosticKind.NeverClosedBlockCommentError })]
+        [InlineData("°/* ", new DiagnosticKind[] { DiagnosticKind.UnknownCharacterError, DiagnosticKind.NeverClosedBlockCommentError })]
+        [InlineData("°'  ", new DiagnosticKind[] { DiagnosticKind.UnknownCharacterError, DiagnosticKind.NeverClosedStringLiteralError })]
+        [InlineData("10000000000000000000000000000000000000000000", new DiagnosticKind[] { DiagnosticKind.InvalidIntLiteralError })]
+        public void Test_Tokenization_With_Errors(string text, DiagnosticKind[] types)
         {
             var (_, diagnostics) = SyntaxTree.Tokenize(text);
 

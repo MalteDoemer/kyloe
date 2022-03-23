@@ -14,7 +14,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.NeverClosedStringLiteralError;
+        public override DiagnosticKind Kind => DiagnosticKind.NeverClosedStringLiteralError;
 
         public override SourceLocation? Location => errorToken.Location;
 

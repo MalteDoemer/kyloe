@@ -20,7 +20,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.UnsupportedBinaryOperation;
+        public override DiagnosticKind Kind => DiagnosticKind.UnsupportedBinaryOperation;
 
         public override SourceLocation? Location => expression.Location;
 

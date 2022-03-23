@@ -15,7 +15,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.MemberAccessNotAllowed;
+        public override DiagnosticKind Kind => DiagnosticKind.MemberAccessNotAllowed;
 
         public override SourceLocation? Location => expression.Location;
 
