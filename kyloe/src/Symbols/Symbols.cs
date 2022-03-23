@@ -98,21 +98,21 @@ namespace Kyloe.Symbols
 
     sealed class OperationSymbol : Symbol
     {
-        public OperationSymbol(BoundOperation operation, MethodType underlyingMethod)
+        public OperationSymbol(BoundOperation operation, MethodGroupType methodGroup)
         {
             Operation = operation;
-            UnderlyingMethod = underlyingMethod;
+            MethodGroup = methodGroup;
         }
 
         public BoundOperation Operation { get; }
 
-        public MethodType UnderlyingMethod { get; }
+        public MethodGroupType MethodGroup { get; }
 
         public override string Name => SemanticInfo.GetMethodNameFromOperation(Operation);
 
         public override SymbolKind Kind => SymbolKind.OperationSymbol;
 
-        public override TypeSpecifier Type => UnderlyingMethod;
+        public override TypeSpecifier Type => MethodGroup;
     }
 
     sealed class LocalVariableSymbol : Symbol

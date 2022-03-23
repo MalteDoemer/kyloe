@@ -1,7 +1,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Kyloe.Semantics;
 
 namespace Kyloe.Symbols
@@ -60,8 +59,7 @@ namespace Kyloe.Symbols
                 var ret = GetBuiltinType(binary.ret);
 
                 foreach (var op in binary.ops)
-                    left.Scope.DeclareSymbol(CreateBuiltinBinaryOperator)
-                    // left.AddOperation(CreateBuiltinBinaryOperation(op, ret, left, right));
+                    left.Scope.DeclareSymbol(CreateBuiltinBinaryOperator(op, ret, left, right));
             }
 
             foreach (var unary in BuiltinOperatorInfo.UnaryOperations)
@@ -70,7 +68,7 @@ namespace Kyloe.Symbols
                 var ret = GetBuiltinType(unary.ret);
 
                 foreach (var op in unary.ops)
-                    arg.AddOperation(CreateBuiltinUnaryOperation(op, ret, arg));
+                    arg.Scope.DeclareSymbol(CreateBuiltinUnaryOperator(op, ret, arg));
             }
 
         }
@@ -135,7 +133,7 @@ namespace Kyloe.Symbols
                 if (sym is null)
                 {
                     var classType = new ClassType(reference.Name, GetAccessModifiers(reference.Resolve()), parent);
-                    parent.Scope.DeclareSymbol(new Symbols.TypeNameSymbol(classType));
+                    parent.Scope.DeclareSymbol(new TypeNameSymbol(classType));
                     return classType;
                 }
 
@@ -152,7 +150,7 @@ namespace Kyloe.Symbols
                     if (next is null)
                     {
                         var newNS = new NamespaceType(ns, currentNS);
-                        currentNS.Scope.DeclareSymbol(new Symbols.NamespaceSymbol(newNS));
+                        currentNS.Scope.DeclareSymbol(new NamespaceSymbol(newNS));
                         currentNS = newNS;
                     }
                     else
@@ -167,7 +165,7 @@ namespace Kyloe.Symbols
                 {
                     var typeDef = reference.Resolve();
                     var classType = new ClassType(reference.Name, GetAccessModifiers(typeDef), currentNS);
-                    currentNS.Scope.DeclareSymbol(new Symbols.TypeNameSymbol(classType));
+                    currentNS.Scope.DeclareSymbol(new TypeNameSymbol(classType));
                     return classType;
                 }
 
@@ -191,7 +189,7 @@ namespace Kyloe.Symbols
 
                 foreach (var field in definition.Fields)
                 {
-                    var fieldSymbol = new Symbols.FieldSymbol(
+                    var fieldSymbol = new FieldSymbol(
                         field.Name,
                         GetOrDeclareType(field.FieldType),
                         field.IsInitOnly,
@@ -207,7 +205,7 @@ namespace Kyloe.Symbols
                     var getMethod = property.GetMethod is null ? null : CreateMethodType(property.GetMethod);
                     var setMethod = property.SetMethod is null ? null : CreateMethodType(property.SetMethod);
 
-                    var propertySymbol = new Symbols.PropertySymbol(
+                    var propertySymbol = new PropertySymbol(
                         name: property.Name,
                         type: GetOrDeclareType(property.PropertyType),
                         isStatic: !property.HasThis,
@@ -219,6 +217,7 @@ namespace Kyloe.Symbols
                 }
 
                 var methodDictionary = new Dictionary<string, MethodGroupType>();
+                var operationDictionary = new Dictionary<string, OperationSymbol>();
 
                 foreach (var method in definition.Methods)
                 {
@@ -227,8 +226,30 @@ namespace Kyloe.Symbols
 
                     var methodType = CreateMethodType(method);
 
+                    if (method.IsSpecialName)
+                    {
+                        if (SemanticInfo.GetOperationFromMethodName(method.Name) is BoundOperation op)
+                        {
+                            if (operationDictionary.TryGetValue(method.Name, out var operationSymbol))
+                            {
+                                operationSymbol.MethodGroup.Methods.Add(methodType);
+                            }
+                            else
+                            {
+                                var operation = new OperationSymbol(op, new MethodGroupType(method.Name, classType));
+                                operation.MethodGroup.Methods.Add(methodType);
+                                operationDictionary.Add(method.Name, operation);
+                            }
+
+                            continue;
+                        }
+                    }
+
+
                     if (methodDictionary.TryGetValue(method.Name, out var methodGroup))
+                    {
                         methodGroup.Methods.Add(methodType);
+                    }
                     else
                     {
                         var group = new MethodGroupType(method.Name, classType);
@@ -239,7 +260,12 @@ namespace Kyloe.Symbols
 
                 foreach (var group in methodDictionary.Values)
                 {
-                    classType.Scope.DeclareSymbol(new Symbols.MethodGroupSymbol(group));
+                    classType.Scope.DeclareSymbol(new MethodGroupSymbol(group));
+                }
+
+                foreach (var op in operationDictionary.Values)
+                {
+                    classType.Scope.DeclareSymbol(op);
                 }
             }
         }
@@ -329,7 +355,10 @@ namespace Kyloe.Symbols
             method.ParameterTypes.Add(left);
             method.ParameterTypes.Add(right);
 
-            return new OperationSymbol(op, method);
+            var group = new MethodGroupType(name, left);
+            group.Methods.Add(method);
+
+            return new OperationSymbol(op, group);
         }
 
         private static OperationSymbol CreateBuiltinUnaryOperator(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
@@ -338,8 +367,10 @@ namespace Kyloe.Symbols
             var method = new MethodType(name, AccessModifiers.Public, arg, true, ret);
             method.ParameterTypes.Add(arg);
 
+            var group = new MethodGroupType(name, arg);
+            group.Methods.Add(method);
 
-            return new OperationSymbol(op, method);
+            return new OperationSymbol(op, group);
         }
 
 

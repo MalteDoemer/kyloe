@@ -573,15 +573,21 @@ namespace Kyloe.Semantics
 
             var name = SemanticInfo.GetMethodNameFromOperation(op);
 
-            var method = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.UnderlyingMethod;
+            var methodGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
 
-            if (method is null
-                || method.ParameterTypes.Count() != 2
-                || !method.ParameterTypes.First().Equals(leftType)
-                || !method.ParameterTypes.Last().Equals(rightType))
+            if (methodGroup is null)
                 return null;
 
-            return method.ReturnType;
+            var methods = methodGroup.Methods.Where(
+                method => method.ParameterTypes.Count() == 2 &&
+                method.ParameterTypes.First().Equals(leftType) &&
+                method.ParameterTypes.Last().Equals(rightType)
+            );
+
+            if (methods.Count() > 1)
+                throw new Exception("Found multiple operators with the same signature!");
+
+            return methods.FirstOrDefault()?.ReturnType;
         }
 
         private TypeSpecifier? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
@@ -598,13 +604,21 @@ namespace Kyloe.Semantics
 
             var name = SemanticInfo.GetMethodNameFromOperation(op);
 
-            var method = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.UnderlyingMethod;
+            var methodGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
 
-            if (method is null
-                || method.ParameterTypes.Count() != 1
-                || !method.ParameterTypes.First().Equals(type))
+            if (methodGroup is null)
                 return null;
-            return method.ReturnType;
+
+            var methods = methodGroup.Methods.Where(
+                method => method.ParameterTypes.Count() == 1 &&
+                method.ParameterTypes.First().Equals(type)
+            );
+
+            if (methods.Count() > 1)
+                throw new Exception("Found multiple operators with the same signature!");
+
+            return methods.FirstOrDefault()?.ReturnType;
+
         }
     }
 }
