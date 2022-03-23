@@ -13,6 +13,8 @@ namespace Kyloe.Semantics
     {
         public abstract TypeSpecifier ResultType { get; }
 
+        // public abstract IReadOnlySymbolScope? SymbolScope { get; }
+
         public abstract ValueCategory ValueCategory { get; }
 
         public bool IsValue => ValueCategory != ValueCategory.None;

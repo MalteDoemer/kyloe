@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Kyloe.Semantics;
 
 namespace Kyloe.Symbols
 {
@@ -10,6 +11,7 @@ namespace Kyloe.Symbols
         LocalVariableSymbol,
         FieldSymbol,
         PropertySymbol,
+        OperationSymbol,
     }
 
     interface IReadOnlySymbolScope
@@ -92,6 +94,25 @@ namespace Kyloe.Symbols
         public override SymbolKind Kind => SymbolKind.MethodGroupSymbol;
 
         public override TypeSpecifier Type { get; }
+    }
+
+    sealed class OperationSymbol : Symbol
+    {
+        public OperationSymbol(BoundOperation operation, MethodType underlyingMethod)
+        {
+            Operation = operation;
+            UnderlyingMethod = underlyingMethod;
+        }
+
+        public BoundOperation Operation { get; }
+
+        public MethodType UnderlyingMethod { get; }
+
+        public override string Name => SemanticInfo.GetMethodNameFromOperation(Operation);
+
+        public override SymbolKind Kind => SymbolKind.OperationSymbol;
+
+        public override TypeSpecifier Type => UnderlyingMethod;
     }
 
     sealed class LocalVariableSymbol : Symbol

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Kyloe.Semantics;
 
 namespace Kyloe.Symbols
 {
@@ -51,6 +52,48 @@ namespace Kyloe.Symbols
             Bool = (ClassType)GetOrDeclareType(ts.Boolean);
             String = (ClassType)GetOrDeclareType(ts.String);
 
+
+            foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
+            {
+                var left = GetBuiltinType(binary.lhs);
+                var right = GetBuiltinType(binary.rhs);
+                var ret = GetBuiltinType(binary.ret);
+
+                foreach (var op in binary.ops)
+                    left.Scope.DeclareSymbol(CreateBuiltinBinaryOperator)
+                    // left.AddOperation(CreateBuiltinBinaryOperation(op, ret, left, right));
+            }
+
+            foreach (var unary in BuiltinOperatorInfo.UnaryOperations)
+            {
+                var arg = GetBuiltinType(unary.arg);
+                var ret = GetBuiltinType(unary.ret);
+
+                foreach (var op in unary.ops)
+                    arg.AddOperation(CreateBuiltinUnaryOperation(op, ret, arg));
+            }
+
+        }
+
+        private ClassType GetBuiltinType(BuiltinType type)
+        {
+            switch (type)
+            {
+                case BuiltinType.Char: return Char;
+                case BuiltinType.I8: return I8;
+                case BuiltinType.I16: return I16;
+                case BuiltinType.I32: return I32;
+                case BuiltinType.I64: return I64;
+                case BuiltinType.U8: return U8;
+                case BuiltinType.U16: return U16;
+                case BuiltinType.U32: return U32;
+                case BuiltinType.U64: return U64;
+                case BuiltinType.Float: return Float;
+                case BuiltinType.Double: return Double;
+                case BuiltinType.Bool: return Bool;
+                case BuiltinType.String: return String;
+                default: throw new Exception($"unexpected builtin type: {type}");
+            }
         }
 
         private TypeSpecifier GetOrDeclareType(Mono.Cecil.TypeReference reference)
@@ -279,6 +322,25 @@ namespace Kyloe.Symbols
             throw new Exception($"Invalid access modifiers for method: '{method}'");
         }
 
+        private static OperationSymbol CreateBuiltinBinaryOperator(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)
+        {
+            var name = SemanticInfo.GetMethodNameFromOperation(op);
+            var method = new MethodType(name, AccessModifiers.Public, left, true, ret);
+            method.ParameterTypes.Add(left);
+            method.ParameterTypes.Add(right);
+
+            return new OperationSymbol(op, method);
+        }
+
+        private static OperationSymbol CreateBuiltinUnaryOperator(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
+        {
+            var name = SemanticInfo.GetMethodNameFromOperation(op);
+            var method = new MethodType(name, AccessModifiers.Public, arg, true, ret);
+            method.ParameterTypes.Add(arg);
+
+
+            return new OperationSymbol(op, method);
+        }
 
 
     }

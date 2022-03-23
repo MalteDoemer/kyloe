@@ -18,8 +18,8 @@ namespace Kyloe.Diagnostics
         ExpectedModifiableValueError,
         UnsupportedAssignmentOperation,
         ExpectedTypeNameError,
-        RestrictedMemberAccessError,
         MemberNotFoundError,
-        MemberAccessError
+        MemberAccessError,
+        MemberAccessNotAllowed
     }
 }
