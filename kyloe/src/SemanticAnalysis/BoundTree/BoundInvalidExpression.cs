@@ -10,9 +10,7 @@ namespace Kyloe.Semantics
             ResultType = typeSystem.Error;
         }
 
-        public override ITypeSymbol ResultType { get; }
-
-        public override ISymbol ResultSymbol => ResultType;
+        public override TypeSpecifier ResultType { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundInvalidExpression;
 

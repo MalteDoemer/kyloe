@@ -1,19 +1,13 @@
 namespace Kyloe.Symbols
 {
-    public enum SymbolKind
+    internal enum SymbolKind
     {
         NamespaceSymbol,
-        MethodSymbol,
-        ParameterSymbol,
+        TypeNameSymbol,
+        MethodGroupSymbol,
         LocalVariableSymbol,
-        ErrorTypeSymbol,
-        ClassTypeSymbol,
-        OperationSymbol,
-        PropertySymbol,
         FieldSymbol,
-        ArrayTypeSymbol,
-        ByRefTypeSymbol,
-        PointerTypeSymbol,
-        FunctionPointerSymbol,
+        PropertySymbol,
+        OperationSymbol,
     }
 }

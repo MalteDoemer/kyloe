@@ -1,58 +1,24 @@
-using Kyloe.Utility;
-
 namespace Kyloe.Symbols
 {
-    public partial class TypeSystem
+    internal sealed class FieldSymbol : Symbol
     {
-        private sealed class FieldSymbol : IFieldSymbol
+        public FieldSymbol(string name, TypeSpecifier type, bool isReadonly, bool isStatic, AccessModifiers accessModifiers)
         {
-            private ITypeSymbol? type;
-            private AccessModifiers accessModifiers;
-            private bool isReadonly;
-            private bool isStatic;
-
-            public FieldSymbol(string name)
-            {
-                Name = name;
-            }
-
-            public string Name { get; }
-
-            public SymbolKind Kind => SymbolKind.FieldSymbol;
-
-            public ITypeSymbol Type => type ?? throw new NotInitializedException(nameof(Type));
-
-            public AccessModifiers AccessModifiers => accessModifiers;
-
-            public bool IsReadonly => isReadonly;
-
-            public bool IsStatic => isStatic;
-
-            public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
-
-            public FieldSymbol SetType(ITypeSymbol type)
-            {
-                this.type = type;
-                return this;
-            }
-
-            public FieldSymbol SetAccessModifiers(AccessModifiers modifiers)
-            {
-                this.accessModifiers = modifiers;
-                return this;
-            }
-
-            public FieldSymbol SetReadonly(bool value)
-            {
-                this.isReadonly = value;
-                return this;
-            }
-
-            public FieldSymbol SetStatic(bool value)
-            {
-                this.isStatic = value;
-                return this;
-            }
+            Name = name;
+            Type = type;
+            IsReadonly = isReadonly;
+            IsStatic = isStatic;
+            AccessModifiers = accessModifiers;
         }
+
+        public bool IsReadonly { get; }
+        public bool IsStatic { get; }
+        public AccessModifiers AccessModifiers { get; }
+
+        public override string Name { get; }
+
+        public override SymbolKind Kind => SymbolKind.FieldSymbol;
+
+        public override TypeSpecifier Type { get; }
     }
 }

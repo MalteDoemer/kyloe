@@ -14,7 +14,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.ExpectedModifiableValueError;
+        public override DiagnosticKind Kind => DiagnosticKind.ExpectedModifiableValueError;
 
         public override SourceLocation? Location => expression.Location;
 

@@ -1,6 +1,6 @@
 namespace Kyloe.Diagnostics
 {
-    public enum DiagnosticType
+    public enum DiagnosticKind
     {
         NeverClosedBlockCommentError,
         NeverClosedStringLiteralError,
@@ -18,8 +18,8 @@ namespace Kyloe.Diagnostics
         ExpectedModifiableValueError,
         UnsupportedAssignmentOperation,
         ExpectedTypeNameError,
-        RestrictedMemberAccessError,
         MemberNotFoundError,
-        MemberAccessError
+        MemberAccessError,
+        MemberAccessNotAllowed
     }
 }

@@ -4,7 +4,7 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundUnaryExpression : BoundExpression
     {
-        public BoundUnaryExpression(BoundExpression expression, BoundOperation operation, ITypeSymbol result)
+        public BoundUnaryExpression(BoundExpression expression, BoundOperation operation, TypeSpecifier result)
         {
             Expression = expression;
             Operation = operation;
@@ -14,9 +14,7 @@ namespace Kyloe.Semantics
         public BoundExpression Expression { get; }
         public BoundOperation Operation { get; }
         
-        public override ITypeSymbol ResultType { get; }
-
-        public override ISymbol ResultSymbol => ResultType;
+        public override TypeSpecifier ResultType { get; }
 
         public override BoundNodeType Type => BoundNodeType.BoundUnaryExpression;
 

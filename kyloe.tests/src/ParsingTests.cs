@@ -12,7 +12,7 @@ namespace Kyloe.Tests.Parsing
 
         [Theory]
         [MemberData(nameof(GetExpressionErrorData))]
-        public void Test_Parsing_Expression_With_Errors(string text, params DiagnosticType[] errors)
+        public void Test_Parsing_Expression_With_Errors(string text, params DiagnosticKind[] errors)
         {
             var tree = SyntaxTree.ParseExpression(text);
             DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
@@ -20,7 +20,7 @@ namespace Kyloe.Tests.Parsing
 
         [Theory]
         [MemberData(nameof(GetStatementErrorData))]
-        public void Test_Parsing_Statements_With_Errors(string text, params DiagnosticType[] errors)
+        public void Test_Parsing_Statements_With_Errors(string text, params DiagnosticKind[] errors)
         {
             var tree = SyntaxTree.ParseStatement(text);
             DiagnosticAssert.HasAll(tree.GetDiagnostics(), errors);
@@ -49,52 +49,52 @@ namespace Kyloe.Tests.Parsing
         {
             yield return new object[] {
                 "arr[1)]",
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "()",
-                DiagnosticType.ExpectedExpressionError,
+                DiagnosticKind.ExpectedExpressionError,
             };
 
             yield return new object[] {
                 "((1)",
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "(1))",
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "1 + ",
-                DiagnosticType.ExpectedExpressionError
+                DiagnosticKind.ExpectedExpressionError
             };
 
             yield return new object[] {
                 "x += ",
-                DiagnosticType.ExpectedExpressionError
+                DiagnosticKind.ExpectedExpressionError
             };
 
             yield return new object[] {
                 "(1 ",
-                DiagnosticType.ExpectedTokenError
+                DiagnosticKind.ExpectedTokenError
             };
 
             yield return new object[] {
                 "hello(1, 2",
-                DiagnosticType.ExpectedTokenError
+                DiagnosticKind.ExpectedTokenError
             };
 
             yield return new object[] {
                 "data[36 + 1",
-                DiagnosticType.ExpectedTokenError
+                DiagnosticKind.ExpectedTokenError
             };
 
             yield return new object[] {
                 "x.y.",
-                DiagnosticType.ExpectedTokenError
+                DiagnosticKind.ExpectedTokenError
             };
         }
 
@@ -102,33 +102,33 @@ namespace Kyloe.Tests.Parsing
         {
             yield return new object[] {
                 "1",
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "(1",
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "a[];",
-                DiagnosticType.ExpectedExpressionError,
+                DiagnosticKind.ExpectedExpressionError,
             };
 
             yield return new object[] {
                 "()",
-                DiagnosticType.ExpectedExpressionError,
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedExpressionError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "var ",
-                DiagnosticType.ExpectedTokenError,
+                DiagnosticKind.ExpectedTokenError,
             };
 
             yield return new object[] {
                 "var x = ;",
-                DiagnosticType.ExpectedExpressionError,
+                DiagnosticKind.ExpectedExpressionError,
             };
         }
 

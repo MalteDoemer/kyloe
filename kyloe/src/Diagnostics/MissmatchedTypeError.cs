@@ -7,10 +7,10 @@ namespace Kyloe.Diagnostics
     internal sealed class MissmatchedTypeError : Diagnostic
     {
         private readonly SyntaxExpression expression;
-        private readonly ISymbol expected;
-        private readonly ISymbol provided;
+        private readonly TypeSpecifier expected;
+        private readonly TypeSpecifier provided;
 
-        public MissmatchedTypeError(SyntaxExpression expression, ISymbol expected, ISymbol provided)
+        public MissmatchedTypeError(SyntaxExpression expression, TypeSpecifier expected, TypeSpecifier provided)
         {
             this.expression = expression;
             this.expected = expected;
@@ -19,10 +19,10 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.MissmatchedTypeError;
+        public override DiagnosticKind Kind => DiagnosticKind.MissmatchedTypeError;
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"missmatched types, expected '{expected}' got '{provided}'";
+        public override string Message() => $"missmatched types, expected '{expected.FullName()}' got '{provided.FullName()}'";
     }
 }

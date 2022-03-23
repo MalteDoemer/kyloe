@@ -14,7 +14,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.RedefinedLocalVariableError;
+        public override DiagnosticKind Kind => DiagnosticKind.RedefinedLocalVariableError;
 
         public override SourceLocation? Location => nameToken.Location;
 

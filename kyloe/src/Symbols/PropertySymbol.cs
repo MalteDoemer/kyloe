@@ -1,61 +1,24 @@
-using Kyloe.Utility;
-
 namespace Kyloe.Symbols
 {
-    public partial class TypeSystem
+
+    sealed class PropertySymbol : Symbol
     {
-        private sealed class PropertySymbol : IPropertySymbol
+        public PropertySymbol(string name, TypeSpecifier type, bool isStatic, MethodType? getMethod, MethodType? setMethod)
         {
-            private ITypeSymbol? type;
-            private IMethodSymbol? getterMethod;
-            private IMethodSymbol? setterMethod;
-            private bool isStatic;
-
-
-            public PropertySymbol(string name)
-            {
-                Name = name;
-            }
-
-            public string Name { get; }
-
-            public SymbolKind Kind => SymbolKind.PropertySymbol;
-
-            public AccessModifiers AccessModifiers => AccessModifiers.Public;
-
-            public ITypeSymbol Type => type ?? throw new NotInitializedException(nameof(Type));
-
-            public IMethodSymbol? GetterMethod => getterMethod;
-
-            public IMethodSymbol? SetterMethod => setterMethod;
-
-            public bool IsStatic => isStatic;
-
-            public bool Equals(ISymbol? other) => object.ReferenceEquals(this, other);
-
-            public PropertySymbol SetType(ITypeSymbol type)
-            {
-                this.type = type;
-                return this;
-            }
-
-            public PropertySymbol SetSetterMethod(IMethodSymbol setterMethod)
-            {
-                this.setterMethod = setterMethod;
-                return this;
-            }
-
-            public PropertySymbol SetGetterMethod(IMethodSymbol getterMethod)
-            {
-                this.getterMethod = getterMethod;
-                return this;
-            }
-
-            public PropertySymbol SetStatic(bool value)
-            {
-                this.isStatic = value;
-                return this;
-            }
+            Name = name;
+            Type = type;
+            IsStatic = isStatic;
+            GetMethod = getMethod;
+            SetMethod = setMethod;
         }
+
+        public bool IsStatic { get; }
+        public MethodType? GetMethod { get; }
+        public MethodType? SetMethod { get; }
+        public override string Name { get; }
+
+        public override SymbolKind Kind => SymbolKind.PropertySymbol;
+
+        public override TypeSpecifier Type { get; }
     }
 }

@@ -4,6 +4,8 @@ using System;
 using Kyloe.Diagnostics;
 using Kyloe.Utility;
 using Kyloe.Syntax;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Kyloe
 {
@@ -22,14 +24,19 @@ namespace Kyloe
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
-        public static Compilation Compile(string text) => Compile(SourceText.FromText(text));
+        public static Compilation Compile(string text) => Compile(SourceText.FromText(text), Array.Empty<AssemblyDefinition>());
 
-        public static Compilation Compile(SourceText text)
+        public static Compilation Compile(SourceText text, IEnumerable<AssemblyDefinition> refrenceAssemblies)
         {
             var assemblyName = new AssemblyNameDefinition("test", new Version(0, 1));
             var assembly = AssemblyDefinition.CreateAssembly(assemblyName, "<test>", ModuleKind.Dll);
 
-            var typeSystem = Symbols.TypeSystem.Create(assembly);
+            var assemblies = refrenceAssemblies.ToArray();
+
+            if (assemblies.Length == 0)
+                assemblies = new[] { assembly.MainModule.TypeSystem.Boolean.Resolve().Module.Assembly };
+
+            var typeSystem = Symbols.TypeSystem.Create(assembly, assemblies);
 
             var collector = new DiagnosticCollector(text);
             var lexer = new Lexer(text.GetReader(), collector);

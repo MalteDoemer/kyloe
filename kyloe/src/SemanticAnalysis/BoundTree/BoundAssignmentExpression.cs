@@ -16,9 +16,7 @@ namespace Kyloe.Semantics
         public AssignmentOperation Operation { get; }
         public BoundExpression RightExpression { get; }
 
-        public override ITypeSymbol ResultType { get; }
-
-        public override ISymbol ResultSymbol => ResultType;
+        public override TypeSpecifier ResultType { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

@@ -17,7 +17,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public override DiagnosticType Type => DiagnosticType.UnknownCharacterError;
+        public override DiagnosticKind Kind => DiagnosticKind.UnknownCharacterError;
 
         public override SourceLocation? Location => errorToken.Location;
 
