@@ -25,15 +25,14 @@ namespace Kyloe.Symbols
         public ClassType Bool { get; }
         public ClassType String { get; }
 
-        public static TypeSystem Create(Mono.Cecil.AssemblyDefinition mainAssembly)
+        public static TypeSystem Create(Mono.Cecil.AssemblyDefinition mainAssembly, Mono.Cecil.AssemblyDefinition[] referenceAssemblies)
         {
-            return new TypeSystem(mainAssembly, Array.Empty<Mono.Cecil.AssemblyDefinition>());
+            return new TypeSystem(mainAssembly, referenceAssemblies);
         }
 
-        private TypeSystem(Mono.Cecil.AssemblyDefinition mainAssembly, Mono.Cecil.AssemblyDefinition[] assemblyDefinitions)
+        private TypeSystem(Mono.Cecil.AssemblyDefinition mainAssembly, Mono.Cecil.AssemblyDefinition[] referenceAssemblies)
         {
             var ts = mainAssembly.MainModule.TypeSystem;
-            var systemAssembly = ts.Boolean.Resolve().Module.Assembly;
 
             RootNamespace = new NamespaceType("", null);
             Error = new ErrorType();
@@ -53,15 +52,7 @@ namespace Kyloe.Symbols
             Bool = (ClassType)GetOrDeclareType(ts.Boolean);
             String = (ClassType)GetOrDeclareType(ts.String);
 
-            foreach (var type in systemAssembly.Modules.SelectMany(mod => mod.Types))
-            {
-                if (type.HasGenericParameters || type.IsNotPublic)
-                    continue;
-
-                DefineType(type);
-            }
-
-            foreach (var type in assemblyDefinitions.SelectMany(asm => asm.Modules).SelectMany(mod => mod.Types))
+            foreach (var type in referenceAssemblies.SelectMany(asm => asm.Modules).SelectMany(mod => mod.Types))
             {
                 if (type.HasGenericParameters || type.IsNotPublic)
                     continue;
