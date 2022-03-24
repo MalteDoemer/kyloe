@@ -300,39 +300,54 @@ namespace Kyloe.Semantics
 
             var args = BindArgumentExpression(expr.Arguments);
 
-            if (bound.ResultType is MethodGroupType methodGroup)
+            if (bound.ResultType is FunctionGroupType functionGroup)
             {
-                foreach (var method in methodGroup.Methods)
+                foreach (var function in functionGroup.Functions)
                 {
-                    
+                    // Check whether a static or instance function is allowed to be called:
+                    // - A static method can only be called on their type names e.g. Console.WriteLine()
+                    // - A instance method can only be called on an instance of the type e.g. myObject.Equals(other) 
+
+                    if (function.IsStatic && bound.ValueCategory != ValueCategory.NoValue)
+                    {
+                        diagnostics.Add(new CannotCallStaticMethodError(expr));
+                        return new BoundInvalidCallExpression(typeSystem, bound);
+                    }
+                    else if (!function.IsStatic && bound.ValueCategory == ValueCategory.NoValue)
+                    {
+                        diagnostics.Add(new InstanceRequiredToCallError(expr));
+                        return new BoundInvalidCallExpression(typeSystem, bound);
+                    }
+
+                    if (CheckArgumentTypes(function, args))
+                    {
+                        return new BoundCallExpression(function, bound, args);
+                    }
                 }
+
+                diagnostics.Add(new NoMatchingFunctionError(functionGroup.FullName(), expr, args));
+                return new BoundInvalidCallExpression(typeSystem, bound);
             }
             else
             {
                 diagnostics.Add(new NotCallableError(expr.Expression));
                 return new BoundInvalidCallExpression(typeSystem, bound);
             }
-
-            throw new System.NotImplementedException();
         }
 
-        private bool ArgumentTypesMatch(MethodType method, BoundArgumentExpression expression)
+        private bool CheckArgumentTypes(FunctionType function, BoundArguments expression)
         {
-            if (method.ParameterTypes.Count() != expression.Arguments.Count())
+            if (function.ParameterTypes.Count() != expression.Arguments.Count())
                 return false;
 
-            foreach (var (param, arg) in method.ParameterTypes.Zip(expression.Arguments))
-            {
-                if (!arg.ResultType.Equals(arg))
-                {
+            foreach (var (param, arg) in function.ParameterTypes.Zip(expression.Arguments))
+                if (!arg.ResultType.Equals(param))
                     return false;
-                }
-            }
 
             return true;
         }
 
-        private BoundArgumentExpression BindArgumentExpression(ArgumentExpression arguments)
+        private BoundArguments BindArgumentExpression(ArgumentExpression arguments)
         {
             var builder = ImmutableArray.CreateBuilder<BoundExpression>();
 
@@ -342,7 +357,7 @@ namespace Kyloe.Semantics
                 builder.Add(bound);
             }
 
-            return new BoundArgumentExpression(builder.MoveToImmutable());
+            return new BoundArguments(builder.ToImmutable());
         }
 
         private BoundExpression BindSubscriptExpression(SubscriptExpression expr)

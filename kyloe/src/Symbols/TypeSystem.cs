@@ -52,6 +52,13 @@ namespace Kyloe.Symbols
             String = new BuiltinType("string");
 
 
+            var testFunctionGroup = new FunctionGroupType("test", I64);
+            var testFunction = new FunctionType("test", I64, false, Void);
+            testFunction.ParameterTypes.Add(Double);
+            testFunctionGroup.Functions.Add(testFunction);
+            I64.Scope.DeclareSymbol(new FunctionGroupSymbol(testFunctionGroup));
+
+
             foreach (var builtin in Enum.GetValues<BuiltinTypeKind>())
                 GlobalScope.DeclareSymbol(new TypeNameSymbol(GetBuiltinType(builtin)));
 

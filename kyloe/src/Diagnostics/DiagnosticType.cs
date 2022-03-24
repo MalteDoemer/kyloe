@@ -21,6 +21,9 @@ namespace Kyloe.Diagnostics
         MemberNotFoundError,
         MemberAccessError,
         MemberAccessNotAllowed,
-        NotCallableError
+        NotCallableError,
+        NoMatchingFunctionError,
+        CannotCallStaticMethodError,
+        InstanceRequiredToCallError
     }
 }

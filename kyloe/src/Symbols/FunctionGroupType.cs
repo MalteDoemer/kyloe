@@ -26,12 +26,10 @@ namespace Kyloe.Symbols
         {
             var builder = new StringBuilder();
             var parentName = Parent.FullName();
-
-            builder.Append("func ");
+            
             if (parentName != "")
                 builder.Append(parentName).Append('.');
             builder.Append(Name);
-            builder.Append("(...)");
 
             return builder.ToString();
         }

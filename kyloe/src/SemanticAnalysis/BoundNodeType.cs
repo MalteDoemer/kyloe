@@ -16,5 +16,6 @@ namespace Kyloe.Semantics
         BoundInvalidMemberAccessExpression,
         BoundSymbolExpression,
         BoundInvalidCallExpression,
+        BoundCallExpression,
     }
 }
