@@ -2,9 +2,9 @@ using Kyloe.Semantics;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class MethodGroupSymbol : Symbol
+    internal sealed class FunctionGroupSymbol : Symbol
     {
-        public MethodGroupSymbol(MethodGroupType groupType)
+        public FunctionGroupSymbol(FunctionGroupType groupType)
         {
             Name = groupType.Name;
             Type = groupType;
@@ -12,7 +12,7 @@ namespace Kyloe.Symbols
 
         public override string Name { get; }
 
-        public override SymbolKind Kind => SymbolKind.MethodGroupSymbol;
+        public override SymbolKind Kind => SymbolKind.FunctionGroupSymbol;
 
         public override TypeSpecifier Type { get; }
 

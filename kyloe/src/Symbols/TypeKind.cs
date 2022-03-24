@@ -4,8 +4,8 @@ namespace Kyloe.Symbols
     {
         ErrorType,
         BuiltinType,
-        MethodType,
-        MethodGroupType,
+        FunctionType,
+        FunctionGroupType,
         ArrayType,
     }
 }

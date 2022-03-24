@@ -20,7 +20,7 @@ namespace Kyloe.Semantics
             }
         }
 
-        public static string GetMethodNameFromOperation(BoundOperation operation)
+        public static string GetFunctionNameFromOperation(BoundOperation operation)
         {
             switch (operation)
             {
@@ -49,7 +49,7 @@ namespace Kyloe.Semantics
             }
         }
 
-        public static BoundOperation? GetOperationFromMethodName(string name)
+        public static BoundOperation? GetOperationFromFunctionName(string name)
         {
             switch (name)
             {
@@ -115,14 +115,14 @@ namespace Kyloe.Semantics
         }
 
 
-        public static bool IsUnaryOperationMethodName(string name)
+        public static bool IsUnaryOperationName(string name)
         {
-            return GetOperationFromMethodName(name) is BoundOperation op && op.IsUnaryOperation();
+            return GetOperationFromFunctionName(name) is BoundOperation op && op.IsUnaryOperation();
         }
 
-        public static bool IsBinaryOperationMethodName(string name)
+        public static bool IsBinaryOperationName(string name)
         {
-            return GetOperationFromMethodName(name) is BoundOperation op && op.IsBinaryOperation();
+            return GetOperationFromFunctionName(name) is BoundOperation op && op.IsBinaryOperation();
         }
 
         internal static BoundOperation GetBinaryOperation(SyntaxTokenType type)

@@ -344,8 +344,8 @@ namespace Kyloe.Semantics
             {
                 case SymbolKind.TypeNameSymbol:
                     return bound.ValueCategory == ValueCategory.NoValue;
-                case SymbolKind.MethodGroupSymbol:
-                    // method access needs to be check after overload resolution
+                case SymbolKind.FunctionGroupSymbol:
+                    // function access needs to be check after overload resolution
                     return true;
                 case SymbolKind.FieldSymbol:
                     var fieldSymbol = (FieldSymbol)member;
@@ -447,23 +447,23 @@ namespace Kyloe.Semantics
             if (!left.IsValue || !right.IsValue)
                 return null;
 
-            var name = SemanticInfo.GetMethodNameFromOperation(op);
+            var name = SemanticInfo.GetFunctionNameFromOperation(op);
 
-            var methodGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
+            var funcGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.FunctionGroup;
 
-            if (methodGroup is null)
+            if (funcGroup is null)
                 return null;
 
-            var methods = methodGroup.Methods.Where(
-                method => method.ParameterTypes.Count() == 2 &&
-                method.ParameterTypes.First().Equals(leftType) &&
-                method.ParameterTypes.Last().Equals(rightType)
+            var functions = funcGroup.Functions.Where(
+                func => func.ParameterTypes.Count() == 2 &&
+                func.ParameterTypes.First().Equals(leftType) &&
+                func.ParameterTypes.Last().Equals(rightType)
             );
 
-            if (methods.Count() > 1)
+            if (functions.Count() > 1)
                 throw new Exception("Found multiple operators with the same signature!");
 
-            return methods.FirstOrDefault()?.ReturnType;
+            return functions.FirstOrDefault()?.ReturnType;
         }
 
         private TypeSpecifier? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
@@ -478,23 +478,22 @@ namespace Kyloe.Semantics
             if (!expr.IsValue)
                 return null;
 
-            var name = SemanticInfo.GetMethodNameFromOperation(op);
+            var name = SemanticInfo.GetFunctionNameFromOperation(op);
 
-            var methodGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
+            var funcGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.FunctionGroup;
 
-            if (methodGroup is null)
+            if (funcGroup is null)
                 return null;
 
-            var methods = methodGroup.Methods.Where(
-                method => method.ParameterTypes.Count() == 1 &&
-                method.ParameterTypes.First().Equals(type)
+            var functions = funcGroup.Functions.Where(
+                func => func.ParameterTypes.Count() == 1 &&
+                func.ParameterTypes.First().Equals(type)
             );
 
-            if (methods.Count() > 1)
+            if (functions.Count() > 1)
                 throw new Exception("Found multiple operators with the same signature!");
 
-            return methods.FirstOrDefault()?.ReturnType;
-
+            return functions.FirstOrDefault()?.ReturnType;
         }
     }
 }

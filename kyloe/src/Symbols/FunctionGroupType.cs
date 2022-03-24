@@ -1,28 +1,22 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class MethodType : TypeSpecifier
+    internal sealed class FunctionGroupType : TypeSpecifier
     {
-        public MethodType(string name, TypeSpecifier parent, bool isStatic, TypeSpecifier returnType)
+        public FunctionGroupType(string name, TypeSpecifier parent)
         {
             Name = name;
             Parent = parent;
-            IsStatic = isStatic;
-            ReturnType = returnType;
-            ParameterTypes = new List<TypeSpecifier>();
+            Functions = new List<FunctionType>();
         }
 
         public string Name { get; }
         public TypeSpecifier Parent { get; }
+        public List<FunctionType> Functions { get; }
 
-        public bool IsStatic { get; }
-        public TypeSpecifier ReturnType { get; }
-        public List<TypeSpecifier> ParameterTypes { get; }
-
-        public override TypeKind Kind => TypeKind.MethodType;
+        public override TypeKind Kind => TypeKind.FunctionGroupType;
 
         public override IReadOnlySymbolScope? ReadOnlyScope => null;
 
@@ -31,18 +25,13 @@ namespace Kyloe.Symbols
         public override string FullName()
         {
             var builder = new StringBuilder();
-
             var parentName = Parent.FullName();
-
 
             builder.Append("func ");
             if (parentName != "")
                 builder.Append(parentName).Append('.');
             builder.Append(Name);
-            builder.Append('(');
-            builder.AppendJoin(',', ParameterTypes.Select(param => param.FullName()));
-            builder.Append(") -> ");
-            builder.Append(ReturnType.FullName());
+            builder.Append("(...)");
 
             return builder.ToString();
         }

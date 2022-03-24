@@ -3,7 +3,7 @@ namespace Kyloe.Symbols
     internal enum SymbolKind
     {
         TypeNameSymbol,
-        MethodGroupSymbol,
+        FunctionGroupSymbol,
         LocalVariableSymbol,
         FieldSymbol,
         OperationSymbol,
