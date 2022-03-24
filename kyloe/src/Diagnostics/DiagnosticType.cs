@@ -20,6 +20,7 @@ namespace Kyloe.Diagnostics
         ExpectedTypeNameError,
         MemberNotFoundError,
         MemberAccessError,
-        MemberAccessNotAllowed
+        MemberAccessNotAllowed,
+        NotCallableError
     }
 }
