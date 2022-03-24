@@ -271,7 +271,53 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindCallExpression(CallExpression expr)
         {
-            throw new NotImplementedException();
+            var bound = BindExpression(expr.Expression);
+
+            var args = BindArgumentExpression(expr.Arguments);
+
+            if (bound.ResultType is MethodGroupType methodGroup)
+            {
+                foreach (var method in methodGroup.Methods)
+                {
+                    
+                }
+            }
+            else
+            {
+                diagnostics.Add(new NotCallableError(expr.Expression));
+                return new BoundInvalidCallExpression(typeSystem, bound);
+            }
+
+            throw new System.NotImplementedException();
+        }
+
+        private bool ArgumentTypesMatch(MethodType method, BoundArgumentExpression expression)
+        {
+            if (method.ParameterTypes.Count() != expression.Arguments.Count())
+                return false;
+
+            foreach (var (param, arg) in method.ParameterTypes.Zip(expression.Arguments))
+            {
+                if (!arg.ResultType.Equals(arg))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private BoundArgumentExpression BindArgumentExpression(ArgumentExpression arguments)
+        {
+            var builder = ImmutableArray.CreateBuilder<BoundExpression>();
+
+            foreach (var arg in arguments.Nodes)
+            {
+                var bound = BindExpression(arg);
+                builder.Add(bound);
+            }
+
+            return new BoundArgumentExpression(builder.MoveToImmutable());
         }
 
         private BoundExpression BindSubscriptExpression(SubscriptExpression expr)
