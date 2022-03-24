@@ -9,7 +9,7 @@ namespace Kyloe.Semantics
             LeftExpression = leftExpression;
             Operation = operation;
             RightExpression = rightExpression;
-            ResultType = typeSystem.Empty;
+            ResultType = typeSystem.Void;
         }
 
         public BoundExpression LeftExpression { get; }
@@ -18,7 +18,7 @@ namespace Kyloe.Semantics
 
         public override TypeSpecifier ResultType { get; }
 
-        public override ValueCategory ValueCategory => ValueCategory.None;
+        public override ValueCategory ValueCategory => ValueCategory.NoValue;
 
         public override BoundNodeType Type => BoundNodeType.BoundAssignmentExpression;
 

@@ -20,8 +20,6 @@ namespace Kyloe.Symbols
 
         public override IReadOnlySymbolScope? ReadOnlyScope => null;
 
-        public override AccessModifiers AccessModifiers => AccessModifiers.Public;
-
         public override bool Equals(TypeSpecifier? other) => object.ReferenceEquals(this, other);
 
         public override string FullName()

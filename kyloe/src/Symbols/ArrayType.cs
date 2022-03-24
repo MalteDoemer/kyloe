@@ -16,8 +16,6 @@ namespace Kyloe.Symbols
 
         public override IReadOnlySymbolScope? ReadOnlyScope => Scope;
 
-        public override AccessModifiers AccessModifiers => ElementType.AccessModifiers;
-
         public override bool Equals(TypeSpecifier? other) => other is ArrayType array && array.ElementType.Equals(ElementType);
 
         public override string FullName() => ElementType.FullName() + "[]";

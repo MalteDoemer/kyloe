@@ -6,8 +6,6 @@ namespace Kyloe.Symbols
     {
         public abstract TypeKind Kind { get; }
 
-        public abstract AccessModifiers AccessModifiers { get; }
-
         public abstract IReadOnlySymbolScope? ReadOnlyScope { get; }
 
         public abstract bool Equals(TypeSpecifier? other);

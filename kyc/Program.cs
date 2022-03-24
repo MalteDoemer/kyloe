@@ -12,10 +12,7 @@ namespace Kyc
             bool help = false;
             bool interactive = false;
 
-            var refrences = new List<string>();
-
             var options = new OptionSet() {
-                {"r|reference=", "adds a assembly to the reference assemblies", value => refrences.Add(value) },
                 {"i|interactive", "starts a interactive kyloe shell", value => interactive = value is not null },
                 {"h|help", "show this message and exit", value => help = value is not null },
             };
@@ -66,9 +63,8 @@ namespace Kyc
 
             try
             {
-                var referenceAssemblies = refrences.Select(path => AssemblyDefinition.ReadAssembly(path));
                 var text = SourceText.FromFile(extra[0]);
-                var compilation = Compilation.Compile(text, referenceAssemblies);
+                var compilation = Compilation.Compile(text);
                 compilation.GetDiagnostics().WriteTo(Console.Out);
             }
             catch (IOException ioException)

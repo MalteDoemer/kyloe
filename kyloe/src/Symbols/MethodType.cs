@@ -6,10 +6,9 @@ namespace Kyloe.Symbols
 {
     internal sealed class MethodType : TypeSpecifier
     {
-        public MethodType(string name, AccessModifiers accessModifiers, TypeSpecifier parent, bool isStatic, TypeSpecifier returnType)
+        public MethodType(string name, TypeSpecifier parent, bool isStatic, TypeSpecifier returnType)
         {
             Name = name;
-            AccessModifiers = accessModifiers;
             Parent = parent;
             IsStatic = isStatic;
             ReturnType = returnType;
@@ -24,8 +23,6 @@ namespace Kyloe.Symbols
         public List<TypeSpecifier> ParameterTypes { get; }
 
         public override TypeKind Kind => TypeKind.MethodType;
-
-        public override AccessModifiers AccessModifiers { get; }
 
         public override IReadOnlySymbolScope? ReadOnlyScope => null;
 

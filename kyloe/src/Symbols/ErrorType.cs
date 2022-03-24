@@ -6,8 +6,6 @@ namespace Kyloe.Symbols
 
         public override TypeKind Kind => TypeKind.ErrorType;
 
-        public override AccessModifiers AccessModifiers => AccessModifiers.Public;
-
         public override bool Equals(TypeSpecifier? other) => other is ErrorType;
 
         public override string FullName() => "<error-type>";

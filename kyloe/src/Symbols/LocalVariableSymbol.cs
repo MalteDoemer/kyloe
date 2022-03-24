@@ -1,3 +1,5 @@
+using Kyloe.Semantics;
+
 namespace Kyloe.Symbols
 {
     internal sealed class LocalVariableSymbol : Symbol
@@ -16,5 +18,7 @@ namespace Kyloe.Symbols
         public override SymbolKind Kind => SymbolKind.LocalVariableSymbol;
 
         public override TypeSpecifier Type { get; }
+
+        public override ValueCategory ValueCategory => IsConst ? ValueCategory.ReadableValue : ValueCategory.ModifiableValue;
     }
 }

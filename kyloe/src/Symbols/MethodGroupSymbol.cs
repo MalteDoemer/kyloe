@@ -1,3 +1,5 @@
+using Kyloe.Semantics;
+
 namespace Kyloe.Symbols
 {
     internal sealed class MethodGroupSymbol : Symbol
@@ -13,5 +15,7 @@ namespace Kyloe.Symbols
         public override SymbolKind Kind => SymbolKind.MethodGroupSymbol;
 
         public override TypeSpecifier Type { get; }
+
+        public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }
 }

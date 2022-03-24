@@ -50,13 +50,38 @@ namespace Kyloe.Semantics
     {
         private readonly TypeSystem typeSystem;
         private readonly DiagnosticCollector diagnostics;
-        private readonly LocalVariableScopeStack locals;
+        private readonly Stack<SymbolScope> symbolStack;
 
         public Binder(TypeSystem typeSystem, DiagnosticCollector diagnostics)
         {
             this.typeSystem = typeSystem;
             this.diagnostics = diagnostics;
-            this.locals = new LocalVariableScopeStack();
+            this.symbolStack = new Stack<SymbolScope>();
+            this.symbolStack.Push(typeSystem.GlobalScope);
+        }
+
+        private void EnterNewScope()
+        {
+            symbolStack.Push(new SymbolScope());
+        }
+
+        private void ExitCurrentScope()
+        {
+            symbolStack.Pop();
+        }
+
+        private bool DeclareSymbol(Symbol symbol)
+        {
+            return symbolStack.Peek().DeclareSymbol(symbol);
+        }
+
+        private Symbol? LookupSymbol(string name)
+        {
+            foreach (var scope in symbolStack)
+                if (scope.LookupSymbol(name) is Symbol symbol)
+                    return symbol;
+
+            return null;
         }
 
         private bool IsTypeMissmatch(TypeSpecifier expectedType, TypeSpecifier rightType)
@@ -127,12 +152,12 @@ namespace Kyloe.Semantics
         {
             var builder = ImmutableArray.CreateBuilder<BoundStatement>();
 
-            locals.EnterNewScope();
+            EnterNewScope();
 
             foreach (var statement in stmt.Statements)
                 builder.Add(BindStatement(statement));
 
-            locals.ExitCurrentScope();
+            ExitCurrentScope();
 
             return new BoundBlockStatement(builder.ToImmutable());
         }
@@ -179,12 +204,12 @@ namespace Kyloe.Semantics
 
             string name = ExtractName(stmt.NameToken);
 
-            if (!locals.TryDeclareLocal(name, varType, isConst))
+            var local = new LocalVariableSymbol(name, varType, isConst);
+
+            if (!DeclareSymbol(local))
                 diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
 
-            var localVariable = locals.LookupLocal(name)!;
-
-            return new BoundDeclarationStatement(localVariable, typeClause, expr);
+            return new BoundDeclarationStatement(local, typeClause, expr);
         }
 
         private BoundTypeClause BindTypeClause(TypeClause typeClause)
@@ -361,29 +386,18 @@ namespace Kyloe.Semantics
 
         private bool IsMemberAccessValid(BoundExpression bound, Symbol member)
         {
-            // TODO: implement proper access modifier checks
-
             switch (member.Kind)
             {
-                case SymbolKind.NamespaceSymbol:
-                    Debug.Assert(bound.ValueCategory == ValueCategory.None);
-                    return true;
                 case SymbolKind.TypeNameSymbol:
-                    return bound.ValueCategory == ValueCategory.None;
+                    return bound.ValueCategory == ValueCategory.NoValue;
                 case SymbolKind.MethodGroupSymbol:
-                    // access check on mehtods has to be handeld later
-                    // since overloaded methods can have different access modifiers (and static/non-static)
+                    // method access needs to be check after overload resolution
                     return true;
                 case SymbolKind.FieldSymbol:
                     var fieldSymbol = (FieldSymbol)member;
                     if (fieldSymbol.IsStatic)
-                        return bound.ValueCategory == ValueCategory.None;
-                    return bound.ValueCategory == ValueCategory.None;
-                case SymbolKind.PropertySymbol:
-                    var propertySymbol = (PropertySymbol)member;
-                    if (propertySymbol.IsStatic)
-                        return bound.ValueCategory == ValueCategory.None;
-                    return bound.ValueCategory == ValueCategory.None;
+                        return bound.ValueCategory == ValueCategory.NoValue;
+                    return bound.ValueCategory == ValueCategory.NoValue;
                 case SymbolKind.OperationSymbol:
                     // you cannot access an operator directly by its name
                     // (e.g. you cannot call op_Addition() directly)
@@ -395,125 +409,14 @@ namespace Kyloe.Semantics
             throw new NotImplementedException();
         }
 
-        /*
-       private BoundExpression BindMemberAccessExpression(MemberAccessExpression expr)
-       {
-           var right = BindExpression(expr.Expression);
-           var name = ExtractName(expr.IdentifierExpression.NameToken);
-
-           if (right.ResultType is ErrorType)
-               return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
-
-           if (!(right.ResultSymbol is IMemberContainer memberContainer))
-           {
-               diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
-               return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
-           }
-
-           var members = memberContainer.LookupMembers(name);
-
-           if (members.Count() == 0)
-           {
-               diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
-               return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
-           }
-
-           if (right.IsValue)
-           {
-               // allowed members:
-               // - non-static methods
-               // - non-static fields => TODO
-               // - non-static properties => TODO
-
-               var instanceMethods = members
-                   .Where(member => member.Kind == SymbolKind.MethodSymbol)
-                   .Cast<IMethodSymbol>()
-                   .Where(method => !method.IsStatic);
-
-               throw new System.NotImplementedException();
-           }
-           else
-           {
-               // allowed members:
-               // - static methods
-               // - static fields => TODO
-               // - static properties => TODO
-               // - type names
-               // - namespaces
-
-               var staticMethods = members
-                   .Where(member => member.Kind == SymbolKind.MethodSymbol)
-                   .Cast<IMethodSymbol>()
-                   .Where(method => method.IsStatic);
-
-               var staticFields = members
-                   .Where(member => member.Kind == SymbolKind.FieldSymbol)
-                   .Cast<IFieldSymbol>()
-                   .Where(field => field.IsStatic);
-
-               var staticProperties = members
-                   .Where(member => member.Kind == SymbolKind.PropertySymbol)
-                   .Cast<IPropertySymbol>()
-                   .Where(property => property.IsStatic);
-
-               var typeNames = members
-                   .Where(member => member.Kind == SymbolKind.ClassTypeSymbol)
-                   .Cast<ITypeSymbol>();
-
-               var namespaces = members
-                   .Where(member => member.Kind == SymbolKind.NamespaceSymbol)
-                   .Cast<INamespaceSymbol>();
-
-               int staticMethodCount = staticMethods.Count();
-               int staticFieldCount = staticFields.Count();
-               int staticPropertyCount = staticProperties.Count();
-               int typeNameCount = typeNames.Count();
-               int namespaceCount = namespaces.Count();
-
-               if (staticMethodCount > 0)
-               {
-                   throw new System.NotImplementedException();
-               }
-
-               if (staticFieldCount > 0)
-               {
-                   Debug.Assert(staticFieldCount == 1);
-                   return new BoundFieldAccessExpression(staticFields.First(), right, name);
-               }
-
-               if (staticPropertyCount > 0)
-               {
-                   Debug.Assert(staticPropertyCount == 1);
-                   return new BoundPropertyAccessExpression(staticProperties.First(), right, name);
-               }
-
-               if (typeNameCount > 0)
-               {
-                   return new BoundTypeNameMemberAccessExpression(typeNames.First(), right, name);
-               }
-
-               if (namespaceCount > 0)
-               {
-                   return new BoundNamespaceMemberAccessExpression(typeSystem, namespaces.First(), right, name);
-               }
-
-               diagnostics.Add(new MemberNotFoundError(expr.Expression, right.ResultSymbol, name));
-               return new BoundInvalidMemberAccessExpression(typeSystem, right, name);
-           }
-       } */
-
         private BoundExpression BindIdentifierExpression(IdentifierExpression expr)
         {
             var name = ExtractName(expr.NameToken);
 
-            if (locals.LookupLocal(name) is Symbol localSymbol)
-                return new BoundSymbolExpression(localSymbol);
+            var symbol = LookupSymbol(name);
 
-            if (BuiltinTypeFromName(name) is ClassType builtinType)
-                return new BoundSymbolExpression(new TypeNameSymbol(builtinType));
-
-            if (LookupGlobalNamespace(name) is Symbol globalSymbol)
-                return new BoundSymbolExpression(globalSymbol);
+            if (symbol is not null)
+                return new BoundSymbolExpression(symbol);
 
             diagnostics.Add(new NonExistantNameError(expr.NameToken));
             return new BoundInvalidExpression(typeSystem);
@@ -575,33 +478,6 @@ namespace Kyloe.Semantics
 
             var name = (string)nameToken.Value;
             return name;
-        }
-
-        private Symbol? LookupGlobalNamespace(string name)
-        {
-            return typeSystem.RootNamespace.Scope.LookupSymbol(name);
-        }
-
-        private ClassType? BuiltinTypeFromName(string name)
-        {
-            switch (name)
-            {
-                case "char": return typeSystem.Char;
-                case "i8": return typeSystem.I8;
-                case "i16": return typeSystem.I16;
-                case "i32": return typeSystem.I32;
-                case "i64": return typeSystem.I64;
-                case "u8": return typeSystem.U8;
-                case "u16": return typeSystem.U16;
-                case "u32": return typeSystem.U32;
-                case "u64": return typeSystem.U64;
-                case "float": return typeSystem.Float;
-                case "double": return typeSystem.Double;
-                case "bool": return typeSystem.Bool;
-                case "string": return typeSystem.String;
-
-                default: return null;
-            }
         }
 
         private TypeSpecifier? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
