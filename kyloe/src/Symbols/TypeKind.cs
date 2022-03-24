@@ -3,12 +3,9 @@ namespace Kyloe.Symbols
     internal enum TypeKind
     {
         ErrorType,
-        NamespaceType,
-        ClassType,
+        BuiltinType,
         MethodType,
         MethodGroupType,
         ArrayType,
-        PointerType,
-        ByRefType,
     }
 }

@@ -6,7 +6,7 @@ namespace Kyloe.Symbols
 {
     internal partial class TypeSystem
     {
-        private enum BuiltinType
+        private enum BuiltinTypeKind
         {
             Char,
             I8,
@@ -77,58 +77,58 @@ namespace Kyloe.Symbols
 
             public static readonly ImmutableArray<BoundOperation> ArithmeticAndBitwiseOperations = ArithmeticOperations.Concat(BitwiseOperations).ToImmutableArray();
 
-            public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinType ret, BuiltinType lhs, BuiltinType rhs)> BinaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation>, BuiltinType, BuiltinType, BuiltinType)>
+            public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind lhs, BuiltinTypeKind rhs)> BinaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation>, BuiltinTypeKind, BuiltinTypeKind, BuiltinTypeKind)>
             (
-                (ArithmeticAndBitwiseOperations, BuiltinType.I8, BuiltinType.I8, BuiltinType.I8),
-                (ArithmeticAndBitwiseOperations, BuiltinType.I16, BuiltinType.I16, BuiltinType.I16),
-                (ArithmeticAndBitwiseOperations, BuiltinType.I32, BuiltinType.I32, BuiltinType.I32),
-                (ArithmeticAndBitwiseOperations, BuiltinType.I64, BuiltinType.I64, BuiltinType.I64),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.I8, BuiltinTypeKind.I8, BuiltinTypeKind.I8),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.I16, BuiltinTypeKind.I16, BuiltinTypeKind.I16),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.I32, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.I64, BuiltinTypeKind.I64, BuiltinTypeKind.I64),
 
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I8, BuiltinType.I8),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I16, BuiltinType.I16),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I32, BuiltinType.I32),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.I64, BuiltinType.I64),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.I8, BuiltinTypeKind.I8),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.I16, BuiltinTypeKind.I16),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.I64, BuiltinTypeKind.I64),
 
 
-                (ArithmeticAndBitwiseOperations, BuiltinType.U8, BuiltinType.U8, BuiltinType.U8),
-                (ArithmeticAndBitwiseOperations, BuiltinType.U16, BuiltinType.U16, BuiltinType.U16),
-                (ArithmeticAndBitwiseOperations, BuiltinType.U32, BuiltinType.U32, BuiltinType.U32),
-                (ArithmeticAndBitwiseOperations, BuiltinType.U64, BuiltinType.U64, BuiltinType.U64),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.U8, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.U16, BuiltinTypeKind.U16, BuiltinTypeKind.U16),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.U32, BuiltinTypeKind.U32, BuiltinTypeKind.U32),
+                (ArithmeticAndBitwiseOperations, BuiltinTypeKind.U64, BuiltinTypeKind.U64, BuiltinTypeKind.U64),
 
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U8, BuiltinType.U8),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U16, BuiltinType.U16),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U32, BuiltinType.U32),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.U64, BuiltinType.U64),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.U16, BuiltinTypeKind.U16),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.U32, BuiltinTypeKind.U32),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.U64, BuiltinTypeKind.U64),
 
-                (ArithmeticOperations, BuiltinType.Float, BuiltinType.Float, BuiltinType.Float),
-                (ArithmeticOperations, BuiltinType.Double, BuiltinType.Double, BuiltinType.Double),
+                (ArithmeticOperations, BuiltinTypeKind.Float, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
+                (ArithmeticOperations, BuiltinTypeKind.Double, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
 
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.Float, BuiltinType.Float),
-                (EqualityAndComparisonOperations, BuiltinType.Bool, BuiltinType.Double, BuiltinType.Double),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
+                (EqualityAndComparisonOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
 
-                (EqualityOperations, BuiltinType.Bool, BuiltinType.Bool, BuiltinType.Bool),
-                (EqualityOperations, BuiltinType.Bool, BuiltinType.Char, BuiltinType.Char),
-                (EqualityOperations, BuiltinType.Bool, BuiltinType.String, BuiltinType.String)
+                (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool),
+                (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Char, BuiltinTypeKind.Char),
+                (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.String, BuiltinTypeKind.String)
 
 
             );
 
-            public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinType ret, BuiltinType arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation> ops, BuiltinType ret, BuiltinType arg)>
+            public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind arg)>
             (
-                (NegationAndBitwiseNot, BuiltinType.I8, BuiltinType.I8),
-                (NegationAndBitwiseNot, BuiltinType.I16, BuiltinType.I16),
-                (NegationAndBitwiseNot, BuiltinType.I32, BuiltinType.I32),
-                (NegationAndBitwiseNot, BuiltinType.I64, BuiltinType.I64),
+                (NegationAndBitwiseNot, BuiltinTypeKind.I8, BuiltinTypeKind.I8),
+                (NegationAndBitwiseNot, BuiltinTypeKind.I16, BuiltinTypeKind.I16),
+                (NegationAndBitwiseNot, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
+                (NegationAndBitwiseNot, BuiltinTypeKind.I64, BuiltinTypeKind.I64),
 
-                (BitwiseNot, BuiltinType.U8, BuiltinType.U8),
-                (BitwiseNot, BuiltinType.U16, BuiltinType.U16),
-                (BitwiseNot, BuiltinType.U32, BuiltinType.U32),
-                (BitwiseNot, BuiltinType.U64, BuiltinType.U64),
+                (BitwiseNot, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
+                (BitwiseNot, BuiltinTypeKind.U16, BuiltinTypeKind.U16),
+                (BitwiseNot, BuiltinTypeKind.U32, BuiltinTypeKind.U32),
+                (BitwiseNot, BuiltinTypeKind.U64, BuiltinTypeKind.U64),
 
-                (Negation, BuiltinType.Float, BuiltinType.Float),
-                (Negation, BuiltinType.Double, BuiltinType.Double),
+                (Negation, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
+                (Negation, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
 
-                (LogicalNot, BuiltinType.Bool, BuiltinType.Bool)
+                (LogicalNot, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool)
             );
         }
     }

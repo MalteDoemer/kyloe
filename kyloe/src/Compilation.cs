@@ -24,19 +24,14 @@ namespace Kyloe
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
-        public static Compilation Compile(string text) => Compile(SourceText.FromText(text), Array.Empty<AssemblyDefinition>());
+        public static Compilation Compile(string text) => Compile(SourceText.FromText(text));
 
-        public static Compilation Compile(SourceText text, IEnumerable<AssemblyDefinition> refrenceAssemblies)
+        public static Compilation Compile(SourceText text)
         {
             var assemblyName = new AssemblyNameDefinition("test", new Version(0, 1));
             var assembly = AssemblyDefinition.CreateAssembly(assemblyName, "<test>", ModuleKind.Dll);
 
-            var assemblies = refrenceAssemblies.ToArray();
-
-            if (assemblies.Length == 0)
-                assemblies = new[] { assembly.MainModule.TypeSystem.Boolean.Resolve().Module.Assembly };
-
-            var typeSystem = Symbols.TypeSystem.Create(assembly, assemblies);
+            var typeSystem = Symbols.TypeSystem.Create();
 
             var collector = new DiagnosticCollector(text);
             var lexer = new Lexer(text.GetReader(), collector);

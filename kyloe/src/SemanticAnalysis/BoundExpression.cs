@@ -6,7 +6,7 @@ namespace Kyloe.Semantics
     {
         ModifiableValue,
         ReadableValue,
-        None,
+        NoValue,
     }
 
     internal abstract class BoundExpression : BoundNode
@@ -17,7 +17,7 @@ namespace Kyloe.Semantics
 
         public abstract ValueCategory ValueCategory { get; }
 
-        public bool IsValue => ValueCategory != ValueCategory.None;
+        public bool IsValue => ValueCategory != ValueCategory.NoValue;
 
         public bool IsModifiableValue => ValueCategory == ValueCategory.ModifiableValue;
     }

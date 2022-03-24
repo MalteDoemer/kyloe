@@ -1,11 +1,13 @@
+using Kyloe.Semantics;
+
 namespace Kyloe.Symbols
 {
     internal sealed class TypeNameSymbol : Symbol
     {
-        public TypeNameSymbol(ClassType classType)
+        public TypeNameSymbol(BuiltinType builtinType)
         {
-            Name = classType.Name;
-            Type = classType;
+            Name = builtinType.Name;
+            Type = builtinType;
         }
 
         public override string Name { get; }
@@ -13,5 +15,7 @@ namespace Kyloe.Symbols
         public override SymbolKind Kind => SymbolKind.TypeNameSymbol;
 
         public override TypeSpecifier Type { get; }
+
+        public override ValueCategory ValueCategory => ValueCategory.NoValue;
     }
 }
