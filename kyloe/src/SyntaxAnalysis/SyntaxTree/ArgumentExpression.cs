@@ -31,6 +31,6 @@ namespace Kyloe.Syntax
                 yield return new SyntaxNodeChild(Nodes.Last());
         }
 
-        public static ArgumentExpression Empty => new ArgumentExpression(ImmutableArray<SyntaxExpression>.Empty, ImmutableArray<SyntaxToken>.Empty);
+        public static ArgumentExpression Empty = new ArgumentExpression(ImmutableArray<SyntaxExpression>.Empty, ImmutableArray<SyntaxToken>.Empty);
     }
 }

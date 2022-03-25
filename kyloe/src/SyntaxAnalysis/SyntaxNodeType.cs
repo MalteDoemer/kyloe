@@ -22,6 +22,10 @@ namespace Kyloe.Syntax
         IfStatement,
         EmptyStatement,
         BlockStatement,
+
+        // Other
+        FunctionDecleration,
+        ParameterDeclaration,
     }
 
 }

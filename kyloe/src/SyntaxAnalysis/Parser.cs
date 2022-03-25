@@ -69,6 +69,105 @@ namespace Kyloe.Syntax
             return expr;
         }
 
+        private FunctionDeclaration ParseFunctionDeclaration()
+        {
+            var funcToken = Expect(SyntaxTokenType.FuncKeyword);
+            var nameToken = Expect(SyntaxTokenType.Identifier);
+            var leftParen = Expect(SyntaxTokenType.LeftParen);
+
+            ParameterList parameters;
+
+            if (current.Type != SyntaxTokenType.RightParen)
+                parameters = ParseParameters();
+            else
+                parameters = ParameterList.Empty;
+
+            var rightParen = Expect(SyntaxTokenType.RightParen);
+
+            TrailingTypeClause? typeClause = null;
+
+            if (current.Type == SyntaxTokenType.SmallArrow)
+                typeClause = ParseTrailingTypeClause();
+
+            return new FunctionDeclaration(funcToken, nameToken, leftParen, parameters, rightParen, typeClause);
+        }
+
+        private ParameterDeclaration ParseParameterDeclaration()
+        {
+            var nameToken = Expect(SyntaxTokenType.Identifier);
+            var typeClause = ParseTypeClause();
+
+            return new ParameterDeclaration(nameToken, typeClause);
+        }
+
+        private TypeClause ParseTypeClause()
+        {
+            var colonToken = Expect(SyntaxTokenType.Colon);
+            var node = ParseNameExpression();
+
+            return new TypeClause(colonToken, node);
+        }
+
+        private TrailingTypeClause ParseTrailingTypeClause()
+        {
+            var arrowToken = Expect(SyntaxTokenType.SmallArrow);
+            var node = ParseNameExpression();
+
+            return new TrailingTypeClause(arrowToken, node);
+        }
+
+        private ParameterList ParseParameters()
+        {
+            var parameters = ImmutableArray.CreateBuilder<ParameterDeclaration>();
+            var commas = ImmutableArray.CreateBuilder<SyntaxToken>();
+
+            while (true)
+            {
+                parameters.Add(ParseParameterDeclaration());
+
+                if (current.Type != SyntaxTokenType.Comma)
+                    break;
+
+                commas.Add(Advance());
+            }
+
+            return new ParameterList(parameters.ToImmutable(), commas.ToImmutable());
+        }
+
+        private ArgumentExpression ParseArguments()
+        {
+            var expressions = ImmutableArray.CreateBuilder<SyntaxExpression>();
+            var commas = ImmutableArray.CreateBuilder<SyntaxToken>();
+
+            while (true)
+            {
+                expressions.Add(ParseExpressionImpl());
+
+                if (current.Type != SyntaxTokenType.Comma)
+                    break;
+
+                commas.Add(Advance());
+            }
+
+            return new ArgumentExpression(expressions.ToImmutable(), commas.ToImmutable());
+        }
+
+        private SyntaxExpression ParseNameExpression()
+        {
+            var identifierToken = Expect(SyntaxTokenType.Identifier);
+
+            SyntaxExpression node = new IdentifierExpression(identifierToken);
+
+            while (current.Type == SyntaxTokenType.Dot)
+            {
+                var dotToken = Advance();
+                var nameToken = Expect(SyntaxTokenType.Identifier);
+                node = new MemberAccessExpression(node, dotToken, new IdentifierExpression(nameToken));
+            }
+
+            return node;
+        }
+
         private SyntaxStatement ParseStatementImpl()
         {
             switch (current.Type)
@@ -146,24 +245,6 @@ namespace Kyloe.Syntax
             var expr = ParseExpressionImpl();
             var semi = Expect(SyntaxTokenType.SemiColon);
             return new DeclarationStatement(decl, name, typeClause, equals, expr, semi);
-        }
-
-        private TypeClause? ParseTypeClause()
-        {
-            var colonToken = Expect(SyntaxTokenType.Colon);
-
-            var identifierToken = Expect(SyntaxTokenType.Identifier);
-
-            SyntaxExpression node = new IdentifierExpression(identifierToken);
-
-            while (current.Type == SyntaxTokenType.Dot)
-            {
-                var dotToken = Advance();
-                var nameToken = Expect(SyntaxTokenType.Identifier);
-                node = new MemberAccessExpression(node, dotToken, new IdentifierExpression(nameToken));
-            }
-
-            return new TypeClause(colonToken, node);
         }
 
         private SyntaxStatement ParseExpressionStatement()
@@ -256,24 +337,6 @@ namespace Kyloe.Syntax
             }
 
             return node;
-        }
-
-        private ArgumentExpression ParseArguments()
-        {
-            var expressions = ImmutableArray.CreateBuilder<SyntaxExpression>();
-            var commas = ImmutableArray.CreateBuilder<SyntaxToken>();
-
-            while (true)
-            {
-                expressions.Add(ParseExpressionImpl());
-
-                if (current.Type != SyntaxTokenType.Comma)
-                    break;
-
-                commas.Add(Advance());
-            }
-
-            return new ArgumentExpression(expressions.ToImmutable(), commas.ToImmutable());
         }
 
         private SyntaxExpression ParsePrimary()

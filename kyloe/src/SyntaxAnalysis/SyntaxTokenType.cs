@@ -70,5 +70,6 @@ namespace Kyloe.Syntax
         ConstKeyword,
         IfKeyword,
         ElseKeyword,
+        FuncKeyword,
     }
 }

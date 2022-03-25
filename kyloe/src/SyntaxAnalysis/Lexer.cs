@@ -194,6 +194,8 @@ namespace Kyloe.Syntax
                     return new SyntaxToken(SyntaxTokenType.ElseKeyword, location);
                 case "const":
                     return new SyntaxToken(SyntaxTokenType.ConstKeyword, location);
+                case "func":
+                    return new SyntaxToken(SyntaxTokenType.FuncKeyword, location);
                 default:
                     return new SyntaxToken(SyntaxTokenType.Identifier, location, ident);
             }
