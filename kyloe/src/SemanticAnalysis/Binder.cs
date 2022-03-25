@@ -84,6 +84,8 @@ namespace Kyloe.Semantics
             return null;
         }
 
+        private bool InGlobalScope() => symbolStack.Count == 1;
+
         private bool IsTypeMissmatch(TypeSpecifier expectedType, TypeSpecifier rightType)
         {
             if (expectedType is ErrorType || rightType is ErrorType)
@@ -406,7 +408,7 @@ namespace Kyloe.Semantics
                 case SymbolKind.TypeNameSymbol:
                     return bound.ValueCategory == ValueCategory.NoValue;
                 case SymbolKind.FunctionGroupSymbol:
-                    // function access needs to be check after overload resolution
+                    // function access needs to be checked after overload resolution
                     return true;
                 case SymbolKind.FieldSymbol:
                     var fieldSymbol = (FieldSymbol)member;
@@ -420,8 +422,6 @@ namespace Kyloe.Semantics
                 default:
                     throw new Exception($"unexpected symbol kind: {member.Kind}");
             }
-
-            throw new NotImplementedException();
         }
 
         private BoundExpression BindIdentifierExpression(IdentifierExpression expr)
