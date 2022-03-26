@@ -17,7 +17,6 @@ namespace Kyloe.Symbols
                 BoundOperation.Modulo
             );
 
-
             public static readonly ImmutableArray<BoundOperation> BitwiseOperations = ImmutableArray.Create<BoundOperation>
             (
                 BoundOperation.BitwiseAnd,
@@ -112,6 +111,10 @@ namespace Kyloe.Symbols
                 (Negation, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
 
                 (LogicalNot, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool)
+            );
+
+            public static readonly ImmutableArray<(BuiltinTypeKind from, BuiltinTypeKind to)> ImplicitConversions = ImmutableArray.Create<(BuiltinTypeKind from, BuiltinTypeKind to)>(
+                (BuiltinTypeKind.I64, BuiltinTypeKind.I32)
             );
         }
     }

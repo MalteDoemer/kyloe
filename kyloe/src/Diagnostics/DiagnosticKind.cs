@@ -13,7 +13,6 @@ namespace Kyloe.Diagnostics
         UnsupportedBinaryOperation,
         UnsupportedUnaryOperation,
         MissmatchedTypeError,
-        RedefinedLocalVariableError,
         NonExistantNameError,
         ExpectedModifiableValueError,
         UnsupportedAssignmentOperation,

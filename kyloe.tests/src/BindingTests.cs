@@ -72,7 +72,7 @@ namespace Kyloe.Tests.Binding
 
                     var x = 1;
                 }",
-                DiagnosticKind.RedefinedLocalVariableError,
+                DiagnosticKind.NameAlreadyExistsError,
             };
 
             yield return new object[] {
