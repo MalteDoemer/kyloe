@@ -69,7 +69,7 @@ namespace Kyloe.Syntax
             return expr;
         }
 
-        private FunctionDeclaration ParseFunctionDeclaration()
+        private FunctionDefinition ParseFunctionDefinition()
         {
             var funcToken = Expect(SyntaxTokenType.FuncKeyword);
             var nameToken = Expect(SyntaxTokenType.Identifier);
@@ -89,7 +89,9 @@ namespace Kyloe.Syntax
             if (current.Type == SyntaxTokenType.SmallArrow)
                 typeClause = ParseTrailingTypeClause();
 
-            return new FunctionDeclaration(funcToken, nameToken, leftParen, parameters, rightParen, typeClause);
+            var body = ParseBlockStatement();
+
+            return new FunctionDefinition(funcToken, nameToken, leftParen, parameters, rightParen, typeClause, body);
         }
 
         private ParameterDeclaration ParseParameterDeclaration()

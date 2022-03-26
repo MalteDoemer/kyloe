@@ -3,9 +3,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal sealed class FunctionDeclaration : SyntaxNode
+    internal sealed class FunctionDefinition : SyntaxNode
     {
-        public FunctionDeclaration(SyntaxToken funcToken, SyntaxToken nameToken, SyntaxToken leftParen, ParameterList parameterList, SyntaxToken rightParen, TrailingTypeClause? trailingTypeClause)
+        public FunctionDefinition(SyntaxToken funcToken, SyntaxToken nameToken, SyntaxToken leftParen, ParameterList parameterList, SyntaxToken rightParen, TrailingTypeClause? trailingTypeClause, SyntaxStatement body)
         {
             FuncToken = funcToken;
             NameToken = nameToken;
@@ -13,6 +13,7 @@ namespace Kyloe.Syntax
             ParameterList = parameterList;
             RightParen = rightParen;
             TrailingTypeClause = trailingTypeClause;
+            Body = body;
         }
 
         public SyntaxToken FuncToken { get; }
@@ -20,10 +21,10 @@ namespace Kyloe.Syntax
         public SyntaxToken LeftParen { get; }
         public ParameterList ParameterList { get; }
         public SyntaxToken RightParen { get; }
-
         public TrailingTypeClause? TrailingTypeClause { get; }
+        public SyntaxStatement Body { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.FunctionDecleration;
+        public override SyntaxNodeType Type => SyntaxNodeType.FunctionDefinition;
 
         public override SourceLocation Location => throw new System.NotImplementedException();
 

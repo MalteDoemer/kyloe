@@ -51,14 +51,6 @@ namespace Kyloe.Symbols
             Bool = new BuiltinType("bool");
             String = new BuiltinType("string");
 
-
-            var testFunctionGroup = new FunctionGroupType("test", I64);
-            var testFunction = new FunctionType("test", I64, false, Void);
-            testFunction.ParameterTypes.Add(Double);
-            testFunctionGroup.Functions.Add(testFunction);
-            I64.Scope.DeclareSymbol(new FunctionGroupSymbol(testFunctionGroup));
-
-
             foreach (var builtin in Enum.GetValues<BuiltinTypeKind>())
                 GlobalScope.DeclareSymbol(new TypeNameSymbol(GetBuiltinType(builtin)));
 
@@ -108,8 +100,8 @@ namespace Kyloe.Symbols
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
             var func = new FunctionType(name, left, true, ret);
-            func.ParameterTypes.Add(left);
-            func.ParameterTypes.Add(right);
+            func.Parameters.Add(new ParameterSymbol("l", left));
+            func.Parameters.Add(new ParameterSymbol("r", right));
 
             var group = new FunctionGroupType(name, left);
             group.Functions.Add(func);
@@ -121,7 +113,7 @@ namespace Kyloe.Symbols
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
             var func = new FunctionType(name, arg, true, ret);
-            func.ParameterTypes.Add(arg);
+            func.Parameters.Add(new ParameterSymbol("", arg));
 
             var group = new FunctionGroupType(name, arg);
             group.Functions.Add(func);

@@ -7,14 +7,15 @@ namespace Kyloe.Symbols
         public FunctionGroupSymbol(FunctionGroupType groupType)
         {
             Name = groupType.Name;
-            Type = groupType;
+            Group = groupType;
         }
 
         public override string Name { get; }
+        public FunctionGroupType Group { get; }
 
         public override SymbolKind Kind => SymbolKind.FunctionGroupSymbol;
 
-        public override TypeSpecifier Type { get; }
+        public override TypeSpecifier Type => Group;
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }

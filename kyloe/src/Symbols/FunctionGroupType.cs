@@ -5,7 +5,7 @@ namespace Kyloe.Symbols
 {
     internal sealed class FunctionGroupType : TypeSpecifier
     {
-        public FunctionGroupType(string name, TypeSpecifier parent)
+        public FunctionGroupType(string name, TypeSpecifier? parent)
         {
             Name = name;
             Parent = parent;
@@ -13,7 +13,7 @@ namespace Kyloe.Symbols
         }
 
         public string Name { get; }
-        public TypeSpecifier Parent { get; }
+        public TypeSpecifier? Parent { get; }
         public List<FunctionType> Functions { get; }
 
         public override TypeKind Kind => TypeKind.FunctionGroupType;
@@ -25,10 +25,9 @@ namespace Kyloe.Symbols
         public override string FullName()
         {
             var builder = new StringBuilder();
-            var parentName = Parent.FullName();
             
-            if (parentName != "")
-                builder.Append(parentName).Append('.');
+            if (Parent is not null)
+                builder.Append(Parent.FullName()).Append('.');
             builder.Append(Name);
 
             return builder.ToString();
