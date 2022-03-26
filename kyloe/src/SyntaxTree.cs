@@ -60,6 +60,23 @@ namespace Kyloe
             }
         }
 
+        public static SyntaxTree Parse(string text) => Parse(SourceText.FromText(text));
+
+        public static SyntaxTree Parse(SourceText sourceText) 
+        {
+            using (var reader = sourceText.GetReader())
+            {
+                var collector = new DiagnosticCollector(sourceText);
+                var lexer = new Lexer(reader, collector);
+                var parser = new Parser(lexer, collector);
+
+                var tree = parser.Parse();
+                var result = collector.ToResult();
+
+                return new SyntaxTree(tree, sourceText, result);
+            }
+        }
+
         public static (ImmutableArray<SyntaxToken>, DiagnosticResult) Tokenize(string text) => Tokenize(SourceText.FromText(text));
 
         public static (ImmutableArray<SyntaxToken>, DiagnosticResult) Tokenize(SourceText sourceText)

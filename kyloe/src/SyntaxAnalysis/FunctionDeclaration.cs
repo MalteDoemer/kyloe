@@ -5,7 +5,7 @@ namespace Kyloe.Syntax
 {
     internal sealed class FunctionDeclaration : SyntaxNode
     {
-        public FunctionDeclaration(SyntaxToken funcToken, SyntaxToken nameToken, SyntaxToken leftParen, ParameterList parameterList, SyntaxToken rightParen, TrailingTypeClause? trailingTypeClause)
+        public FunctionDeclaration(SyntaxToken funcToken, SyntaxToken nameToken, SyntaxToken leftParen, ParameterList parameterList, SyntaxToken rightParen, TrailingTypeClause? trailingTypeClause, SyntaxStatement body)
         {
             FuncToken = funcToken;
             NameToken = nameToken;
@@ -13,6 +13,7 @@ namespace Kyloe.Syntax
             ParameterList = parameterList;
             RightParen = rightParen;
             TrailingTypeClause = trailingTypeClause;
+            Body = body;
         }
 
         public SyntaxToken FuncToken { get; }
@@ -22,6 +23,7 @@ namespace Kyloe.Syntax
         public SyntaxToken RightParen { get; }
 
         public TrailingTypeClause? TrailingTypeClause { get; }
+        public SyntaxStatement Body { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.FunctionDecleration;
 
@@ -41,6 +43,8 @@ namespace Kyloe.Syntax
             if (TrailingTypeClause is not null)
                 foreach (var child in TrailingTypeClause.GetChildren())
                     yield return child;
+
+            yield return new SyntaxNodeChild(Body);
         }
     }
 }

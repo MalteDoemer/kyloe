@@ -52,7 +52,7 @@ namespace Kyloe.Syntax
 
         public SyntaxNode Parse()
         {
-            return ParseStatement();
+            return ParseCompilationUnit();
         }
 
         public SyntaxStatement ParseStatement()
@@ -67,6 +67,24 @@ namespace Kyloe.Syntax
             var expr = ParseExpressionImpl();
             Expect(SyntaxTokenType.End);
             return expr;
+        }
+
+        private CompilationUnitSyntax ParseCompilationUnit() 
+        {
+            var functions = ImmutableArray.CreateBuilder<FunctionDeclaration>();
+            var globals = ImmutableArray.CreateBuilder<DeclarationStatement>();
+
+            while (current.Type != SyntaxTokenType.End) 
+            {
+                Console.WriteLine(current.Type);
+
+                if (current.Type == SyntaxTokenType.VarKeyword || current.Type == SyntaxTokenType.ConstKeyword)
+                    globals.Add(ParseDeclarationStatement());
+                else
+                    functions.Add(ParseFunctionDeclaration());
+            }
+
+            return new CompilationUnitSyntax(globals.ToImmutable(), functions.ToImmutable());
         }
 
         private FunctionDeclaration ParseFunctionDeclaration()
@@ -89,7 +107,9 @@ namespace Kyloe.Syntax
             if (current.Type == SyntaxTokenType.SmallArrow)
                 typeClause = ParseTrailingTypeClause();
 
-            return new FunctionDeclaration(funcToken, nameToken, leftParen, parameters, rightParen, typeClause);
+            var body = ParseBlockStatement();
+
+            return new FunctionDeclaration(funcToken, nameToken, leftParen, parameters, rightParen, typeClause, body);
         }
 
         private ParameterDeclaration ParseParameterDeclaration()
@@ -217,7 +237,7 @@ namespace Kyloe.Syntax
 
         private SyntaxStatement ParseIfStatement()
         {
-            var ifToken = Advance();
+            var ifToken = Expect(SyntaxTokenType.IfKeyword);
             var condition = ParseExpressionImpl();
             var body = ParseBlockStatement();
 
@@ -231,9 +251,15 @@ namespace Kyloe.Syntax
             return new IfStatement(ifToken, condition, body, null);
         }
 
-        private SyntaxStatement ParseDeclarationStatement()
+        private DeclarationStatement ParseDeclarationStatement()
         {
-            var decl = Advance();
+            SyntaxToken decl;
+
+            if (current.Type == SyntaxTokenType.ConstKeyword)
+                decl = Advance();
+
+            decl = Expect(SyntaxTokenType.VarKeyword);
+
             var name = Expect(SyntaxTokenType.Identifier);
 
             TypeClause? typeClause = null;

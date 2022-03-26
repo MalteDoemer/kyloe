@@ -26,6 +26,7 @@ namespace Kyloe.Syntax
         // Other
         FunctionDecleration,
         ParameterDeclaration,
+        CompilationUnitSyntax,
     }
 
 }
