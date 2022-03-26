@@ -1,6 +1,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using Kyloe.Semantics;
 
@@ -54,7 +56,20 @@ namespace Kyloe.Symbols
             foreach (var builtin in Enum.GetValues<BuiltinTypeKind>())
                 GlobalScope.DeclareSymbol(new TypeNameSymbol(GetBuiltinType(builtin)));
 
-            foreach (var binary in BuiltinOperatorInfo.BinaryOperations)
+            foreach (var (name, ret, parameters) in BuiltinFunctionInfo.BuiltinFunctions)
+            {
+                var group = GlobalScope.LookupSymbol(name) as FunctionGroupSymbol;
+
+                if (group is null)
+                {
+                    group = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+                    Debug.Assert(GlobalScope.DeclareSymbol(group));
+                }
+
+                group.Group.Functions.Add(CreateBuiltinFunction(name, ret, parameters));
+            }
+
+            foreach (var binary in BuiltinOperationInfo.BinaryOperations)
             {
                 var left = GetBuiltinType(binary.lhs);
                 var right = GetBuiltinType(binary.rhs);
@@ -64,7 +79,7 @@ namespace Kyloe.Symbols
                     left.Scope.DeclareSymbol(CreateBuiltinBinaryOperation(op, ret, left, right));
             }
 
-            foreach (var unary in BuiltinOperatorInfo.UnaryOperations)
+            foreach (var unary in BuiltinOperationInfo.UnaryOperations)
             {
                 var arg = GetBuiltinType(unary.arg);
                 var ret = GetBuiltinType(unary.ret);
@@ -75,10 +90,13 @@ namespace Kyloe.Symbols
 
         }
 
+
+
         private BuiltinType GetBuiltinType(BuiltinTypeKind type)
         {
             switch (type)
             {
+                case BuiltinTypeKind.Void: return Void;
                 case BuiltinTypeKind.Char: return Char;
                 case BuiltinTypeKind.I8: return I8;
                 case BuiltinTypeKind.I16: return I16;
@@ -94,6 +112,16 @@ namespace Kyloe.Symbols
                 case BuiltinTypeKind.String: return String;
                 default: throw new Exception($"unexpected builtin type: {type}");
             }
+        }
+
+        private FunctionType CreateBuiltinFunction(string name, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
+        {
+            var func = new FunctionType(name, null, true, GetBuiltinType(ret));
+
+            foreach (var param in parameters)
+                func.Parameters.Add(new ParameterSymbol(param.name, GetBuiltinType(param.type)));
+
+            return func;
         }
 
         private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)

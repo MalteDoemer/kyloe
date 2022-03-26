@@ -1,9 +1,9 @@
 
 const increment = 10;
 
-
 func test(a: i64)  {
     var res = a + increment;
+    println(res);
 }
 
 func main() {
