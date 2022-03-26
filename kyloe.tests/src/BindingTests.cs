@@ -10,7 +10,7 @@ namespace Kyloe.Tests.Binding
         [MemberData(nameof(GetErrorData))]
         public void Test_Binding_With_Errors(string text, params DiagnosticKind[] errors)
         {
-            var compilation = Compilation.Compile(text);
+            var compilation = Compilation.Compile(AddMainFunction(text));
             DiagnosticAssert.HasAll(compilation.GetDiagnostics(), errors);
         }
 
@@ -18,11 +18,11 @@ namespace Kyloe.Tests.Binding
         [MemberData(nameof(GetNoErrorData))]
         public void Test_Binding_No_Errors(string text)
         {
-            var compilation = Compilation.Compile(text);
+            var compilation = Compilation.Compile(AddMainFunction(text));
             DiagnosticAssert.NoDiagnostics(compilation.GetDiagnostics());
         }
 
-        private static string AddMainMethod(string text) 
+        private static string AddMainFunction(string text) 
         {
             return "func main() {" + text + "}";
         }

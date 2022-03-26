@@ -6,10 +6,8 @@ using System.Collections.Generic;
 
 namespace Kyloe.Tests.Parsing
 {
-
     public class ParsingTests
     {
-
         [Theory]
         [MemberData(nameof(GetExpressionErrorData))]
         public void Test_Parsing_Expression_With_Errors(string text, params DiagnosticKind[] errors)
@@ -35,12 +33,20 @@ namespace Kyloe.Tests.Parsing
             TreeAssert.Verify(tree, node);
         }
 
-
         [Theory]
         [MemberData(nameof(GetStatementTreeData))]
         public void Test_Statement_Tree_Structure(string text, VerifyNode node)
         {
             var tree = SyntaxTree.ParseStatement(text);
+            DiagnosticAssert.NoErrors(tree.GetDiagnostics());
+            TreeAssert.Verify(tree, node);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetProgramTreeData))]
+        public void Test_Program_Tree_Structure(string text, VerifyNode node)
+        {
+            var tree = SyntaxTree.Parse(text);
             DiagnosticAssert.NoErrors(tree.GetDiagnostics());
             TreeAssert.Verify(tree, node);
         }
@@ -145,8 +151,8 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "10.5 + -47.1",
                 VerifyNode.BinaryExpression(
-                    VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral), 
-                    SyntaxTokenType.Plus, 
+                    VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral),
+                    SyntaxTokenType.Plus,
                     VerifyNode.UnaryExpression(
                         SyntaxTokenType.Minus,
                         VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
@@ -157,8 +163,8 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "1 - -1",
                 VerifyNode.BinaryExpression(
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral), 
-                    SyntaxTokenType.Minus, 
+                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
+                    SyntaxTokenType.Minus,
                     VerifyNode.UnaryExpression(
                         SyntaxTokenType.Minus,
                         VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
@@ -283,6 +289,134 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 ";",
                 VerifyNode.EmptyStatement()
+            };
+
+            yield return new object[] {
+                "var x = 5;",
+                VerifyNode.DeclarationStatement(
+                    SyntaxTokenType.VarKeyword,
+                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                )
+            };
+
+            yield return new object[] {
+                @"
+                if true == false {
+                    ;
+                }   
+                ",
+
+                VerifyNode.IfStatement(
+                    VerifyNode.BinaryExpression(
+                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral),
+                        SyntaxTokenType.DoubleEqual,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral)
+                    ),
+                    VerifyNode.BlockStatement(
+                        VerifyNode.EmptyStatement()
+                    )
+                )
+            };
+
+            yield return new object[] {
+                @"
+                if true == false {
+                    ;
+                } else {
+                    ;
+                }
+                ",
+
+                VerifyNode.IfElseStatement(
+                    VerifyNode.BinaryExpression(
+                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral),
+                        SyntaxTokenType.DoubleEqual,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral)
+                    ),
+                    VerifyNode.BlockStatement(
+                        VerifyNode.EmptyStatement()
+                    ),
+
+                    VerifyNode.BlockStatement(
+                        VerifyNode.EmptyStatement()
+                    )
+                )
+            };
+
+            yield return new object[] {
+                "{ var x = 5; var y = x + 25; } ",
+                VerifyNode.BlockStatement(
+                    VerifyNode.DeclarationStatement(
+                        SyntaxTokenType.VarKeyword,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    ),
+                    VerifyNode.DeclarationStatement(
+                        SyntaxTokenType.VarKeyword,
+                        VerifyNode.BinaryExpression(
+                            VerifyNode.IdentifierExpression(),
+                            SyntaxTokenType.Plus,
+                            VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                        )
+                    )
+
+                )
+            };
+        }
+
+        public static IEnumerable<object[]> GetProgramTreeData()
+        {
+            yield return new object[] {
+                @"
+                func main() {
+                }
+                ",
+
+                VerifyNode.CompilationUnitSyntax(
+                    VerifyNode.FunctionDefinition(0, VerifyNode.BlockStatement(), false)
+                ),
+            };
+
+            yield return new object[] {
+                @"
+                func test(a: i32, b: double, c: float) -> bool {
+                }
+                ",
+
+                VerifyNode.CompilationUnitSyntax(
+                    VerifyNode.FunctionDefinition(3, VerifyNode.BlockStatement(), true)
+                ),
+            };
+
+            yield return new object[] {
+                @"
+                var globalVar = 12345;
+                const globalConst = 5.4;
+
+                func test(a: i32, b: double, c: float) -> bool {
+                    var x = globalVar;
+                }
+                ",
+
+                VerifyNode.CompilationUnitSyntax(
+                    VerifyNode.DeclarationStatement(
+                        SyntaxTokenType.VarKeyword,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    ),
+                    VerifyNode.DeclarationStatement(
+                        SyntaxTokenType.ConstKeyword,
+                        VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
+                    ),
+                    VerifyNode.FunctionDefinition(
+                        3,
+                        VerifyNode.BlockStatement(
+                            VerifyNode.DeclarationStatement(
+                                SyntaxTokenType.VarKeyword, 
+                                VerifyNode.IdentifierExpression()
+                            )
+                        ),
+                        true
+                    )
+                ),
             };
         }
     }

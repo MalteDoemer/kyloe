@@ -16,8 +16,15 @@ namespace Kyloe.Syntax
 
         public IEnumerable<SyntaxNodeChild> GetChildren()
         {
-            foreach (var param in Parameters)
-                yield return new SyntaxNodeChild(param);
+            int i = 0;
+            for (i = 0; i < Commas.Length; i++)
+            {
+                yield return new SyntaxNodeChild(Parameters[i]);
+                yield return new SyntaxNodeChild(Commas[i]);
+            }
+
+            for (; i < Parameters.Length; i++)
+                yield return new SyntaxNodeChild(Parameters[i]);
         }
 
         public static ParameterList Empty = new ParameterList(ImmutableArray<ParameterDeclaration>.Empty, ImmutableArray<SyntaxToken>.Empty);
