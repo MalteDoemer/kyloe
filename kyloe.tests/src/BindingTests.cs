@@ -22,6 +22,10 @@ namespace Kyloe.Tests.Binding
             DiagnosticAssert.NoDiagnostics(compilation.GetDiagnostics());
         }
 
+        private static string AddMainMethod(string text) 
+        {
+            return "func main() {" + text + "}";
+        }
 
         public static IEnumerable<object[]> GetErrorData()
         {

@@ -3,8 +3,6 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    // func hi(a: i32, b: i32) -> void {  }
-
     internal sealed class ParameterDeclaration : SyntaxNode
     {
         public ParameterDeclaration(SyntaxToken nameToken, TypeClause typeClause)

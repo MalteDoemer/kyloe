@@ -7,5 +7,6 @@ namespace Kyloe.Symbols
         LocalVariableSymbol,
         FieldSymbol,
         OperationSymbol,
+        ParameterSymbol,
     }
 }

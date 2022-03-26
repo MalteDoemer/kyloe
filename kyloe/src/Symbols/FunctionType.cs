@@ -6,21 +6,21 @@ namespace Kyloe.Symbols
 {
     internal sealed class FunctionType : TypeSpecifier
     {
-        public FunctionType(string name, TypeSpecifier parent, bool isStatic, TypeSpecifier returnType)
+        public FunctionType(string name, TypeSpecifier? parent, bool isStatic, TypeSpecifier returnType)
         {
             Name = name;
             Parent = parent;
             IsStatic = isStatic;
             ReturnType = returnType;
-            ParameterTypes = new List<TypeSpecifier>();
+            Parameters = new List<ParameterSymbol>();
         }
 
         public string Name { get; }
-        public TypeSpecifier Parent { get; }
+        public TypeSpecifier? Parent { get; }
 
         public bool IsStatic { get; }
         public TypeSpecifier ReturnType { get; }
-        public List<TypeSpecifier> ParameterTypes { get; }
+        public List<ParameterSymbol> Parameters { get; }
 
         public override TypeKind Kind => TypeKind.FunctionType;
 
@@ -31,16 +31,13 @@ namespace Kyloe.Symbols
         public override string FullName()
         {
             var builder = new StringBuilder();
-
-            var parentName = Parent.FullName();
-
-
+            
             builder.Append("func ");
-            if (parentName != "")
-                builder.Append(parentName).Append('.');
+            if (Parent is not null)
+                builder.Append(Parent.FullName()).Append('.');
             builder.Append(Name);
             builder.Append('(');
-            builder.AppendJoin(',', ParameterTypes.Select(param => param.FullName()));
+            builder.AppendJoin(',', Parameters.Select(param => param.Type.FullName()));
             builder.Append(") -> ");
             builder.Append(ReturnType.FullName());
 

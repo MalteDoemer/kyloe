@@ -24,6 +24,6 @@ namespace Kyloe.Diagnostics
         NotCallableError,
         NoMatchingFunctionError,
         CannotCallStaticMethodError,
-        InstanceRequiredToCallError
+        InstanceRequiredToCallError,
     }
 }

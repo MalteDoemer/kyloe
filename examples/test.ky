@@ -1,5 +1,4 @@
-{
+func main() {
     var x = 5;
-
-    x.test(5, "hi");
+    5.test(5.5);
 }

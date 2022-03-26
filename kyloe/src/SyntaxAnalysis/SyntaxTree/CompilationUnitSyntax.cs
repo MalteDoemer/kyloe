@@ -7,14 +7,14 @@ namespace Kyloe.Syntax
 {
     internal class CompilationUnitSyntax : SyntaxNode
     {
-        public CompilationUnitSyntax(ImmutableArray<DeclarationStatement> globalDeclarations, ImmutableArray<FunctionDeclaration> functionDeclarations)
+        public CompilationUnitSyntax(ImmutableArray<DeclarationStatement> globalDeclarations, ImmutableArray<FunctionDefinition> functionDefinitions)
         {
             GlobalDeclarations = globalDeclarations;
-            FunctionDeclarations = functionDeclarations;
+            FunctionDefinitions = functionDefinitions;
         }
 
         public ImmutableArray<DeclarationStatement> GlobalDeclarations { get; }
-        public ImmutableArray<FunctionDeclaration> FunctionDeclarations { get; }
+        public ImmutableArray<FunctionDefinition> FunctionDefinitions { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.CompilationUnitSyntax;
 
@@ -22,21 +22,21 @@ namespace Kyloe.Syntax
         {
             get
             {
-                if (GlobalDeclarations.IsEmpty && FunctionDeclarations.IsEmpty)
+                if (GlobalDeclarations.IsEmpty && FunctionDefinitions.IsEmpty)
                     return SourceLocation.FromLength(0, 0);
                 else if (GlobalDeclarations.IsEmpty)
-                    return SourceLocation.CreateAround(FunctionDeclarations.First().Location, FunctionDeclarations.Last().Location);
-                else if (FunctionDeclarations.IsEmpty)
+                    return SourceLocation.CreateAround(FunctionDefinitions.First().Location, FunctionDefinitions.Last().Location);
+                else if (FunctionDefinitions.IsEmpty)
                     return SourceLocation.CreateAround(GlobalDeclarations.First().Location, GlobalDeclarations.Last().Location);
 
 
-                var first = GlobalDeclarations.First().Location.Start <= FunctionDeclarations.First().Location.Start
+                var first = GlobalDeclarations.First().Location.Start <= FunctionDefinitions.First().Location.Start
                             ? GlobalDeclarations.First().Location
-                            : FunctionDeclarations.First().Location;
+                            : FunctionDefinitions.First().Location;
 
-                var last = GlobalDeclarations.Last().Location.End >= FunctionDeclarations.Last().Location.End
+                var last = GlobalDeclarations.Last().Location.End >= FunctionDefinitions.Last().Location.End
                             ? GlobalDeclarations.Last().Location
-                            : FunctionDeclarations.Last().Location;
+                            : FunctionDefinitions.Last().Location;
 
                 return SourceLocation.CreateAround(first, last);
             }
@@ -47,7 +47,7 @@ namespace Kyloe.Syntax
             foreach (var global in GlobalDeclarations)
                 yield return new SyntaxNodeChild(global);
 
-            foreach (var func in FunctionDeclarations)
+            foreach (var func in FunctionDefinitions)
                 yield return new SyntaxNodeChild(func);
         }
     }

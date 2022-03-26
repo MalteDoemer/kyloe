@@ -71,7 +71,7 @@ namespace Kyloe.Syntax
 
         private CompilationUnitSyntax ParseCompilationUnit() 
         {
-            var functions = ImmutableArray.CreateBuilder<FunctionDeclaration>();
+            var functions = ImmutableArray.CreateBuilder<FunctionDefinition>();
             var globals = ImmutableArray.CreateBuilder<DeclarationStatement>();
 
             while (current.Type != SyntaxTokenType.End) 
@@ -81,13 +81,13 @@ namespace Kyloe.Syntax
                 if (current.Type == SyntaxTokenType.VarKeyword || current.Type == SyntaxTokenType.ConstKeyword)
                     globals.Add(ParseDeclarationStatement());
                 else
-                    functions.Add(ParseFunctionDeclaration());
+                    functions.Add(ParseFunctionDefinition());
             }
 
             return new CompilationUnitSyntax(globals.ToImmutable(), functions.ToImmutable());
         }
-
-        private FunctionDeclaration ParseFunctionDeclaration()
+        
+        private FunctionDefinition ParseFunctionDefinition()
         {
             var funcToken = Expect(SyntaxTokenType.FuncKeyword);
             var nameToken = Expect(SyntaxTokenType.Identifier);
@@ -109,7 +109,7 @@ namespace Kyloe.Syntax
 
             var body = ParseBlockStatement();
 
-            return new FunctionDeclaration(funcToken, nameToken, leftParen, parameters, rightParen, typeClause, body);
+            return new FunctionDefinition(funcToken, nameToken, leftParen, parameters, rightParen, typeClause, body);
         }
 
         private ParameterDeclaration ParseParameterDeclaration()

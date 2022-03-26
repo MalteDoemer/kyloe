@@ -24,7 +24,7 @@ namespace Kyloe.Syntax
         BlockStatement,
 
         // Other
-        FunctionDecleration,
+        FunctionDefinition,
         ParameterDeclaration,
         CompilationUnitSyntax,
     }

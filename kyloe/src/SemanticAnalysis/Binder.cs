@@ -321,7 +321,9 @@ namespace Kyloe.Semantics
                         return new BoundInvalidCallExpression(typeSystem, bound);
                     }
 
-                    if (CheckArgumentTypes(function, args))
+                    if (TypeSequenceEquals(
+                        function.Parameters.Select(param => param.Type),
+                        args.Arguments.Select(arg => arg.ResultType)))
                     {
                         return new BoundCallExpression(function, bound, args);
                     }
@@ -337,13 +339,13 @@ namespace Kyloe.Semantics
             }
         }
 
-        private bool CheckArgumentTypes(FunctionType function, BoundArguments expression)
+        private bool TypeSequenceEquals(IEnumerable<TypeSpecifier> seq1, IEnumerable<TypeSpecifier> seq2)
         {
-            if (function.ParameterTypes.Count() != expression.Arguments.Count())
+            if (seq1.Count() != seq2.Count())
                 return false;
 
-            foreach (var (param, arg) in function.ParameterTypes.Zip(expression.Arguments))
-                if (!arg.ResultType.Equals(param))
+            foreach (var (t1, t2) in seq1.Zip(seq2))
+                if (!t1.Equals(t2))
                     return false;
 
             return true;
@@ -515,10 +517,10 @@ namespace Kyloe.Semantics
             if (funcGroup is null)
                 return null;
 
+            var args = new[] { leftType, rightType };
+
             var functions = funcGroup.Functions.Where(
-                func => func.ParameterTypes.Count() == 2 &&
-                func.ParameterTypes.First().Equals(leftType) &&
-                func.ParameterTypes.Last().Equals(rightType)
+                func => TypeSequenceEquals(func.Parameters.Select(param => param.Type), args)
             );
 
             if (functions.Count() > 1)
@@ -546,9 +548,10 @@ namespace Kyloe.Semantics
             if (funcGroup is null)
                 return null;
 
+            var args = new[] { type };
+
             var functions = funcGroup.Functions.Where(
-                func => func.ParameterTypes.Count() == 1 &&
-                func.ParameterTypes.First().Equals(type)
+                func => TypeSequenceEquals(func.Parameters.Select(param => param.Type), args)
             );
 
             if (functions.Count() > 1)
