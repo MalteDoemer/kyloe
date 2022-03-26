@@ -307,7 +307,10 @@ namespace Kyloe.Semantics
                 symbol = new LocalVariableSymbol(name, varType, isConst);
 
             if (!DeclareSymbol(symbol))
-                diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
+            {
+
+                diagnostics.Add(new NameAlreadyExistsError(stmt.NameToken));
+            }
 
             return new BoundDeclarationStatement(symbol, typeClause, expr);
         }
