@@ -5,20 +5,20 @@ namespace Kyloe.Syntax
 {
     internal sealed class TypeClause
     {
-        public TypeClause(SyntaxToken colonToken, SyntaxExpression nameExpression)
+        public TypeClause(SyntaxToken token, SyntaxExpression nameExpression)
         {
-            ColonToken = colonToken;
+            Token = token;
             NameExpression = nameExpression;
         }
 
-        public SyntaxToken ColonToken { get; }
+        public SyntaxToken Token { get; }
         public SyntaxExpression NameExpression { get; }
 
-        public SourceLocation Location => SourceLocation.CreateAround(ColonToken.Location, NameExpression.Location);
+        public SourceLocation Location => SourceLocation.CreateAround(Token.Location, NameExpression.Location);
 
         public IEnumerable<SyntaxNodeChild> GetChildren()
         {
-            yield return new SyntaxNodeChild(ColonToken);
+            yield return new SyntaxNodeChild(Token);
             yield return new SyntaxNodeChild(NameExpression);
         }
     }

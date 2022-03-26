@@ -25,5 +25,8 @@ namespace Kyloe.Diagnostics
         NoMatchingFunctionError,
         CannotCallStaticMethodError,
         InstanceRequiredToCallError,
+        NameAlreadyExistsError,
+        FunctionWithSameParametersExistsError,
+        RedefinedParameterError,
     }
 }

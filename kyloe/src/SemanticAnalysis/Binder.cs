@@ -10,42 +10,6 @@ using System.Linq;
 
 namespace Kyloe.Semantics
 {
-    internal class LocalVariableScopeStack
-    {
-        private readonly Stack<SymbolScope> scopes;
-
-        public LocalVariableScopeStack()
-        {
-            scopes = new Stack<SymbolScope>();
-            scopes.Push(new SymbolScope());
-        }
-
-        public void EnterNewScope()
-        {
-            scopes.Push(new SymbolScope());
-        }
-
-        public void ExitCurrentScope()
-        {
-            scopes.Pop();
-        }
-
-        public bool TryDeclareLocal(string name, TypeSpecifier type, bool isConst)
-        {
-            return scopes.Peek().DeclareSymbol(new LocalVariableSymbol(name, type, isConst));
-        }
-
-        public LocalVariableSymbol? LookupLocal(string name)
-        {
-            foreach (var scope in scopes)
-                if (scope.LookupSymbol(name) is LocalVariableSymbol symbol)
-                    return symbol;
-
-            return null;
-        }
-    }
-
-
     internal class Binder
     {
         private readonly TypeSystem typeSystem;
@@ -94,6 +58,18 @@ namespace Kyloe.Semantics
             return !expectedType.Equals(rightType);
         }
 
+        private bool TypeSequenceEquals(IEnumerable<TypeSpecifier> seq1, IEnumerable<TypeSpecifier> seq2)
+        {
+            if (seq1.Count() != seq2.Count())
+                return false;
+
+            foreach (var (t1, t2) in seq1.Zip(seq2))
+                if (!t1.Equals(t2))
+                    return false;
+
+            return true;
+        }
+
         private (BoundExpression, TypeSpecifier) BindAndExpect(SyntaxExpression expr, bool mustBeValue, bool mustBeModifiable, TypeSpecifier? expectedType = null)
         {
             var bound = BindExpression(expr);
@@ -128,10 +104,126 @@ namespace Kyloe.Semantics
                 return BindStatement(statement);
             else if (node is SyntaxExpression expression)
                 return BindExpression(expression);
+            else if (node is CompilationUnitSyntax compilationUnit)
+                return BindCompilationUnit(compilationUnit);
             else throw new Exception($"Unexpected SyntaxNode: {node.GetType()}");
         }
 
-        public BoundStatement BindStatement(SyntaxStatement stmt)
+        private BoundNode BindCompilationUnit(CompilationUnitSyntax compilationUnit)
+        {
+            var functionTypes = new List<FunctionType>(compilationUnit.FunctionDefinitions.Length);
+            var globals = ImmutableArray.CreateBuilder<BoundDeclarationStatement>(compilationUnit.GlobalDeclarations.Length);
+            var functions = ImmutableArray.CreateBuilder<BoundFunctionDefinition>(compilationUnit.FunctionDefinitions.Length);
+
+            // declare all functions, but not bind the bodies yet
+            foreach (var func in compilationUnit.FunctionDefinitions)
+                functionTypes.Add(BindFunctionDeclaration(func));
+
+            foreach (var global in compilationUnit.GlobalDeclarations)
+                globals.Add(BindDeclarationStatement(global));
+
+            foreach (var (funcType, funcDef) in functionTypes.Zip(compilationUnit.FunctionDefinitions))
+                functions.Add(BindFunctionDefinition(funcDef, funcType));
+
+            return new BoundCompilationUnit(globals.MoveToImmutable(), functions.MoveToImmutable());
+        }
+
+        private BoundFunctionDefinition BindFunctionDefinition(FunctionDefinition funcDef, FunctionType funcType)
+        {
+            EnterNewScope(); // this scope contains the parameters
+
+            foreach (var param in funcType.Parameters)
+                if (!DeclareSymbol(param))
+                    diagnostics.Add(new RedefinedParameterError(funcDef.NameToken));
+
+            var body = BindBlockStatement(funcDef.Body);
+
+            ExitCurrentScope();
+
+            return new BoundFunctionDefinition(funcType, body);
+        }
+
+        private FunctionType BindFunctionDeclaration(FunctionDefinition declaration)
+        {
+            var name = ExtractName(declaration.NameToken);
+
+            var symbol = LookupSymbol(name);
+            FunctionGroupSymbol functionGroup;
+
+            if (symbol is null)
+            {
+                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+                DeclareSymbol(functionGroup);
+            }
+            else if (symbol is FunctionGroupSymbol groupSymbol)
+            {
+                functionGroup = groupSymbol;
+            }
+            else
+            {
+                diagnostics.Add(new NameAlreadyExistsError(declaration.NameToken));
+                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+            }
+
+            var returnType = declaration.TypeClause is null
+                             ? typeSystem.Void
+                             : BindTypeClause(declaration.TypeClause).Type;
+
+            var function = new FunctionType(name, functionGroup.Group, true, returnType);
+
+
+            foreach (var param in declaration.ParameterList.Parameters)
+                function.Parameters.Add(BindParameterDeclaration(param));
+
+
+            bool alreadyExists = false;
+
+            foreach (var otherFunction in functionGroup.Group.Functions)
+            {
+                if (TypeSequenceEquals(function.Parameters.Select(param => param.Type), otherFunction.Parameters.Select(param => param.Type)))
+                {
+                    diagnostics.Add(new FunctionWithSameParametersExistsError(declaration.NameToken));
+                    alreadyExists = true;
+                    break;
+                }
+            }
+
+            if (!alreadyExists)
+                functionGroup.Group.Functions.Add(function);
+
+
+            return function;
+        }
+
+        private ParameterSymbol BindParameterDeclaration(ParameterDeclaration declaration)
+        {
+            var name = ExtractName(declaration.NameToken);
+            var type = BindTypeClause(declaration.TypeClause).Type;
+            return new ParameterSymbol(name, type);
+        }
+
+        private BoundTypeClause BindTypeClause(TypeClause typeClause)
+        {
+            var bound = BindExpression(typeClause.NameExpression);
+
+            Symbol? symbol;
+
+            if (bound is BoundSymbolExpression symbolExpression)
+                symbol = symbolExpression.Symbol;
+            else if (bound is BoundMemberAccessExpression memberAccessExpression)
+                symbol = memberAccessExpression.Symbol;
+            else
+                symbol = null;
+
+            if (symbol is TypeNameSymbol typeName)
+                return new BoundTypeClause(bound, typeName.Type);
+
+            if (bound.ResultType is not ErrorType)
+                diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
+            return new BoundTypeClause(bound, typeSystem.Error);
+        }
+
+        private BoundStatement BindStatement(SyntaxStatement stmt)
         {
             switch (stmt.Type)
             {
@@ -150,7 +242,7 @@ namespace Kyloe.Semantics
             }
         }
 
-        private BoundStatement BindBlockStatement(BlockStatement stmt)
+        private BoundBlockStatement BindBlockStatement(BlockStatement stmt)
         {
             var builder = ImmutableArray.CreateBuilder<BoundStatement>();
 
@@ -179,7 +271,7 @@ namespace Kyloe.Semantics
             return new BoundIfStatement(condition, body, elseClasue);
         }
 
-        private BoundStatement BindDeclarationStatement(DeclarationStatement stmt)
+        private BoundDeclarationStatement BindDeclarationStatement(DeclarationStatement stmt)
         {
             bool isConst = stmt.DeclerationToken.Type == SyntaxTokenType.ConstKeyword;
 
@@ -206,33 +298,18 @@ namespace Kyloe.Semantics
 
             string name = ExtractName(stmt.NameToken);
 
-            var local = new LocalVariableSymbol(name, varType, isConst);
 
-            if (!DeclareSymbol(local))
+            Symbol symbol;
+
+            if (InGlobalScope())
+                symbol = new GlobalVariableSymbol(name, varType, isConst);
+            else
+                symbol = new LocalVariableSymbol(name, varType, isConst);
+
+            if (!DeclareSymbol(symbol))
                 diagnostics.Add(new RedefinedLocalVariableError(stmt.NameToken));
 
-            return new BoundDeclarationStatement(local, typeClause, expr);
-        }
-
-        private BoundTypeClause BindTypeClause(TypeClause typeClause)
-        {
-            var bound = BindExpression(typeClause.NameExpression);
-
-            Symbol? symbol;
-
-            if (bound is BoundSymbolExpression symbolExpression)
-                symbol = symbolExpression.Symbol;
-            else if (bound is BoundMemberAccessExpression memberAccessExpression)
-                symbol = memberAccessExpression.Symbol;
-            else
-                symbol = null;
-
-            if (symbol is TypeNameSymbol typeName)
-                return new BoundTypeClause(bound, typeName.Type);
-
-            if (bound.ResultType is not ErrorType)
-                diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
-            return new BoundTypeClause(bound, typeSystem.Error);
+            return new BoundDeclarationStatement(symbol, typeClause, expr);
         }
 
         private BoundStatement BindExpressionStatement(ExpressionStatement stmt)
@@ -241,7 +318,7 @@ namespace Kyloe.Semantics
             return new BoundExpressionStatement(expr);
         }
 
-        public BoundExpression BindExpression(SyntaxExpression expr)
+        private BoundExpression BindExpression(SyntaxExpression expr)
         {
             switch (expr.Type)
             {
@@ -339,18 +416,6 @@ namespace Kyloe.Semantics
             }
         }
 
-        private bool TypeSequenceEquals(IEnumerable<TypeSpecifier> seq1, IEnumerable<TypeSpecifier> seq2)
-        {
-            if (seq1.Count() != seq2.Count())
-                return false;
-
-            foreach (var (t1, t2) in seq1.Zip(seq2))
-                if (!t1.Equals(t2))
-                    return false;
-
-            return true;
-        }
-
         private BoundArguments BindArgumentExpression(ArgumentExpression arguments)
         {
             var builder = ImmutableArray.CreateBuilder<BoundExpression>();
@@ -393,14 +458,15 @@ namespace Kyloe.Semantics
                 return new BoundInvalidMemberAccessExpression(typeSystem, bound, name);
             }
 
-
             if (!IsMemberAccessValid(bound, member))
             {
                 diagnostics.Add(new MemberAccessError(expr.Expression, bound.ResultType, name));
                 return new BoundInvalidMemberAccessExpression(typeSystem, bound, name);
             }
 
-            return new BoundMemberAccessExpression(bound, member);
+            var valueCategory = MemberAccessValueCategory(bound, member);
+
+            return new BoundMemberAccessExpression(bound, member, valueCategory);
         }
 
         private bool IsMemberAccessValid(BoundExpression bound, Symbol member)
@@ -416,7 +482,7 @@ namespace Kyloe.Semantics
                     var fieldSymbol = (FieldSymbol)member;
                     if (fieldSymbol.IsStatic)
                         return bound.ValueCategory == ValueCategory.NoValue;
-                    return bound.ValueCategory == ValueCategory.NoValue;
+                    return bound.ValueCategory != ValueCategory.NoValue;
                 case SymbolKind.OperationSymbol:
                     // you cannot access an operator directly by its name
                     // (e.g. you cannot call op_Addition() directly)
@@ -424,6 +490,14 @@ namespace Kyloe.Semantics
                 default:
                     throw new Exception($"unexpected symbol kind: {member.Kind}");
             }
+        }
+
+        private ValueCategory MemberAccessValueCategory(BoundExpression bound, Symbol member)
+        {
+            if (member is FunctionGroupSymbol)
+                return bound.ValueCategory;
+            else
+                return member.ValueCategory;
         }
 
         private BoundExpression BindIdentifierExpression(IdentifierExpression expr)

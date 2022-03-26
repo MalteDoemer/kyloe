@@ -8,5 +8,6 @@ namespace Kyloe.Symbols
         FieldSymbol,
         OperationSymbol,
         ParameterSymbol,
+        GlobalVariableSymbol,
     }
 }

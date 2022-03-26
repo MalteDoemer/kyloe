@@ -17,6 +17,6 @@ namespace Kyloe.Symbols
 
         public override TypeSpecifier Type => Group;
 
-        public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
+        public override ValueCategory ValueCategory => ValueCategory.NoValue;
     }
 }

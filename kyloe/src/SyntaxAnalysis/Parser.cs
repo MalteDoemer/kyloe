@@ -76,8 +76,6 @@ namespace Kyloe.Syntax
 
             while (current.Type != SyntaxTokenType.End) 
             {
-                Console.WriteLine(current.Type);
-
                 if (current.Type == SyntaxTokenType.VarKeyword || current.Type == SyntaxTokenType.ConstKeyword)
                     globals.Add(ParseDeclarationStatement());
                 else
@@ -102,10 +100,10 @@ namespace Kyloe.Syntax
 
             var rightParen = Expect(SyntaxTokenType.RightParen);
 
-            TrailingTypeClause? typeClause = null;
+            TypeClause? typeClause = null;
 
             if (current.Type == SyntaxTokenType.SmallArrow)
-                typeClause = ParseTrailingTypeClause();
+                typeClause = ParseTypeClause(SyntaxTokenType.SmallArrow);
 
             var body = ParseBlockStatement();
 
@@ -120,20 +118,12 @@ namespace Kyloe.Syntax
             return new ParameterDeclaration(nameToken, typeClause);
         }
 
-        private TypeClause ParseTypeClause()
+        private TypeClause ParseTypeClause(SyntaxTokenType type = SyntaxTokenType.Colon)
         {
-            var colonToken = Expect(SyntaxTokenType.Colon);
+            var colonToken = Expect(type);
             var node = ParseNameExpression();
 
             return new TypeClause(colonToken, node);
-        }
-
-        private TrailingTypeClause ParseTrailingTypeClause()
-        {
-            var arrowToken = Expect(SyntaxTokenType.SmallArrow);
-            var node = ParseNameExpression();
-
-            return new TrailingTypeClause(arrowToken, node);
         }
 
         private ParameterList ParseParameters()
@@ -206,12 +196,12 @@ namespace Kyloe.Syntax
             }
         }
 
-        private SyntaxStatement ParseBlockStatement()
+        private BlockStatement ParseBlockStatement()
         {
             var leftCurly = Expect(SyntaxTokenType.LeftCurly);
             var builder = ImmutableArray.CreateBuilder<SyntaxStatement>();
 
-            while (current.Type != SyntaxTokenType.RightCurly)
+            while (!(current.Type == SyntaxTokenType.RightCurly || current.Type == SyntaxTokenType.End))
             {
                 var startToken = current;
                 var stmt = ParseStatementImpl();
@@ -222,12 +212,6 @@ namespace Kyloe.Syntax
                 // If this was the case we have to skip the token.
                 if (object.ReferenceEquals(startToken, current))
                     Advance();
-
-
-                if (current.Type == SyntaxTokenType.End)
-                {
-                    throw new NotImplementedException();
-                }
             }
 
             var rightCurly = Expect(SyntaxTokenType.RightCurly);
@@ -257,8 +241,8 @@ namespace Kyloe.Syntax
 
             if (current.Type == SyntaxTokenType.ConstKeyword)
                 decl = Advance();
-
-            decl = Expect(SyntaxTokenType.VarKeyword);
+            else
+                decl = Expect(SyntaxTokenType.VarKeyword);
 
             var name = Expect(SyntaxTokenType.Identifier);
 

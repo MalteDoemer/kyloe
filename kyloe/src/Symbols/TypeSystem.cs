@@ -99,11 +99,11 @@ namespace Kyloe.Symbols
         private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var func = new FunctionType(name, left, true, ret);
+            var group = new FunctionGroupType(name, left);
+            var func = new FunctionType(name, group, true, ret);
+
             func.Parameters.Add(new ParameterSymbol("l", left));
             func.Parameters.Add(new ParameterSymbol("r", right));
-
-            var group = new FunctionGroupType(name, left);
             group.Functions.Add(func);
 
             return new OperationSymbol(op, group);
@@ -112,10 +112,10 @@ namespace Kyloe.Symbols
         private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var func = new FunctionType(name, arg, true, ret);
-            func.Parameters.Add(new ParameterSymbol("", arg));
-
             var group = new FunctionGroupType(name, arg);
+            var func = new FunctionType(name, group, true, ret);
+
+            func.Parameters.Add(new ParameterSymbol("", arg));
             group.Functions.Add(func);
 
             return new OperationSymbol(op, group);
