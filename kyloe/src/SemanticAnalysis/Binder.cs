@@ -152,7 +152,7 @@ namespace Kyloe.Semantics
 
             if (symbol is null)
             {
-                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
                 DeclareSymbol(functionGroup);
             }
             else if (symbol is FunctionGroupSymbol groupSymbol)
@@ -161,15 +161,16 @@ namespace Kyloe.Semantics
             }
             else
             {
-                diagnostics.Add(new NameAlreadyExistsError(declaration.NameToken));
-                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+                if (symbol is not ErrorSymbol)
+                    diagnostics.Add(new NameAlreadyExistsError(declaration.NameToken));
+                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
             }
 
             var returnType = declaration.TypeClause is null
                              ? typeSystem.Void
                              : BindTypeClause(declaration.TypeClause).Type;
 
-            var function = new FunctionType(name, functionGroup.Group, true, returnType);
+            var function = new FunctionType(name, functionGroup.Group, returnType);
 
 
             foreach (var param in declaration.ParameterList.Parameters)
@@ -182,7 +183,8 @@ namespace Kyloe.Semantics
             {
                 if (TypeSequenceEquals(function.Parameters.Select(param => param.Type), otherFunction.Parameters.Select(param => param.Type)))
                 {
-                    diagnostics.Add(new FunctionWithSameParametersExistsError(declaration.NameToken));
+                    if (symbol is not ErrorSymbol)
+                        diagnostics.Add(new OverloadWithSameParametersExistsError(declaration.NameToken));
                     alreadyExists = true;
                     break;
                 }
@@ -190,7 +192,6 @@ namespace Kyloe.Semantics
 
             if (!alreadyExists)
                 functionGroup.Group.Functions.Add(function);
-
 
             return function;
         }
@@ -206,17 +207,8 @@ namespace Kyloe.Semantics
         {
             var bound = BindExpression(typeClause.NameExpression);
 
-            Symbol? symbol;
-
-            if (bound is BoundSymbolExpression symbolExpression)
-                symbol = symbolExpression.Symbol;
-            else if (bound is BoundMemberAccessExpression memberAccessExpression)
-                symbol = memberAccessExpression.Symbol;
-            else
-                symbol = null;
-
-            if (symbol is TypeNameSymbol typeName)
-                return new BoundTypeClause(bound, typeName.Type);
+            if (bound.IsTypeName)
+                return new BoundTypeClause(bound, bound.ResultType);
 
             if (bound.ResultType is not ErrorType)
                 diagnostics.Add(new ExpectedTypeNameError(typeClause.NameExpression));
@@ -379,42 +371,28 @@ namespace Kyloe.Semantics
         private BoundExpression BindCallExpression(CallExpression expr)
         {
             var bound = BindExpression(expr.Expression);
-
             var args = BindArgumentExpression(expr.Arguments);
 
             if (bound.ResultType is FunctionGroupType functionGroup)
             {
-                foreach (var function in functionGroup.Functions)
+                var function = FindFunctionOverload(functionGroup, args.Arguments.Select(arg => arg.ResultType));
+
+                if (function is null)
                 {
-                    // Check whether a static or instance function is allowed to be called:
-                    // - A static method can only be called on their type names e.g. Console.WriteLine()
-                    // - A instance method can only be called on an instance of the type e.g. myObject.Equals(other) 
-
-                    if (function.IsStatic && bound.ValueCategory != ValueCategory.NoValue)
-                    {
-                        diagnostics.Add(new CannotCallStaticMethodError(expr));
-                        return new BoundInvalidCallExpression(typeSystem, bound);
-                    }
-                    else if (!function.IsStatic && bound.ValueCategory == ValueCategory.NoValue)
-                    {
-                        diagnostics.Add(new InstanceRequiredToCallError(expr));
-                        return new BoundInvalidCallExpression(typeSystem, bound);
-                    }
-
-                    if (TypeSequenceEquals(
-                        function.Parameters.Select(param => param.Type),
-                        args.Arguments.Select(arg => arg.ResultType)))
-                    {
-                        return new BoundCallExpression(function, bound, args);
-                    }
+                    diagnostics.Add(new NoMatchingOverloadError(functionGroup.FullName(), expr, args));
+                    return new BoundInvalidCallExpression(typeSystem, bound);
                 }
 
-                diagnostics.Add(new NoMatchingFunctionError(functionGroup.FullName(), expr, args));
-                return new BoundInvalidCallExpression(typeSystem, bound);
+                return new BoundFunctionCallExpression(function, bound, args);
+            }
+            else if (bound.ResultType is MethodGroupType methodGroup)
+            {
+                throw new System.NotImplementedException();
             }
             else
             {
-                diagnostics.Add(new NotCallableError(expr.Expression));
+                if (bound.ResultType is not ErrorType)
+                    diagnostics.Add(new NotCallableError(expr.Expression));
                 return new BoundInvalidCallExpression(typeSystem, bound);
             }
         }
@@ -439,68 +417,7 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindMemberAccessExpression(MemberAccessExpression expr)
         {
-            var bound = BindExpression(expr.Expression);
-            var name = ExtractName(expr.IdentifierExpression.NameToken);
-
-            if (bound.ResultType is ErrorType)
-                return new BoundInvalidMemberAccessExpression(typeSystem, bound, name);
-
-            var scope = bound.ResultType.ReadOnlyScope;
-
-            if (scope is null)
-            {
-                diagnostics.Add(new MemberAccessNotAllowed(expr.Expression));
-                return new BoundInvalidMemberAccessExpression(typeSystem, bound, name);
-            }
-
-            var member = scope.LookupSymbol(name);
-
-            if (member is null)
-            {
-                diagnostics.Add(new MemberAccessError(expr.Expression, bound.ResultType, name));
-                return new BoundInvalidMemberAccessExpression(typeSystem, bound, name);
-            }
-
-            if (!IsMemberAccessValid(bound, member))
-            {
-                diagnostics.Add(new MemberAccessError(expr.Expression, bound.ResultType, name));
-                return new BoundInvalidMemberAccessExpression(typeSystem, bound, name);
-            }
-
-            var valueCategory = MemberAccessValueCategory(bound, member);
-
-            return new BoundMemberAccessExpression(bound, member, valueCategory);
-        }
-
-        private bool IsMemberAccessValid(BoundExpression bound, Symbol member)
-        {
-            switch (member.Kind)
-            {
-                case SymbolKind.TypeNameSymbol:
-                    return bound.ValueCategory == ValueCategory.NoValue;
-                case SymbolKind.FunctionGroupSymbol:
-                    // function access needs to be checked after overload resolution
-                    return true;
-                case SymbolKind.FieldSymbol:
-                    var fieldSymbol = (FieldSymbol)member;
-                    if (fieldSymbol.IsStatic)
-                        return bound.ValueCategory == ValueCategory.NoValue;
-                    return bound.ValueCategory != ValueCategory.NoValue;
-                case SymbolKind.OperationSymbol:
-                    // you cannot access an operator directly by its name
-                    // (e.g. you cannot call op_Addition() directly)
-                    return false;
-                default:
-                    throw new Exception($"unexpected symbol kind: {member.Kind}");
-            }
-        }
-
-        private ValueCategory MemberAccessValueCategory(BoundExpression bound, Symbol member)
-        {
-            if (member is FunctionGroupSymbol)
-                return bound.ValueCategory;
-            else
-                return member.ValueCategory;
+            throw new NotImplementedException();
         }
 
         private BoundExpression BindIdentifierExpression(IdentifierExpression expr)
@@ -512,7 +429,8 @@ namespace Kyloe.Semantics
             if (symbol is not null)
                 return new BoundSymbolExpression(symbol);
 
-            diagnostics.Add(new NonExistantNameError(expr.NameToken));
+            if (symbol is not ErrorSymbol)
+                diagnostics.Add(new NonExistantNameError(expr.NameToken));
             return new BoundInvalidExpression(typeSystem);
         }
 
@@ -574,6 +492,28 @@ namespace Kyloe.Semantics
             return name;
         }
 
+        private FunctionType? FindFunctionOverload(FunctionGroupType group, IEnumerable<TypeSpecifier> parameterTypes)
+        {
+            foreach (var func in group.Functions)
+            {
+                if (TypeSequenceEquals(func.Parameters.Select(param => param.Type), parameterTypes))
+                    return func;
+            }
+
+            return null;
+        }
+
+        private MethodType? FindMethodOverload(MethodGroupType group, IEnumerable<TypeSpecifier> parameterTypes, bool isStatic)
+        {
+            foreach (var method in group.Methods)
+            {
+                if (method.IsStatic == isStatic && TypeSequenceEquals(method.Parameters.Select(param => param.Type), parameterTypes))
+                    return method;
+            }
+
+            return null;
+        }
+
         private TypeSpecifier? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
         {
             Debug.Assert(op.IsBinaryOperation());
@@ -589,21 +529,16 @@ namespace Kyloe.Semantics
 
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
 
-            var funcGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.FunctionGroup;
+            var methodGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
 
-            if (funcGroup is null)
+            if (methodGroup is null)
                 return null;
 
             var args = new[] { leftType, rightType };
 
-            var functions = funcGroup.Functions.Where(
-                func => TypeSequenceEquals(func.Parameters.Select(param => param.Type), args)
-            );
+            var method = FindMethodOverload(methodGroup, args, true);
 
-            if (functions.Count() > 1)
-                throw new Exception("Found multiple operators with the same signature!");
-
-            return functions.FirstOrDefault()?.ReturnType;
+            return method?.ReturnType;
         }
 
         private TypeSpecifier? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
@@ -620,21 +555,16 @@ namespace Kyloe.Semantics
 
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
 
-            var funcGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.FunctionGroup;
+            var methodGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
 
-            if (funcGroup is null)
+            if (methodGroup is null)
                 return null;
 
             var args = new[] { type };
 
-            var functions = funcGroup.Functions.Where(
-                func => TypeSequenceEquals(func.Parameters.Select(param => param.Type), args)
-            );
+            var method = FindMethodOverload(methodGroup, args, true);
 
-            if (functions.Count() > 1)
-                throw new Exception("Found multiple operators with the same signature!");
-
-            return functions.FirstOrDefault()?.ReturnType;
+            return method?.ReturnType;
         }
     }
 }

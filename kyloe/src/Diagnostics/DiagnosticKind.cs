@@ -16,16 +16,11 @@ namespace Kyloe.Diagnostics
         NonExistantNameError,
         ExpectedModifiableValueError,
         UnsupportedAssignmentOperation,
-        ExpectedTypeNameError,
-        MemberNotFoundError,
-        MemberAccessError,
-        MemberAccessNotAllowed,
-        NotCallableError,
-        NoMatchingFunctionError,
-        CannotCallStaticMethodError,
-        InstanceRequiredToCallError,
-        NameAlreadyExistsError,
-        FunctionWithSameParametersExistsError,
+        ExpectedTypeNameError,          // TODO: add a test
+        NotCallableError,               // TODO: add a test
+        NoMatchingOverloadError,
+        NameAlreadyExistsError, 
+        OverloadWithSameParametersExistsError,
         RedefinedParameterError,
     }
 }

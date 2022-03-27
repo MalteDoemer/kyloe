@@ -16,6 +16,6 @@ namespace Kyloe.Symbols
 
         public override TypeSpecifier Type { get; }
 
-        public override ValueCategory ValueCategory => ValueCategory.NoValue;
+        public override ValueCategory ValueCategory => ValueCategory.TypeName;
     }
 }

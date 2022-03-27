@@ -47,7 +47,7 @@ namespace Kyloe.Syntax
                 isCurrentValid = false;
             }
 
-            return new SyntaxToken(type, current.Location, current.Value);
+            return new SyntaxToken(type, current.Location, SyntaxInfo.GetDefaultValue(type));
         }
 
         public SyntaxNode Parse()

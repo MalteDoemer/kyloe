@@ -263,5 +263,26 @@ namespace Kyloe.Syntax
                     return null;
             }
         }
+    
+        public static object? GetDefaultValue(SyntaxTokenType type) 
+        {
+            switch (type) 
+            {
+                case SyntaxTokenType.Invalid:
+                    return '\0';
+                case SyntaxTokenType.IntLiteral:
+                    return 0;
+                case SyntaxTokenType.FloatLiteral:
+                    return 0.0;
+                case SyntaxTokenType.BoolLiteral:
+                    return false;
+                case SyntaxTokenType.StringLiteral:
+                    return string.Empty;
+                case SyntaxTokenType.Identifier:
+                    return string.Empty;
+                default:
+                    return null;
+            }
+        }
     }
 }

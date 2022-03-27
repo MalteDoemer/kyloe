@@ -37,6 +37,7 @@ namespace Kyloe.Symbols
         {
             GlobalScope = new SymbolScope();
 
+
             Error = new ErrorType();
             Void = new BuiltinType("void");
             Char = new BuiltinType("char");
@@ -53,6 +54,8 @@ namespace Kyloe.Symbols
             Bool = new BuiltinType("bool");
             String = new BuiltinType("string");
 
+            GlobalScope.DeclareSymbol(new ErrorSymbol(this));
+
             foreach (var builtin in Enum.GetValues<BuiltinTypeKind>())
                 GlobalScope.DeclareSymbol(new TypeNameSymbol(GetBuiltinType(builtin)));
 
@@ -62,11 +65,11 @@ namespace Kyloe.Symbols
 
                 if (group is null)
                 {
-                    group = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+                    group = new FunctionGroupSymbol(new FunctionGroupType(name));
                     Debug.Assert(GlobalScope.DeclareSymbol(group));
                 }
 
-                group.Group.Functions.Add(CreateBuiltinFunction(name, ret, parameters));
+                group.Group.Functions.Add(CreateBuiltinFunction(name, group.Group, ret, parameters));
             }
 
             foreach (var binary in BuiltinOperationInfo.BinaryOperations)
@@ -114,9 +117,9 @@ namespace Kyloe.Symbols
             }
         }
 
-        private FunctionType CreateBuiltinFunction(string name, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
+        private FunctionType CreateBuiltinFunction(string name, FunctionGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
         {
-            var func = new FunctionType(name, null, true, GetBuiltinType(ret));
+            var func = new FunctionType(name, group, GetBuiltinType(ret));
 
             foreach (var param in parameters)
                 func.Parameters.Add(new ParameterSymbol(param.name, GetBuiltinType(param.type)));
@@ -127,12 +130,12 @@ namespace Kyloe.Symbols
         private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var group = new FunctionGroupType(name, left);
-            var func = new FunctionType(name, group, true, ret);
+            var group = new MethodGroupType(name, left);
+            var method = new MethodType(name, group, ret, true);
 
-            func.Parameters.Add(new ParameterSymbol("l", left));
-            func.Parameters.Add(new ParameterSymbol("r", right));
-            group.Functions.Add(func);
+            method.Parameters.Add(new ParameterSymbol("l", left));
+            method.Parameters.Add(new ParameterSymbol("r", right));
+            group.Methods.Add(method);
 
             return new OperationSymbol(op, group);
         }
@@ -140,11 +143,11 @@ namespace Kyloe.Symbols
         private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var group = new FunctionGroupType(name, arg);
-            var func = new FunctionType(name, group, true, ret);
+            var group = new MethodGroupType(name, arg);
+            var method = new MethodType(name, group, ret, true);
 
-            func.Parameters.Add(new ParameterSymbol("", arg));
-            group.Functions.Add(func);
+            method.Parameters.Add(new ParameterSymbol("", arg));
+            group.Methods.Add(method);
 
             return new OperationSymbol(op, group);
         }

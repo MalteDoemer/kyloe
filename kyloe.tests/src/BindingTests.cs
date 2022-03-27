@@ -7,10 +7,31 @@ namespace Kyloe.Tests.Binding
     public class BindingTests
     {
         [Theory]
+        [MemberData(nameof(GetStatementErrorData))]
+        public void Test_Binding_Statements_With_Errors(string text, params DiagnosticKind[] errors)
+        {
+            var compilation = Compilation.Compile(AddMainFunction(text));
+            DiagnosticAssert.HasAll(compilation.GetDiagnostics(), errors);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetStatementNoErrorData))]
+        public void Test_Binding_Statements_No_Errors(string text)
+        {
+            var compilation = Compilation.Compile(AddMainFunction(text));
+            DiagnosticAssert.NoDiagnostics(compilation.GetDiagnostics());
+        }
+
+        private static string AddMainFunction(string text)
+        {
+            return "func main() {" + text + "}";
+        }
+
+        [Theory]
         [MemberData(nameof(GetErrorData))]
         public void Test_Binding_With_Errors(string text, params DiagnosticKind[] errors)
         {
-            var compilation = Compilation.Compile(AddMainFunction(text));
+            var compilation = Compilation.Compile(text);
             DiagnosticAssert.HasAll(compilation.GetDiagnostics(), errors);
         }
 
@@ -18,16 +39,11 @@ namespace Kyloe.Tests.Binding
         [MemberData(nameof(GetNoErrorData))]
         public void Test_Binding_No_Errors(string text)
         {
-            var compilation = Compilation.Compile(AddMainFunction(text));
+            var compilation = Compilation.Compile(text);
             DiagnosticAssert.NoDiagnostics(compilation.GetDiagnostics());
         }
 
-        private static string AddMainFunction(string text) 
-        {
-            return "func main() {" + text + "}";
-        }
-
-        public static IEnumerable<object[]> GetErrorData()
+        public static IEnumerable<object[]> GetStatementErrorData()
         {
             yield return new object[] {
                 "1 + 1.5;",
@@ -57,10 +73,19 @@ namespace Kyloe.Tests.Binding
             yield return new object[] {
                 @"{
                     var x = 5;
+                    var y: x = 5;
+                }",
+                DiagnosticKind.ExpectedTypeNameError,
+            };
+
+            yield return new object[] {
+                @"{
+                    var x = 5;
                     var y = x + 'hi';
                 }",
                 DiagnosticKind.UnsupportedBinaryOperation,
             };
+
 
             yield return new object[] {
                 @"{
@@ -141,7 +166,7 @@ namespace Kyloe.Tests.Binding
             };
         }
 
-        public static IEnumerable<object[]> GetNoErrorData()
+        public static IEnumerable<object[]> GetStatementNoErrorData()
         {
             yield return new object[] {
                 "1 + 2 * 3 / 5 % 9 - 26;"
@@ -259,6 +284,78 @@ namespace Kyloe.Tests.Binding
                         num1 += num2 - 5.0;
                     }
                 }"
+            };
+
+            yield return new object[] {
+                "var x: i64 = 5;"
+            };
+
+            yield return new object[] {
+                "var b: bool = 1 == 5;"
+            };
+
+            yield return new object[] {
+                "var str: string = 'hello world!';"
+            };
+        }
+
+        public static IEnumerable<object[]> GetErrorData()
+        {
+            yield return new object[] {
+                @"
+                func test(a: i32, a: float) {}
+
+                func main() {}
+                ",
+                DiagnosticKind.RedefinedParameterError
+            };
+
+            yield return new object[] {
+                @"
+                func test(a: i32) {}
+
+                func test(c: i32) {}
+
+                func main() {}
+                ",
+                DiagnosticKind.OverloadWithSameParametersExistsError
+            };
+
+            yield return new object[] {
+                @"
+                func test(a: i64) {}
+
+                func main() {
+                    test(5, 5);
+                }
+                ",
+                DiagnosticKind.NoMatchingOverloadError
+            };
+
+
+        }
+
+        public static IEnumerable<object[]> GetNoErrorData()
+        {
+            yield return new object[] {
+                @"
+                func main() {
+                    println('Hello World');
+                }
+                "
+            };
+
+            yield return new object[] {
+                @"
+                func sayHello(name: string) {
+                    println('Hello');
+                    println(name);
+                }
+
+                func main() {
+                    sayHello('Kyloe');
+                }
+                "
             };
         }
 

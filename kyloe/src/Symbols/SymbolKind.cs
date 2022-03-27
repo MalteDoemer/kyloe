@@ -9,5 +9,6 @@ namespace Kyloe.Symbols
         OperationSymbol,
         ParameterSymbol,
         GlobalVariableSymbol,
+        ErrorSymbol,
     }
 }

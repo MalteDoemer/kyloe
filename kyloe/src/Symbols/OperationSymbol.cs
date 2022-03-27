@@ -4,22 +4,22 @@ namespace Kyloe.Symbols
 {
     internal sealed class OperationSymbol : Symbol
     {
-        public OperationSymbol(BoundOperation operation, FunctionGroupType functionGroup)
+        public OperationSymbol(BoundOperation operation, MethodGroupType methodGroup)
         {
             Operation = operation;
-            FunctionGroup = functionGroup;
+            MethodGroup = methodGroup;
         }
 
         public BoundOperation Operation { get; }
 
-        public FunctionGroupType FunctionGroup { get; }
+        public MethodGroupType MethodGroup { get; }
 
         public override string Name => SemanticInfo.GetFunctionNameFromOperation(Operation);
 
         public override SymbolKind Kind => SymbolKind.OperationSymbol;
 
-        public override TypeSpecifier Type => FunctionGroup;
+        public override TypeSpecifier Type => MethodGroup;
 
-        public override ValueCategory ValueCategory => ValueCategory.NoValue;
+        public override ValueCategory ValueCategory => ValueCategory.None;
     }
 }

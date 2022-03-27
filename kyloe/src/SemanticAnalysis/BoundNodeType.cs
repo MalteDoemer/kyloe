@@ -12,8 +12,6 @@ namespace Kyloe.Semantics
         BoundIfStatement,
         BoundDeclarationStatement,
         BoundAssignmentExpression,
-        BoundMemberAccessExpression,
-        BoundInvalidMemberAccessExpression,
         BoundSymbolExpression,
         BoundInvalidCallExpression,
         BoundCallExpression,
