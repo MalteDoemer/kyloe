@@ -3,34 +3,25 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal sealed class CallExpression : SyntaxExpression
+    internal sealed class CallSyntax : SyntaxNode
     {
-        public CallExpression(SyntaxExpression expression, SyntaxToken leftParen, ArgumentExpression arguments, SyntaxToken rightParen)
+        public CallSyntax(SyntaxNode node, SyntaxNode arguments)
         {
-            Expression = expression;
-            LeftParen = leftParen;
+            Expression = node;
             Arguments = arguments;
-            RightParen = rightParen;
         }
 
-        public SyntaxExpression Expression { get; }
-        public SyntaxToken LeftParen { get; }
-        public ArgumentExpression Arguments { get; }
-        public SyntaxToken RightParen { get; }
+        public SyntaxNode Expression { get; }
+        public SyntaxNode Arguments { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.CallExpression;
+        public override SyntaxNodeType Type => SyntaxNodeType.CallSyntax;
 
-        public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, RightParen.Location);
+        public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, Arguments.Location);
 
         public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(Expression);
-            yield return new SyntaxNodeChild(LeftParen);
-
-            foreach (var child in Arguments.GetChildren())
-                yield return child;
-
-            yield return new SyntaxNodeChild(RightParen);
+            yield return new SyntaxNodeChild(Arguments);
         }
     }
 }

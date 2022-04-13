@@ -68,7 +68,7 @@ namespace Kyloe.Syntax
 
                 if (current == '\0')
                 {
-                    var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
+                    var token = new SyntaxToken(SyntaxTokenKind.Invalid, SourceLocation.FromBounds(start, position));
                     diagnostics.Add(new NeverClosedStringLiteralError(token));
                     return token;
                 }
@@ -80,7 +80,7 @@ namespace Kyloe.Syntax
 
             var location = SourceLocation.FromBounds(start, position);
 
-            return new SyntaxToken(SyntaxTokenType.StringLiteral, location, builder.ToString());
+            return new SyntaxToken(SyntaxTokenKind.StringLiteral, location, builder.ToString());
         }
 
         private SyntaxToken SkipWhiteSpace()
@@ -108,7 +108,7 @@ namespace Kyloe.Syntax
             {
                 if (current == '\0')
                 {
-                    var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromBounds(start, position));
+                    var token = new SyntaxToken(SyntaxTokenKind.Invalid, SourceLocation.FromBounds(start, position));
                     diagnostics.Add(new NeverClosedBlockCommentError(token));
                     return token;
                 }
@@ -135,11 +135,11 @@ namespace Kyloe.Syntax
 
                 if (long.TryParse(str, out long value))
                 {
-                    return new SyntaxToken(SyntaxTokenType.IntLiteral, location, value);
+                    return new SyntaxToken(SyntaxTokenKind.IntLiteral, location, value);
                 }
                 else
                 {
-                    var token = new SyntaxToken(SyntaxTokenType.Invalid, location, str);
+                    var token = new SyntaxToken(SyntaxTokenKind.Invalid, location, str);
                     diagnostics.Add(new InvalidIntLiteralError(token));
                     return token;
                 }
@@ -157,11 +157,11 @@ namespace Kyloe.Syntax
 
                 if (double.TryParse(str, out double value))
                 {
-                    return new SyntaxToken(SyntaxTokenType.FloatLiteral, location, value);
+                    return new SyntaxToken(SyntaxTokenKind.FloatLiteral, location, value);
                 }
                 else
                 {
-                    var token = new SyntaxToken(SyntaxTokenType.FloatLiteral, location, str);
+                    var token = new SyntaxToken(SyntaxTokenKind.FloatLiteral, location, str);
                     diagnostics.Add(new InvalidFloatLiteralError(token));
                     return token;
                 }
@@ -183,21 +183,21 @@ namespace Kyloe.Syntax
             switch (ident)
             {
                 case "true":
-                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, location, true);
+                    return new SyntaxToken(SyntaxTokenKind.BoolLiteral, location, true);
                 case "false":
-                    return new SyntaxToken(SyntaxTokenType.BoolLiteral, location, false);
+                    return new SyntaxToken(SyntaxTokenKind.BoolLiteral, location, false);
                 case "var":
-                    return new SyntaxToken(SyntaxTokenType.VarKeyword, location);
+                    return new SyntaxToken(SyntaxTokenKind.VarKeyword, location);
                 case "if":
-                    return new SyntaxToken(SyntaxTokenType.IfKeyword, location);
+                    return new SyntaxToken(SyntaxTokenKind.IfKeyword, location);
                 case "else":
-                    return new SyntaxToken(SyntaxTokenType.ElseKeyword, location);
+                    return new SyntaxToken(SyntaxTokenKind.ElseKeyword, location);
                 case "const":
-                    return new SyntaxToken(SyntaxTokenType.ConstKeyword, location);
+                    return new SyntaxToken(SyntaxTokenKind.ConstKeyword, location);
                 case "func":
-                    return new SyntaxToken(SyntaxTokenType.FuncKeyword, location);
+                    return new SyntaxToken(SyntaxTokenKind.FuncKeyword, location);
                 default:
-                    return new SyntaxToken(SyntaxTokenType.Identifier, location, ident);
+                    return new SyntaxToken(SyntaxTokenKind.Identifier, location, ident);
             }
         }
 
@@ -211,35 +211,35 @@ namespace Kyloe.Syntax
             switch (c1, c2)
             {
                 case ('-', '>'):
-                    return new SyntaxToken(SyntaxTokenType.SmallArrow, location);
+                    return new SyntaxToken(SyntaxTokenKind.SmallArrow, location);
                 case ('+', '='):
-                    return new SyntaxToken(SyntaxTokenType.PlusEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.PlusEquals, location);
                 case ('-', '='):
-                    return new SyntaxToken(SyntaxTokenType.MinusEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.MinusEquals, location);
                 case ('*', '='):
-                    return new SyntaxToken(SyntaxTokenType.StarEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.StarEquals, location);
                 case ('/', '='):
-                    return new SyntaxToken(SyntaxTokenType.SlashEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.SlashEquals, location);
                 case ('%', '='):
-                    return new SyntaxToken(SyntaxTokenType.PercentEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.PercentEquals, location);
                 case ('&', '&'):
-                    return new SyntaxToken(SyntaxTokenType.DoubleAmpersand, location);
+                    return new SyntaxToken(SyntaxTokenKind.DoubleAmpersand, location);
                 case ('|', '|'):
-                    return new SyntaxToken(SyntaxTokenType.DoublePipe, location);
+                    return new SyntaxToken(SyntaxTokenKind.DoublePipe, location);
                 case ('&', '='):
-                    return new SyntaxToken(SyntaxTokenType.AmpersandEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.AmpersandEquals, location);
                 case ('|', '='):
-                    return new SyntaxToken(SyntaxTokenType.PipeEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.PipeEquals, location);
                 case ('^', '='):
-                    return new SyntaxToken(SyntaxTokenType.HatEquals, location);
+                    return new SyntaxToken(SyntaxTokenKind.HatEquals, location);
                 case ('=', '='):
-                    return new SyntaxToken(SyntaxTokenType.DoubleEqual, location);
+                    return new SyntaxToken(SyntaxTokenKind.DoubleEqual, location);
                 case ('!', '='):
-                    return new SyntaxToken(SyntaxTokenType.NotEqual, location);
+                    return new SyntaxToken(SyntaxTokenKind.NotEqual, location);
                 case ('<', '='):
-                    return new SyntaxToken(SyntaxTokenType.LessEqual, location);
+                    return new SyntaxToken(SyntaxTokenKind.LessEqual, location);
                 case ('>', '='):
-                    return new SyntaxToken(SyntaxTokenType.GreaterEqual, location);
+                    return new SyntaxToken(SyntaxTokenKind.GreaterEqual, location);
                 default:
                     return null;
             }
@@ -252,55 +252,55 @@ namespace Kyloe.Syntax
             switch (current)
             {
                 case '+':
-                    return new SyntaxToken(SyntaxTokenType.Plus, location);
+                    return new SyntaxToken(SyntaxTokenKind.Plus, location);
                 case '-':
-                    return new SyntaxToken(SyntaxTokenType.Minus, location);
+                    return new SyntaxToken(SyntaxTokenKind.Minus, location);
                 case '*':
-                    return new SyntaxToken(SyntaxTokenType.Star, location);
+                    return new SyntaxToken(SyntaxTokenKind.Star, location);
                 case '/':
                     // A slash could also mean a line comment, or a block comment.
                     // In that case just return null, it will be handled later.
                     if (next == '/' || next == '*')
                         return null;
-                    return new SyntaxToken(SyntaxTokenType.Slash, location);
+                    return new SyntaxToken(SyntaxTokenKind.Slash, location);
                 case '%':
-                    return new SyntaxToken(SyntaxTokenType.Percent, location);
+                    return new SyntaxToken(SyntaxTokenKind.Percent, location);
                 case '&':
-                    return new SyntaxToken(SyntaxTokenType.Ampersand, location);
+                    return new SyntaxToken(SyntaxTokenKind.Ampersand, location);
                 case '|':
-                    return new SyntaxToken(SyntaxTokenType.Pipe, location);
+                    return new SyntaxToken(SyntaxTokenKind.Pipe, location);
                 case '~':
-                    return new SyntaxToken(SyntaxTokenType.Tilde, location);
+                    return new SyntaxToken(SyntaxTokenKind.Tilde, location);
                 case '^':
-                    return new SyntaxToken(SyntaxTokenType.Hat, location);
+                    return new SyntaxToken(SyntaxTokenKind.Hat, location);
                 case '<':
-                    return new SyntaxToken(SyntaxTokenType.Less, location);
+                    return new SyntaxToken(SyntaxTokenKind.Less, location);
                 case '>':
-                    return new SyntaxToken(SyntaxTokenType.Greater, location);
+                    return new SyntaxToken(SyntaxTokenKind.Greater, location);
                 case '=':
-                    return new SyntaxToken(SyntaxTokenType.Equals, location);
+                    return new SyntaxToken(SyntaxTokenKind.Equals, location);
                 case '!':
-                    return new SyntaxToken(SyntaxTokenType.Bang, location);
+                    return new SyntaxToken(SyntaxTokenKind.Bang, location);
                 case '(':
-                    return new SyntaxToken(SyntaxTokenType.LeftParen, location);
+                    return new SyntaxToken(SyntaxTokenKind.LeftParen, location);
                 case ')':
-                    return new SyntaxToken(SyntaxTokenType.RightParen, location);
+                    return new SyntaxToken(SyntaxTokenKind.RightParen, location);
                 case '[':
-                    return new SyntaxToken(SyntaxTokenType.LeftSquare, location);
+                    return new SyntaxToken(SyntaxTokenKind.LeftSquare, location);
                 case ']':
-                    return new SyntaxToken(SyntaxTokenType.RightSquare, location);
+                    return new SyntaxToken(SyntaxTokenKind.RightSquare, location);
                 case '{':
-                    return new SyntaxToken(SyntaxTokenType.LeftCurly, location);
+                    return new SyntaxToken(SyntaxTokenKind.LeftCurly, location);
                 case '}':
-                    return new SyntaxToken(SyntaxTokenType.RightCurly, location);
+                    return new SyntaxToken(SyntaxTokenKind.RightCurly, location);
                 case ',':
-                    return new SyntaxToken(SyntaxTokenType.Comma, location);
+                    return new SyntaxToken(SyntaxTokenKind.Comma, location);
                 case '.':
-                    return new SyntaxToken(SyntaxTokenType.Dot, location);
+                    return new SyntaxToken(SyntaxTokenKind.Dot, location);
                 case ':':
-                    return new SyntaxToken(SyntaxTokenType.Colon, location);
+                    return new SyntaxToken(SyntaxTokenKind.Colon, location);
                 case ';':
-                    return new SyntaxToken(SyntaxTokenType.SemiColon, location);
+                    return new SyntaxToken(SyntaxTokenKind.SemiColon, location);
                 default:
                     return null;
             }
@@ -344,11 +344,11 @@ namespace Kyloe.Syntax
             }
             else if (current == '\0')
             {
-                return new SyntaxToken(SyntaxTokenType.End, SourceLocation.FromLength(position, 1));
+                return new SyntaxToken(SyntaxTokenKind.End, SourceLocation.FromLength(position, 1));
             }
             else
             {
-                var token = new SyntaxToken(SyntaxTokenType.Invalid, SourceLocation.FromLength(position, 1), Advance());
+                var token = new SyntaxToken(SyntaxTokenKind.Invalid, SourceLocation.FromLength(position, 1), Advance());
                 diagnostics.Add(new UnknownCharacterError(token));
                 return token;
             }
@@ -362,7 +362,7 @@ namespace Kyloe.Syntax
             {
                 token = NextToken();
                 yield return token;
-            } while (token.Type != SyntaxTokenType.End);
+            } while (token.Kind != SyntaxTokenKind.End);
         }
     }
 }

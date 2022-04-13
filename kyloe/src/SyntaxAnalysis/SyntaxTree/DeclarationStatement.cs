@@ -3,12 +3,12 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal sealed class DeclarationStatement : SyntaxStatement
+    internal sealed class DeclarationStatement : SyntaxNode
     {
-        public DeclarationStatement(SyntaxToken declerationToken, SyntaxToken nameToken, TypeClause? typeClause, SyntaxToken equalsToken, SyntaxExpression assignmentExpression, SyntaxToken semicolon)
+        public DeclarationStatement(SyntaxToken declerationToken, SyntaxNode nameNode, TypeClause? typeClause, SyntaxToken equalsToken, SyntaxExpression assignmentExpression, SyntaxToken semicolon)
         {
             DeclerationToken = declerationToken;
-            NameToken = nameToken;
+            NameNode = nameNode;
             TypeClause = typeClause;
             EqualsToken = equalsToken;
             AssignmentExpression = assignmentExpression;
@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
         }
 
         public SyntaxToken DeclerationToken { get; }
-        public SyntaxToken NameToken { get; }
+        public SyntaxNode NameNode { get; }
         public TypeClause? TypeClause { get; }
         public SyntaxToken EqualsToken { get; }
         public SyntaxExpression AssignmentExpression { get; }
@@ -29,7 +29,7 @@ namespace Kyloe.Syntax
         public override IEnumerable<SyntaxNodeChild> GetChildren()
         {
             yield return new SyntaxNodeChild(DeclerationToken);
-            yield return new SyntaxNodeChild(NameToken);
+            yield return new SyntaxNodeChild(NameNode);
 
             if (TypeClause is not null)
                 foreach (var child in TypeClause.GetChildren())

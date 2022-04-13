@@ -5,18 +5,18 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class ExpectedTypeNameError : Diagnostic
     {
-        private readonly SyntaxExpression expression;
+        private readonly SyntaxNode node;
 
-        public ExpectedTypeNameError(SyntaxExpression expression)
+        public ExpectedTypeNameError(SyntaxNode node)
         {
-            this.expression = expression;
+            this.node = node;
         }
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override DiagnosticKind Kind => DiagnosticKind.ExpectedTypeNameError;
 
-        public override SourceLocation? Location => expression.Location;
+        public override SourceLocation? Location => node.Location;
 
         public override string Message() => "expected a type name";
     }

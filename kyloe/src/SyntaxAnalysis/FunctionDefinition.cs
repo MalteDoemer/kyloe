@@ -5,7 +5,7 @@ namespace Kyloe.Syntax
 {
     internal sealed class FunctionDefinition : SyntaxNode
     {
-        public FunctionDefinition(SyntaxToken funcToken, SyntaxToken nameToken, SyntaxToken leftParen, ParameterList parameterList, SyntaxToken rightParen, TypeClause? typeClause, BlockStatement body)
+        public FunctionDefinition(SyntaxToken funcToken, SyntaxToken nameToken, SyntaxToken leftParen, ParameterList parameterList, SyntaxToken rightParen, TypeClause? typeClause, BlockSyntax body)
         {
             FuncToken = funcToken;
             NameToken = nameToken;
@@ -22,7 +22,7 @@ namespace Kyloe.Syntax
         public ParameterList ParameterList { get; }
         public SyntaxToken RightParen { get; }
         public TypeClause? TypeClause { get; }
-        public BlockStatement Body { get; }
+        public BlockSyntax Body { get; }
 
         public override SyntaxNodeType Type => SyntaxNodeType.FunctionDefinition;
 

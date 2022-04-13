@@ -5,18 +5,18 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class ExpectedModifiableValueError : Diagnostic
     {
-        private readonly SyntaxExpression expression;
+        private readonly SyntaxNode node;
 
-        public ExpectedModifiableValueError(SyntaxExpression expression)
+        public ExpectedModifiableValueError(SyntaxNode node)
         {
-            this.expression = expression;
+            this.node = node;
         }
 
         public override DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
         public override DiagnosticKind Kind => DiagnosticKind.ExpectedModifiableValueError;
 
-        public override SourceLocation? Location => expression.Location;
+        public override SourceLocation? Location => node.Location;
 
         public override string Message() => "expected a modifiable value";
     }

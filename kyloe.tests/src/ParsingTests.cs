@@ -143,19 +143,19 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "-1",
                 VerifyNode.UnaryExpression(
-                    SyntaxTokenType.Minus,
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    SyntaxTokenKind.Minus,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                 )
             };
 
             yield return new object[] {
                 "10.5 + -47.1",
                 VerifyNode.BinaryExpression(
-                    VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral),
-                    SyntaxTokenType.Plus,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.FloatLiteral),
+                    SyntaxTokenKind.Plus,
                     VerifyNode.UnaryExpression(
-                        SyntaxTokenType.Minus,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
+                        SyntaxTokenKind.Minus,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.FloatLiteral)
                     )
                 )
             };
@@ -163,11 +163,11 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "1 - -1",
                 VerifyNode.BinaryExpression(
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
-                    SyntaxTokenType.Minus,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral),
+                    SyntaxTokenKind.Minus,
                     VerifyNode.UnaryExpression(
-                        SyntaxTokenType.Minus,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                        SyntaxTokenKind.Minus,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                     )
                 )
             };
@@ -175,21 +175,21 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "1 + 2",
                 VerifyNode.BinaryExpression(
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
-                    SyntaxTokenType.Plus,
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral),
+                    SyntaxTokenKind.Plus,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                 )
             };
 
             yield return new object[] {
                 "1 + 2 * 3",
                 VerifyNode.BinaryExpression(
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
-                    SyntaxTokenType.Plus,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral),
+                    SyntaxTokenKind.Plus,
                     VerifyNode.BinaryExpression(
-                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
-                        SyntaxTokenType.Star,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral),
+                        SyntaxTokenKind.Star,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                     )
                 )
             };
@@ -200,13 +200,13 @@ namespace Kyloe.Tests.Parsing
                 VerifyNode.BinaryExpression(
                     VerifyNode.ParenthsizedExpression(
                         VerifyNode.BinaryExpression(
-                            VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
-                            SyntaxTokenType.Plus,
-                            VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                            VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral),
+                            SyntaxTokenKind.Plus,
+                            VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                         )
                     ),
-                    SyntaxTokenType.Star,
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    SyntaxTokenKind.Star,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                 )
             };
 
@@ -214,7 +214,7 @@ namespace Kyloe.Tests.Parsing
                 "arr[5]",
                 VerifyNode.SubscriptExpression(
                     VerifyNode.IdentifierExpression(),
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                 )
             };
 
@@ -231,7 +231,7 @@ namespace Kyloe.Tests.Parsing
                     VerifyNode.MemberAccessExpression(
                         VerifyNode.SubscriptExpression(
                             VerifyNode.IdentifierExpression(),
-                            VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                            VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                         )
                     )
                 )
@@ -248,8 +248,8 @@ namespace Kyloe.Tests.Parsing
                 "hello(1, 'hello')",
                 VerifyNode.CallExpression(
                     VerifyNode.IdentifierExpression(),
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral),
-                    VerifyNode.LiteralExpression(SyntaxTokenType.StringLiteral)
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral),
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.StringLiteral)
                 )
             };
 
@@ -257,8 +257,8 @@ namespace Kyloe.Tests.Parsing
                 "x += 3",
                 VerifyNode.AssignmentExpression(
                     VerifyNode.IdentifierExpression(),
-                    SyntaxTokenType.PlusEquals,
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    SyntaxTokenKind.PlusEquals,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                 )
             };
         }
@@ -270,8 +270,8 @@ namespace Kyloe.Tests.Parsing
                 VerifyNode.ExpressionStatement(
                     VerifyNode.AssignmentExpression(
                         VerifyNode.IdentifierExpression(),
-                        SyntaxTokenType.PlusEquals,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                        SyntaxTokenKind.PlusEquals,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                     )
                 )
             };
@@ -281,7 +281,7 @@ namespace Kyloe.Tests.Parsing
                 VerifyNode.ExpressionStatement(
                     VerifyNode.CallExpression(
                         VerifyNode.IdentifierExpression(),
-                        VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.FloatLiteral)
                     )
                 )
             };
@@ -294,8 +294,8 @@ namespace Kyloe.Tests.Parsing
             yield return new object[] {
                 "var x = 5;",
                 VerifyNode.DeclarationStatement(
-                    SyntaxTokenType.VarKeyword,
-                    VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                    SyntaxTokenKind.VarKeyword,
+                    VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                 )
             };
 
@@ -308,9 +308,9 @@ namespace Kyloe.Tests.Parsing
 
                 VerifyNode.IfStatement(
                     VerifyNode.BinaryExpression(
-                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral),
-                        SyntaxTokenType.DoubleEqual,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral)
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.BoolLiteral),
+                        SyntaxTokenKind.DoubleEqual,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.BoolLiteral)
                     ),
                     VerifyNode.BlockStatement(
                         VerifyNode.EmptyStatement()
@@ -329,9 +329,9 @@ namespace Kyloe.Tests.Parsing
 
                 VerifyNode.IfElseStatement(
                     VerifyNode.BinaryExpression(
-                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral),
-                        SyntaxTokenType.DoubleEqual,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.BoolLiteral)
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.BoolLiteral),
+                        SyntaxTokenKind.DoubleEqual,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.BoolLiteral)
                     ),
                     VerifyNode.BlockStatement(
                         VerifyNode.EmptyStatement()
@@ -347,15 +347,15 @@ namespace Kyloe.Tests.Parsing
                 "{ var x = 5; var y = x + 25; } ",
                 VerifyNode.BlockStatement(
                     VerifyNode.DeclarationStatement(
-                        SyntaxTokenType.VarKeyword,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                        SyntaxTokenKind.VarKeyword,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                     ),
                     VerifyNode.DeclarationStatement(
-                        SyntaxTokenType.VarKeyword,
+                        SyntaxTokenKind.VarKeyword,
                         VerifyNode.BinaryExpression(
                             VerifyNode.IdentifierExpression(),
-                            SyntaxTokenType.Plus,
-                            VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                            SyntaxTokenKind.Plus,
+                            VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                         )
                     )
 
@@ -399,18 +399,18 @@ namespace Kyloe.Tests.Parsing
 
                 VerifyNode.CompilationUnitSyntax(
                     VerifyNode.DeclarationStatement(
-                        SyntaxTokenType.VarKeyword,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.IntLiteral)
+                        SyntaxTokenKind.VarKeyword,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.IntLiteral)
                     ),
                     VerifyNode.DeclarationStatement(
-                        SyntaxTokenType.ConstKeyword,
-                        VerifyNode.LiteralExpression(SyntaxTokenType.FloatLiteral)
+                        SyntaxTokenKind.ConstKeyword,
+                        VerifyNode.LiteralExpression(SyntaxTokenKind.FloatLiteral)
                     ),
                     VerifyNode.FunctionDefinition(
                         3,
                         VerifyNode.BlockStatement(
                             VerifyNode.DeclarationStatement(
-                                SyntaxTokenType.VarKeyword, 
+                                SyntaxTokenKind.VarKeyword, 
                                 VerifyNode.IdentifierExpression()
                             )
                         ),

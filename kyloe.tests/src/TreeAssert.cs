@@ -9,7 +9,7 @@ namespace Kyloe.Tests
 {
     public struct SyntaxNodeOrTokenType
     {
-        private readonly SyntaxTokenType tokenType;
+        private readonly SyntaxTokenKind tokenType;
         private readonly SyntaxNodeType nodeType;
         private readonly bool isNodeType;
 
@@ -17,10 +17,10 @@ namespace Kyloe.Tests
         {
             isNodeType = true;
             nodeType = type;
-            tokenType = default(SyntaxTokenType);
+            tokenType = default(SyntaxTokenKind);
         }
 
-        public SyntaxNodeOrTokenType(SyntaxTokenType type)
+        public SyntaxNodeOrTokenType(SyntaxTokenKind type)
         {
             isNodeType = false;
             tokenType = type;
@@ -30,7 +30,7 @@ namespace Kyloe.Tests
         public bool IsNode => isNodeType;
         public bool IsToken => !isNodeType;
 
-        public SyntaxTokenType TokenType
+        public SyntaxTokenKind TokenType
         {
             get
             {
@@ -58,7 +58,7 @@ namespace Kyloe.Tests
             Children = children;
         }
 
-        public VerifyNode(SyntaxTokenType expected)
+        public VerifyNode(SyntaxTokenKind expected)
         {
             Type = new SyntaxNodeOrTokenType(expected);
             Children = Array.Empty<VerifyNode>();
@@ -70,123 +70,123 @@ namespace Kyloe.Tests
         public bool IsNode => Type.IsNode;
         public bool IsToken => Type.IsToken;
 
-        public static VerifyNode LiteralExpression(SyntaxTokenType type)
+        public static VerifyNode LiteralExpression(SyntaxTokenKind kind)
         {
-            return new VerifyNode(SyntaxNodeType.LiteralExpression, new VerifyNode(type));
+            return new VerifyNode(SyntaxNodeType.LiteralExpression, new VerifyNode(kind));
         }
 
-        public static VerifyNode BinaryExpression(VerifyNode left, SyntaxTokenType op, VerifyNode right)
+        public static VerifyNode BinaryExpression(VerifyNode left, SyntaxTokenKind op, VerifyNode right)
         {
-            return new VerifyNode(SyntaxNodeType.BinaryExpression, left, new VerifyNode(op), right);
+            return new VerifyNode(SyntaxNodeType.BinarySyntax, left, new VerifyNode(op), right);
         }
 
-        public static VerifyNode UnaryExpression(SyntaxTokenType op, VerifyNode expr)
+        public static VerifyNode UnaryExpression(SyntaxTokenKind op, VerifyNode expr)
         {
             return new VerifyNode(SyntaxNodeType.UnaryExpression, new VerifyNode(op), expr);
         }
 
         public static VerifyNode ParenthsizedExpression(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.ParenthesizedExpression, new VerifyNode(SyntaxTokenType.LeftParen), expr, new VerifyNode(SyntaxTokenType.RightParen));
+            return new VerifyNode(SyntaxNodeType.ParenthesizedExpression, new VerifyNode(SyntaxTokenKind.LeftParen), expr, new VerifyNode(SyntaxTokenKind.RightParen));
         }
 
         public static VerifyNode IdentifierExpression()
         {
-            return new VerifyNode(SyntaxNodeType.IdentifierExpression, new VerifyNode(SyntaxTokenType.Identifier));
+            return new VerifyNode(SyntaxNodeType.IdentifierExpression, new VerifyNode(SyntaxTokenKind.Identifier));
         }
 
         public static VerifyNode SubscriptExpression(VerifyNode expr, VerifyNode index)
         {
-            return new VerifyNode(SyntaxNodeType.SubscriptExpression, expr, new VerifyNode(SyntaxTokenType.LeftSquare), index, new VerifyNode(SyntaxTokenType.RightSquare));
+            return new VerifyNode(SyntaxNodeType.SubscriptExpression, expr, new VerifyNode(SyntaxTokenKind.LeftSquare), index, new VerifyNode(SyntaxTokenKind.RightSquare));
         }
 
         public static VerifyNode MemberAccessExpression(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenType.Dot), IdentifierExpression());
+            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenKind.Dot), IdentifierExpression());
         }
 
         public static VerifyNode CallExpression(VerifyNode expr, params VerifyNode[] args)
         {
             if (args.Length == 0)
-                return new VerifyNode(SyntaxNodeType.CallExpression, expr, new VerifyNode(SyntaxTokenType.LeftParen), new VerifyNode(SyntaxTokenType.RightParen));
+                return new VerifyNode(SyntaxNodeType.CallSyntax, expr, new VerifyNode(SyntaxTokenKind.LeftParen), new VerifyNode(SyntaxTokenKind.RightParen));
 
             var children = new List<VerifyNode>();
             children.Add(expr);
-            children.Add(new VerifyNode(SyntaxTokenType.LeftParen));
+            children.Add(new VerifyNode(SyntaxTokenKind.LeftParen));
 
             for (int i = 0; i < args.Length - 1; i++)
             {
                 children.Add(args[i]);
-                children.Add(new VerifyNode(SyntaxTokenType.Comma));
+                children.Add(new VerifyNode(SyntaxTokenKind.Comma));
             }
 
             children.Add(args.Last());
-            children.Add(new VerifyNode(SyntaxTokenType.RightParen));
+            children.Add(new VerifyNode(SyntaxTokenKind.RightParen));
 
-            return new VerifyNode(SyntaxNodeType.CallExpression, children.ToArray());
+            return new VerifyNode(SyntaxNodeType.CallSyntax, children.ToArray());
         }
 
-        public static VerifyNode AssignmentExpression(VerifyNode left, SyntaxTokenType op, VerifyNode right)
+        public static VerifyNode AssignmentExpression(VerifyNode left, SyntaxTokenKind op, VerifyNode right)
         {
-            return new VerifyNode(SyntaxNodeType.AssignmentExpression, left, new VerifyNode(op), right);
+            return new VerifyNode(SyntaxNodeType.AssignmentSyntax, left, new VerifyNode(op), right);
         }
 
         public static VerifyNode ExpressionStatement(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.ExpressionStatement, expr, new VerifyNode(SyntaxTokenType.SemiColon));
+            return new VerifyNode(SyntaxNodeType.ExpressionStatement, expr, new VerifyNode(SyntaxTokenKind.SemiColon));
         }
 
-        public static VerifyNode DeclarationStatement(SyntaxTokenType declToken, VerifyNode expr)
+        public static VerifyNode DeclarationStatement(SyntaxTokenKind declToken, VerifyNode expr)
         {
             return new VerifyNode(
                 SyntaxNodeType.DeclarationStatement,
                 new VerifyNode(declToken),
-                new VerifyNode(SyntaxTokenType.Identifier),
-                new VerifyNode(SyntaxTokenType.Equals),
+                new VerifyNode(SyntaxTokenKind.Identifier),
+                new VerifyNode(SyntaxTokenKind.Equals),
                 expr,
-                new VerifyNode(SyntaxTokenType.SemiColon)
+                new VerifyNode(SyntaxTokenKind.SemiColon)
             );
         }
 
         public static VerifyNode IfStatement(VerifyNode condition, VerifyNode body)
         {
-            return new VerifyNode(SyntaxNodeType.IfStatement, new VerifyNode(SyntaxTokenType.IfKeyword), condition, body);
+            return new VerifyNode(SyntaxNodeType.IfStatement, new VerifyNode(SyntaxTokenKind.IfKeyword), condition, body);
         }
 
         public static VerifyNode IfElseStatement(VerifyNode condition, VerifyNode body, VerifyNode elseBody)
         {
             return new VerifyNode(
                 SyntaxNodeType.IfStatement,
-                new VerifyNode(SyntaxTokenType.IfKeyword),
+                new VerifyNode(SyntaxTokenKind.IfKeyword),
                 condition,
                 body,
-                new VerifyNode(SyntaxTokenType.ElseKeyword),
+                new VerifyNode(SyntaxTokenKind.ElseKeyword),
                 elseBody
             );
         }
 
         public static VerifyNode EmptyStatement()
         {
-            return new VerifyNode(SyntaxNodeType.EmptyStatement, new VerifyNode(SyntaxTokenType.SemiColon));
+            return new VerifyNode(SyntaxNodeType.EmptyStatement, new VerifyNode(SyntaxTokenKind.SemiColon));
         }
 
         public static VerifyNode BlockStatement(params VerifyNode[] statements)
         {
             var nodes = new List<VerifyNode>(statements.Length + 2);
-            nodes.Add(new VerifyNode(SyntaxTokenType.LeftCurly));
+            nodes.Add(new VerifyNode(SyntaxTokenKind.LeftCurly));
             foreach (var stmt in statements)
                 nodes.Add(stmt);
-            nodes.Add(new VerifyNode(SyntaxTokenType.RightCurly));
+            nodes.Add(new VerifyNode(SyntaxTokenKind.RightCurly));
 
-            return new VerifyNode(SyntaxNodeType.BlockStatement, nodes.ToArray());
+            return new VerifyNode(SyntaxNodeType.BlockSyntax, nodes.ToArray());
         }
 
         public static VerifyNode SimpleParameterDeclaration()
         {
             return new VerifyNode(
                 SyntaxNodeType.ParameterDeclaration,
-                new VerifyNode(SyntaxTokenType.Identifier),
-                new VerifyNode(SyntaxTokenType.Colon),
+                new VerifyNode(SyntaxTokenKind.Identifier),
+                new VerifyNode(SyntaxTokenKind.Colon),
                 VerifyNode.IdentifierExpression()
             );
         }
@@ -195,23 +195,23 @@ namespace Kyloe.Tests
         {
             var nodes = new List<VerifyNode>(numParameters + 5);
 
-            nodes.Add(new VerifyNode(SyntaxTokenType.FuncKeyword));
-            nodes.Add(new VerifyNode(SyntaxTokenType.Identifier));
-            nodes.Add(new VerifyNode(SyntaxTokenType.LeftParen));
+            nodes.Add(new VerifyNode(SyntaxTokenKind.FuncKeyword));
+            nodes.Add(new VerifyNode(SyntaxTokenKind.Identifier));
+            nodes.Add(new VerifyNode(SyntaxTokenKind.LeftParen));
 
             for (int i = 0; i < numParameters; i++)
             {
                 nodes.Add(SimpleParameterDeclaration());
 
                 if (i != numParameters - 1)
-                    nodes.Add(new VerifyNode(SyntaxTokenType.Comma));
+                    nodes.Add(new VerifyNode(SyntaxTokenKind.Comma));
             }
 
-            nodes.Add(new VerifyNode(SyntaxTokenType.RightParen));
+            nodes.Add(new VerifyNode(SyntaxTokenKind.RightParen));
 
             if (typeClause)
             {
-                nodes.Add(new VerifyNode(SyntaxTokenType.SmallArrow));
+                nodes.Add(new VerifyNode(SyntaxTokenKind.SmallArrow));
                 nodes.Add(IdentifierExpression());
             }
 
@@ -255,7 +255,7 @@ namespace Kyloe.Tests
             }
             else
             {
-                Assert.Equal(verify.Type.TokenType, node.Token!.Type);
+                Assert.Equal(verify.Type.TokenType, node.Token!.Kind);
             }
         }
 

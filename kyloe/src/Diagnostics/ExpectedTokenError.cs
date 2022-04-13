@@ -7,10 +7,10 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class ExpectedTokenError : Diagnostic
     {
-        private readonly SyntaxTokenType expected;
+        private readonly SyntaxTokenKind expected;
         private readonly SyntaxToken provided;
 
-        public ExpectedTokenError(SyntaxTokenType expected, SyntaxToken provided)
+        public ExpectedTokenError(SyntaxTokenKind expected, SyntaxToken provided)
         {
             this.expected = expected;
             this.provided = provided;
@@ -24,15 +24,7 @@ namespace Kyloe.Diagnostics
 
         public override string Message()
         {
-            string NameOrSymbol(SyntaxTokenType type)
-            {
-                if (SyntaxInfo.GetTokenTypeString(type) is string s)
-                    return s;
-                else
-                    return type.ToString();
-            }
-
-            return $"expected '{NameOrSymbol(expected)}'";
+            return $"expected '{SyntaxInfo.GetTokenKindStringOrName(expected)}'";
         }
     }
 }
