@@ -22,7 +22,7 @@ namespace Kyloe.Syntax
             this.lexer = lexer;
             current = lexer.NextToken();
             next = lexer.NextToken();
-            isCurrentValid = current.Kind != SyntaxTokenKind.Invalid;
+            isCurrentValid = current.Type != SyntaxTokenType.Invalid;
         }
 
         /// Returns the current Token and then advances to the next one.
@@ -31,25 +31,21 @@ namespace Kyloe.Syntax
             var temp = current;
             current = next;
             next = lexer.NextToken();
-            isCurrentValid = current.Kind != SyntaxTokenKind.Invalid;
+            isCurrentValid = current.Type != SyntaxTokenType.Invalid;
             return temp;
         }
 
-        private SyntaxToken Expect(SyntaxTokenKind type)
+        private SyntaxToken Expect(SyntaxTokenType type)
         {
-            if (current.Kind == type)
+            if (current.Type == type)
                 return Advance();
 
+            // Don't report a new diagnostic if the lexer already did.
             if (isCurrentValid)
             {
                 diagnostics.Add(new ExpectedTokenError(type, current));
                 isCurrentValid = false;
             }
-
-            // decide whether to replace the current token or insert a new one
-
-            // if (next.Type == type) {}
-
 
             return new SyntaxToken(type, current.Location, SyntaxInfo.GetDefaultValue(type));
         }
@@ -62,14 +58,14 @@ namespace Kyloe.Syntax
         public SyntaxStatement ParseStatement()
         {
             var stmt = ParseStatementImpl();
-            Expect(SyntaxTokenKind.End);
+            Expect(SyntaxTokenType.End);
             return stmt;
         }
 
         public SyntaxExpression ParseExpression()
         {
             var expr = ParseExpressionImpl();
-            Expect(SyntaxTokenKind.End);
+            Expect(SyntaxTokenType.End);
             return expr;
         }
 
@@ -78,9 +74,9 @@ namespace Kyloe.Syntax
             var functions = ImmutableArray.CreateBuilder<FunctionDefinition>();
             var globals = ImmutableArray.CreateBuilder<DeclarationStatement>();
 
-            while (current.Kind != SyntaxTokenKind.End) 
+            while (current.Type != SyntaxTokenType.End) 
             {
-                if (current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
+                if (current.Type == SyntaxTokenType.VarKeyword || current.Type == SyntaxTokenType.ConstKeyword)
                     globals.Add(ParseDeclarationStatement());
                 else
                     functions.Add(ParseFunctionDefinition());
@@ -91,23 +87,23 @@ namespace Kyloe.Syntax
         
         private FunctionDefinition ParseFunctionDefinition()
         {
-            var funcToken = Expect(SyntaxTokenKind.FuncKeyword);
-            var nameToken = Expect(SyntaxTokenKind.Identifier);
-            var leftParen = Expect(SyntaxTokenKind.LeftParen);
+            var funcToken = Expect(SyntaxTokenType.FuncKeyword);
+            var nameToken = Expect(SyntaxTokenType.Identifier);
+            var leftParen = Expect(SyntaxTokenType.LeftParen);
 
             ParameterList parameters;
 
-            if (current.Kind != SyntaxTokenKind.RightParen)
+            if (current.Type != SyntaxTokenType.RightParen)
                 parameters = ParseParameters();
             else
                 parameters = ParameterList.Empty;
 
-            var rightParen = Expect(SyntaxTokenKind.RightParen);
+            var rightParen = Expect(SyntaxTokenType.RightParen);
 
             TypeClause? typeClause = null;
 
-            if (current.Kind == SyntaxTokenKind.SmallArrow)
-                typeClause = ParseTypeClause(SyntaxTokenKind.SmallArrow);
+            if (current.Type == SyntaxTokenType.SmallArrow)
+                typeClause = ParseTypeClause(SyntaxTokenType.SmallArrow);
 
             var body = ParseBlockStatement();
 
@@ -116,13 +112,13 @@ namespace Kyloe.Syntax
 
         private ParameterDeclaration ParseParameterDeclaration()
         {
-            var nameToken = Expect(SyntaxTokenKind.Identifier);
+            var nameToken = Expect(SyntaxTokenType.Identifier);
             var typeClause = ParseTypeClause();
 
             return new ParameterDeclaration(nameToken, typeClause);
         }
 
-        private TypeClause ParseTypeClause(SyntaxTokenKind type = SyntaxTokenKind.Colon)
+        private TypeClause ParseTypeClause(SyntaxTokenType type = SyntaxTokenType.Colon)
         {
             var colonToken = Expect(type);
             var node = ParseNameExpression();
@@ -139,7 +135,7 @@ namespace Kyloe.Syntax
             {
                 parameters.Add(ParseParameterDeclaration());
 
-                if (current.Kind != SyntaxTokenKind.Comma)
+                if (current.Type != SyntaxTokenType.Comma)
                     break;
 
                 commas.Add(Advance());
@@ -157,7 +153,7 @@ namespace Kyloe.Syntax
             {
                 expressions.Add(ParseExpressionImpl());
 
-                if (current.Kind != SyntaxTokenKind.Comma)
+                if (current.Type != SyntaxTokenType.Comma)
                     break;
 
                 commas.Add(Advance());
@@ -168,14 +164,14 @@ namespace Kyloe.Syntax
 
         private SyntaxExpression ParseNameExpression()
         {
-            var identifierToken = Expect(SyntaxTokenKind.Identifier);
+            var identifierToken = Expect(SyntaxTokenType.Identifier);
 
             SyntaxExpression node = new IdentifierExpression(identifierToken);
 
-            while (current.Kind == SyntaxTokenKind.Dot)
+            while (current.Type == SyntaxTokenType.Dot)
             {
                 var dotToken = Advance();
-                var nameToken = Expect(SyntaxTokenKind.Identifier);
+                var nameToken = Expect(SyntaxTokenType.Identifier);
                 node = new MemberAccessExpression(node, dotToken, new IdentifierExpression(nameToken));
             }
 
@@ -184,28 +180,28 @@ namespace Kyloe.Syntax
 
         private SyntaxStatement ParseStatementImpl()
         {
-            switch (current.Kind)
+            switch (current.Type)
             {
-                case SyntaxTokenKind.SemiColon:
+                case SyntaxTokenType.SemiColon:
                     return new EmptyStatement(Advance());
-                case SyntaxTokenKind.LeftCurly:
+                case SyntaxTokenType.LeftCurly:
                     return ParseBlockStatement();
-                case SyntaxTokenKind.IfKeyword:
+                case SyntaxTokenType.IfKeyword:
                     return ParseIfStatement();
-                case SyntaxTokenKind.VarKeyword:
-                case SyntaxTokenKind.ConstKeyword:
+                case SyntaxTokenType.VarKeyword:
+                case SyntaxTokenType.ConstKeyword:
                     return ParseDeclarationStatement();
                 default:
                     return ParseExpressionStatement();
             }
         }
 
-        private BlockSyntax ParseBlockStatement()
+        private BlockStatement ParseBlockStatement()
         {
-            var leftCurly = Expect(SyntaxTokenKind.LeftCurly);
+            var leftCurly = Expect(SyntaxTokenType.LeftCurly);
             var builder = ImmutableArray.CreateBuilder<SyntaxStatement>();
 
-            while (!(current.Kind == SyntaxTokenKind.RightCurly || current.Kind == SyntaxTokenKind.End))
+            while (!(current.Type == SyntaxTokenType.RightCurly || current.Type == SyntaxTokenType.End))
             {
                 var startToken = current;
                 var stmt = ParseStatementImpl();
@@ -218,18 +214,18 @@ namespace Kyloe.Syntax
                     Advance();
             }
 
-            var rightCurly = Expect(SyntaxTokenKind.RightCurly);
+            var rightCurly = Expect(SyntaxTokenType.RightCurly);
 
             return new BlockStatement(leftCurly, builder.ToImmutable(), rightCurly);
         }
 
         private SyntaxStatement ParseIfStatement()
         {
-            var ifToken = Expect(SyntaxTokenKind.IfKeyword);
+            var ifToken = Expect(SyntaxTokenType.IfKeyword);
             var condition = ParseExpressionImpl();
             var body = ParseBlockStatement();
 
-            if (current.Kind == SyntaxTokenKind.ElseKeyword)
+            if (current.Type == SyntaxTokenType.ElseKeyword)
             {
                 var elseToken = Advance();
                 var elseBody = ParseBlockStatement();
@@ -243,28 +239,28 @@ namespace Kyloe.Syntax
         {
             SyntaxToken decl;
 
-            if (current.Kind == SyntaxTokenKind.ConstKeyword)
+            if (current.Type == SyntaxTokenType.ConstKeyword)
                 decl = Advance();
             else
-                decl = Expect(SyntaxTokenKind.VarKeyword);
+                decl = Expect(SyntaxTokenType.VarKeyword);
 
-            var name = Expect(SyntaxTokenKind.Identifier);
+            var name = Expect(SyntaxTokenType.Identifier);
 
             TypeClause? typeClause = null;
 
-            if (current.Kind == SyntaxTokenKind.Colon)
+            if (current.Type == SyntaxTokenType.Colon)
                 typeClause = ParseTypeClause();
 
-            var equals = Expect(SyntaxTokenKind.Equals);
+            var equals = Expect(SyntaxTokenType.Equals);
             var expr = ParseExpressionImpl();
-            var semi = Expect(SyntaxTokenKind.SemiColon);
+            var semi = Expect(SyntaxTokenType.SemiColon);
             return new DeclarationStatement(decl, name, typeClause, equals, expr, semi);
         }
 
         private SyntaxStatement ParseExpressionStatement()
         {
             var expr = ParseExpressionImpl();
-            var semi = Expect(SyntaxTokenKind.SemiColon);
+            var semi = Expect(SyntaxTokenType.SemiColon);
             return new ExpressionStatement(expr, semi);
         }
 
@@ -277,7 +273,7 @@ namespace Kyloe.Syntax
         {
             var left = ParseBinaryExpression();
 
-            if (current.Kind.IsAssignmentOperator())
+            if (current.Type.IsAssignmentOperator())
             {
                 var op = Advance();
                 var right = ParseAssignmentExpression();
@@ -294,11 +290,11 @@ namespace Kyloe.Syntax
 
             var left = ParseBinaryExpression(precedence - 1);
 
-            while (current.Kind.BinaryOperatorPrecedence() == precedence)
+            while (current.Type.BinaryOperatorPrecedence() == precedence)
             {
                 var op = Advance();
                 var right = ParseBinaryExpression(precedence - 1);
-                left = new BinarySyntax(left, op, right);
+                left = new BinaryExpression(left, op, right);
             }
 
             return left;
@@ -306,7 +302,7 @@ namespace Kyloe.Syntax
 
         private SyntaxExpression ParsePrefixExpression()
         {
-            if (current.Kind.IsPrefixOperator())
+            if (current.Type.IsPrefixOperator())
             {
                 var op = Advance();
                 var expr = ParsePrefixExpression();
@@ -320,32 +316,32 @@ namespace Kyloe.Syntax
         {
             var node = ParsePrimary();
 
-            while (current.Kind.IsPostfixOperator())
+            while (current.Type.IsPostfixOperator())
             {
-                if (current.Kind == SyntaxTokenKind.LeftParen)
+                if (current.Type == SyntaxTokenType.LeftParen)
                 {
-                    var lparen = Expect(SyntaxTokenKind.LeftParen);
+                    var lparen = Expect(SyntaxTokenType.LeftParen);
 
                     var arguments = ArgumentExpression.Empty;
 
-                    if (current.Kind != SyntaxTokenKind.RightParen)
+                    if (current.Type != SyntaxTokenType.RightParen)
                         arguments = ParseArguments();
 
-                    var rparen = Expect(SyntaxTokenKind.RightParen);
+                    var rparen = Expect(SyntaxTokenType.RightParen);
                     node = new CallExpression(node, lparen, arguments, rparen);
                 }
-                else if (current.Kind == SyntaxTokenKind.LeftSquare)
+                else if (current.Type == SyntaxTokenType.LeftSquare)
                 {
-                    var lsquare = Expect(SyntaxTokenKind.LeftSquare);
+                    var lsquare = Expect(SyntaxTokenType.LeftSquare);
                     var expr = ParseExpressionImpl();
-                    var rsqare = Expect(SyntaxTokenKind.RightSquare);
+                    var rsqare = Expect(SyntaxTokenType.RightSquare);
 
                     node = new SubscriptExpression(node, lsquare, expr, rsqare);
                 }
-                else if (current.Kind == SyntaxTokenKind.Dot)
+                else if (current.Type == SyntaxTokenType.Dot)
                 {
                     var dotToken = Advance();
-                    var nameToken = Expect(SyntaxTokenKind.Identifier);
+                    var nameToken = Expect(SyntaxTokenType.Identifier);
                     node = new MemberAccessExpression(node, dotToken, new IdentifierExpression(nameToken));
                 }
             }
@@ -355,25 +351,26 @@ namespace Kyloe.Syntax
 
         private SyntaxExpression ParsePrimary()
         {
-            if (current.Kind.IsLiteralToken())
+            if (current.Type.IsLiteralToken())
             {
                 return new LiteralExpression(Advance());
             }
-            else if (current.Kind == SyntaxTokenKind.LeftParen)
+            else if (current.Type == SyntaxTokenType.LeftParen)
             {
-                var leftParen = Expect(SyntaxTokenKind.LeftParen);
+                var leftParen = Expect(SyntaxTokenType.LeftParen);
                 var expr = ParseExpressionImpl();
-                var rightParen = Expect(SyntaxTokenKind.RightParen);
+                var rightParen = Expect(SyntaxTokenType.RightParen);
 
                 return new ParenthesizedExpression(leftParen, expr, rightParen);
             }
-            else if (current.Kind == SyntaxTokenKind.Identifier)
+            else if (current.Type == SyntaxTokenType.Identifier)
             {
                 var name = Advance();
                 return new IdentifierExpression(name);
             }
             else
             {
+                // Don't report a new diagnostic if the lexer already did.
                 if (isCurrentValid)
                 {
                     diagnostics.Add(new ExpectedExpressionError(current));

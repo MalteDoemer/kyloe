@@ -7,11 +7,11 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class UnsupportedBinaryOperation : Diagnostic
     {
-        private readonly BinarySyntax expression;
+        private readonly BinaryExpression expression;
         private readonly TypeSpecifier leftType;
         private readonly TypeSpecifier rightType;
 
-        public UnsupportedBinaryOperation(BinarySyntax expression, TypeSpecifier leftType, TypeSpecifier rightType)
+        public UnsupportedBinaryOperation(BinaryExpression expression, TypeSpecifier leftType, TypeSpecifier rightType)
         {
             this.leftType = leftType;
             this.expression = expression;
@@ -24,6 +24,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{SyntaxInfo.GetTokenKindString(expression.OperatorToken.Kind)}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
+        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
     }
 }

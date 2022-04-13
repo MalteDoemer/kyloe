@@ -6,11 +6,11 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class UnsupportedAssignmentOperation : Diagnostic
     {
-        private readonly AssignmentSyntax expression;
+        private readonly AssignmentExpression expression;
         private readonly TypeSpecifier leftType;
         private readonly TypeSpecifier rightType;
 
-        public UnsupportedAssignmentOperation(AssignmentSyntax expression, TypeSpecifier leftType, TypeSpecifier rightType)
+        public UnsupportedAssignmentOperation(AssignmentExpression expression, TypeSpecifier leftType, TypeSpecifier rightType)
         {
             this.expression = expression;
             this.leftType = leftType;
@@ -23,6 +23,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{SyntaxInfo.GetTokenKindString(expression.OperatorToken.Kind)}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
+        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
     }
 }

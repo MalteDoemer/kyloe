@@ -227,14 +227,14 @@ namespace Kyloe.Semantics
                     return BindIfStatement((IfStatement)stmt);
                 case SyntaxNodeType.EmptyStatement:
                     return BindEmptyStatement((EmptyStatement)stmt);
-                case SyntaxNodeType.BlockSyntax:
-                    return BindBlockStatement((BlockSyntax)stmt);
+                case SyntaxNodeType.BlockStatement:
+                    return BindBlockStatement((BlockStatement)stmt);
                 default:
                     throw new Exception($"Unexpected SyntaxStatement: {stmt.Type}");
             }
         }
 
-        private BoundBlockStatement BindBlockStatement(BlockSyntax stmt)
+        private BoundBlockStatement BindBlockStatement(BlockStatement stmt)
         {
             var builder = ImmutableArray.CreateBuilder<BoundStatement>();
 
@@ -265,7 +265,7 @@ namespace Kyloe.Semantics
 
         private BoundDeclarationStatement BindDeclarationStatement(DeclarationStatement stmt)
         {
-            bool isConst = stmt.DeclerationToken.Kind == SyntaxTokenKind.ConstKeyword;
+            bool isConst = stmt.DeclerationToken.Type == SyntaxTokenType.ConstKeyword;
 
             var (expr, exprType) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeModifiable: false);
 
@@ -323,8 +323,8 @@ namespace Kyloe.Semantics
                     return BindLiteralExpression((LiteralExpression)expr);
                 case SyntaxNodeType.UnaryExpression:
                     return BindUnaryExpression((UnaryExpression)expr);
-                case SyntaxNodeType.BinarySyntax:
-                    return BindBinaryExpression((BinarySyntax)expr);
+                case SyntaxNodeType.BinaryExpression:
+                    return BindBinaryExpression((BinaryExpression)expr);
                 case SyntaxNodeType.ParenthesizedExpression:
                     return BindParenthesizedExpression((ParenthesizedExpression)expr);
                 case SyntaxNodeType.IdentifierExpression:
@@ -333,21 +333,21 @@ namespace Kyloe.Semantics
                     return BindMemberAccessExpression((MemberAccessExpression)expr);
                 case SyntaxNodeType.SubscriptExpression:
                     return BindSubscriptExpression((SubscriptExpression)expr);
-                case SyntaxNodeType.CallSyntax:
-                    return BindCallExpression((CallSyntax)expr);
-                case SyntaxNodeType.AssignmentSyntax:
-                    return BindAssignmentExpression((AssignmentSyntax)expr);
+                case SyntaxNodeType.CallExpression:
+                    return BindCallExpression((CallExpression)expr);
+                case SyntaxNodeType.AssignmentExpression:
+                    return BindAssignmentExpression((AssignmentExpression)expr);
                 default:
                     throw new System.Exception($"Unexpected SyntaxExpression: {expr.Type}");
             }
         }
 
-        private BoundExpression BindAssignmentExpression(AssignmentSyntax expr)
+        private BoundExpression BindAssignmentExpression(AssignmentExpression expr)
         {
             var (left, leftType) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeModifiable: true);
             var (right, rightType) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeModifiable: false);
 
-            var operation = SemanticInfo.GetAssignmentOperation(expr.OperatorToken.Kind);
+            var operation = SemanticInfo.GetAssignmentOperation(expr.OperatorToken.Type);
 
             if (operation == AssignmentOperation.Assign)
             {
@@ -368,7 +368,7 @@ namespace Kyloe.Semantics
             return new BoundAssignmentExpression(typeSystem, left, operation, right);
         }
 
-        private BoundExpression BindCallExpression(CallSyntax expr)
+        private BoundExpression BindCallExpression(CallExpression expr)
         {
             var bound = BindExpression(expr.Expression);
             var args = BindArgumentExpression(expr.Arguments);
@@ -439,11 +439,11 @@ namespace Kyloe.Semantics
             return BindExpression(expr.Expression);
         }
 
-        private BoundExpression BindBinaryExpression(BinarySyntax expr)
+        private BoundExpression BindBinaryExpression(BinaryExpression expr)
         {
             var left = BindExpression(expr.LeftExpression);
             var right = BindExpression(expr.RightExpression);
-            var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Kind);
+            var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Type);
             var resultType = GetBinaryOperationResult(left, op, right);
 
             if (resultType is not null)
@@ -457,7 +457,7 @@ namespace Kyloe.Semantics
         private BoundExpression BindUnaryExpression(UnaryExpression expr)
         {
             var childExpression = BindExpression(expr.Expression);
-            var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Kind);
+            var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Type);
 
             var resultType = GetUnaryOperationResult(op, childExpression);
 
@@ -471,7 +471,7 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindLiteralExpression(LiteralExpression expr)
         {
-            var type = SemanticInfo.GetTypeFromLiteral(typeSystem, expr.LiteralToken.Kind);
+            var type = SemanticInfo.GetTypeFromLiteral(typeSystem, expr.LiteralToken.Type);
             var value = expr.LiteralToken.Value;
             Debug.Assert(value is not null, "Literal token should always have a value!");
 
@@ -485,7 +485,7 @@ namespace Kyloe.Semantics
 
         private static string ExtractName(SyntaxToken nameToken)
         {
-            Debug.Assert(nameToken.Kind == SyntaxTokenKind.Identifier);
+            Debug.Assert(nameToken.Type == SyntaxTokenType.Identifier);
             Debug.Assert(nameToken.Value is string, $"value of name token wasn't a string: value={nameToken.Value}");
 
             var name = (string)nameToken.Value;

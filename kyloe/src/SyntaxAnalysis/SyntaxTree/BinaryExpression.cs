@@ -3,20 +3,20 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal sealed class BinarySyntax : SyntaxNode
+    internal sealed class BinaryExpression : SyntaxExpression
     {
-        public BinarySyntax(SyntaxNode leftExpression, SyntaxToken operatorToken, SyntaxNode rightExpression)
+        public BinaryExpression(SyntaxExpression leftExpression, SyntaxToken operatorToken, SyntaxExpression rightExpression)
         {
             LeftExpression = leftExpression;
             OperatorToken = operatorToken;
             RightExpression = rightExpression;
         }
 
-        public SyntaxNode LeftExpression { get; }
+        public SyntaxExpression LeftExpression { get; }
         public SyntaxToken OperatorToken { get; }
-        public SyntaxNode RightExpression { get; }
+        public SyntaxExpression RightExpression { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.BinarySyntax;
+        public override SyntaxNodeType Type => SyntaxNodeType.BinaryExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftExpression.Location, RightExpression.Location);
 

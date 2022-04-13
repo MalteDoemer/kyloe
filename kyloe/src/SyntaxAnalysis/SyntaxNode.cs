@@ -18,4 +18,8 @@ namespace Kyloe.Syntax
             pretty.Write(this);
         }
     }
+
+    internal abstract class SyntaxExpression : SyntaxNode { }
+
+    internal abstract class SyntaxStatement : SyntaxNode { }
 }

@@ -17,106 +17,106 @@ namespace Kyloe.Syntax
             return c == '\'' || c == '"';
         }
 
-        public static bool IsLiteralToken(this SyntaxTokenKind kind)
+        public static bool IsLiteralToken(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.IntLiteral:
-                case SyntaxTokenKind.FloatLiteral:
-                case SyntaxTokenKind.StringLiteral:
-                case SyntaxTokenKind.BoolLiteral:
+                case SyntaxTokenType.IntLiteral:
+                case SyntaxTokenType.FloatLiteral:
+                case SyntaxTokenType.StringLiteral:
+                case SyntaxTokenType.BoolLiteral:
                     return true;
                 default:
                     return false;
             }
         }
 
-        public static bool IsOpenBracket(this SyntaxTokenKind kind)
+        public static bool IsOpenBracket(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.LeftCurly:
-                case SyntaxTokenKind.LeftSquare:
-                case SyntaxTokenKind.LeftParen:
+                case SyntaxTokenType.LeftCurly:
+                case SyntaxTokenType.LeftSquare:
+                case SyntaxTokenType.LeftParen:
                     return true;
                 default:
                     return false;
             }
         }
 
-        public static bool IsCloseBracket(this SyntaxTokenKind kind)
+        public static bool IsCloseBracket(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.RightCurly:
-                case SyntaxTokenKind.RightSquare:
-                case SyntaxTokenKind.RightParen:
+                case SyntaxTokenType.RightCurly:
+                case SyntaxTokenType.RightSquare:
+                case SyntaxTokenType.RightParen:
                     return true;
                 default:
                     return false;
             }
         }
 
-        public static SyntaxTokenKind GetCorrespondingBracket(SyntaxTokenKind kind)
+        public static SyntaxTokenType GetCorrespondingBracket(SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.LeftCurly:
-                    return SyntaxTokenKind.RightCurly;
-                case SyntaxTokenKind.LeftSquare:
-                    return SyntaxTokenKind.RightSquare;
-                case SyntaxTokenKind.LeftParen:
-                    return SyntaxTokenKind.RightParen;
-                case SyntaxTokenKind.RightCurly:
-                    return SyntaxTokenKind.LeftCurly;
-                case SyntaxTokenKind.RightSquare:
-                    return SyntaxTokenKind.LeftSquare;
-                case SyntaxTokenKind.RightParen:
-                    return SyntaxTokenKind.LeftParen;
+                case SyntaxTokenType.LeftCurly:
+                    return SyntaxTokenType.RightCurly;
+                case SyntaxTokenType.LeftSquare:
+                    return SyntaxTokenType.RightSquare;
+                case SyntaxTokenType.LeftParen:
+                    return SyntaxTokenType.RightParen;
+                case SyntaxTokenType.RightCurly:
+                    return SyntaxTokenType.LeftCurly;
+                case SyntaxTokenType.RightSquare:
+                    return SyntaxTokenType.LeftSquare;
+                case SyntaxTokenType.RightParen:
+                    return SyntaxTokenType.LeftParen;
 
                 default:
-                    throw new System.Exception($"kind was not a bracket: {kind}");
+                    throw new System.Exception($"type was not a bracket: {type}");
             }
         }
 
         public const int MAX_PRECEDENCE = 9;
 
         // simmilar to https://en.cppreference.com/w/cpp/language/operator_precedence
-        public static int BinaryOperatorPrecedence(this SyntaxTokenKind kind)
+        public static int BinaryOperatorPrecedence(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.Star:
-                case SyntaxTokenKind.Slash:
-                case SyntaxTokenKind.Percent:
+                case SyntaxTokenType.Star:
+                case SyntaxTokenType.Slash:
+                case SyntaxTokenType.Percent:
                     return 1;
 
-                case SyntaxTokenKind.Plus:
-                case SyntaxTokenKind.Minus:
+                case SyntaxTokenType.Plus:
+                case SyntaxTokenType.Minus:
                     return 2;
 
-                case SyntaxTokenKind.Less:
-                case SyntaxTokenKind.Greater:
-                case SyntaxTokenKind.LessEqual:
-                case SyntaxTokenKind.GreaterEqual:
+                case SyntaxTokenType.Less:
+                case SyntaxTokenType.Greater:
+                case SyntaxTokenType.LessEqual:
+                case SyntaxTokenType.GreaterEqual:
                     return 3;
 
-                case SyntaxTokenKind.NotEqual:
-                case SyntaxTokenKind.DoubleEqual:
+                case SyntaxTokenType.NotEqual:
+                case SyntaxTokenType.DoubleEqual:
                     return 4;
 
-                case SyntaxTokenKind.Ampersand:
+                case SyntaxTokenType.Ampersand:
                     return 5;
 
-                case SyntaxTokenKind.Hat:
+                case SyntaxTokenType.Hat:
                     return 6;
 
-                case SyntaxTokenKind.Pipe: return 7;
+                case SyntaxTokenType.Pipe: return 7;
 
-                case SyntaxTokenKind.DoubleAmpersand:
+                case SyntaxTokenType.DoubleAmpersand:
                     return 8;
 
-                case SyntaxTokenKind.DoublePipe:
+                case SyntaxTokenType.DoublePipe:
                     return 9;
 
                 default:
@@ -124,31 +124,31 @@ namespace Kyloe.Syntax
             }
         }
 
-        public static bool IsBinaryOperator(this SyntaxTokenKind kind)
+        public static bool IsBinaryOperator(this SyntaxTokenType type)
         {
-            return kind.BinaryOperatorPrecedence() != -1;
+            return type.BinaryOperatorPrecedence() != -1;
         }
 
-        public static bool IsPrefixOperator(this SyntaxTokenKind kind)
+        public static bool IsPrefixOperator(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.Bang:
-                case SyntaxTokenKind.Tilde:
-                case SyntaxTokenKind.Minus:
+                case SyntaxTokenType.Bang:
+                case SyntaxTokenType.Tilde:
+                case SyntaxTokenType.Minus:
                     return true;
                 default:
                     return false;
             }
         }
 
-        public static bool IsPostfixOperator(this SyntaxTokenKind kind)
+        public static bool IsPostfixOperator(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.LeftSquare:
-                case SyntaxTokenKind.LeftParen:
-                case SyntaxTokenKind.Dot:
+                case SyntaxTokenType.LeftSquare:
+                case SyntaxTokenType.LeftParen:
+                case SyntaxTokenType.Dot:
                     return true;
 
                 default:
@@ -156,19 +156,19 @@ namespace Kyloe.Syntax
             }
         }
 
-        public static bool IsAssignmentOperator(this SyntaxTokenKind kind)
+        public static bool IsAssignmentOperator(this SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.Equals:
-                case SyntaxTokenKind.PlusEquals:
-                case SyntaxTokenKind.MinusEquals:
-                case SyntaxTokenKind.StarEquals:
-                case SyntaxTokenKind.SlashEquals:
-                case SyntaxTokenKind.PercentEquals:
-                case SyntaxTokenKind.AmpersandEquals:
-                case SyntaxTokenKind.PipeEquals:
-                case SyntaxTokenKind.HatEquals:
+                case SyntaxTokenType.Equals:
+                case SyntaxTokenType.PlusEquals:
+                case SyntaxTokenType.MinusEquals:
+                case SyntaxTokenType.StarEquals:
+                case SyntaxTokenType.SlashEquals:
+                case SyntaxTokenType.PercentEquals:
+                case SyntaxTokenType.AmpersandEquals:
+                case SyntaxTokenType.PipeEquals:
+                case SyntaxTokenType.HatEquals:
                     return true;
 
                 default:
@@ -179,115 +179,106 @@ namespace Kyloe.Syntax
         /// This function returns the string that
         /// corresponds to the SyntaxTokenType.
         /// It returns null for more complex tokens such as IntLiteral
-        public static string? GetTokenKindString(SyntaxTokenKind kind)
+        public static string? GetTokenTypeString(SyntaxTokenType type)
         {
-            switch (kind)
+            switch (type)
             {
-                case SyntaxTokenKind.Equals:
+                case SyntaxTokenType.Equals:
                     return "=";
-                case SyntaxTokenKind.PlusEquals:
+                case SyntaxTokenType.PlusEquals:
                     return "+=";
-                case SyntaxTokenKind.MinusEquals:
+                case SyntaxTokenType.MinusEquals:
                     return "-=";
-                case SyntaxTokenKind.StarEquals:
+                case SyntaxTokenType.StarEquals:
                     return "*=";
-                case SyntaxTokenKind.SlashEquals:
+                case SyntaxTokenType.SlashEquals:
                     return "/=";
-                case SyntaxTokenKind.PercentEquals:
+                case SyntaxTokenType.PercentEquals:
                     return "%=";
-                case SyntaxTokenKind.AmpersandEquals:
+                case SyntaxTokenType.AmpersandEquals:
                     return "&=";
-                case SyntaxTokenKind.PipeEquals:
+                case SyntaxTokenType.PipeEquals:
                     return "|=";
-                case SyntaxTokenKind.HatEquals:
+                case SyntaxTokenType.HatEquals:
                     return "^=";
-                case SyntaxTokenKind.Less:
+                case SyntaxTokenType.Less:
                     return "<";
-                case SyntaxTokenKind.Greater:
+                case SyntaxTokenType.Greater:
                     return ">";
-                case SyntaxTokenKind.DoubleEqual:
+                case SyntaxTokenType.DoubleEqual:
                     return "==";
-                case SyntaxTokenKind.LessEqual:
+                case SyntaxTokenType.LessEqual:
                     return "<=";
-                case SyntaxTokenKind.GreaterEqual:
+                case SyntaxTokenType.GreaterEqual:
                     return ">=";
-                case SyntaxTokenKind.NotEqual:
+                case SyntaxTokenType.NotEqual:
                     return "!=";
-                case SyntaxTokenKind.Plus:
+                case SyntaxTokenType.Plus:
                     return "+";
-                case SyntaxTokenKind.Minus:
+                case SyntaxTokenType.Minus:
                     return "-";
-                case SyntaxTokenKind.Star:
+                case SyntaxTokenType.Star:
                     return "*";
-                case SyntaxTokenKind.Slash:
+                case SyntaxTokenType.Slash:
                     return "/";
-                case SyntaxTokenKind.Percent:
+                case SyntaxTokenType.Percent:
                     return "%";
-                case SyntaxTokenKind.Ampersand:
+                case SyntaxTokenType.Ampersand:
                     return "&";
-                case SyntaxTokenKind.DoubleAmpersand:
+                case SyntaxTokenType.DoubleAmpersand:
                     return "&&";
-                case SyntaxTokenKind.Pipe:
+                case SyntaxTokenType.Pipe:
                     return "|";
-                case SyntaxTokenKind.DoublePipe:
+                case SyntaxTokenType.DoublePipe:
                     return "||";
-                case SyntaxTokenKind.Hat:
+                case SyntaxTokenType.Hat:
                     return "^";
-                case SyntaxTokenKind.Tilde:
+                case SyntaxTokenType.Tilde:
                     return "~";
-                case SyntaxTokenKind.Bang:
+                case SyntaxTokenType.Bang:
                     return "!";
-                case SyntaxTokenKind.RightParen:
+                case SyntaxTokenType.RightParen:
                     return ")";
-                case SyntaxTokenKind.LeftParen:
+                case SyntaxTokenType.LeftParen:
                     return "(";
-                case SyntaxTokenKind.RightSquare:
+                case SyntaxTokenType.RightSquare:
                     return "]";
-                case SyntaxTokenKind.LeftSquare:
+                case SyntaxTokenType.LeftSquare:
                     return "[";
-                case SyntaxTokenKind.RightCurly:
+                case SyntaxTokenType.RightCurly:
                     return "}";
-                case SyntaxTokenKind.LeftCurly:
+                case SyntaxTokenType.LeftCurly:
                     return "{";
-                case SyntaxTokenKind.Comma:
+                case SyntaxTokenType.Comma:
                     return ",";
-                case SyntaxTokenKind.Dot:
+                case SyntaxTokenType.Dot:
                     return ".";
-                case SyntaxTokenKind.Colon:
+                case SyntaxTokenType.Colon:
                     return ":";
-                case SyntaxTokenKind.SemiColon:
+                case SyntaxTokenType.SemiColon:
                     return ";";
-                case SyntaxTokenKind.SmallArrow:
+                case SyntaxTokenType.SmallArrow:
                     return "->";
                 default:
                     return null;
             }
         }
     
-
-        public static string GetTokenKindStringOrName(SyntaxTokenKind kind) 
+        public static object? GetDefaultValue(SyntaxTokenType type) 
         {
-            if (GetTokenKindString(kind) is string s)
-                return s;
-
-            return kind.ToString();
-        } 
-
-        public static object? GetDefaultValue(SyntaxTokenKind kind) 
-        {
-            switch (kind) 
+            switch (type) 
             {
-                case SyntaxTokenKind.Invalid:
+                case SyntaxTokenType.Invalid:
                     return '\0';
-                case SyntaxTokenKind.IntLiteral:
+                case SyntaxTokenType.IntLiteral:
                     return 0;
-                case SyntaxTokenKind.FloatLiteral:
+                case SyntaxTokenType.FloatLiteral:
                     return 0.0;
-                case SyntaxTokenKind.BoolLiteral:
+                case SyntaxTokenType.BoolLiteral:
                     return false;
-                case SyntaxTokenKind.StringLiteral:
+                case SyntaxTokenType.StringLiteral:
                     return string.Empty;
-                case SyntaxTokenKind.Identifier:
+                case SyntaxTokenType.Identifier:
                     return string.Empty;
                 default:
                     return null;

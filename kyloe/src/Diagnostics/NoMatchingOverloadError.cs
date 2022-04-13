@@ -7,13 +7,13 @@ namespace Kyloe.Diagnostics
     internal sealed class NoMatchingOverloadError : Diagnostic
     {
         private readonly string name;
-        private readonly CallSyntax callSyntax;
+        private readonly CallExpression callExpression;
         private readonly BoundArguments arguments;
 
-        public NoMatchingOverloadError(string name, CallSyntax callExpression, BoundArguments arguments)
+        public NoMatchingOverloadError(string name, CallExpression callExpression, BoundArguments arguments)
         {
             this.name = name;
-            this.callSyntax = callExpression;
+            this.callExpression = callExpression;
             this.arguments = arguments;
         }
 
@@ -21,7 +21,7 @@ namespace Kyloe.Diagnostics
 
         public override DiagnosticKind Kind => DiagnosticKind.NoMatchingOverloadError;
 
-        public override SourceLocation? Location => callSyntax.Location;
+        public override SourceLocation? Location => callExpression.Location;
 
         public override string Message()
         {

@@ -8,20 +8,20 @@ namespace Kyloe.Syntax
         MalformedExpression,
         LiteralExpression,
         UnaryExpression,
-        BinarySyntax,
+        BinaryExpression,
         ParenthesizedExpression,
         IdentifierExpression,
         MemberAccessExpression,
         SubscriptExpression,
-        CallSyntax,
-        AssignmentSyntax,
+        CallExpression,
+        AssignmentExpression,
 
         // Statements
         ExpressionStatement,
         DeclarationStatement,
         IfStatement,
         EmptyStatement,
-        BlockSyntax,
+        BlockStatement,
 
         // Other
         FunctionDefinition,

@@ -4,23 +4,23 @@ namespace Kyloe.Syntax
 {
     public sealed class SyntaxToken
     {
-        public SyntaxToken(SyntaxTokenKind kind, SourceLocation location, object? value = null)
+        public SyntaxToken(SyntaxTokenType type, SourceLocation location, object? value = null)
         {
-            Kind = kind;
+            Type = type;
             Location = location;
             Value = value;
         }
 
-        public SyntaxTokenKind Kind { get; }
+        public SyntaxTokenType Type { get; }
         public SourceLocation Location { get; }
         public object? Value { get; }
 
         public override string ToString()
         {
             if (Value is null)
-                return $"{Kind}";
+                return $"{Type}";
             else
-                return $"{Kind}: {Value}";
+                return $"{Type}: {Value}";
         }
     }
 }

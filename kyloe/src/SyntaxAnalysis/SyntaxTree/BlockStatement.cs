@@ -4,9 +4,9 @@ using Kyloe.Utility;
 
 namespace Kyloe.Syntax
 {
-    internal sealed class BlockSyntax : SyntaxNode
+    internal sealed class BlockStatement : SyntaxStatement
     {
-        public BlockSyntax(SyntaxToken leftCurly, ImmutableArray<SyntaxNode> statements, SyntaxToken rightCurly)
+        public BlockStatement(SyntaxToken leftCurly, ImmutableArray<SyntaxStatement> statements, SyntaxToken rightCurly)
         {
             LeftCurly = leftCurly;
             Statements = statements;
@@ -14,10 +14,10 @@ namespace Kyloe.Syntax
         }
 
         public SyntaxToken LeftCurly { get; }
-        public ImmutableArray<SyntaxNode> Statements { get; }
+        public ImmutableArray<SyntaxStatement> Statements { get; }
         public SyntaxToken RightCurly { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.BlockSyntax;
+        public override SyntaxNodeType Type => SyntaxNodeType.BlockStatement;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftCurly.Location, RightCurly.Location);
 
