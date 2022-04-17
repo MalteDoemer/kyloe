@@ -22,6 +22,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{SyntaxInfo.GetTokenTypeString(expression.OperatorToken.Type)}' cannot be used with type '{type.FullName()}'";
+        public override string Message() => $"operator '{expression.OperatorToken.Kind.TokenKindString()}' cannot be used with type '{type.FullName()}'";
     }
 }

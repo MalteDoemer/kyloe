@@ -9,7 +9,6 @@ func calculate(a: i32, b: i32) -> i32 {
     }
 }
 
-/* This is a block comment */
 func count(start: i32, times: i32, inc: i32) { 
     var sum = start;
     for i = 0; i < times; i++ {
@@ -24,7 +23,5 @@ func main() {
     const x: i32 = (1 + 2 * 3);
     var y = calculate(x);
 
-    string message = "Value is: ";
-    print(message);
     println(y);
 }

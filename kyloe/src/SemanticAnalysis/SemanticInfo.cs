@@ -7,16 +7,16 @@ namespace Kyloe.Semantics
 {
     public static class SemanticInfo
     {
-        internal static TypeSpecifier GetTypeFromLiteral(TypeSystem typeSystem, SyntaxTokenType tokenType)
+        internal static TypeSpecifier GetTypeFromLiteral(TypeSystem typeSystem, SyntaxTokenKind tokenKind)
         {
-            switch (tokenType)
+            switch (tokenKind)
             {
-                case SyntaxTokenType.IntLiteral: return typeSystem.I64;
-                case SyntaxTokenType.FloatLiteral: return typeSystem.Double;
-                case SyntaxTokenType.BoolLiteral: return typeSystem.Bool;
-                case SyntaxTokenType.StringLiteral: return typeSystem.String;
+                case SyntaxTokenKind.IntLiteral: return typeSystem.I64;
+                case SyntaxTokenKind.FloatLiteral: return typeSystem.Double;
+                case SyntaxTokenKind.BoolLiteral: return typeSystem.Bool;
+                case SyntaxTokenKind.StringLiteral: return typeSystem.String;
                 default:
-                    throw new System.Exception($"Unexpected literal type: {tokenType}");
+                    throw new System.Exception($"Unexpected literal type: {tokenKind}");
             }
         }
 
@@ -125,56 +125,56 @@ namespace Kyloe.Semantics
             return GetOperationFromFunctionName(name) is BoundOperation op && op.IsBinaryOperation();
         }
 
-        internal static BoundOperation GetBinaryOperation(SyntaxTokenType type)
+        internal static BoundOperation GetBinaryOperation(SyntaxTokenKind type)
         {
             switch (type)
             {
-                case SyntaxTokenType.Less: return BoundOperation.LessThan;
-                case SyntaxTokenType.Greater: return BoundOperation.GreaterThan;
-                case SyntaxTokenType.DoubleEqual: return BoundOperation.Equal;
-                case SyntaxTokenType.LessEqual: return BoundOperation.LessThanOrEqual;
-                case SyntaxTokenType.GreaterEqual: return BoundOperation.GreaterThanOrEqual;
-                case SyntaxTokenType.NotEqual: return BoundOperation.NotEqual;
-                case SyntaxTokenType.Plus: return BoundOperation.Addition;
-                case SyntaxTokenType.Minus: return BoundOperation.Subtraction;
-                case SyntaxTokenType.Star: return BoundOperation.Multiplication;
-                case SyntaxTokenType.Slash: return BoundOperation.Division;
-                case SyntaxTokenType.Percent: return BoundOperation.Modulo;
-                case SyntaxTokenType.Ampersand: return BoundOperation.BitwiseAnd;
-                case SyntaxTokenType.DoubleAmpersand: return BoundOperation.LogicalAnd;
-                case SyntaxTokenType.Pipe: return BoundOperation.BitwiseOr;
-                case SyntaxTokenType.DoublePipe: return BoundOperation.LogicalOr;
-                case SyntaxTokenType.Hat: return BoundOperation.BitwiseXor;
+                case SyntaxTokenKind.Less: return BoundOperation.LessThan;
+                case SyntaxTokenKind.Greater: return BoundOperation.GreaterThan;
+                case SyntaxTokenKind.DoubleEqual: return BoundOperation.Equal;
+                case SyntaxTokenKind.LessEqual: return BoundOperation.LessThanOrEqual;
+                case SyntaxTokenKind.GreaterEqual: return BoundOperation.GreaterThanOrEqual;
+                case SyntaxTokenKind.NotEqual: return BoundOperation.NotEqual;
+                case SyntaxTokenKind.Plus: return BoundOperation.Addition;
+                case SyntaxTokenKind.Minus: return BoundOperation.Subtraction;
+                case SyntaxTokenKind.Star: return BoundOperation.Multiplication;
+                case SyntaxTokenKind.Slash: return BoundOperation.Division;
+                case SyntaxTokenKind.Percent: return BoundOperation.Modulo;
+                case SyntaxTokenKind.Ampersand: return BoundOperation.BitwiseAnd;
+                case SyntaxTokenKind.DoubleAmpersand: return BoundOperation.LogicalAnd;
+                case SyntaxTokenKind.Pipe: return BoundOperation.BitwiseOr;
+                case SyntaxTokenKind.DoublePipe: return BoundOperation.LogicalOr;
+                case SyntaxTokenKind.Hat: return BoundOperation.BitwiseXor;
                 default:
                     throw new System.Exception($"Unexpected binary operation type: {type}");
             }
         }
 
-        internal static BoundOperation GetUnaryOperation(SyntaxTokenType type)
+        internal static BoundOperation GetUnaryOperation(SyntaxTokenKind type)
         {
             switch (type)
             {
-                case SyntaxTokenType.Tilde: return BoundOperation.BitwiseNot;
-                case SyntaxTokenType.Bang: return BoundOperation.LogicalNot;
-                case SyntaxTokenType.Minus: return BoundOperation.Negation;
+                case SyntaxTokenKind.Tilde: return BoundOperation.BitwiseNot;
+                case SyntaxTokenKind.Bang: return BoundOperation.LogicalNot;
+                case SyntaxTokenKind.Minus: return BoundOperation.Negation;
                 default:
                     throw new System.Exception($"Unexpected unary operation type: {type}");
             }
         }
 
-        internal static AssignmentOperation GetAssignmentOperation(SyntaxTokenType type)
+        internal static AssignmentOperation GetAssignmentOperation(SyntaxTokenKind type)
         {
             switch (type)
             {
-                case SyntaxTokenType.Equals: return AssignmentOperation.Assign;
-                case SyntaxTokenType.PlusEquals: return AssignmentOperation.AddAssign;
-                case SyntaxTokenType.MinusEquals: return AssignmentOperation.SubAssign;
-                case SyntaxTokenType.StarEquals: return AssignmentOperation.MulAssign;
-                case SyntaxTokenType.SlashEquals: return AssignmentOperation.DivAssign;
-                case SyntaxTokenType.PercentEquals: return AssignmentOperation.ModAssign;
-                case SyntaxTokenType.AmpersandEquals: return AssignmentOperation.AndAssign;
-                case SyntaxTokenType.PipeEquals: return AssignmentOperation.OrAssign;
-                case SyntaxTokenType.HatEquals: return AssignmentOperation.XorAssign;
+                case SyntaxTokenKind.Equals: return AssignmentOperation.Assign;
+                case SyntaxTokenKind.PlusEquals: return AssignmentOperation.AddAssign;
+                case SyntaxTokenKind.MinusEquals: return AssignmentOperation.SubAssign;
+                case SyntaxTokenKind.StarEquals: return AssignmentOperation.MulAssign;
+                case SyntaxTokenKind.SlashEquals: return AssignmentOperation.DivAssign;
+                case SyntaxTokenKind.PercentEquals: return AssignmentOperation.ModAssign;
+                case SyntaxTokenKind.AmpersandEquals: return AssignmentOperation.AndAssign;
+                case SyntaxTokenKind.PipeEquals: return AssignmentOperation.OrAssign;
+                case SyntaxTokenKind.HatEquals: return AssignmentOperation.XorAssign;
 
                 default:
                     throw new System.Exception($"Unexpected assignment operation type: {type}");

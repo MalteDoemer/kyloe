@@ -1,7 +1,6 @@
 namespace Kyloe.Syntax
 {
-    // TODO: make SyntaxTokenType internal
-    public enum SyntaxTokenType
+    public enum SyntaxTokenKind
     {
         // Special Tokens
         Invalid = 0,

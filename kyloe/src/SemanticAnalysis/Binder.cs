@@ -265,7 +265,7 @@ namespace Kyloe.Semantics
 
         private BoundDeclarationStatement BindDeclarationStatement(DeclarationStatement stmt)
         {
-            bool isConst = stmt.DeclerationToken.Type == SyntaxTokenType.ConstKeyword;
+            bool isConst = stmt.DeclerationToken.Kind == SyntaxTokenKind.ConstKeyword;
 
             var (expr, exprType) = BindAndExpect(stmt.AssignmentExpression, mustBeValue: true, mustBeModifiable: false);
 
@@ -347,7 +347,7 @@ namespace Kyloe.Semantics
             var (left, leftType) = BindAndExpect(expr.LeftNode, mustBeValue: true, mustBeModifiable: true);
             var (right, rightType) = BindAndExpect(expr.RightNode, mustBeValue: true, mustBeModifiable: false);
 
-            var operation = SemanticInfo.GetAssignmentOperation(expr.OperatorToken.Type);
+            var operation = SemanticInfo.GetAssignmentOperation(expr.OperatorToken.Kind);
 
             if (operation == AssignmentOperation.Assign)
             {
@@ -443,7 +443,7 @@ namespace Kyloe.Semantics
         {
             var left = BindExpression(expr.LeftExpression);
             var right = BindExpression(expr.RightExpression);
-            var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Type);
+            var op = SemanticInfo.GetBinaryOperation(expr.OperatorToken.Kind);
             var resultType = GetBinaryOperationResult(left, op, right);
 
             if (resultType is not null)
@@ -457,7 +457,7 @@ namespace Kyloe.Semantics
         private BoundExpression BindUnaryExpression(UnaryExpression expr)
         {
             var childExpression = BindExpression(expr.Expression);
-            var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Type);
+            var op = SemanticInfo.GetUnaryOperation(expr.OperatorToken.Kind);
 
             var resultType = GetUnaryOperationResult(op, childExpression);
 
@@ -471,7 +471,7 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindLiteralExpression(LiteralExpression expr)
         {
-            var type = SemanticInfo.GetTypeFromLiteral(typeSystem, expr.LiteralToken.Type);
+            var type = SemanticInfo.GetTypeFromLiteral(typeSystem, expr.LiteralToken.Kind);
             var value = expr.LiteralToken.Value;
             Debug.Assert(value is not null, "Literal token should always have a value!");
 
@@ -485,7 +485,7 @@ namespace Kyloe.Semantics
 
         private static string ExtractName(SyntaxToken nameToken)
         {
-            Debug.Assert(nameToken.Type == SyntaxTokenType.Identifier);
+            Debug.Assert(nameToken.Kind == SyntaxTokenKind.Identifier);
             Debug.Assert(nameToken.Value is string, $"value of name token wasn't a string: value={nameToken.Value}");
 
             var name = (string)nameToken.Value;
