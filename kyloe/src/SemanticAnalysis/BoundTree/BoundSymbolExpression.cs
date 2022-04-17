@@ -15,6 +15,6 @@ namespace Kyloe.Semantics
 
         public override ValueCategory ValueCategory => Symbol.ValueCategory;
 
-        public override BoundNodeType Type => BoundNodeType.BoundSymbolExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundSymbolExpression;
     }
 }

@@ -12,7 +12,7 @@ namespace Kyloe.Semantics
 
         public override TypeSpecifier ResultType { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundInvalidExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundInvalidExpression;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
     }

@@ -1,6 +1,6 @@
 namespace Kyloe.Semantics
 {
-    public enum BoundNodeType
+    public enum BoundNodeKind
     {
         BoundLiteralExpression,
         BoundBinaryExpression,

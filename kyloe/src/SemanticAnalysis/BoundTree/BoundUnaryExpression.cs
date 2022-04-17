@@ -16,7 +16,7 @@ namespace Kyloe.Semantics
         
         public override TypeSpecifier ResultType { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundUnaryExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundUnaryExpression;
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }

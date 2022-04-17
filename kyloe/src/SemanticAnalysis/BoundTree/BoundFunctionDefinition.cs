@@ -14,7 +14,7 @@ namespace Kyloe.Semantics
         public ImmutableArray<BoundDeclarationStatement> Globals { get; }
         public ImmutableArray<BoundFunctionDefinition> Functions { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundCompilationUnit;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundCompilationUnit;
     }
 
     internal sealed class BoundFunctionDefinition : BoundNode
@@ -28,6 +28,6 @@ namespace Kyloe.Semantics
         public FunctionType FunctionType { get; }
         public BoundBlockStatement Body { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundFunctionDefinition;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundFunctionDefinition;
     }
 }

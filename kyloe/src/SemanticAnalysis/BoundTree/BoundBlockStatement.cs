@@ -11,6 +11,6 @@ namespace Kyloe.Semantics
 
         public ImmutableArray<BoundStatement> Statements { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundBlockStatement;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundBlockStatement;
     }
 }

@@ -13,11 +13,11 @@ namespace Kyloe.Semantics
         public BoundStatement Body { get; }
         public BoundStatement? ElseBody { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundIfStatement;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundIfStatement;
     }
 
     internal class BoundEmptyStatement : BoundStatement
     {
-        public override BoundNodeType Type => BoundNodeType.BoundEmptyStatement;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundEmptyStatement;
     }
 }

@@ -15,6 +15,6 @@ namespace Kyloe.Semantics
         public BoundTypeClause? TypeClause { get; }
         public BoundExpression InitializationExpression { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundDeclarationStatement;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundDeclarationStatement;
     }
 }

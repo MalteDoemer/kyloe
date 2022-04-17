@@ -13,7 +13,7 @@ namespace Kyloe.Semantics
         public object Value { get; }
         public override TypeSpecifier ResultType { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundLiteralExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundLiteralExpression;
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }

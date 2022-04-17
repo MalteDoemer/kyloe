@@ -9,6 +9,6 @@ namespace Kyloe.Semantics
 
         public BoundExpression Expression { get; }
 
-        public override BoundNodeType Type => BoundNodeType.BoundExpressionStatement;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundExpressionStatement;
     }
 }

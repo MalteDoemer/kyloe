@@ -20,7 +20,7 @@ namespace Kyloe.Semantics
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 
-        public override BoundNodeType Type => BoundNodeType.BoundAssignmentExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundAssignmentExpression;
 
     }
 }
