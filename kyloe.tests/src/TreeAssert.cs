@@ -10,25 +10,25 @@ namespace Kyloe.Tests
     public struct SyntaxNodeOrTokenKind
     {
         private readonly SyntaxTokenKind tokenKind;
-        private readonly SyntaxNodeType nodeType;
-        private readonly bool isNodeType;
+        private readonly SyntaxNodeKind nodeKind;
+        private readonly bool isNode;
 
-        public SyntaxNodeOrTokenKind(SyntaxNodeType type)
+        public SyntaxNodeOrTokenKind(SyntaxNodeKind kind)
         {
-            isNodeType = true;
-            nodeType = type;
+            isNode = true;
+            nodeKind = kind;
             tokenKind = default(SyntaxTokenKind);
         }
 
         public SyntaxNodeOrTokenKind(SyntaxTokenKind kind)
         {
-            isNodeType = false;
+            isNode = false;
             tokenKind = kind;
-            nodeType = default(SyntaxNodeType);
+            nodeKind = default(SyntaxNodeKind);
         }
 
-        public bool IsNode => isNodeType;
-        public bool IsToken => !isNodeType;
+        public bool IsNode => isNode;
+        public bool IsToken => !isNode;
 
         public SyntaxTokenKind TokenKind
         {
@@ -39,12 +39,12 @@ namespace Kyloe.Tests
             }
         }
 
-        public SyntaxNodeType NodeType
+        public SyntaxNodeKind NodeKind
         {
             get
             {
                 Debug.Assert(IsNode);
-                return nodeType;
+                return nodeKind;
             }
         }
 
@@ -52,7 +52,7 @@ namespace Kyloe.Tests
 
     public class VerifyNode
     {
-        public VerifyNode(SyntaxNodeType expected, params VerifyNode[] children)
+        public VerifyNode(SyntaxNodeKind expected, params VerifyNode[] children)
         {
             Kind = new SyntaxNodeOrTokenKind(expected);
             Children = children;
@@ -72,43 +72,43 @@ namespace Kyloe.Tests
 
         public static VerifyNode LiteralExpression(SyntaxTokenKind kind)
         {
-            return new VerifyNode(SyntaxNodeType.LiteralExpression, new VerifyNode(kind));
+            return new VerifyNode(SyntaxNodeKind.LiteralExpression, new VerifyNode(kind));
         }
 
         public static VerifyNode BinaryExpression(VerifyNode left, SyntaxTokenKind op, VerifyNode right)
         {
-            return new VerifyNode(SyntaxNodeType.BinaryExpression, left, new VerifyNode(op), right);
+            return new VerifyNode(SyntaxNodeKind.BinaryExpression, left, new VerifyNode(op), right);
         }
 
         public static VerifyNode UnaryExpression(SyntaxTokenKind op, VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.UnaryExpression, new VerifyNode(op), expr);
+            return new VerifyNode(SyntaxNodeKind.UnaryExpression, new VerifyNode(op), expr);
         }
 
         public static VerifyNode ParenthsizedExpression(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.ParenthesizedExpression, new VerifyNode(SyntaxTokenKind.LeftParen), expr, new VerifyNode(SyntaxTokenKind.RightParen));
+            return new VerifyNode(SyntaxNodeKind.ParenthesizedExpression, new VerifyNode(SyntaxTokenKind.LeftParen), expr, new VerifyNode(SyntaxTokenKind.RightParen));
         }
 
         public static VerifyNode IdentifierExpression()
         {
-            return new VerifyNode(SyntaxNodeType.IdentifierExpression, new VerifyNode(SyntaxTokenKind.Identifier));
+            return new VerifyNode(SyntaxNodeKind.IdentifierExpression, new VerifyNode(SyntaxTokenKind.Identifier));
         }
 
         public static VerifyNode SubscriptExpression(VerifyNode expr, VerifyNode index)
         {
-            return new VerifyNode(SyntaxNodeType.SubscriptExpression, expr, new VerifyNode(SyntaxTokenKind.LeftSquare), index, new VerifyNode(SyntaxTokenKind.RightSquare));
+            return new VerifyNode(SyntaxNodeKind.SubscriptExpression, expr, new VerifyNode(SyntaxTokenKind.LeftSquare), index, new VerifyNode(SyntaxTokenKind.RightSquare));
         }
 
         public static VerifyNode MemberAccessExpression(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenKind.Dot), IdentifierExpression());
+            return new VerifyNode(SyntaxNodeKind.MemberAccessExpression, expr, new VerifyNode(SyntaxTokenKind.Dot), IdentifierExpression());
         }
 
         public static VerifyNode CallExpression(VerifyNode expr, params VerifyNode[] args)
         {
             if (args.Length == 0)
-                return new VerifyNode(SyntaxNodeType.CallExpression, expr, new VerifyNode(SyntaxTokenKind.LeftParen), new VerifyNode(SyntaxTokenKind.RightParen));
+                return new VerifyNode(SyntaxNodeKind.CallExpression, expr, new VerifyNode(SyntaxTokenKind.LeftParen), new VerifyNode(SyntaxTokenKind.RightParen));
 
             var children = new List<VerifyNode>();
             children.Add(expr);
@@ -123,23 +123,23 @@ namespace Kyloe.Tests
             children.Add(args.Last());
             children.Add(new VerifyNode(SyntaxTokenKind.RightParen));
 
-            return new VerifyNode(SyntaxNodeType.CallExpression, children.ToArray());
+            return new VerifyNode(SyntaxNodeKind.CallExpression, children.ToArray());
         }
 
         public static VerifyNode AssignmentExpression(VerifyNode left, SyntaxTokenKind op, VerifyNode right)
         {
-            return new VerifyNode(SyntaxNodeType.AssignmentExpression, left, new VerifyNode(op), right);
+            return new VerifyNode(SyntaxNodeKind.AssignmentExpression, left, new VerifyNode(op), right);
         }
 
         public static VerifyNode ExpressionStatement(VerifyNode expr)
         {
-            return new VerifyNode(SyntaxNodeType.ExpressionStatement, expr, new VerifyNode(SyntaxTokenKind.SemiColon));
+            return new VerifyNode(SyntaxNodeKind.ExpressionStatement, expr, new VerifyNode(SyntaxTokenKind.SemiColon));
         }
 
         public static VerifyNode DeclarationStatement(SyntaxTokenKind declToken, VerifyNode expr)
         {
             return new VerifyNode(
-                SyntaxNodeType.DeclarationStatement,
+                SyntaxNodeKind.DeclarationStatement,
                 new VerifyNode(declToken),
                 new VerifyNode(SyntaxTokenKind.Identifier),
                 new VerifyNode(SyntaxTokenKind.Equals),
@@ -150,13 +150,13 @@ namespace Kyloe.Tests
 
         public static VerifyNode IfStatement(VerifyNode condition, VerifyNode body)
         {
-            return new VerifyNode(SyntaxNodeType.IfStatement, new VerifyNode(SyntaxTokenKind.IfKeyword), condition, body);
+            return new VerifyNode(SyntaxNodeKind.IfStatement, new VerifyNode(SyntaxTokenKind.IfKeyword), condition, body);
         }
 
         public static VerifyNode IfElseStatement(VerifyNode condition, VerifyNode body, VerifyNode elseBody)
         {
             return new VerifyNode(
-                SyntaxNodeType.IfStatement,
+                SyntaxNodeKind.IfStatement,
                 new VerifyNode(SyntaxTokenKind.IfKeyword),
                 condition,
                 body,
@@ -167,7 +167,7 @@ namespace Kyloe.Tests
 
         public static VerifyNode EmptyStatement()
         {
-            return new VerifyNode(SyntaxNodeType.EmptyStatement, new VerifyNode(SyntaxTokenKind.SemiColon));
+            return new VerifyNode(SyntaxNodeKind.EmptyStatement, new VerifyNode(SyntaxTokenKind.SemiColon));
         }
 
         public static VerifyNode BlockStatement(params VerifyNode[] statements)
@@ -178,13 +178,13 @@ namespace Kyloe.Tests
                 nodes.Add(stmt);
             nodes.Add(new VerifyNode(SyntaxTokenKind.RightCurly));
 
-            return new VerifyNode(SyntaxNodeType.BlockStatement, nodes.ToArray());
+            return new VerifyNode(SyntaxNodeKind.BlockStatement, nodes.ToArray());
         }
 
         public static VerifyNode SimpleParameterDeclaration()
         {
             return new VerifyNode(
-                SyntaxNodeType.ParameterDeclaration,
+                SyntaxNodeKind.ParameterDeclaration,
                 new VerifyNode(SyntaxTokenKind.Identifier),
                 new VerifyNode(SyntaxTokenKind.Colon),
                 VerifyNode.IdentifierExpression()
@@ -218,14 +218,14 @@ namespace Kyloe.Tests
             nodes.Add(body);
 
             return new VerifyNode(
-                SyntaxNodeType.FunctionDefinition,
+                SyntaxNodeKind.FunctionDefinition,
                 nodes.ToArray()
             );
         }
 
         public static VerifyNode CompilationUnitSyntax(params VerifyNode[] nodes)
         {
-            return new VerifyNode(SyntaxNodeType.CompilationUnitSyntax, nodes);
+            return new VerifyNode(SyntaxNodeKind.CompilationUnitSyntax, nodes);
         }
     }
 
@@ -242,7 +242,7 @@ namespace Kyloe.Tests
 
             if (node.IsNode)
             {
-                Assert.Equal(verify.Kind.NodeType, node.Node!.Type);
+                Assert.Equal(verify.Kind.NodeKind, node.Node!.Kind);
 
                 Assert.Equal(verify.Children.Length, node.GetChildren().Count());
 

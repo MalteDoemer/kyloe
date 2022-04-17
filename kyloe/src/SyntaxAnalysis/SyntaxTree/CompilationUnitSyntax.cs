@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
         public ImmutableArray<DeclarationStatement> GlobalDeclarations { get; }
         public ImmutableArray<FunctionDefinition> FunctionDefinitions { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.CompilationUnitSyntax;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.CompilationUnitSyntax;
 
         public override SourceLocation Location
         {

@@ -14,7 +14,7 @@ namespace Kyloe.Syntax
         public SyntaxToken OperatorToken { get; }
         public SyntaxExpression Expression { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.UnaryExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.UnaryExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(OperatorToken.Location, Expression.Location);
 

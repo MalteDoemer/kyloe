@@ -217,20 +217,20 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindStatement(SyntaxStatement stmt)
         {
-            switch (stmt.Type)
+            switch (stmt.Kind)
             {
-                case SyntaxNodeType.ExpressionStatement:
+                case SyntaxNodeKind.ExpressionStatement:
                     return BindExpressionStatement((ExpressionStatement)stmt);
-                case SyntaxNodeType.DeclarationStatement:
+                case SyntaxNodeKind.DeclarationStatement:
                     return BindDeclarationStatement((DeclarationStatement)stmt);
-                case SyntaxNodeType.IfStatement:
+                case SyntaxNodeKind.IfStatement:
                     return BindIfStatement((IfStatement)stmt);
-                case SyntaxNodeType.EmptyStatement:
+                case SyntaxNodeKind.EmptyStatement:
                     return BindEmptyStatement((EmptyStatement)stmt);
-                case SyntaxNodeType.BlockStatement:
+                case SyntaxNodeKind.BlockStatement:
                     return BindBlockStatement((BlockStatement)stmt);
                 default:
-                    throw new Exception($"Unexpected SyntaxStatement: {stmt.Type}");
+                    throw new Exception($"Unexpected SyntaxStatement: {stmt.Kind}");
             }
         }
 
@@ -315,30 +315,30 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindExpression(SyntaxExpression expr)
         {
-            switch (expr.Type)
+            switch (expr.Kind)
             {
-                case SyntaxNodeType.MalformedExpression:
+                case SyntaxNodeKind.MalformedExpression:
                     return BindMalformedExpression((MalformedExpression)expr);
-                case SyntaxNodeType.LiteralExpression:
+                case SyntaxNodeKind.LiteralExpression:
                     return BindLiteralExpression((LiteralExpression)expr);
-                case SyntaxNodeType.UnaryExpression:
+                case SyntaxNodeKind.UnaryExpression:
                     return BindUnaryExpression((UnaryExpression)expr);
-                case SyntaxNodeType.BinaryExpression:
+                case SyntaxNodeKind.BinaryExpression:
                     return BindBinaryExpression((BinaryExpression)expr);
-                case SyntaxNodeType.ParenthesizedExpression:
+                case SyntaxNodeKind.ParenthesizedExpression:
                     return BindParenthesizedExpression((ParenthesizedExpression)expr);
-                case SyntaxNodeType.IdentifierExpression:
+                case SyntaxNodeKind.IdentifierExpression:
                     return BindIdentifierExpression((IdentifierExpression)expr);
-                case SyntaxNodeType.MemberAccessExpression:
+                case SyntaxNodeKind.MemberAccessExpression:
                     return BindMemberAccessExpression((MemberAccessExpression)expr);
-                case SyntaxNodeType.SubscriptExpression:
+                case SyntaxNodeKind.SubscriptExpression:
                     return BindSubscriptExpression((SubscriptExpression)expr);
-                case SyntaxNodeType.CallExpression:
+                case SyntaxNodeKind.CallExpression:
                     return BindCallExpression((CallExpression)expr);
-                case SyntaxNodeType.AssignmentExpression:
+                case SyntaxNodeKind.AssignmentExpression:
                     return BindAssignmentExpression((AssignmentExpression)expr);
                 default:
-                    throw new System.Exception($"Unexpected SyntaxExpression: {expr.Type}");
+                    throw new System.Exception($"Unexpected SyntaxExpression: {expr.Kind}");
             }
         }
 

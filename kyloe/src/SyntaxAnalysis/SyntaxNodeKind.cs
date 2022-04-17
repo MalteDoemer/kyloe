@@ -1,8 +1,6 @@
 namespace Kyloe.Syntax
 {
-
-    // TODO: make SyntaxNodeType internal
-    public enum SyntaxNodeType
+    public enum SyntaxNodeKind
     {
         // Expressions
         MalformedExpression,

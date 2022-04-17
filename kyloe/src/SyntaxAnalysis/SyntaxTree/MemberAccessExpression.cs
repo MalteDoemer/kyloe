@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
         public SyntaxToken DotToken { get; }
         public IdentifierExpression IdentifierExpression { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.MemberAccessExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.MemberAccessExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, IdentifierExpression.Location);
 

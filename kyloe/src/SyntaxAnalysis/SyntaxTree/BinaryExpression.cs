@@ -16,7 +16,7 @@ namespace Kyloe.Syntax
         public SyntaxToken OperatorToken { get; }
         public SyntaxExpression RightExpression { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.BinaryExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.BinaryExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftExpression.Location, RightExpression.Location);
 

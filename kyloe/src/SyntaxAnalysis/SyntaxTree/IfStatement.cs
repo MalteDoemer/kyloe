@@ -18,7 +18,7 @@ namespace Kyloe.Syntax
         public SyntaxStatement Body { get; }
         public ElseClause? ElseClause { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.IfStatement;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.IfStatement;
 
         public override SourceLocation Location => ElseClause is null ? SourceLocation.CreateAround(IfToken.Location, Body.Location) : SourceLocation.CreateAround(IfToken.Location, ElseClause.Location);
 

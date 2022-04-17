@@ -18,7 +18,7 @@ namespace Kyloe.Syntax
         public SyntaxExpression Subscript { get; }
         public SyntaxToken RightSquare { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.SubscriptExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.SubscriptExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftNode.Location, RightSquare.Location);
 

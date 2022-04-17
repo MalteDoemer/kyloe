@@ -12,7 +12,7 @@ namespace Kyloe.Syntax
 
         public SyntaxToken Semicolon { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.EmptyStatement;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.EmptyStatement;
 
         public override SourceLocation Location => Semicolon.Location;
 

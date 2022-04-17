@@ -12,7 +12,7 @@ namespace Kyloe.Syntax
 
         public SyntaxToken Token { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.MalformedExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.MalformedExpression;
 
         public override SourceLocation Location => Token.Location;
 

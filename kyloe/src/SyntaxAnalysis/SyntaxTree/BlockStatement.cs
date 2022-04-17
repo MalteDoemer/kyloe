@@ -17,7 +17,7 @@ namespace Kyloe.Syntax
         public ImmutableArray<SyntaxStatement> Statements { get; }
         public SyntaxToken RightCurly { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.BlockStatement;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.BlockStatement;
 
         public override SourceLocation Location => SourceLocation.CreateAround(LeftCurly.Location, RightCurly.Location);
 

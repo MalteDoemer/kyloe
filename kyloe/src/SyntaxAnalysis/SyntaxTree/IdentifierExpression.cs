@@ -12,7 +12,7 @@ namespace Kyloe.Syntax
 
         public SyntaxToken NameToken { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.IdentifierExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.IdentifierExpression;
 
         public override SourceLocation Location => NameToken.Location;
 

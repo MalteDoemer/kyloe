@@ -12,7 +12,7 @@ namespace Kyloe.Syntax
 
         public SyntaxToken LiteralToken { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.LiteralExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.LiteralExpression;
 
         public override SourceLocation Location => LiteralToken.Location;
 

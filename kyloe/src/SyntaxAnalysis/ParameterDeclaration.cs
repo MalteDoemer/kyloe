@@ -14,7 +14,7 @@ namespace Kyloe.Syntax
         public SyntaxToken NameToken { get; }
         public TypeClause TypeClause { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.ParameterDeclaration;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.ParameterDeclaration;
 
         public override SourceLocation Location => SourceLocation.CreateAround(NameToken.Location, TypeClause.Location);
 

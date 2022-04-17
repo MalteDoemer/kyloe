@@ -14,7 +14,7 @@ namespace Kyloe.Syntax
         public SyntaxExpression Expression { get; }
         public SyntaxToken Semicolon { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.ExpressionStatement;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.ExpressionStatement;
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, Semicolon.Location);
 

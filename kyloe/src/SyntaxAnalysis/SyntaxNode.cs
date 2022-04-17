@@ -6,7 +6,7 @@ namespace Kyloe.Syntax
 {
     public abstract class SyntaxNode
     {
-        public abstract SyntaxNodeType Type { get; }
+        public abstract SyntaxNodeKind Kind { get; }
 
         public abstract SourceLocation Location { get; }
 

@@ -24,7 +24,7 @@ namespace Kyloe.Syntax
         public TypeClause? TypeClause { get; }
         public BlockStatement Body { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.FunctionDefinition;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.FunctionDefinition;
 
         public override SourceLocation Location => throw new System.NotImplementedException();
 

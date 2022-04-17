@@ -22,7 +22,7 @@ namespace Kyloe.Syntax
         public SyntaxExpression AssignmentExpression { get; }
         public SyntaxToken Semicolon { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.DeclarationStatement;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.DeclarationStatement;
 
         public override SourceLocation Location => SourceLocation.CreateAround(DeclerationToken.Location, AssignmentExpression.Location);
 

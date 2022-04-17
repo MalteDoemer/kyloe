@@ -18,7 +18,7 @@ namespace Kyloe.Syntax
         public ArgumentExpression Arguments { get; }
         public SyntaxToken RightParen { get; }
 
-        public override SyntaxNodeType Type => SyntaxNodeType.CallExpression;
+        public override SyntaxNodeKind Kind => SyntaxNodeKind.CallExpression;
 
         public override SourceLocation Location => SourceLocation.CreateAround(Expression.Location, RightParen.Location);
 
