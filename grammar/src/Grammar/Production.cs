@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Kyloe.Grammar
 {
-    internal abstract class Production
+    public abstract class Production
     {
         public abstract IEnumerable<TokenKind> Children();
     }

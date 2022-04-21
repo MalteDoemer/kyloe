@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace Kyloe.Grammar
 {
@@ -8,23 +9,108 @@ namespace Kyloe.Grammar
 
         public static void Main(string[]? args)
         {
-            if (args is null || args.Length < 1)
+            if (args is null || args.Length <= 1)
             {
-                Console.WriteLine("error: expected a grammar file as first argument");
+                Usage();
                 return;
             }
 
-            var text = File.ReadAllText(args[0]);
+            var file = args[0];
+            var command = args[1];
 
-            var parser = new GrammarParser(text);
-            var binder = new GrammarBinder(parser.Parse());
-            var flattener = new GrammarFlattener(binder.Bind());
-            var grammar = flattener.Flatten();
+            var text = File.ReadAllText(file);
+            var grammar = FinalGrammar.CreateFromText(text);
 
-            foreach (var rule in grammar.Rules.Values)
+            if (command == "first")
             {
-                Console.WriteLine(rule);
+                if (args.Length != 3)
+                {
+                    Usage();
+                    return;
+                }
+
+                var ruleName = args[2];
+                var rule = grammar.LookupRule(ruleName);
+
+                if (rule is null)
+                {
+                    Console.WriteLine($"error: the rule '{ruleName}' does not exist");
+                    return;
+                }
+
+                var first = grammar.FirstSet(rule.Kind);
+                var names = first.Select(token => grammar.GetName(token));
+                Console.WriteLine($"FIRST = {{ {string.Join(", ", names)} }}");
+                return;
             }
+            else if (command == "follow")
+            {
+                if (args.Length != 3)
+                {
+                    Usage();
+                    return;
+                }
+
+                var ruleName = args[2];
+                var rule = grammar.LookupRule(ruleName);
+
+                if (rule is null)
+                {
+                    Console.WriteLine($"error: the rule '{ruleName}' does not exist");
+                    return;
+                }
+
+                var first = grammar.FollowSet(rule.Kind);
+                var names = first.Select(token => grammar.GetName(token));
+                Console.WriteLine($"FOLLOW = {{ {string.Join(", ", names)} }}");
+                return;
+            }
+            else if (command == "rules")
+            {
+                if (args.Length != 2)
+                {
+                    Usage();
+                    return;
+                }
+
+                foreach (var rule in grammar.Rules.Values)
+                    Console.WriteLine(rule);
+
+                return;
+            }
+            else if (command == "terminals")
+            {
+                if (args.Length != 2)
+                {
+                    Usage();
+                    return;
+                }
+
+                foreach (var terminal in grammar.Terminals.Values)
+                    Console.WriteLine(terminal);
+
+                return;
+            }
+
+            Usage();
+            return;
+        }
+
+        private static void Usage()
+        {
+            Console.WriteLine($"usage: {System.AppDomain.CurrentDomain.FriendlyName} GRAMMAR COMMAND [ARGS]");
+            Console.WriteLine();
+            Console.WriteLine("GRAMMAR:");
+            Console.WriteLine("\tthe path to a grammar defintion file");
+            Console.WriteLine();
+            Console.WriteLine("RULE:");
+            Console.WriteLine("\ta name of a rule defined in the grammar definition file");
+            Console.WriteLine();
+            Console.WriteLine($"COMMAND:");
+            Console.WriteLine($"\tfirst RULE\t\tprints the first set of RULE");
+            Console.WriteLine($"\tfollow RULE\t\tprints the follow set of RULE");
+            Console.WriteLine($"\trules\t\t\tprints all rules");
+            Console.WriteLine($"\tterminals\t\t\tprints all terminals");
         }
     }
 }

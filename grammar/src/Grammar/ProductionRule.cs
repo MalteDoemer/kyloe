@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Kyloe.Grammar
 {
-    internal sealed class ProductionRule
+    public sealed class ProductionRule
     {
         public ProductionRule(string name, TokenKind kind, Production production)
         {

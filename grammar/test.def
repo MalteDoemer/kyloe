@@ -8,6 +8,8 @@ RParen = '\)';
 
 Num = '\b\d+\b';
 
+Start = Sum;
+
 Sum = (Sum, Plus | Minus, Mult) | Mult;
 Mult = (Mult, Star | Slash, Primary) | Primary;
 Primary = Num | (LParen, Sum, RParen);

@@ -1,6 +1,6 @@
 namespace Kyloe.Grammar
 {
-    internal sealed class TerminalDefinition
+    public sealed class TerminalDefinition
     {
         public TerminalDefinition(string name, TokenKind kind, string text)
         {
@@ -12,5 +12,7 @@ namespace Kyloe.Grammar
         public string Name { get; }
         public TokenKind Kind { get; }
         public string Text { get; }
+
+        public override string ToString() => $"{Name} = '{Text}'";
     }
 }
