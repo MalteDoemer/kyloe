@@ -20,22 +20,37 @@ namespace Kyloe.Grammar
             var builder = ImmutableDictionary.CreateBuilder<TokenKind, ProductionRule>();
 
             foreach (var rule in boundGrammar.Rules.Values)
+            {
                 builder.Add(rule.Kind, Flatten(rule));
+            }
 
             return new BoundGrammar(boundGrammar.Terminals, builder.ToImmutable());
         }
 
         /// <summary>
         /// This function goes through all productions and removes the or productions just like when multiplying out in maths.
+        /// Also it reorders the production, so that all productions that are left recursive come first.
         /// </summary>
         private ProductionRule Flatten(ProductionRule rule)
         {
             // The binder always creates a rule with one production.
             Debug.Assert(rule.Productions.Length == 1);
 
-            var prod = rule.Productions.First();
+            var production = rule.Productions.First();
 
-            return new ProductionRule(rule.Name, rule.Kind, FlattenProduction(prod).ToImmutableArray());
+            var withRecursion = ImmutableArray.CreateBuilder<Production>();
+            var noRecursion = ImmutableArray.CreateBuilder<Production>();
+
+            foreach (var prod in FlattenProduction(production))
+                if (prod.Children().First() == rule.Kind)
+                    withRecursion.Add(prod);
+                else
+                    noRecursion.Add(prod);
+
+            var index = withRecursion.Count;
+            withRecursion.AddRange(noRecursion);
+
+            return new ProductionRule(rule.Name, rule.Kind, index, withRecursion.ToImmutable());
         }
 
 

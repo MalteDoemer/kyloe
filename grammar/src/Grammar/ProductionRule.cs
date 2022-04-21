@@ -5,15 +5,25 @@ namespace Kyloe.Grammar
 {
     internal sealed class ProductionRule
     {
-        public ProductionRule(string name, TokenKind kind, ImmutableArray<Production> productions)
+        public ProductionRule(string name, TokenKind kind, Production production)
         {
             Name = name;
             Kind = kind;
+            FirstProductionNonLeftRecursiveProduction = -1;
+            Productions = ImmutableArray.Create(production);
+        }
+
+        public ProductionRule(string name, TokenKind kind, int firstProductionNonLeftRecursiveProduction, ImmutableArray<Production> productions)
+        {
+            Name = name;
+            Kind = kind;
+            FirstProductionNonLeftRecursiveProduction = firstProductionNonLeftRecursiveProduction;
             Productions = productions;
         }
 
         public string Name { get; }
         public TokenKind Kind { get; }
+        public int FirstProductionNonLeftRecursiveProduction { get; }
         public ImmutableArray<Production> Productions { get; }
 
         public override string ToString()

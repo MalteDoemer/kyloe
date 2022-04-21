@@ -55,7 +55,7 @@ namespace Kyloe.Grammar
                 else
                 {
                     var prod = BindNode(stmt.Node);
-                    var rule = new ProductionRule(name, kind, ImmutableArray.Create(prod));
+                    var rule = new ProductionRule(name, kind, prod);
                     rules.Add(kind, rule);
                 }
             }
