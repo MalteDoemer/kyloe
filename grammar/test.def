@@ -1,0 +1,10 @@
+Star = '\*';
+Plus = '\+';
+LParen = '\(';
+RParen = '\)';
+
+Num = '\b\d+\b';
+
+Sum = (Sum, Plus, Mult) | Mult;
+Mult = (Mult, Star, Primary) | Primary;
+Primary = Num | (LParen, Sum, RParen);
