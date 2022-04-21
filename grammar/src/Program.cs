@@ -7,16 +7,18 @@ namespace Kyloe.Grammar
         private static string text = @"
 
 
-Primary = ° (LParen, Expr, RParen);
+Primary = (LParen, Expr, RParen) | #;
 ";
 
         public static void Main()
         {
-            var lexer = new GrammarLexer(text);
+            var parser = new GrammarParser(text);
 
-            foreach (var token in lexer.Tokens())
+            var grammar = parser.Parse();
+
+            foreach (var stmt in grammar.Statements) 
             {
-                Console.WriteLine(token);
+                Console.WriteLine(stmt);
             }
         }
     }
