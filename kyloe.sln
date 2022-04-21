@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyc", "kyc\kyc.csproj", "{E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe.tests", "kyloe.tests\kyloe.tests.csproj", "{15C81C3B-7113-4027-870C-C7F0C885EAC4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grammar", "grammar\grammar.csproj", "{A0110EB2-E4CD-4783-8A04-AF0305BCCF0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{15C81C3B-7113-4027-870C-C7F0C885EAC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15C81C3B-7113-4027-870C-C7F0C885EAC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15C81C3B-7113-4027-870C-C7F0C885EAC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0110EB2-E4CD-4783-8A04-AF0305BCCF0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0110EB2-E4CD-4783-8A04-AF0305BCCF0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0110EB2-E4CD-4783-8A04-AF0305BCCF0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0110EB2-E4CD-4783-8A04-AF0305BCCF0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
