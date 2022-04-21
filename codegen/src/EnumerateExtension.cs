@@ -1,7 +1,4 @@
-using System.Linq;
-using System.Collections.Generic;
-
-namespace Kyloe.Grammar
+namespace CodeGen
 {
     public static class EnumerateExtension
     {
