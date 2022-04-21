@@ -18,9 +18,8 @@ namespace Kyloe.Grammar
 
             var parser = new GrammarParser(text);
             var binder = new GrammarBinder(parser.Parse());
-
-            var grammar = binder.Bind();
-
+            var flattener = new GrammarFlattener(binder.Bind());
+            var grammar = flattener.Flatten();
 
             foreach (var rule in grammar.Rules.Values)
             {
