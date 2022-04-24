@@ -47,6 +47,26 @@ namespace Kyloe.Grammar
             return boundGrammar.Rules.Values.Where(r => string.Equals(r.Name, name, comparison)).FirstOrDefault();
         }
 
+
+        /// <summary>
+        /// Returns an IEnumerable over all terminals in a given production recursively.
+        /// </summary>
+        public IEnumerable<TokenKind> EnumerateTerminals(TokenKind kind)
+        {
+            if (kind.IsTerminal)
+                yield return kind;
+            else
+            {
+                var rule = Rules[kind];
+
+                foreach (var prod in rule.Productions)
+                    foreach (var child in prod.Children())
+                        if (child != kind)
+                            foreach (var terminal in EnumerateTerminals(child))
+                                yield return terminal;
+            }
+        }
+
         /// <summary>
         /// Find the FIRST set of a given token.
         /// </summary>

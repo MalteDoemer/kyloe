@@ -9,7 +9,7 @@ namespace Kyloe.Grammar
         {
             Name = name;
             Kind = kind;
-            FirstProductionNonLeftRecursiveProduction = -1;
+            FirstNonLeftRecursiveProduction = -1;
             Productions = ImmutableArray.Create(production);
         }
 
@@ -17,14 +17,16 @@ namespace Kyloe.Grammar
         {
             Name = name;
             Kind = kind;
-            FirstProductionNonLeftRecursiveProduction = firstProductionNonLeftRecursiveProduction;
+            FirstNonLeftRecursiveProduction = firstProductionNonLeftRecursiveProduction;
             Productions = productions;
         }
 
         public string Name { get; }
         public TokenKind Kind { get; }
-        public int FirstProductionNonLeftRecursiveProduction { get; }
+        public int FirstNonLeftRecursiveProduction { get; }
         public ImmutableArray<Production> Productions { get; }
+
+        public bool IsLeftRecursive => FirstNonLeftRecursiveProduction > 0;
 
         public override string ToString()
         {

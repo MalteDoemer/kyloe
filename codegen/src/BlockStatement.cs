@@ -54,7 +54,8 @@ namespace CodeGen
 
             foreach (var stmt in Statements)
             {
-                writer.WriteNewLine();
+                if (stmt is not BlockStatement)
+                    writer.WriteNewLine();
                 stmt.Generate(writer);
             }
 

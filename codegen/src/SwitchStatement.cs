@@ -1,6 +1,6 @@
 namespace CodeGen
 {
-    public sealed class SwitchStatement
+    public sealed class SwitchStatement : ICodeStatement
     {
         public SwitchStatement(string @switch)
         {
@@ -62,6 +62,14 @@ namespace CodeGen
         {
             Body.AddRange(statements);
             return this;
+        }
+
+        public void Generate(GeneratorWriter writer)
+        {
+            writer.Write("switch (");
+            writer.Write(Switch);
+            writer.Write(")");
+            Body.Generate(writer);
         }
     }
 }

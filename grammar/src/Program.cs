@@ -91,6 +91,29 @@ namespace Kyloe.Grammar
 
                 return;
             }
+            else if (command == "generate")
+            {
+                if (args.Length != 3)
+                {
+                    Usage();
+                    return;
+                }
+
+                var output = args[2];
+
+                using (var outFile = new StreamWriter(output))
+                {
+                    var writer = new CodeGen.GeneratorWriter(outFile, 4);
+                    var info = new ParserGeneratorInfo(locationClassName: "SourceLocation");
+                    var generator = new ParserGenerator(grammar, info);
+
+                    generator
+                        .CreateCompilationUnit("GeneratorTest", CodeGen.AccessModifier.Public)
+                        .Generate(writer);
+
+                    return;
+                }
+            }
 
             Usage();
             return;
@@ -106,11 +129,15 @@ namespace Kyloe.Grammar
             Console.WriteLine("RULE:");
             Console.WriteLine("\ta name of a rule defined in the grammar definition file");
             Console.WriteLine();
+            Console.WriteLine("OUTPUT:");
+            Console.WriteLine("\tthe path to a .cs file that should be used as output");
+            Console.WriteLine();
             Console.WriteLine($"COMMAND:");
             Console.WriteLine($"\tfirst RULE\t\tprints the first set of RULE");
             Console.WriteLine($"\tfollow RULE\t\tprints the follow set of RULE");
             Console.WriteLine($"\trules\t\t\tprints all rules");
-            Console.WriteLine($"\tterminals\t\t\tprints all terminals");
+            Console.WriteLine($"\tterminals\t\tprints all terminals");
+            Console.WriteLine($"\tgenerate OUTPUT\t\tgenerates the parser to OUTPUT");
         }
     }
 }
