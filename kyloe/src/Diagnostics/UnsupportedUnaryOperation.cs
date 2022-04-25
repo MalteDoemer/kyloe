@@ -7,12 +7,14 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class UnsupportedUnaryOperation : Diagnostic
     {
-        private readonly UnaryExpression expression;
+        private readonly SyntaxToken expression;
+        private readonly BoundOperation operation;
         private readonly TypeSpecifier type;
 
-        public UnsupportedUnaryOperation(UnaryExpression expression, TypeSpecifier type)
+        public UnsupportedUnaryOperation(SyntaxToken expression, BoundOperation operation, TypeSpecifier type)
         {
             this.expression = expression;
+            this.operation = operation;
             this.type = type;
         }
 
@@ -22,6 +24,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{expression.OperatorToken.Kind.TokenKindString()}' cannot be used with type '{type.FullName()}'";
+        public override string Message() => $"operator '{operation}' cannot be used with type '{type.FullName()}'";
     }
 }

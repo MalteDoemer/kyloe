@@ -1,0 +1,120 @@
+(* Punctuation *)
+Comma = '\,';
+Dot = '\.';
+Colon = '\:';
+SemiColon = '\;';
+SmallArrow = '\-\>';
+
+(* Comparison Operators *)
+LessEqual = '\<\=';
+Less = '\<';
+GreaterEqual = '\>\=';
+Greater = '\>';
+DoubleEqual = '\=\=';
+NotEqual = '\!\=';
+
+(* Assignment Operators *)
+PlusEqual = '\+\=';
+MinusEqual = '\-\=';
+StarEqual = '\*\=';
+SlashEqual = '\/\=';
+PercentEqual = '\%\=';
+AmpersandEqual = '\&\=';
+PipeEqual = '\|\=';
+HatEqual = '\^\=';
+Equal = '\=';
+
+(* Binary Operators *)
+Plus = '\+';
+Minus = '\-';
+Star = '\*';
+Slash = '\/';
+Percent = '\%';
+DoubleAmpersand = '\&\&';
+Ampersand = '\&';
+DoublePipe = '\|\|';
+Pipe = '\|';
+Hat = '\^';
+
+(* Unary Operators *)
+Tilde = '\~';
+Bang = '\!';
+
+(* Brackets *)
+LeftParen = '\(';
+RightParen = '\)';
+LeftSquare = '\[';
+RightSquare = '\]';
+LeftCurly = '\{';
+RightCurly = '\}';
+
+(* Literals *)
+Int = '\b\d+\b';
+Float = '\b\d+\.\d+';
+Bool = '\b(true|false)\b';
+String = '(\".*\"|\u0027.*\u0027)';
+
+(* Keywords *)
+VarKeyword = '\bvar\b';
+ConstKeyword = '\bconst\b';
+IfKeyword = '\bif\b';
+ElseKeyword = '\belse\b';
+FuncKeyword = '\bfunc\b';
+
+Identifier = '\b[a-zA-Z_]([a-zA-Z_]|\d)*\b';
+
+(* Discard *)
+Whitespace = '\s+';
+LineComment = '\/\/.*\n';
+BlockComment = '\/\*.*\*\/'; 
+Discard = Whitespace | LineComment | BlockComment;
+
+Start = CompilationUnit;
+Stop = SemiColon | LeftCurly | RightCurly;
+
+CompilationUnit = (CompilationUnit, TopLevelItem) | #;
+
+TopLevelItem = FunctionDefinition | DeclarationStatement;
+
+FunctionDefinition = FuncKeyword, Identifier, LeftParen, Parameters, RightParen, BlockStatement;
+
+Parameters = (Parameters, Comma, ParameterDeclaration) | ParameterDeclaration | #;
+ParameterDeclaration = Identifier, OptionalTypeClause;
+
+TypeClause = Colon, Identifier;
+OptionalTypeClause = TypeClause | #;
+
+Statement = BlockStatement | IfStatement | DeclarationStatement | ExpressionStatement | SemiColon;
+ExpressionStatement = (Expression, SemiColon);
+
+BlockStatement = LeftCurly, RepeatedStatement, RightCurly;
+RepeatedStatement = (RepeatedStatement, Statement) | #;
+
+IfStatement = IfKeyword, Expression, BlockStatement, OptionalElseStatement;
+
+OptionalElseStatement = ElseStatement | #;
+ElseStatement = ElseKeyword, IfStatementOrBlockStatement;
+IfStatementOrBlockStatement = (IfStatement | BlockStatement);
+
+DeclarationStatement = (VarKeyword | ConstKeyword), Identifier, Equal, Expression, SemiColon;
+
+Expression = AssignmentHelper;
+
+AssignmentHelper = LogicalOr, Assignment;
+Assignment = ((Equal | PlusEqual | MinusEqual | StarEqual | SlashEqual | PercentEqual | AmpersandEqual | PipeEqual | HatEqual), LogicalOr, Assignment) | #;
+
+LogicalOr = (LogicalOr, DoublePipe, LogicalAnd) | LogicalAnd;
+LogicalAnd = (LogicalAnd, DoubleAmpersand, BitOr) | BitOr;
+BitOr = (BitOr, Pipe, BitXor) | BitXor;
+BitXor = (BitXor, Hat, BitAnd) | BitAnd;
+BitAnd = (BitAnd, Ampersand, Equality) | Equality;
+Equality = (Equality, DoubleEqual | NotEqual, Comparison) | Comparison;
+Comparison = (Comparison, Less | LessEqual | Greater | GreaterEqual, Sum) | Sum;
+Sum = (Sum, Plus | Minus, Mult) | Mult;
+Mult = (Mult, Star | Slash, Prefix) | Prefix;
+Prefix = (Plus | Minus, Prefix) | Postfix;
+Postfix =  (Postfix, (LeftParen, Arguments, RightParen) | (LeftSquare, Arguments, RightSquare) | (Dot, Primary)) | Primary;
+Arguments = (Arguments, Comma, Expression) | Expression | #;
+
+Primary = Int | Float | Bool | String | Identifier | Parenthesized;
+Parenthesized = (LeftParen, Sum, RightParen);

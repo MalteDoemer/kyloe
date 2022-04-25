@@ -1,0 +1,43 @@
+{
+    "Namespace": "Kyloe.Syntax",
+    "TokenKindEnum": {
+        "Name": "SyntaxTokenKind",
+        "AccessModifier": "Internal"
+    },
+    "ExtensionClass": {
+        "Name": "SyntaxTokenKindExtension",
+        "AccessModifier": "Public"
+    },
+    "TokenClass": {
+        "Name": "SyntaxToken",
+        "AccessModifier": "Public"
+    },
+    "TerminalClass": {
+        "Name": "SyntaxTerminal",
+        "AccessModifier": "Public"
+    },
+    "NodeClass": {
+        "Name": "SyntaxNode",
+        "AccessModifier": "Public"
+    },
+    "LocationClass": {
+        "Name": "Kyloe.Utility.SourceLocation",
+        "AccessModifier": "Public"
+    },
+    "ErrorClass": {
+        "Name": "Kyloe.Diagnostics.SyntaxError",
+        "AccessModifier": "Public"
+    },
+    "ErrorKindEnum": {
+        "Name": "Kyloe.Diagnostics.DiagnosticKind",
+        "AccessModifier": "Public"
+    },
+    "LexerClass": {
+        "Name": "Lexer",
+        "AccessModifier": "Internal"
+    },
+    "ParserClass": {
+        "Name": "Parser",
+        "AccessModifier": "Internal"
+    }
+}

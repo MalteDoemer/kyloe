@@ -8,12 +8,12 @@ namespace Kyloe.Grammar
     public sealed class ParserGenerator
     {
         private readonly FinalGrammar grammar;
-        private readonly ParserGeneratorInfo info;
+        private readonly GeneratorInfo info;
 
         private readonly List<TokenKind> terminals;
         private readonly List<TokenKind> nonTerminals;
 
-        public ParserGenerator(FinalGrammar grammar, ParserGeneratorInfo info)
+        public ParserGenerator(FinalGrammar grammar, GeneratorInfo info)
         {
             this.grammar = grammar;
             this.info = info;
@@ -28,16 +28,53 @@ namespace Kyloe.Grammar
             nonTerminals.Sort();
         }
 
-        public CompilationUnit CreateCompilationUnit(string namespaceName, AccessModifier accessModifier)
+        public IEnumerable<(string, CompilationUnit)> CreateMultipleCompilationUnits()
         {
-            var ns = new Namespace(namespaceName)
-                .Add(CreateTokenKindEnum(accessModifier))
-                .Add(CreateExtensionClass(accessModifier))
-                .Add(CreateTokenClass(accessModifier))
-                .Add(CreateTerminalClass(accessModifier))
-                .Add(CreateNodeClass(accessModifier))
-                .Add(CreateLexerClass(accessModifier))
-                .Add(CreateParserClass(accessModifier));
+            yield return (info.TokenKindEnum.Name, new CompilationUnit()
+                .AddItem(new Namespace(info.Namespace).Add(CreateTokenKindEnum())));
+
+            yield return (info.ExtensionClass.Name, new CompilationUnit()
+                .AddItem(new Namespace(info.Namespace).Add(CreateExtensionClass())));
+
+            yield return (info.TokenClass.Name, new CompilationUnit()
+                .AddUsing("using System.Collections.Generic;")
+                .AddItem(new Namespace(info.Namespace).Add(CreateTokenClass())));
+
+            yield return (info.TerminalClass.Name, new CompilationUnit()
+                .AddUsing("using System.Linq;")
+                .AddUsing("using System.Collections.Generic;")
+                .AddItem(new Namespace(info.Namespace).Add(CreateTerminalClass())));
+
+            yield return (info.NodeClass.Name, new CompilationUnit()
+                .AddUsing("using System.Linq;")
+                .AddUsing("using System.Collections.Immutable;")
+                .AddUsing("using System.Collections.Generic;")
+                .AddItem(new Namespace(info.Namespace).Add(CreateNodeClass())));
+
+            yield return (info.LexerClass.Name, new CompilationUnit()
+                .AddUsing("using System;")
+                .AddUsing("using System.Linq;")
+                .AddUsing("using System.Collections.Generic;")
+                .AddUsing("using System.Text.RegularExpressions;")
+                .AddItem(new Namespace(info.Namespace).Add(CreateLexerClass())));
+
+            yield return (info.ParserClass.Name, new CompilationUnit()
+                .AddUsing("using System.Linq;")
+                .AddUsing("using System.Collections.Immutable;")
+                .AddUsing("using System.Collections.Generic;")
+                .AddItem(new Namespace(info.Namespace).Add(CreateParserClass())));
+        }
+
+        public CompilationUnit CreateSingleCompilationUnit()
+        {
+            var ns = new Namespace(info.Namespace)
+                .Add(CreateTokenKindEnum())
+                .Add(CreateExtensionClass())
+                .Add(CreateTokenClass())
+                .Add(CreateTerminalClass())
+                .Add(CreateNodeClass())
+                .Add(CreateLexerClass())
+                .Add(CreateParserClass());
 
             return new CompilationUnit()
                 .AddUsing("using System;")
@@ -48,23 +85,23 @@ namespace Kyloe.Grammar
                 .AddItem(ns);
         }
 
-        public Enum CreateTokenKindEnum(AccessModifier accessModifier)
+        public Enum CreateTokenKindEnum()
         {
-            return new Enum(accessModifier, info.TokenKindEnumName, "int").AddRange(
+            return new Enum(info.TokenKindEnum.AccessModifiers, info.TokenKindEnum.Name, "int").AddRange(
                 Enumerable.Reverse(terminals)
                 .Concat(nonTerminals)
                 .Select(t => new EnumMember(grammar.GetName(t), t.Value.ToString()))
             );
         }
 
-        public Class CreateExtensionClass(AccessModifier accessModifier)
+        public Class CreateExtensionClass()
         {
             var isTerminalMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Static,
                 "bool",
                 "IsTerminal")
-                .AddArg($"this {info.TokenKindEnumName} kind")
+                .AddArg($"this {info.TokenKindEnum.Name} kind")
                 .AddLine("return (int)kind < 0;");
 
             var isNonTerminalMethod = new Method(
@@ -72,54 +109,54 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Static,
                 "bool",
                 "IsNonTerminal")
-                .AddArg($"this {info.TokenKindEnumName} kind")
+                .AddArg($"this {info.TokenKindEnum.Name} kind")
                 .AddLine("return (int)kind > 0;");
 
             return new Class(
-                accessModifier,
+                info.ExtensionClass.AccessModifiers,
                 InheritanceModifier.Static,
-                info.ExtensionClassName)
+                info.ExtensionClass.Name)
                 .Add(isTerminalMethod)
                 .Add(isNonTerminalMethod);
         }
 
-        public Class CreateTokenClass(AccessModifier accessModifier)
+        public Class CreateTokenClass()
         {
             var kindProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Abstract,
-                info.TokenKindEnumName,
+                info.TokenKindEnum.Name,
                 "Kind",
                 "{ get; }");
 
             var locationProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Abstract,
-                info.LocationClassName,
+                info.LocationClass.Name,
                 "Location",
                 "{ get; }");
 
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Abstract,
-                $"IEnumerable<{info.TokenClassName}>",
+                $"IEnumerable<{info.TokenClass.Name}>",
                 "Children");
 
             return new Class(
-                accessModifier,
+                info.TokenClass.AccessModifiers,
                 InheritanceModifier.Abstract,
-                info.TokenClassName)
+                info.TokenClass.Name)
                 .Add(kindProp)
                 .Add(locationProp)
                 .Add(childrenMethod);
         }
 
-        public Class CreateTerminalClass(AccessModifier accessModifier)
+        public Class CreateTerminalClass()
         {
             var kindProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                info.TokenKindEnumName,
+                info.TokenKindEnum.Name,
                 "Kind",
                 "{ get; }");
 
@@ -133,7 +170,7 @@ namespace Kyloe.Grammar
             var locationProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                info.LocationClassName,
+                info.LocationClass.Name,
                 "Location",
                 "{ get; }");
 
@@ -148,18 +185,18 @@ namespace Kyloe.Grammar
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                $"IEnumerable<{info.TokenClassName}>",
+                $"IEnumerable<{info.TokenClass.Name}>",
                 "Children")
-                .AddLine($"return Enumerable.Empty<{info.TokenClassName}>();");
+                .AddLine($"return Enumerable.Empty<{info.TokenClass.Name}>();");
 
             var ctor = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
-                info.TerminalClassName,
+                info.TerminalClass.Name,
                 null)
-                .AddArg($"{info.TokenKindEnumName} kind")
+                .AddArg($"{info.TokenKindEnum.Name} kind")
                 .AddArg("string text")
-                .AddArg($"{info.LocationClassName} location")
+                .AddArg($"{info.LocationClass.Name} location")
                 .AddArg("bool invalid = false")
                 .AddLine("Kind = kind;")
                 .AddLine("Text = text;")
@@ -168,10 +205,10 @@ namespace Kyloe.Grammar
                 ;
 
             return new Class(
-                accessModifier,
+                info.TerminalClass.AccessModifiers,
                 InheritanceModifier.Sealed,
-                info.TerminalClassName,
-                info.TokenClassName)
+                info.TerminalClass.Name,
+                info.TokenClass.Name)
                 .Add(ctor)
                 .Add(kindProp)
                 .Add(textProp)
@@ -180,14 +217,14 @@ namespace Kyloe.Grammar
                 .Add(childrenMethod);
         }
 
-        public Class CreateNodeClass(AccessModifier accessModifier)
+        public Class CreateNodeClass()
         {
-            var immutableArray = $"ImmutableArray<{info.TokenClassName}?>";
+            var immutableArray = $"ImmutableArray<{info.TokenClass.Name}?>";
 
             var kindProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                info.TokenKindEnumName,
+                info.TokenKindEnum.Name,
                 "Kind",
                 "{ get; }");
 
@@ -201,32 +238,32 @@ namespace Kyloe.Grammar
             var locationProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                info.LocationClassName,
+                info.LocationClass.Name,
                 "Location",
-                $"=> {info.LocationClassName}.CreateAround(Children().First().Location, Children().Last().Location);");
+                $"=> {info.LocationClass.Name}.CreateAround(Children().First().Location, Children().Last().Location);");
 
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                $"IEnumerable<{info.TokenClassName}>",
+                $"IEnumerable<{info.TokenClass.Name}>",
                 "Children")
                 .AddLine($"return Tokens.Where(t => t is not null)!;");
 
             var ctor = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
-                info.NodeClassName,
+                info.NodeClass.Name,
                 null)
-                .AddArg($"{info.TokenKindEnumName} kind")
+                .AddArg($"{info.TokenKindEnum.Name} kind")
                 .AddArg($"{immutableArray} tokens")
                 .AddLine("Kind = kind;")
                 .AddLine("Tokens = tokens;");
 
             return new Class(
-                accessModifier,
+                info.NodeClass.AccessModifiers,
                 InheritanceModifier.Sealed,
-                info.NodeClassName,
-                info.TokenClassName)
+                info.NodeClass.Name,
+                info.TokenClass.Name)
                 .Add(ctor)
                 .Add(kindProp)
                 .Add(tokensProp)
@@ -234,7 +271,7 @@ namespace Kyloe.Grammar
                 .Add(childrenMethod);
         }
 
-        public Class CreateLexerClass(AccessModifier accessModifier)
+        public Class CreateLexerClass()
         {
             var groups = new List<string>();
 
@@ -246,8 +283,8 @@ namespace Kyloe.Grammar
 
             var regexString = CreateRawString(string.Join('|', groups));
 
-            var dict = $"Dictionary<string, {info.TokenKindEnumName}>";
-            var set = $"HashSet<{info.TokenKindEnumName}>";
+            var dict = $"Dictionary<string, {info.TokenKindEnum.Name}>";
+            var set = $"HashSet<{info.TokenKindEnum.Name}>";
 
 
             var regexField = new Field(
@@ -288,7 +325,7 @@ namespace Kyloe.Grammar
             var ctor = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
-                info.LexerClassName,
+                info.LexerClass.Name,
                 null)
                 .AddArg("string text")
                 .AddLine("this.pos = 0;")
@@ -296,8 +333,8 @@ namespace Kyloe.Grammar
                 .AddLine($"this.groupNames = new {dict}();")
                 .AddLine($"this.regex = new Regex({regexString}, RegexOptions.Compiled | RegexOptions.Multiline);")
                 .AddLine("")
-                .AddLine($"var names = Enum.GetNames<{info.TokenKindEnumName}>();")
-                .AddLine($"var values = Enum.GetValues<{info.TokenKindEnumName}>();")
+                .AddLine($"var names = Enum.GetNames<{info.TokenKindEnum.Name}>();")
+                .AddLine($"var values = Enum.GetValues<{info.TokenKindEnum.Name}>();")
                 .AddStatement(new ForLoop("int i = 0; i < names.Length; i++")
                     .AddLine("groupNames.Add(names[i], values[i]);"));
 
@@ -316,14 +353,14 @@ namespace Kyloe.Grammar
                 var terminalsMethod = new Method(
                     AccessModifier.Public,
                     InheritanceModifier.None,
-                    $"IEnumerable<{info.TerminalClassName}>",
+                    $"IEnumerable<{info.TerminalClass.Name}>",
                     "Terminals")
                     .AddLine("return AllTerminals().Where(t => !discardTerminals.Contains(t.Kind));");
 
                 return new Class(
-                    accessModifier,
+                    info.LexerClass.AccessModifiers,
                     InheritanceModifier.Sealed,
-                    info.LexerClassName)
+                    info.LexerClass.Name)
                     .Add(regexField)
                     .Add(groupNamesField)
                     .Add(discardField)
@@ -336,9 +373,9 @@ namespace Kyloe.Grammar
             else
             {
                 return new Class(
-                    accessModifier,
+                    info.LexerClass.AccessModifiers,
                     InheritanceModifier.Sealed,
-                    info.LexerClassName)
+                    info.LexerClass.Name)
                     .Add(regexField)
                     .Add(groupNamesField)
                     .Add(textField)
@@ -353,25 +390,25 @@ namespace Kyloe.Grammar
             return new Method(
                     AccessModifier.Public,
                     InheritanceModifier.None,
-                    $"IEnumerable<{info.TerminalClassName}>",
+                    $"IEnumerable<{info.TerminalClass.Name}>",
                     name)
                     .AddStatement(new WhileLoop("pos < text.Length")
                         .AddLine("var match = regex.Match(text, pos);")
                         .AddStatement(new IfStatement("match.Success")
                             .AddLine("var group = match.Groups.OfType<System.Text.RegularExpressions.Group>().Where(g => g.Success).Last();")
-                            .AddLine($"var location = {info.LocationClassName}.FromLength(match.Index, match.Length);")
-                            .AddLine($"var terminal = new {info.TerminalClassName}(groupNames[group.Name], match.Value, location);")
+                            .AddLine($"var location = {info.LocationClass.Name}.FromLength(match.Index, match.Length);")
+                            .AddLine($"var terminal = new {info.TerminalClass.Name}(groupNames[group.Name], match.Value, location);")
                             .AddLine("pos += location.Length;")
                             .AddLine("yield return terminal;"))
                         .AddStatement(new ElseStatement()
-                            .AddLine($"var location = {info.LocationClassName}.FromLength(pos, 1);")
-                            .AddLine($"var terminal = new {info.TerminalClassName}({info.TokenKindEnumName}.Error, text[pos].ToString(), location);")
+                            .AddLine($"var location = {info.LocationClass.Name}.FromLength(pos, 1);")
+                            .AddLine($"var terminal = new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.Error, text[pos].ToString(), location);")
                             .AddLine("pos += 1;")
                             .AddLine("yield return terminal;")))
-                    .AddLine($"yield return new {info.TerminalClassName}({info.TokenKindEnumName}.End, \"<end>\", {info.LocationClassName}.FromLength(pos, 0));");
+                    .AddLine($"yield return new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.End, \"<end>\", {info.LocationClass.Name}.FromLength(pos, 0));");
         }
 
-        public Class CreateParserClass(AccessModifier accessModifier)
+        public Class CreateParserClass()
         {
 
             if (grammar.StartRule is null)
@@ -386,14 +423,14 @@ namespace Kyloe.Grammar
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 @readonly: true,
-                type: $"ImmutableArray<{info.TerminalClassName}>",
+                type: $"ImmutableArray<{info.TerminalClass.Name}>",
                 name: "terminals");
 
             var stopTerminalsField = new Field(
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 true,
-                $"HashSet<{info.TokenKindEnumName}>",
+                $"HashSet<{info.TokenKindEnum.Name}>",
                 "stopTerminals"
             );
 
@@ -401,7 +438,7 @@ namespace Kyloe.Grammar
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 @readonly: true,
-                type: $"ICollection<{info.ErrorClassName}>",
+                type: $"ICollection<{info.ErrorClass.Name}>",
                 name: "errors");
 
             var posField = new Field(
@@ -421,36 +458,36 @@ namespace Kyloe.Grammar
             var currentProp = new SimpleProperty(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                info.TerminalClassName,
+                info.TerminalClass.Name,
                 "current",
                 "=> pos < terminals.Length ? terminals[pos] : terminals[terminals.Length - 1];");
 
             var ctor = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
-                info.ParserClassName,
+                info.ParserClass.Name,
                 null)
                 .AddArg("string text")
-                .AddArg($"ICollection<{info.ErrorClassName}> errors")
+                .AddArg($"ICollection<{info.ErrorClass.Name}> errors")
                 .AddLine("this.pos = 0;")
                 .AddLine("this.isValid = true;")
                 .AddLine("this.errors = errors;")
-                .AddLine($"var lexer = new {info.LexerClassName}(text);")
-                .AddLine($"var builder = ImmutableArray.CreateBuilder<{info.TerminalClassName}>();")
+                .AddLine($"var lexer = new {info.LexerClass.Name}(text);")
+                .AddLine($"var builder = ImmutableArray.CreateBuilder<{info.TerminalClass.Name}>();")
                 .AddStatement(new ForeachLoop("var terminal in lexer.Terminals()")
-                    .AddStatement(new IfStatement($"terminal.Kind == {info.TokenKindEnumName}.Error")
-                        .AddLine($"errors.Add(new {info.ErrorClassName}({info.ErrorKindEnumName}.InvalidCharacterError, string.Format(\"invalid character: \\\\u{{0:x4}}\", (int)(terminal.Text[0])), terminal.Location));"))
+                    .AddStatement(new IfStatement($"terminal.Kind == {info.TokenKindEnum.Name}.Error")
+                        .AddLine($"errors.Add(new {info.ErrorClass.Name}({info.ErrorKindEnum.Name}.InvalidCharacterError, string.Format(\"invalid character: \\\\u{{0:x4}}\", (int)(terminal.Text[0])), terminal.Location));"))
                     .AddStatement(new ElseStatement()
                         .AddLine("builder.Add(terminal);")))
                 .AddLine("this.terminals = builder.ToImmutable();")
-                .AddLine($"this.stopTerminals = new HashSet<{info.TokenKindEnumName}>();")
+                .AddLine($"this.stopTerminals = new HashSet<{info.TokenKindEnum.Name}>();")
                 .AddLines(stopTerminals.Select(t => $"this.stopTerminals.Add({TokenKindAccessString(t)});"))
                 .AddLine($"this.stopTerminals.Add({TokenKindAccessString(TokenKind.End)});");
 
             var advanceMethod = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                info.TerminalClassName,
+                info.TerminalClass.Name,
                 "Advance")
                 .AddLine("var temp = current;")
                 .AddLine("pos += 1;")
@@ -460,13 +497,13 @@ namespace Kyloe.Grammar
             var expectMethod = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                $"{info.TokenClassName}?",
+                $"{info.TokenClass.Name}?",
                 "Expect")
-                .AddArg($"{info.TokenKindEnumName} expected")
-                .AddArg($"params {info.TokenKindEnumName}[] next")
+                .AddArg($"{info.TokenKindEnum.Name} expected")
+                .AddArg($"params {info.TokenKindEnum.Name}[] next")
                 .AddLine("if (current.Kind == expected) return Advance();")
                 .AddLine("Unexpected(expected);")
-                .AddLine($"var forged = new {info.TerminalClassName}(expected, current.Text, current.Location, invalid: true);")
+                .AddLine($"var forged = new {info.TerminalClass.Name}(expected, current.Text, current.Location, invalid: true);")
                 .AddLine($"if (next.Length != 0) SkipInput(next);")
                 .AddLine("return forged;");
 
@@ -475,7 +512,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 "void",
                 "SkipInput")
-                .AddArg($"params {info.TokenKindEnumName}[] next")
+                .AddArg($"params {info.TokenKindEnum.Name}[] next")
                 .AddLine("var nextSet = next.ToHashSet();")
                 .AddStatement(new WhileLoop("!next.Contains(current.Kind) && ! stopTerminals.Contains(current.Kind)")
                     .AddLine("pos += 1;"));
@@ -485,7 +522,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 "void",
                 "Unexpected")
-                .AddArg($"params {info.TokenKindEnumName}[] expected")
+                .AddArg($"params {info.TokenKindEnum.Name}[] expected")
                 .AddStatement(new IfStatement("!isValid")
                     .AddLine("return;"))
                 .AddLine("isValid = false;")
@@ -494,27 +531,27 @@ namespace Kyloe.Grammar
                     .AddLine("msg = $\"expected {expected[0]}, got {current.Kind}\";"))
                 .AddStatement(new ElseStatement()
                     .AddLine("msg = $\"expected one of ({string.Join(\", \", expected)}), got {current.Kind}\";"))
-                .AddLine($"errors.Add(new {info.ErrorClassName}({info.ErrorKindEnumName}.UnexpectedTokenError, msg, current.Location));");
+                .AddLine($"errors.Add(new {info.ErrorClass.Name}({info.ErrorKindEnum.Name}.UnexpectedTokenError, msg, current.Location));");
 
             var createNodeMethod = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                $"{info.TokenClassName}?",
+                $"{info.TokenClass.Name}?",
                 "CreateNode")
-                .AddArg($"{info.TokenKindEnumName} kind")
-                .AddArg($"params {info.TokenClassName}?[] tokens")
+                .AddArg($"{info.TokenKindEnum.Name} kind")
+                .AddArg($"params {info.TokenClass.Name}?[] tokens")
                 .AddLine("var arr = tokens.ToImmutableArray();")
                 .AddLine("if (arr.Length == 0) return null;")
                 .AddLine("else if (arr.Length == 1) return arr[0];")
-                .AddLine($"else return new {info.NodeClassName}(kind, arr);");
+                .AddLine($"else return new {info.NodeClass.Name}(kind, arr);");
 
             var parseMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
-                $"{info.TokenClassName}?",
+                $"{info.TokenClass.Name}?",
                 "Parse")
                 .AddLine($"var token = {ParseMethodName(grammar.StartRule.Kind)}();")
-                .AddLine($"Expect({info.TokenKindEnumName}.End);")
+                .AddLine($"Expect({info.TokenKindEnum.Name}.End);")
                 .AddLine("return token;");
 
             IEnumerable<TokenKind> rules;
@@ -525,9 +562,9 @@ namespace Kyloe.Grammar
                 rules = nonTerminals.Where(t => t != grammar.DiscardRule.Kind);
 
             return new Class(
-                accessModifier,
+                info.ParserClass.AccessModifiers,
                 InheritanceModifier.Sealed,
-                info.ParserClassName)
+                info.ParserClass.Name)
                 .Add(terminalsField)
                 .Add(stopTerminalsField)
                 .Add(errorsField)
@@ -552,7 +589,7 @@ namespace Kyloe.Grammar
             var method = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                $"{info.TokenClassName}?",
+                $"{info.TokenClass.Name}?",
                 name);
 
             var rule = grammar.Rules[nonTerminal];
@@ -605,7 +642,7 @@ namespace Kyloe.Grammar
                 var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
 
                 defaultBlock.AddLine($"Unexpected({args});");
-                defaultBlock.AddLine($"return new Node({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<Token?>(current));");
+                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}?>(current));");
 
                 sw.AddStatement(defaultBlock);
             }
@@ -659,7 +696,7 @@ namespace Kyloe.Grammar
                 var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
 
                 defaultBlock.AddLine($"Unexpected({args});");
-                defaultBlock.AddLine($"return new Node({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<Token?>(current));");
+                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}?>(current));");
 
                 outerSwitch.AddStatement(defaultBlock);
             }
@@ -669,7 +706,7 @@ namespace Kyloe.Grammar
 
         private void GenerateLeftRecursiveLoop(BlockStatement block, ProductionRule rule, Production production)
         {
-            GenerateProductionParsingBlock($"{info.TokenClassName}? node =", "n", block, rule, production);
+            GenerateProductionParsingBlock($"{info.TokenClass.Name}? node =", "n", block, rule, production);
 
             var condition = new StringBuilder();
 
@@ -721,7 +758,7 @@ namespace Kyloe.Grammar
                 if (hasAny)
                 {
                     var innerBlock = new BlockStatement();
-                    GenerateProductionParsingBlock($"{info.TokenClassName}? temp =", "x", innerBlock, rule, prod);
+                    GenerateProductionParsingBlock($"{info.TokenClass.Name}? temp =", "x", innerBlock, rule, prod);
                     innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
                     innerBlock.AddLine("break;");
                     innerSwitch.AddStatement(innerBlock);
@@ -751,7 +788,7 @@ namespace Kyloe.Grammar
                     if (hasAny)
                     {
                         var innerBlock = new BlockStatement();
-                        GenerateProductionParsingBlock($"{info.TokenClassName}? temp =", "x", innerBlock, rule, prod);
+                        GenerateProductionParsingBlock($"{info.TokenClass.Name}? temp =", "x", innerBlock, rule, prod);
                         innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
                         innerBlock.AddLine("break;");
 
@@ -801,7 +838,7 @@ namespace Kyloe.Grammar
 
             code.Append(result);
             code.Append(" CreateNode(");
-            code.Append(info.TokenKindEnumName);
+            code.Append(info.TokenKindEnum.Name);
             code.Append('.');
             code.Append(grammar.GetName(rule.Kind));
 
@@ -841,7 +878,7 @@ namespace Kyloe.Grammar
 
         private string TokenKindAccessString(TokenKind kind)
         {
-            return $"{info.TokenKindEnumName}.{grammar.GetName(kind)}";
+            return $"{info.TokenKindEnum.Name}.{grammar.GetName(kind)}";
         }
 
         private string CreateRawString(string str)

@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Text.Json;
 using System.IO;
 using System.Linq;
+using CodeGen;
+using System.Text.Json.Serialization;
 
 namespace Kyloe.Grammar
 {
@@ -9,6 +12,23 @@ namespace Kyloe.Grammar
 
         public static void Main(string[]? args)
         {
+            // var testopts = new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() }, WriteIndented = true };
+            // var test = new GeneratorInfo();
+            // test.Namespace = "Test";
+            // test.TokenKindEnum = new ClassInfo("TokenKindEnum", AccessModifier.Public);
+            // test.ExtensionClass = new ClassInfo("ExtensionClass", AccessModifier.Public);
+            // test.TokenClass = new ClassInfo("TokenClass", AccessModifier.Public);
+            // test.TerminalClass = new ClassInfo("TerminalClass", AccessModifier.Public);
+            // test.NodeClass = new ClassInfo("NodeClass", AccessModifier.Public);
+            // test.LocationClass = new ClassInfo("LocationClass", AccessModifier.Public);
+            // test.ErrorClass = new ClassInfo("ErrorClass", AccessModifier.Public);
+            // test.ErrorKindEnum = new ClassInfo("ErrorKindEnum", AccessModifier.Public);
+            // test.LexerClass = new ClassInfo("LexerClass", AccessModifier.Internal);
+            // test.ParserClass = new ClassInfo("ParserClass", AccessModifier.Internal);
+
+            // var gen = JsonSerializer.Serialize<GeneratorInfo>(test, testopts);
+            // Console.WriteLine(gen);
+
             if (args is null || args.Length <= 1)
             {
                 Usage();
@@ -93,27 +113,34 @@ namespace Kyloe.Grammar
             }
             else if (command == "generate")
             {
-                if (args.Length != 3)
+                if (args.Length != 4)
                 {
                     Usage();
                     return;
                 }
 
-                var output = args[2];
+                var json = File.ReadAllText(args[2]);
+                var outDir = args[3];
+                var opts = new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() } };
+                var info = JsonSerializer.Deserialize<GeneratorInfo>(json);
 
-                using (var outFile = new StreamWriter(output))
+                var generator = new ParserGenerator(grammar, info);
+
+                foreach (var (name, unit) in generator.CreateMultipleCompilationUnits())
                 {
-                    var writer = new CodeGen.GeneratorWriter(outFile, 4);
-                    var info = new ParserGeneratorInfo(locationClassName: "SourceLocation");
-                    var generator = new ParserGenerator(grammar, info);
-
-                    generator
-                        .CreateCompilationUnit("GeneratorTest", CodeGen.AccessModifier.Public)
-                        .Generate(writer);
-
-                    return;
+                    var outfile = $"{outDir}{Path.DirectorySeparatorChar}{name}.cs";
+                    using (var stream = new StreamWriter(outfile))
+                    {
+                        var writer = new GeneratorWriter(stream, 4);
+                        unit.Generate(writer);
+                    }
                 }
+
+                return;
             }
+
+
+
 
             Usage();
             return;
@@ -130,14 +157,17 @@ namespace Kyloe.Grammar
             Console.WriteLine("\ta name of a rule defined in the grammar definition file");
             Console.WriteLine();
             Console.WriteLine("OUTPUT:");
-            Console.WriteLine("\tthe path to a .cs file that should be used as output");
+            Console.WriteLine("\tthe output directory");
+            Console.WriteLine();
+            Console.WriteLine("CLASSES:");
+            Console.WriteLine("\tthe path to a .json file that defines a ParserGeneratorInfo struct");
             Console.WriteLine();
             Console.WriteLine($"COMMAND:");
             Console.WriteLine($"\tfirst RULE\t\tprints the first set of RULE");
             Console.WriteLine($"\tfollow RULE\t\tprints the follow set of RULE");
             Console.WriteLine($"\trules\t\t\tprints all rules");
             Console.WriteLine($"\tterminals\t\tprints all terminals");
-            Console.WriteLine($"\tgenerate OUTPUT\t\tgenerates the parser to OUTPUT");
+            Console.WriteLine($"\tgenerate CLASSES OUTPUT\tgenerates the code to OUTPUT using the names in CLASSES");
         }
     }
 }

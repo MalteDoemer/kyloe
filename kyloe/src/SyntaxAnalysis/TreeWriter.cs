@@ -23,13 +23,15 @@ namespace Kyloe.Syntax
             this.writer = writer;
         }
 
-        public void Write(SyntaxNode root)
+        public void Write(SyntaxToken? root)
         {
-            var child = new SyntaxNodeChild(root);
-            WriteChild(child, "", ChildType.Root);
+            if (root is null)
+                writer.Write("(null)");
+            else
+                WriteChild(root, "", ChildType.Root);
         }
 
-        private void WriteChild(SyntaxNodeChild node, string indent, ChildType thisType)
+        private void WriteChild(SyntaxToken node, string indent, ChildType thisType)
         {
             writer.Write(indent);
 
@@ -38,9 +40,9 @@ namespace Kyloe.Syntax
             else if (thisType == ChildType.Leaf)
                 writer.Write(LEAF_NODE);
 
-            writer.WriteLine(node.ToString());
+            writer.WriteLine(node.Kind);
 
-            var children = node.GetChildren().GetEnumerator();
+            var children = node.Children().GetEnumerator();
 
             if (children is null)
                 return;

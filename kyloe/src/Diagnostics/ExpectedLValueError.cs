@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class ExpectedModifiableValueError : Diagnostic
     {
-        private readonly SyntaxExpression expression;
+        private readonly SyntaxToken expression;
 
-        public ExpectedModifiableValueError(SyntaxExpression expression)
+        public ExpectedModifiableValueError(SyntaxToken expression)
         {
             this.expression = expression;
         }

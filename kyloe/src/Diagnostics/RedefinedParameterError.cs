@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class RedefinedParameterError : Diagnostic
     {
-        private readonly SyntaxToken nameToken;
+        private readonly SyntaxTerminal nameToken;
 
-        public RedefinedParameterError(SyntaxToken nameToken)
+        public RedefinedParameterError(SyntaxTerminal nameToken)
         {
             this.nameToken = nameToken;
         }
@@ -18,6 +18,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => nameToken.Location;
 
-        public override string Message() => $"parameter with the name '{nameToken.Value}' already exists";
+        public override string Message() => $"parameter with the name '{nameToken.Text}' already exists";
     }
 }

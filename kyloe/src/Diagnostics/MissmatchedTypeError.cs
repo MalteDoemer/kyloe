@@ -6,11 +6,11 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class MissmatchedTypeError : Diagnostic
     {
-        private readonly SyntaxExpression expression;
+        private readonly SyntaxToken expression;
         private readonly TypeSpecifier expected;
         private readonly TypeSpecifier provided;
 
-        public MissmatchedTypeError(SyntaxExpression expression, TypeSpecifier expected, TypeSpecifier provided)
+        public MissmatchedTypeError(SyntaxToken expression, TypeSpecifier expected, TypeSpecifier provided)
         {
             this.expression = expression;
             this.expected = expected;

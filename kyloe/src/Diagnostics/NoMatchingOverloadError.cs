@@ -7,10 +7,10 @@ namespace Kyloe.Diagnostics
     internal sealed class NoMatchingOverloadError : Diagnostic
     {
         private readonly string name;
-        private readonly CallExpression callExpression;
+        private readonly SyntaxToken callExpression;
         private readonly BoundArguments arguments;
 
-        public NoMatchingOverloadError(string name, CallExpression callExpression, BoundArguments arguments)
+        public NoMatchingOverloadError(string name, SyntaxToken callExpression, BoundArguments arguments)
         {
             this.name = name;
             this.callExpression = callExpression;

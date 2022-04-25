@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class OverloadWithSameParametersExistsError : Diagnostic 
     {
-        private readonly SyntaxToken nameToken;
+        private readonly SyntaxTerminal nameToken;
 
-        public OverloadWithSameParametersExistsError(SyntaxToken nameToken)
+        public OverloadWithSameParametersExistsError(SyntaxTerminal nameToken)
         {
             this.nameToken = nameToken;
         }
@@ -18,6 +18,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => nameToken.Location;
 
-        public override string Message() => $"the function {nameToken.Value} with the same parameters already exists";
+        public override string Message() => $"the function {nameToken.Text} with the same parameters already exists";
     }
 }

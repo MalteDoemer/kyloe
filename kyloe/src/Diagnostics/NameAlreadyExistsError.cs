@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class NameAlreadyExistsError : Diagnostic
     {
-        private readonly SyntaxToken nameToken;
+        private readonly SyntaxTerminal nameToken;
 
-        public NameAlreadyExistsError(SyntaxToken nameToken)
+        public NameAlreadyExistsError(SyntaxTerminal nameToken)
         {
             this.nameToken = nameToken;
         }
@@ -18,6 +18,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => nameToken.Location;
 
-        public override string Message() => $"the name {nameToken.Value} already exists";
+        public override string Message() => $"the name {nameToken.Text} already exists";
     }
 }

@@ -9,6 +9,8 @@ namespace Kyloe.Utility
 
         public abstract TextReader GetReader();
 
+        public abstract string GetAllText();
+
         public (int, int) GetStartLineColumn(SourceLocation location)
         {
             var lineEndPos = 0;
@@ -86,6 +88,11 @@ namespace Kyloe.Utility
 
         public override string? FileName => null;
 
+        public override string GetAllText()
+        {
+            return text;
+        }
+
         public override TextReader GetReader() => new StringReader(text);
     }
 
@@ -99,6 +106,8 @@ namespace Kyloe.Utility
         }
 
         public override string? FileName => path;
+
+        public override string GetAllText() => File.ReadAllText(path);
 
         public override TextReader GetReader() => File.OpenText(path);
     }

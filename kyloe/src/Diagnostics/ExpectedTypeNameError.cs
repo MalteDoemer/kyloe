@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class ExpectedTypeNameError : Diagnostic
     {
-        private readonly SyntaxExpression expression;
+        private readonly SyntaxToken expression;
 
-        public ExpectedTypeNameError(SyntaxExpression expression)
+        public ExpectedTypeNameError(SyntaxToken expression)
         {
             this.expression = expression;
         }

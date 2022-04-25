@@ -11,10 +11,10 @@ namespace Kyloe.Semantics
         {
             switch (tokenKind)
             {
-                case SyntaxTokenKind.IntLiteral: return typeSystem.I64;
-                case SyntaxTokenKind.FloatLiteral: return typeSystem.Double;
-                case SyntaxTokenKind.BoolLiteral: return typeSystem.Bool;
-                case SyntaxTokenKind.StringLiteral: return typeSystem.String;
+                case SyntaxTokenKind.Int: return typeSystem.I64;
+                case SyntaxTokenKind.Float: return typeSystem.Double;
+                case SyntaxTokenKind.Bool: return typeSystem.Bool;
+                case SyntaxTokenKind.String: return typeSystem.String;
                 default:
                     throw new System.Exception($"Unexpected literal type: {tokenKind}");
             }
@@ -166,15 +166,15 @@ namespace Kyloe.Semantics
         {
             switch (type)
             {
-                case SyntaxTokenKind.Equals: return AssignmentOperation.Assign;
-                case SyntaxTokenKind.PlusEquals: return AssignmentOperation.AddAssign;
-                case SyntaxTokenKind.MinusEquals: return AssignmentOperation.SubAssign;
-                case SyntaxTokenKind.StarEquals: return AssignmentOperation.MulAssign;
-                case SyntaxTokenKind.SlashEquals: return AssignmentOperation.DivAssign;
-                case SyntaxTokenKind.PercentEquals: return AssignmentOperation.ModAssign;
-                case SyntaxTokenKind.AmpersandEquals: return AssignmentOperation.AndAssign;
-                case SyntaxTokenKind.PipeEquals: return AssignmentOperation.OrAssign;
-                case SyntaxTokenKind.HatEquals: return AssignmentOperation.XorAssign;
+                case SyntaxTokenKind.Equal: return AssignmentOperation.Assign;
+                case SyntaxTokenKind.PlusEqual: return AssignmentOperation.AddAssign;
+                case SyntaxTokenKind.MinusEqual: return AssignmentOperation.SubAssign;
+                case SyntaxTokenKind.StarEqual: return AssignmentOperation.MulAssign;
+                case SyntaxTokenKind.SlashEqual: return AssignmentOperation.DivAssign;
+                case SyntaxTokenKind.PercentEqual: return AssignmentOperation.ModAssign;
+                case SyntaxTokenKind.AmpersandEqual: return AssignmentOperation.AndAssign;
+                case SyntaxTokenKind.PipeEqual: return AssignmentOperation.OrAssign;
+                case SyntaxTokenKind.HatEqual: return AssignmentOperation.XorAssign;
 
                 default:
                     throw new System.Exception($"Unexpected assignment operation type: {type}");

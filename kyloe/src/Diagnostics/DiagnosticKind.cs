@@ -2,13 +2,11 @@ namespace Kyloe.Diagnostics
 {
     public enum DiagnosticKind
     {
-        NeverClosedBlockCommentError,
-        NeverClosedStringLiteralError,
-        ExpectedTokenError,
-        UnknownCharacterError,
-        InvalidIntLiteralError,
-        InvalidFloatLiteralError,
-        ExpectedExpressionError,
+        // Syntax Errors
+        UnexpectedTokenError,
+        InvalidCharacterError,
+
+        // Semantic Errors
         ExpectedValueError,
         UnsupportedBinaryOperation,
         UnsupportedUnaryOperation,

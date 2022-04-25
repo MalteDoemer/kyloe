@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class NonExistantNameError : Diagnostic
     {   
-        private readonly SyntaxToken nameToken;
+        private readonly SyntaxTerminal nameToken;
 
-        public NonExistantNameError(SyntaxToken nameToken)
+        public NonExistantNameError(SyntaxTerminal nameToken)
         {
             this.nameToken = nameToken;
         }
@@ -18,6 +18,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => nameToken.Location;
 
-        public override string Message() => $"cannot find the name '{nameToken.Value}' in this scope";
+        public override string Message() => $"cannot find the name '{nameToken.Text}' in this scope";
     }
 }

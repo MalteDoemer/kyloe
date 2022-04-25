@@ -1,3 +1,4 @@
+using Kyloe.Semantics;
 using Kyloe.Symbols;
 using Kyloe.Syntax;
 using Kyloe.Utility;
@@ -6,13 +7,15 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class UnsupportedAssignmentOperation : Diagnostic
     {
-        private readonly AssignmentExpression expression;
+        private readonly SyntaxToken expression;
+        private readonly BoundOperation operation;
         private readonly TypeSpecifier leftType;
         private readonly TypeSpecifier rightType;
 
-        public UnsupportedAssignmentOperation(AssignmentExpression expression, TypeSpecifier leftType, TypeSpecifier rightType)
+        public UnsupportedAssignmentOperation(SyntaxToken expression, BoundOperation operation, TypeSpecifier leftType, TypeSpecifier rightType)
         {
             this.expression = expression;
+            this.operation = operation;
             this.leftType = leftType;
             this.rightType = rightType;
         }
@@ -23,6 +26,6 @@ namespace Kyloe.Diagnostics
 
         public override SourceLocation? Location => expression.Location;
 
-        public override string Message() => $"operator '{expression.OperatorToken.Kind.TokenKindString()}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
+        public override string Message() => $"operator '{operation}' cannot be used with types '{leftType.FullName()}' and '{rightType.FullName()}'";
     }
 }

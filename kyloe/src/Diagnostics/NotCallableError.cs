@@ -5,9 +5,9 @@ namespace Kyloe.Diagnostics
 {
     internal sealed class NotCallableError : Diagnostic 
     {
-        private readonly SyntaxExpression expression;
+        private readonly SyntaxToken expression;
 
-        public NotCallableError(SyntaxExpression expression)
+        public NotCallableError(SyntaxToken expression)
         {
             this.expression = expression;
         }
