@@ -4,18 +4,18 @@ namespace CodeGen
     {
         public Arguments()
         {
-            Args = new List<Argument>();
+            Args = new List<string>();
         }
 
-        public List<Argument> Args { get; }
+        public List<string> Args { get; }
 
-        public Arguments Add(Argument arg)
+        public Arguments Add(string arg)
         {
             Args.Add(arg);
             return this;
         }
 
-        public Arguments AddRange(IEnumerable<Argument> args)
+        public Arguments AddRange(IEnumerable<string> args)
         {
             Args.AddRange(args);
             return this;
@@ -26,7 +26,8 @@ namespace CodeGen
             writer.Write("(");
             foreach (var (i, arg) in Args.EnumerateIndex())
             {
-                arg.Generate(writer);
+                // arg.Generate(writer);
+                writer.Write(arg);
 
                 if (i != Args.Count - 1)
                     writer.Write(", ");

@@ -64,7 +64,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Static,
                 "bool",
                 "IsTerminal")
-                .AddArg(new Argument($"this {info.TokenKindEnumName}", "kind"))
+                .AddArg($"this {info.TokenKindEnumName} kind")
                 .AddLine("return (int)kind < 0;");
 
             var isNonTerminalMethod = new Method(
@@ -72,7 +72,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Static,
                 "bool",
                 "IsNonTerminal")
-                .AddArg(new Argument($"this {info.TokenKindEnumName}", "kind"))
+                .AddArg($"this {info.TokenKindEnumName} kind")
                 .AddLine("return (int)kind > 0;");
 
             return new Class(
@@ -137,6 +137,14 @@ namespace Kyloe.Grammar
                 "Location",
                 "{ get; }");
 
+            var invalidProp = new SimpleProperty(
+                AccessModifier.Public,
+                InheritanceModifier.None,
+                "bool",
+                "Invalid",
+                "{ get; }"
+            );
+
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
@@ -149,12 +157,15 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 info.TerminalClassName,
                 null)
-                .AddArg(new Argument(info.TokenKindEnumName, "kind"))
-                .AddArg(new Argument("string", "text"))
-                .AddArg(new Argument(info.LocationClassName, "location"))
+                .AddArg($"{info.TokenKindEnumName} kind")
+                .AddArg("string text")
+                .AddArg($"{info.LocationClassName} location")
+                .AddArg("bool invalid = false")
                 .AddLine("Kind = kind;")
                 .AddLine("Text = text;")
-                .AddLine("Location = location;");
+                .AddLine("Location = location;")
+                .AddLine("Invalid = invalid;")
+                ;
 
             return new Class(
                 accessModifier,
@@ -165,6 +176,7 @@ namespace Kyloe.Grammar
                 .Add(kindProp)
                 .Add(textProp)
                 .Add(locationProp)
+                .Add(invalidProp)
                 .Add(childrenMethod);
         }
 
@@ -200,15 +212,13 @@ namespace Kyloe.Grammar
                 "Children")
                 .AddLine($"return Tokens.Where(t => t is not null)!;");
 
-
-
             var ctor = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
                 info.NodeClassName,
                 null)
-                .AddArg(new Argument(info.TokenKindEnumName, "kind"))
-                .AddArg(new Argument(immutableArray, "tokens"))
+                .AddArg($"{info.TokenKindEnumName} kind")
+                .AddArg($"{immutableArray} tokens")
                 .AddLine("Kind = kind;")
                 .AddLine("Tokens = tokens;");
 
@@ -277,7 +287,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 info.LexerClassName,
                 null)
-                .AddArg(new Argument("string", "text"))
+                .AddArg("string text")
                 .AddLine("this.pos = 0;")
                 .AddLine("this.text = text;")
                 .AddLine($"this.groupNames = new {dict}();")
@@ -417,8 +427,8 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 info.ParserClassName,
                 null)
-                .AddArg(new Argument("string", "text"))
-                .AddArg(new Argument($"ICollection<{info.ErrorClassName}>", "errors"))
+                .AddArg("string text")
+                .AddArg($"ICollection<{info.ErrorClassName}> errors")
                 .AddLine("this.pos = 0;")
                 .AddLine("this.isValid = true;")
                 .AddLine("this.errors = errors;")
@@ -448,11 +458,11 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 $"{info.TokenClassName}?",
                 "Expect")
-                .AddArg(new Argument(info.TokenKindEnumName, "expected"))
-                .AddArg(new Argument($"params {info.TokenKindEnumName}[]", "next"))
+                .AddArg($"{info.TokenKindEnumName} expected")
+                .AddArg($"params {info.TokenKindEnumName}[] next")
                 .AddLine("if (current.Kind == expected) return Advance();")
                 .AddLine("Unexpected(expected);")
-                .AddLine($"var forged = new {info.TerminalClassName}(expected, current.Text, current.Location);")
+                .AddLine($"var forged = new {info.TerminalClassName}(expected, current.Text, current.Location, invalid: true);")
                 .AddLine($"if (next.Length != 0) SkipInput(next);")
                 .AddLine("return forged;");
 
@@ -461,7 +471,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 "void",
                 "SkipInput")
-                .AddArg(new Argument($"params {info.TokenKindEnumName}[]", "next"))
+                .AddArg($"params {info.TokenKindEnumName}[] next")
                 .AddLine("var nextSet = next.ToHashSet();")
                 .AddStatement(new WhileLoop("!next.Contains(current.Kind) && ! stopTerminals.Contains(current.Kind)")
                     .AddLine("pos += 1;"));
@@ -471,7 +481,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 "void",
                 "Unexpected")
-                .AddArg(new Argument($"params {info.TokenKindEnumName}[]", "expected"))
+                .AddArg($"params {info.TokenKindEnumName}[] expected")
                 .AddStatement(new IfStatement("!isValid")
                     .AddLine("return;"))
                 .AddLine("isValid = false;")
@@ -487,8 +497,8 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 $"{info.TokenClassName}?",
                 "CreateNode")
-                .AddArg(new Argument(info.TokenKindEnumName, "kind"))
-                .AddArg(new Argument($"params {info.TokenClassName}?[]", "tokens"))
+                .AddArg($"{info.TokenKindEnumName} kind")
+                .AddArg($"params {info.TokenClassName}?[] tokens")
                 .AddLine("var arr = tokens.ToImmutableArray();")
                 .AddLine("if (arr.Length == 0) return null;")
                 .AddLine("else if (arr.Length == 1) return arr[0];")

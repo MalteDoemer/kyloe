@@ -19,13 +19,13 @@ namespace CodeGen
         public Arguments Arguments { get; }
         public BlockStatement Body { get; }
 
-        public Method AddArg(Argument arg)
+        public Method AddArg(string arg)
         {
             Arguments.Add(arg);
             return this;
         }
 
-        public Method AddArgRange(IEnumerable<Argument> args)
+        public Method AddArgRange(IEnumerable<string> args)
         {
             Arguments.AddRange(args);
             return this;
