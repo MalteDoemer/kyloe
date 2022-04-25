@@ -76,13 +76,14 @@ CompilationUnit = (CompilationUnit, TopLevelItem) | #;
 
 TopLevelItem = FunctionDefinition | DeclarationStatement;
 
-FunctionDefinition = FuncKeyword, Identifier, LeftParen, Parameters, RightParen, BlockStatement;
+FunctionDefinition = FuncKeyword, Identifier, LeftParen, Parameters, RightParen, TrailingTypeClause, BlockStatement;
+
+TrailingTypeClause = (SmallArrow, Identifier) | #;
 
 Parameters = (Parameters, Comma, ParameterDeclaration) | ParameterDeclaration | #;
-ParameterDeclaration = Identifier, OptionalTypeClause;
+ParameterDeclaration = Identifier, TypeClause;
 
-TypeClause = Colon, Identifier;
-OptionalTypeClause = TypeClause | #;
+TypeClause = (Colon, Identifier) | #;
 
 Statement = BlockStatement | IfStatement | DeclarationStatement | ExpressionStatement | SemiColon;
 ExpressionStatement = (Expression, SemiColon);

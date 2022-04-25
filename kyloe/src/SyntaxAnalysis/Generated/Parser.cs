@@ -207,15 +207,30 @@ namespace Kyloe.Syntax
                     var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n2 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Comma, SyntaxTokenKind.Identifier, SyntaxTokenKind.Epsilon);
                     var n3 = ParseParameters();
-                    var n4 = Expect(SyntaxTokenKind.RightParen, SyntaxTokenKind.LeftCurly);
-                    var n5 = ParseBlockStatement();
-                    return CreateNode(SyntaxTokenKind.FunctionDefinition, n0, n1, n2, n3, n4, n5);
+                    var n4 = Expect(SyntaxTokenKind.RightParen, SyntaxTokenKind.SmallArrow, SyntaxTokenKind.Epsilon);
+                    var n5 = ParseTrailingTypeClause();
+                    var n6 = ParseBlockStatement();
+                    return CreateNode(SyntaxTokenKind.FunctionDefinition, n0, n1, n2, n3, n4, n5, n6);
                 }
                 default:
                 {
                     Unexpected(SyntaxTokenKind.FuncKeyword);
                     return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken?>(current));
                 }
+            }
+        }
+        
+        private SyntaxToken? ParseTrailingTypeClause()
+        {
+            switch (current.Kind)
+            {
+                case SyntaxTokenKind.SmallArrow:
+                {
+                    var n0 = Advance();
+                    var n1 = Expect(SyntaxTokenKind.Identifier);
+                    return CreateNode(SyntaxTokenKind.TrailingTypeClause, n0, n1);
+                }
+                default: return null;
             }
         }
         
@@ -288,7 +303,7 @@ namespace Kyloe.Syntax
                 case SyntaxTokenKind.Identifier:
                 {
                     var n0 = Advance();
-                    var n1 = ParseOptionalTypeClause();
+                    var n1 = ParseTypeClause();
                     return CreateNode(SyntaxTokenKind.ParameterDeclaration, n0, n1);
                 }
                 default:
@@ -308,23 +323,6 @@ namespace Kyloe.Syntax
                     var n0 = Advance();
                     var n1 = Expect(SyntaxTokenKind.Identifier);
                     return CreateNode(SyntaxTokenKind.TypeClause, n0, n1);
-                }
-                default:
-                {
-                    Unexpected(SyntaxTokenKind.Colon);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken?>(current));
-                }
-            }
-        }
-        
-        private SyntaxToken? ParseOptionalTypeClause()
-        {
-            switch (current.Kind)
-            {
-                case SyntaxTokenKind.Colon:
-                {
-                    var n0 = ParseTypeClause();
-                    return CreateNode(SyntaxTokenKind.OptionalTypeClause, n0);
                 }
                 default: return null;
             }
