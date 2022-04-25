@@ -296,7 +296,7 @@ namespace Kyloe.Grammar
                 .AddLine($"this.discardTerminals = new {set}();");
 
                 foreach (var terminal in grammar.EnumerateTerminals(grammar.DiscardRule.Kind))
-                    ctor.AddLine($"this.discardTerminals.Add({info.TokenKindEnumName}.{grammar.GetName(terminal)});");
+                    ctor.AddLine($"this.discardTerminals.Add({TokenKindAccessString(terminal)});");
 
                 var allTerminalsMethod = CreateLexerMethod("AllTerminals");
 
@@ -360,12 +360,29 @@ namespace Kyloe.Grammar
 
         public Class CreateParserClass(AccessModifier accessModifier)
         {
+
+            if (grammar.StartRule is null)
+                throw new GrammarException("cannot create Parser class without a Start rule");
+
+            if (grammar.StopRule is null)
+                throw new GrammarException("cannot create Parser class without a Stop rule");
+
+            var stopTerminals = grammar.EnumerateTerminals(grammar.StopRule.Kind);
+
             var terminalsField = new Field(
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 @readonly: true,
                 type: $"ImmutableArray<{info.TerminalClassName}>",
                 name: "terminals");
+
+            var stopTerminalsField = new Field(
+                AccessModifier.Private,
+                InheritanceModifier.None,
+                true,
+                $"HashSet<{info.TokenKindEnumName}>",
+                "stopTerminals"
+            );
 
             var errorsField = new Field(
                 AccessModifier.Private,
@@ -380,6 +397,13 @@ namespace Kyloe.Grammar
                 @readonly: false,
                 type: "int",
                 name: "pos");
+
+            var isValidField = new Field(
+                AccessModifier.Private,
+                InheritanceModifier.None,
+                @readonly: false,
+                type: "bool",
+                name: "isValid");
 
             var currentProp = new SimpleProperty(
                 AccessModifier.Private,
@@ -396,6 +420,7 @@ namespace Kyloe.Grammar
                 .AddArg(new Argument("string", "text"))
                 .AddArg(new Argument($"ICollection<{info.ErrorClassName}>", "errors"))
                 .AddLine("this.pos = 0;")
+                .AddLine("this.isValid = true;")
                 .AddLine("this.errors = errors;")
                 .AddLine($"var lexer = new {info.LexerClassName}(text);")
                 .AddLine($"var builder = ImmutableArray.CreateBuilder<{info.TerminalClassName}>();")
@@ -404,8 +429,9 @@ namespace Kyloe.Grammar
                         .AddLine($"errors.Add(new {info.ErrorClassName}({info.ErrorKindEnumName}.InvalidCharacterError, string.Format(\"invalid character: \\\\u{{0:x4}}\", (int)(terminal.Text[0])), terminal.Location));"))
                     .AddStatement(new ElseStatement()
                         .AddLine("builder.Add(terminal);")))
-                .AddLine("this.terminals = builder.ToImmutable();");
-
+                .AddLine("this.terminals = builder.ToImmutable();")
+                .AddLine($"this.stopTerminals = new HashSet<{info.TokenKindEnumName}>();")
+                .AddLines(stopTerminals.Select(t => $"this.stopTerminals.Add({TokenKindAccessString(t)});"));
 
             var advanceMethod = new Method(
                 AccessModifier.Private,
@@ -414,6 +440,7 @@ namespace Kyloe.Grammar
                 "Advance")
                 .AddLine("var temp = current;")
                 .AddLine("pos += 1;")
+                .AddLine("isValid = true;")
                 .AddLine("return temp;");
 
             var expectMethod = new Method(
@@ -421,10 +448,39 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 $"{info.TokenClassName}?",
                 "Expect")
-                .AddArg(new Argument(info.TokenKindEnumName, "kind"))
-                .AddStatement(new IfStatement("current.Kind == kind")
-                    .AddLine("return Advance();"))
-                .AddLine("throw new NotImplementedException();");
+                .AddArg(new Argument(info.TokenKindEnumName, "expected"))
+                .AddArg(new Argument($"params {info.TokenKindEnumName}[]", "next"))
+                .AddLine("if (current.Kind == expected) return Advance();")
+                .AddLine("Unexpected(expected);")
+                .AddLine($"var forged = new {info.TerminalClassName}(expected, current.Text, current.Location);")
+                .AddLine($"if (next.Length != 0) SkipInput(next);")
+                .AddLine("return forged;");
+
+            var skipInputMethod = new Method(
+                AccessModifier.Private,
+                InheritanceModifier.None,
+                "void",
+                "SkipInput")
+                .AddArg(new Argument($"params {info.TokenKindEnumName}[]", "next"))
+                .AddLine("var nextSet = next.ToHashSet();")
+                .AddStatement(new WhileLoop("!next.Contains(current.Kind) && ! stopTerminals.Contains(current.Kind)")
+                    .AddLine("pos += 1;"));
+
+            var unexpectedMethod = new Method(
+                AccessModifier.Private,
+                InheritanceModifier.None,
+                "void",
+                "Unexpected")
+                .AddArg(new Argument($"params {info.TokenKindEnumName}[]", "expected"))
+                .AddStatement(new IfStatement("!isValid")
+                    .AddLine("return;"))
+                .AddLine("isValid = false;")
+                .AddLine($"string msg;")
+                .AddStatement(new IfStatement("expected.Length == 1")
+                    .AddLine("msg = $\"expected {expected[0]}, got {current.Kind}\";"))
+                .AddStatement(new ElseStatement()
+                    .AddLine("msg = $\"expected one of ({string.Join(\", \", expected)}), got {current.Kind}\";"))
+                .AddLine($"errors.Add(new {info.ErrorClassName}({info.ErrorKindEnumName}.UnexpectedTokenError, msg, current.Location));");
 
             var createNodeMethod = new Method(
                 AccessModifier.Private,
@@ -438,15 +494,12 @@ namespace Kyloe.Grammar
                 .AddLine("else if (arr.Length == 1) return arr[0];")
                 .AddLine($"else return new {info.NodeClassName}(kind, arr);");
 
-            if (grammar.StartRule is null)
-                throw new GrammarException("cannot create Parser class without a Start rule");
-
             var parseMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
                 $"{info.TokenClassName}?",
                 "Parse")
-                .AddLine($"var token = {GetParseMethodName(grammar.StartRule.Kind)}();")
+                .AddLine($"var token = {ParseMethodName(grammar.StartRule.Kind)}();")
                 .AddLine($"Expect({info.TokenKindEnumName}.End);")
                 .AddLine("return token;");
 
@@ -462,12 +515,16 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Sealed,
                 info.ParserClassName)
                 .Add(terminalsField)
+                .Add(stopTerminalsField)
                 .Add(errorsField)
                 .Add(posField)
+                .Add(isValidField)
                 .Add(currentProp)
                 .Add(ctor)
                 .Add(advanceMethod)
                 .Add(expectMethod)
+                .Add(skipInputMethod)
+                .Add(unexpectedMethod)
                 .Add(createNodeMethod)
                 .Add(parseMethod)
                 .AddRange(rules.Select(t => CreateParseMethod(t)));
@@ -476,7 +533,7 @@ namespace Kyloe.Grammar
         private Method CreateParseMethod(TokenKind nonTerminal)
         {
 
-            var name = GetParseMethodName(nonTerminal);
+            var name = ParseMethodName(nonTerminal);
 
             var method = new Method(
                 AccessModifier.Private,
@@ -498,6 +555,8 @@ namespace Kyloe.Grammar
         {
             var sw = new SwitchStatement("current.Kind");
 
+            var expected = new List<TokenKind>();
+
             foreach (var prod in rule.Productions)
             {
                 var first = grammar.FirstSet(rule.Kind, prod);
@@ -510,7 +569,8 @@ namespace Kyloe.Grammar
                         continue;
 
                     hasAny = true;
-                    sw.AddCase($"{info.TokenKindEnumName}.{grammar.GetName(token)}");
+                    sw.AddCase(TokenKindAccessString(token));
+                    expected.Add(token);
                 }
 
                 if (hasAny)
@@ -524,7 +584,17 @@ namespace Kyloe.Grammar
             if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
                 sw.AddLine("default: return null;");
             else
-                sw.AddLine("default: throw new NotImplementedException();");
+            {
+                sw.AddLine("default:");
+                var defaultBlock = new BlockStatement();
+
+                var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
+
+                defaultBlock.AddLine($"Unexpected({args});");
+                defaultBlock.AddLine($"return new Node({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<Token?>(current));");
+
+                sw.AddStatement(defaultBlock);
+            }
 
             method.AddStatement(sw);
         }
@@ -532,6 +602,8 @@ namespace Kyloe.Grammar
         private void GenerateLeftRecursiveParseMethodBody(Method method, ProductionRule rule)
         {
             var outerSwitch = new SwitchStatement("current.Kind");
+
+            var expected = new List<TokenKind>();
 
             for (int i = rule.FirstNonLeftRecursiveProduction; i < rule.Productions.Length; i++)
             {
@@ -546,7 +618,8 @@ namespace Kyloe.Grammar
                         continue;
 
                     hasAny = true;
-                    outerSwitch.AddCase($"{info.TokenKindEnumName}.{grammar.GetName(token)}");
+                    outerSwitch.AddCase(TokenKindAccessString(token));
+                    expected.Add(token);
                 }
 
                 if (hasAny)
@@ -566,7 +639,15 @@ namespace Kyloe.Grammar
             }
             else
             {
-                outerSwitch.AddLine("default: throw new NotImplementedException();");
+                outerSwitch.AddLine("default:");
+                var defaultBlock = new BlockStatement();
+
+                var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
+
+                defaultBlock.AddLine($"Unexpected({args});");
+                defaultBlock.AddLine($"return new Node({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<Token?>(current));");
+
+                outerSwitch.AddStatement(defaultBlock);
             }
 
             method.AddStatement(outerSwitch);
@@ -594,7 +675,7 @@ namespace Kyloe.Grammar
                     if (token == TokenKind.Epsilon)
                         continue;
 
-                    condition.Append($"current.Kind == {info.TokenKindEnumName}.{grammar.GetName(token)} || ");
+                    condition.Append($"current.Kind == {TokenKindAccessString(token)} || ");
                 }
             }
 
@@ -620,14 +701,14 @@ namespace Kyloe.Grammar
                         continue;
 
                     hasAny = true;
-                    innerSwitch.AddCase($"{info.TokenKindEnumName}.{grammar.GetName(token)}");
+                    innerSwitch.AddCase(TokenKindAccessString(token));
                 }
 
                 if (hasAny)
                 {
                     var innerBlock = new BlockStatement();
                     GenerateProductionParsingBlock($"{info.TokenClassName}? temp =", "x", innerBlock, rule, prod);
-                    innerBlock.AddLine($"node = CreateNode({info.TokenKindEnumName}.{grammar.GetName(rule.Kind)}, node, temp);");
+                    innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
                     innerBlock.AddLine("break;");
                     innerSwitch.AddStatement(innerBlock);
                 }
@@ -647,7 +728,7 @@ namespace Kyloe.Grammar
                         if (token == TokenKind.Epsilon)
                             continue;
 
-                        innerSwitch.AddCase($"{info.TokenKindEnumName}.{grammar.GetName(token)}");
+                        innerSwitch.AddCase(TokenKindAccessString(token));
                         hasAny = true;
 
 
@@ -657,7 +738,7 @@ namespace Kyloe.Grammar
                     {
                         var innerBlock = new BlockStatement();
                         GenerateProductionParsingBlock($"{info.TokenClassName}? temp =", "x", block, rule, prod);
-                        innerBlock.AddLine($"node = CreateNode({info.TokenKindEnumName}.{grammar.GetName(rule.Kind)}, node, x);");
+                        innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, x);");
                         innerBlock.AddLine("break;");
 
                         innerSwitch.AddStatement(innerBlock);
@@ -681,14 +762,25 @@ namespace Kyloe.Grammar
             }
 
             var n = 0;
-            foreach (var child in production.Children())
-            {
-                if (child.IsTerminal)
-                    statement.AddLine($"var {varname}{n} = Expect({info.TokenKindEnumName}.{grammar.GetName(child)});");
-                else
-                    statement.AddLine($"var {varname}{n} = {GetParseMethodName(child)}();");
+            var children = production.Children().ToArray();
 
-                n++;
+            for (; n < children.Length; n++)
+            {
+                var child = children[n];
+
+                if (!child.IsTerminal)
+                    statement.AddLine($"var {varname}{n} = {ParseMethodName(child)}();");
+                else if (n == 0)
+                    statement.AddLine($"var {varname}{n} = Advance();");
+                else if (n == children.Length - 1)
+                    statement.AddLine($"var {varname}{n} = Expect({TokenKindAccessString(child)});");
+                else
+                {
+                    var next = children[n + 1];
+                    var firstNext = grammar.FirstSet(next);
+                    var args = string.Join(", ", firstNext.Select(t => TokenKindAccessString(t)));
+                    statement.AddLine($"var {varname}{n} = Expect({TokenKindAccessString(child)}, {args});");
+                }
             }
 
             var code = new StringBuilder();
@@ -728,9 +820,14 @@ namespace Kyloe.Grammar
             }
         }
 
-        private string GetParseMethodName(TokenKind nonTerminal)
+        private string ParseMethodName(TokenKind nonTerminal)
         {
             return $"Parse{grammar.GetName(nonTerminal)}";
+        }
+
+        private string TokenKindAccessString(TokenKind kind)
+        {
+            return $"{info.TokenKindEnumName}.{grammar.GetName(kind)}";
         }
 
         private string CreateRawString(string str)

@@ -17,6 +17,7 @@ namespace Kyloe.Grammar
             this.boundGrammar = boundGrammar;
             StartRule = LookupRule("start", StringComparison.OrdinalIgnoreCase);
             DiscardRule = LookupRule("discard", StringComparison.OrdinalIgnoreCase);
+            StopRule = LookupRule("stop", StringComparison.OrdinalIgnoreCase);
 
             firstSetCache = new Dictionary<TokenKind, HashSet<TokenKind>>();
             followSetCache = new Dictionary<TokenKind, HashSet<TokenKind>>();
@@ -24,6 +25,7 @@ namespace Kyloe.Grammar
 
         public ProductionRule? StartRule { get; }
         public ProductionRule? DiscardRule { get; }
+        public ProductionRule? StopRule { get; }
 
         public ImmutableDictionary<TokenKind, TerminalDefinition> Terminals => boundGrammar.Terminals;
         public ImmutableDictionary<TokenKind, ProductionRule> Rules => boundGrammar.Rules;
