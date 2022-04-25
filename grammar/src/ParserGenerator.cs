@@ -238,8 +238,11 @@ namespace Kyloe.Grammar
         {
             var groups = new List<string>();
 
-            foreach (var terminal in grammar.Terminals.Values)
-                groups.Add($"(?<{terminal.Name}>\\G{terminal.Text})");
+            foreach (var terminal in Enumerable.Reverse(terminals))
+            {
+                if (grammar.Terminals.TryGetValue(terminal, out var t))
+                    groups.Add($"(?<{t.Name}>\\G{t.Text})");
+            }
 
             var regexString = CreateRawString(string.Join('|', groups));
 
@@ -442,7 +445,7 @@ namespace Kyloe.Grammar
                 .AddLine("this.terminals = builder.ToImmutable();")
                 .AddLine($"this.stopTerminals = new HashSet<{info.TokenKindEnumName}>();")
                 .AddLines(stopTerminals.Select(t => $"this.stopTerminals.Add({TokenKindAccessString(t)});"))
-                .AddLine($"this.stopTerminals.Add({TokenKindAccessString(TokenKind.Error)});");
+                .AddLine($"this.stopTerminals.Add({TokenKindAccessString(TokenKind.End)});");
 
             var advanceMethod = new Method(
                 AccessModifier.Private,
@@ -748,8 +751,8 @@ namespace Kyloe.Grammar
                     if (hasAny)
                     {
                         var innerBlock = new BlockStatement();
-                        GenerateProductionParsingBlock($"{info.TokenClassName}? temp =", "x", block, rule, prod);
-                        innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, x);");
+                        GenerateProductionParsingBlock($"{info.TokenClassName}? temp =", "x", innerBlock, rule, prod);
+                        innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
                         innerBlock.AddLine("break;");
 
                         innerSwitch.AddStatement(innerBlock);

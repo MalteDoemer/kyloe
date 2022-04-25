@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 
 namespace Kyloe.Grammar
@@ -10,6 +11,7 @@ namespace Kyloe.Grammar
             Name = name;
             Kind = kind;
             FirstNonLeftRecursiveProduction = -1;
+            IsOptional = false;
             Productions = ImmutableArray.Create(production);
         }
 
@@ -18,6 +20,7 @@ namespace Kyloe.Grammar
             Name = name;
             Kind = kind;
             FirstNonLeftRecursiveProduction = firstProductionNonLeftRecursiveProduction;
+            IsOptional = productions.Where(p => p is EmptyProduction).Any();
             Productions = productions;
         }
 
@@ -27,24 +30,25 @@ namespace Kyloe.Grammar
         public ImmutableArray<Production> Productions { get; }
 
         public bool IsLeftRecursive => FirstNonLeftRecursiveProduction > 0;
+        public bool IsOptional { get; }
 
-        public override string ToString()
+    public override string ToString()
+    {
+        var builder = new StringBuilder();
+
+        builder.Append($"{Name} = ");
+
+        foreach (var prod in Productions)
         {
-            var builder = new StringBuilder();
-
-            builder.Append($"{Name} = ");
-
-            foreach (var prod in Productions)
-            {
-                builder.Append(prod.ToString());
-                builder.Append(" | ");
-            }
-
-            // Hack:
-            // Remove the or symbol of the last node
-            builder.Remove(builder.Length - 3, 3);
-
-            return builder.ToString();
+            builder.Append(prod.ToString());
+            builder.Append(" | ");
         }
+
+        // Hack:
+        // Remove the or symbol of the last node
+        builder.Remove(builder.Length - 3, 3);
+
+        return builder.ToString();
     }
+}
 }

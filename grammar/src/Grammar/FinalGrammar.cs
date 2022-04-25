@@ -108,7 +108,7 @@ namespace Kyloe.Grammar
 
             // - For every child Yi in α
             // -    If Yi == A
-            // -        If Yi is last child, Add ε to FIRST(A, α)
+            // -        If exists A -> ε, add FIRST(Y(i+1)) to FIRST(A, α)
             // -        break
             // -    Else
             // -        Add FIRST(Yi) to FIRST(A, α)
@@ -122,12 +122,16 @@ namespace Kyloe.Grammar
             var children = production.Children();
             var last = production.Children().Last();
 
-            foreach (var child in children)
+            foreach (var (i, child) in children.EnumerateIndex())
             {
                 if (child == rule)
                 {
-                    if (child == last)
-                        firstSet.Add(TokenKind.Epsilon);
+                    if (Rules[rule].IsOptional)
+                    {
+                        var next = children.ElementAtOrDefault(i + 1);
+                        if (next != default(TokenKind))
+                            firstSet.UnionWith(FirstSet(next));
+                    }
                     break;
                 }
 
