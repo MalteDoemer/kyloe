@@ -441,7 +441,8 @@ namespace Kyloe.Grammar
                         .AddLine("builder.Add(terminal);")))
                 .AddLine("this.terminals = builder.ToImmutable();")
                 .AddLine($"this.stopTerminals = new HashSet<{info.TokenKindEnumName}>();")
-                .AddLines(stopTerminals.Select(t => $"this.stopTerminals.Add({TokenKindAccessString(t)});"));
+                .AddLines(stopTerminals.Select(t => $"this.stopTerminals.Add({TokenKindAccessString(t)});"))
+                .AddLine($"this.stopTerminals.Add({TokenKindAccessString(TokenKind.Error)});");
 
             var advanceMethod = new Method(
                 AccessModifier.Private,
