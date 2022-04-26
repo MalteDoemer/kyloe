@@ -37,6 +37,7 @@ namespace Kyloe.Grammar
                 .AddItem(new Namespace(info.Namespace).Add(CreateExtensionClass())));
 
             yield return (info.TokenClass.Name, new CompilationUnit()
+                .AddUsing("using System.Linq;")
                 .AddUsing("using System.Collections.Generic;")
                 .AddItem(new Namespace(info.Namespace).Add(CreateTokenClass())));
 
@@ -139,7 +140,7 @@ namespace Kyloe.Grammar
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Abstract,
-                $"IEnumerable<{info.TokenClass.Name}>",
+                $"IEnumerable<{info.TokenClass.Name}?>",
                 "Children");
 
             return new Class(
@@ -185,7 +186,7 @@ namespace Kyloe.Grammar
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                $"IEnumerable<{info.TokenClass.Name}>",
+                $"IEnumerable<{info.TokenClass.Name}?>",
                 "Children")
                 .AddLine($"return Enumerable.Empty<{info.TokenClass.Name}>();");
 
@@ -221,6 +222,14 @@ namespace Kyloe.Grammar
         {
             var immutableArray = $"ImmutableArray<{info.TokenClass.Name}?>";
 
+            var nonNullTokensProp = new SimpleProperty(
+                AccessModifier.Private,
+                InheritanceModifier.None,
+                $"IEnumerable<{info.TokenClass.Name}>",
+                "nonNullTokens",
+                "=> Tokens.Where(t => t is not null)!;"
+            );
+
             var kindProp = new SimpleProperty(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
@@ -240,14 +249,14 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Override,
                 info.LocationClass.Name,
                 "Location",
-                $"=> {info.LocationClass.Name}.CreateAround(Children().First().Location, Children().Last().Location);");
+                $"=> {info.LocationClass.Name}.CreateAround(nonNullTokens.First().Location, nonNullTokens.Last().Location);");
 
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                $"IEnumerable<{info.TokenClass.Name}>",
+                $"IEnumerable<{info.TokenClass.Name}?>",
                 "Children")
-                .AddLine($"return Tokens.Where(t => t is not null)!;");
+                .AddLine($"return Tokens;");
 
             var ctor = new Method(
                 AccessModifier.Public,
@@ -264,6 +273,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Sealed,
                 info.NodeClass.Name,
                 info.TokenClass.Name)
+                .Add(nonNullTokensProp)
                 .Add(ctor)
                 .Add(kindProp)
                 .Add(tokensProp)
