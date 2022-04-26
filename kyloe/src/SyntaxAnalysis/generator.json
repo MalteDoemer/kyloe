@@ -12,6 +12,10 @@
         "Name": "SyntaxToken",
         "AccessModifier": "Public"
     },
+    "EmptyTokenClass": {
+        "Name": "EmptySytaxToken",
+        "AccessModifier": "Public"
+    },
     "TerminalClass": {
         "Name": "SyntaxTerminal",
         "AccessModifier": "Public"

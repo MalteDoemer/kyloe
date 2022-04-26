@@ -10,11 +10,11 @@ namespace Kyloe
 {
     public class SyntaxTree
     {
-        private readonly SyntaxToken? root;
+        private readonly SyntaxToken root;
         private readonly SourceText sourceText;
         private readonly DiagnosticResult diagnostics;
 
-        private SyntaxTree(SyntaxToken? root, SourceText sourceText, DiagnosticResult diagnostics)
+        private SyntaxTree(SyntaxToken root, SourceText sourceText, DiagnosticResult diagnostics)
         {
             this.root = root;
             this.sourceText = sourceText;
@@ -27,7 +27,7 @@ namespace Kyloe
             treeWriter.Write(root);
         }
 
-        public SyntaxToken? GetRoot() => root;
+        public SyntaxToken GetRoot() => root;
 
         public SourceText GetSourceText() => sourceText;
 

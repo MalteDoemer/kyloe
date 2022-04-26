@@ -37,9 +37,13 @@ namespace Kyloe.Grammar
                 .AddItem(new Namespace(info.Namespace).Add(CreateExtensionClass())));
 
             yield return (info.TokenClass.Name, new CompilationUnit()
-                .AddUsing("using System.Linq;")
                 .AddUsing("using System.Collections.Generic;")
                 .AddItem(new Namespace(info.Namespace).Add(CreateTokenClass())));
+
+            yield return (info.EmptyTokenClass.Name, new CompilationUnit()
+                .AddUsing("using System.Linq;")
+                .AddUsing("using System.Collections.Generic;")
+                .AddItem(new Namespace(info.Namespace).Add(CreateEmptyTokenClass())));
 
             yield return (info.TerminalClass.Name, new CompilationUnit()
                 .AddUsing("using System.Linq;")
@@ -72,6 +76,7 @@ namespace Kyloe.Grammar
                 .Add(CreateTokenKindEnum())
                 .Add(CreateExtensionClass())
                 .Add(CreateTokenClass())
+                .Add(CreateEmptyTokenClass())
                 .Add(CreateTerminalClass())
                 .Add(CreateNodeClass())
                 .Add(CreateLexerClass())
@@ -140,13 +145,54 @@ namespace Kyloe.Grammar
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Abstract,
-                $"IEnumerable<{info.TokenClass.Name}?>",
+                $"IEnumerable<{info.TokenClass.Name}>",
                 "Children");
 
             return new Class(
                 info.TokenClass.AccessModifiers,
                 InheritanceModifier.Abstract,
                 info.TokenClass.Name)
+                .Add(kindProp)
+                .Add(locationProp)
+                .Add(childrenMethod);
+        }
+
+        public Class CreateEmptyTokenClass()
+        {
+            var kindProp = new SimpleProperty(
+                AccessModifier.Public,
+                InheritanceModifier.Override,
+                info.TokenKindEnum.Name,
+                "Kind",
+                $"=> {TokenKindAccessString(TokenKind.Epsilon)};");
+
+            var locationProp = new SimpleProperty(
+                AccessModifier.Public,
+                InheritanceModifier.Override,
+                info.LocationClass.Name,
+                "Location",
+                $"=> default({info.LocationClass.Name});");
+
+            var childrenMethod = new Method(
+               AccessModifier.Public,
+               InheritanceModifier.Override,
+               $"IEnumerable<{info.TokenClass.Name}>",
+               "Children")
+               .AddLine($"return Enumerable.Empty<{info.TokenClass.Name}>();");
+
+            var ctor = new Method(
+                AccessModifier.Public,
+                InheritanceModifier.None,
+                info.EmptyTokenClass.Name,
+                null
+            );
+
+            return new Class(
+                info.EmptyTokenClass.AccessModifiers,
+                InheritanceModifier.Sealed,
+                info.EmptyTokenClass.Name,
+                info.TokenClass.Name)
+                .Add(ctor)
                 .Add(kindProp)
                 .Add(locationProp)
                 .Add(childrenMethod);
@@ -186,7 +232,7 @@ namespace Kyloe.Grammar
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                $"IEnumerable<{info.TokenClass.Name}?>",
+                $"IEnumerable<{info.TokenClass.Name}>",
                 "Children")
                 .AddLine($"return Enumerable.Empty<{info.TokenClass.Name}>();");
 
@@ -220,14 +266,14 @@ namespace Kyloe.Grammar
 
         public Class CreateNodeClass()
         {
-            var immutableArray = $"ImmutableArray<{info.TokenClass.Name}?>";
+            var immutableArray = $"ImmutableArray<{info.TokenClass.Name}>";
 
-            var nonNullTokensProp = new SimpleProperty(
+            var nonEmptyChildrenProp = new SimpleProperty(
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 $"IEnumerable<{info.TokenClass.Name}>",
-                "nonNullTokens",
-                "=> Tokens.Where(t => t is not null)!;"
+                "nonEmptyChildren",
+                $"=> Tokens.Where(t => t is not {info.EmptyTokenClass.Name});"
             );
 
             var kindProp = new SimpleProperty(
@@ -249,12 +295,12 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Override,
                 info.LocationClass.Name,
                 "Location",
-                $"=> {info.LocationClass.Name}.CreateAround(nonNullTokens.First().Location, nonNullTokens.Last().Location);");
+                $"=> {info.LocationClass.Name}.CreateAround(nonEmptyChildren.First().Location, nonEmptyChildren.Last().Location);");
 
             var childrenMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.Override,
-                $"IEnumerable<{info.TokenClass.Name}?>",
+                $"IEnumerable<{info.TokenClass.Name}>",
                 "Children")
                 .AddLine($"return Tokens;");
 
@@ -273,7 +319,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.Sealed,
                 info.NodeClass.Name,
                 info.TokenClass.Name)
-                .Add(nonNullTokensProp)
+                .Add(nonEmptyChildrenProp)
                 .Add(ctor)
                 .Add(kindProp)
                 .Add(tokensProp)
@@ -507,7 +553,7 @@ namespace Kyloe.Grammar
             var expectMethod = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                $"{info.TokenClass.Name}?",
+                info.TerminalClass.Name,
                 "Expect")
                 .AddArg($"{info.TokenKindEnum.Name} expected")
                 .AddArg($"params {info.TokenKindEnum.Name}[] next")
@@ -546,19 +592,19 @@ namespace Kyloe.Grammar
             var createNodeMethod = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                $"{info.TokenClass.Name}?",
+                info.TokenClass.Name,
                 "CreateNode")
                 .AddArg($"{info.TokenKindEnum.Name} kind")
-                .AddArg($"params {info.TokenClass.Name}?[] tokens")
+                .AddArg($"params {info.TokenClass.Name}[] tokens")
                 .AddLine("var arr = tokens.ToImmutableArray();")
-                .AddLine("if (arr.Length == 0) return null;")
+                .AddLine($"if (arr.Length == 0) return new {info.EmptyTokenClass.Name}();")
                 .AddLine("else if (arr.Length == 1) return arr[0];")
                 .AddLine($"else return new {info.NodeClass.Name}(kind, arr);");
 
             var parseMethod = new Method(
                 AccessModifier.Public,
                 InheritanceModifier.None,
-                $"{info.TokenClass.Name}?",
+                info.TokenClass.Name,
                 "Parse")
                 .AddLine($"var token = {ParseMethodName(grammar.StartRule.Kind)}();")
                 .AddLine($"Expect({info.TokenKindEnum.Name}.End);")
@@ -599,7 +645,7 @@ namespace Kyloe.Grammar
             var method = new Method(
                 AccessModifier.Private,
                 InheritanceModifier.None,
-                $"{info.TokenClass.Name}?",
+                info.TokenClass.Name,
                 name);
 
             var rule = grammar.Rules[nonTerminal];
@@ -643,7 +689,7 @@ namespace Kyloe.Grammar
 
             }
             if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
-                sw.AddLine("default: return null;");
+                sw.AddLine($"default: return new {info.EmptyTokenClass.Name}();");
             else
             {
                 sw.AddLine("default:");
@@ -652,7 +698,7 @@ namespace Kyloe.Grammar
                 var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
 
                 defaultBlock.AddLine($"Unexpected({args});");
-                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}?>(current));");
+                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}>(current));");
 
                 sw.AddStatement(defaultBlock);
             }
@@ -706,7 +752,7 @@ namespace Kyloe.Grammar
                 var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
 
                 defaultBlock.AddLine($"Unexpected({args});");
-                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}?>(current));");
+                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}>(current));");
 
                 outerSwitch.AddStatement(defaultBlock);
             }
@@ -716,7 +762,7 @@ namespace Kyloe.Grammar
 
         private void GenerateLeftRecursiveLoop(BlockStatement block, ProductionRule rule, Production production)
         {
-            GenerateProductionParsingBlock($"{info.TokenClass.Name}? node =", "n", block, rule, production);
+            GenerateProductionParsingBlock($"{info.TokenClass.Name} node =", "n", block, rule, production);
 
             var condition = new StringBuilder();
 
@@ -768,7 +814,7 @@ namespace Kyloe.Grammar
                 if (hasAny)
                 {
                     var innerBlock = new BlockStatement();
-                    GenerateProductionParsingBlock($"{info.TokenClass.Name}? temp =", "x", innerBlock, rule, prod);
+                    GenerateProductionParsingBlock($"var temp =", "x", innerBlock, rule, prod);
                     innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
                     innerBlock.AddLine("break;");
                     innerSwitch.AddStatement(innerBlock);
@@ -798,7 +844,7 @@ namespace Kyloe.Grammar
                     if (hasAny)
                     {
                         var innerBlock = new BlockStatement();
-                        GenerateProductionParsingBlock($"{info.TokenClass.Name}? temp =", "x", innerBlock, rule, prod);
+                        GenerateProductionParsingBlock($"var temp =", "x", innerBlock, rule, prod);
                         innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
                         innerBlock.AddLine("break;");
 
@@ -818,7 +864,7 @@ namespace Kyloe.Grammar
         {
             if (production is EmptyProduction)
             {
-                statement.AddLine($"{result} null;");
+                statement.AddLine($"{result} new {info.EmptyTokenClass.Name}();");
                 return;
             }
 

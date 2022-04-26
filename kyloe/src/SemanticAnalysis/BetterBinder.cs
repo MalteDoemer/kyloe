@@ -69,10 +69,11 @@ namespace Kyloe.Semantics
             return true;
         }
 
-        public BoundNode Bind(SyntaxToken? token)
+        public BoundNode Bind(SyntaxToken token)
         {
             throw new NotImplementedException();
         }
+
 
     }
 }
