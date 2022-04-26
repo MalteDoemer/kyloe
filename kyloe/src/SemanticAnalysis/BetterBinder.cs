@@ -69,11 +69,136 @@ namespace Kyloe.Semantics
             return true;
         }
 
+        private SyntaxNode GetNode(SyntaxToken token)
+        {
+            Debug.Assert(token is SyntaxNode);
+            return (SyntaxNode)token;
+        }
+
+        private SyntaxTerminal GetTerminal(SyntaxToken token)
+        {
+            Debug.Assert(token is SyntaxTerminal);
+            return (SyntaxTerminal)token;
+        }
+
+        private IEnumerable<SyntaxToken> Collect(SyntaxToken token, params SyntaxTokenKind[] kinds)
+        {
+            if (kinds.Contains(token.Kind))
+            {
+                yield return token;
+
+                foreach (var child in token.Children())
+                    foreach (var t in Collect(child, kinds))
+                        yield return t;
+            }
+        }
+
         public BoundNode Bind(SyntaxToken token)
+        {
+            if (token is EmptySytaxToken)
+                return new BoundCompilationUnit(ImmutableArray<BoundDeclarationStatement>.Empty, ImmutableArray<BoundFunctionDefinition>.Empty);
+
+
+            var functionSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.FunctionDefinition).Where(t => t.Kind == SyntaxTokenKind.FunctionDefinition);
+            var globalSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.DeclarationStatement).Where(t => t.Kind == SyntaxTokenKind.DeclarationStatement);
+
+            var functionTypes = new List<FunctionType>();
+            var globals = ImmutableArray.CreateBuilder<BoundDeclarationStatement>();
+            var functions = ImmutableArray.CreateBuilder<BoundFunctionDefinition>();
+
+            foreach (var func in functionSyntax)
+                functionTypes.Add(BindFunctionDeclaration(func));
+
+            foreach (var global in globalSyntax)
+                globals.Add(BindDeclarationStatement(global));
+
+            foreach (var (funcType, funcDef) in functionTypes.Zip(functionSyntax))
+                functions.Add(BindFunctionDefinition(funcDef, funcType));
+
+            return new BoundCompilationUnit(globals.MoveToImmutable(), functions.MoveToImmutable());
+        }
+
+
+        private FunctionType BindFunctionDeclaration(SyntaxToken token)
+        {
+            // FunctionDefinition
+            // ├── FuncKeyword
+            // ├── Identifier
+            // ├── LeftParen
+            // ├── Parameters (optional)
+            // ├── RightParen
+            // ├── TypeClause (optional)
+            // └── BlockStatement
+
+            var functionDeclaration = (SyntaxNode)token;
+
+            var nameTerminal = GetTerminal(functionDeclaration.Tokens[1]);
+            var parameters = functionDeclaration.Tokens[3];
+            var typeClause = functionDeclaration.Tokens[5];
+            var body = GetNode(functionDeclaration.Tokens[6]);
+
+            var name = nameTerminal.Text;
+
+            var symbol = LookupSymbol(name);
+
+            FunctionGroupSymbol functionGroup;
+
+            if (symbol is null)
+            {
+                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
+                DeclareSymbol(functionGroup);
+            }
+            else if (symbol is FunctionGroupSymbol groupSymbol)
+            {
+                functionGroup = groupSymbol;
+            }
+            else
+            {
+                if (symbol is not ErrorSymbol)
+                    diagnostics.NameAlreadyExistsError(nameTerminal.Location, name);
+                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
+            }
+
+            var returnType = BindFunctionTypeClause(typeClause);
+
+            var function = new FunctionType(name, functionGroup.Group, returnType);
+
+            var paramSyntax = Collect(parameters, SyntaxTokenKind.Parameters, SyntaxTokenKind.ParameterDeclaration).Where(t => t.Kind == SyntaxTokenKind.ParameterDeclaration).ToList(); 
+            
+            throw new NotImplementedException();
+        }
+
+        private TypeSpecifier BindFunctionTypeClause(SyntaxToken typeClause)
+        {
+            if (typeClause is EmptySytaxToken)
+                return typeSystem.Void;
+
+            var node = GetNode(typeClause);
+
+            var nameTerminal = GetTerminal(node.Tokens[1]);
+
+            var symbol = LookupSymbol(nameTerminal.Text);
+
+            if (symbol is null)
+            {
+                diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
+                return typeSystem.Error;
+            }
+            else
+            {
+                return symbol.Type;
+            }
+        }
+
+        private BoundFunctionDefinition BindFunctionDefinition(SyntaxToken funcDef, FunctionType funcType)
         {
             throw new NotImplementedException();
         }
 
+        private BoundDeclarationStatement BindDeclarationStatement(SyntaxToken global)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }
