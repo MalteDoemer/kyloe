@@ -31,7 +31,7 @@ namespace Kyloe.Syntax
                 WriteChild(root, "", ChildType.Root);
         }
 
-        private void WriteChild(SyntaxToken node, string indent, ChildType thisType)
+        private void WriteChild(SyntaxToken? token, string indent, ChildType thisType)
         {
             writer.Write(indent);
 
@@ -40,36 +40,35 @@ namespace Kyloe.Syntax
             else if (thisType == ChildType.Leaf)
                 writer.Write(LEAF_NODE);
 
-            writer.WriteLine(node.Kind);
+            writer.WriteLine(token is null ? "(null)" : token.Kind);
 
-            var children = node.Children().GetEnumerator();
-
-            if (children is null)
-                return;
-
-            // initially the IEnumerator points to the element before the first one
-            // so MoveNext() has to be called before accessing Current
-            if (!children.MoveNext())
-                return;
-
-            while (true)
+            if (token is SyntaxNode node)
             {
-                var next = children.Current;
-                bool hasNext = children.MoveNext();
+                var children = node.Tokens.GetEnumerator();
 
-                string nextIndent = "";
+                // initially the IEnumerator points to the element before the first one
+                // so MoveNext() has to be called before accessing Current
+                if (!children.MoveNext())
+                    return;
 
-                if (thisType == ChildType.Normal)
-                    nextIndent = indent + CHILD_INDENT;
-                else if (thisType == ChildType.Leaf)
-                    nextIndent = indent + LEAF_INDENT;
+                while (true)
+                {
+                    var next = children.Current;
+                    bool hasNext = children.MoveNext();
 
-                WriteChild(next, nextIndent, hasNext ? ChildType.Normal : ChildType.Leaf);
+                    string nextIndent = "";
 
-                if (!hasNext)
-                    break;
+                    if (thisType == ChildType.Normal)
+                        nextIndent = indent + CHILD_INDENT;
+                    else if (thisType == ChildType.Leaf)
+                        nextIndent = indent + LEAF_INDENT;
+
+                    WriteChild(next, nextIndent, hasNext ? ChildType.Normal : ChildType.Leaf);
+
+                    if (!hasNext)
+                        break;
+                }
             }
-
-        }       
+        }
     }
 }

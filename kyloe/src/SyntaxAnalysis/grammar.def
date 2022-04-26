@@ -76,11 +76,11 @@ CompilationUnit = (CompilationUnit, TopLevelItem) | #;
 
 TopLevelItem = FunctionDefinition | DeclarationStatement;
 
-FunctionDefinition = FuncKeyword, Identifier, LeftParen, Parameters, RightParen, TrailingTypeClause, BlockStatement;
-
+FunctionDefinition = FuncKeyword, Identifier, LeftParen, OptionalParameters, RightParen, TrailingTypeClause, BlockStatement;
 TrailingTypeClause = (SmallArrow, Identifier) | #;
 
-Parameters = (Parameters, Comma, ParameterDeclaration) | ParameterDeclaration | #;
+OptionalParameters = Parameters | #;
+Parameters = (Parameters, Comma, ParameterDeclaration) | ParameterDeclaration;
 ParameterDeclaration = Identifier, TypeClause;
 
 TypeClause = (Colon, Identifier) | #;

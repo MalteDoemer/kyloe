@@ -25,7 +25,7 @@ namespace Kyc
                 Console.WriteLine();
                 tree.GetDiagnostics().WriteTo(Console.Out);
                 Console.WriteLine();
-                tree.GetRoot().WriteTo(Console.Out);
+                tree.WriteTo(Console.Out);
             }
         }
 

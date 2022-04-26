@@ -205,8 +205,8 @@ namespace Kyloe.Syntax
                 {
                     var n0 = Advance();
                     var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    var n2 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Comma, SyntaxTokenKind.Identifier, SyntaxTokenKind.Epsilon);
-                    var n3 = ParseParameters();
+                    var n2 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Identifier, SyntaxTokenKind.Epsilon);
+                    var n3 = ParseOptionalParameters();
                     var n4 = Expect(SyntaxTokenKind.RightParen, SyntaxTokenKind.SmallArrow, SyntaxTokenKind.Epsilon);
                     var n5 = ParseTrailingTypeClause();
                     var n6 = ParseBlockStatement();
@@ -234,6 +234,19 @@ namespace Kyloe.Syntax
             }
         }
         
+        private SyntaxToken? ParseOptionalParameters()
+        {
+            switch (current.Kind)
+            {
+                case SyntaxTokenKind.Identifier:
+                {
+                    var n0 = ParseParameters();
+                    return CreateNode(SyntaxTokenKind.OptionalParameters, n0);
+                }
+                default: return null;
+            }
+        }
+        
         private SyntaxToken? ParseParameters()
         {
             switch (current.Kind)
@@ -242,7 +255,7 @@ namespace Kyloe.Syntax
                 {
                     var n0 = ParseParameterDeclaration();
                     SyntaxToken? node = CreateNode(SyntaxTokenKind.Parameters, n0);
-                    while (current.Kind == SyntaxTokenKind.Comma || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.RightParen)
+                    while (current.Kind == SyntaxTokenKind.Comma)
                     {
                         switch (current.Kind)
                         {
@@ -254,44 +267,14 @@ namespace Kyloe.Syntax
                                 node = CreateNode(SyntaxTokenKind.Parameters, node, temp);
                                 break;
                             }
-                            case SyntaxTokenKind.Identifier:
-                            {
-                                var x0 = ParseParameterDeclaration();
-                                SyntaxToken? temp = CreateNode(SyntaxTokenKind.Parameters, x0);
-                                node = CreateNode(SyntaxTokenKind.Parameters, node, temp);
-                                break;
-                            }
-                            default: return node;
                         }
                     }
                     return node;
                 }
                 default:
                 {
-                    SyntaxToken? node = null;
-                    while (current.Kind == SyntaxTokenKind.Comma || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.RightParen)
-                    {
-                        switch (current.Kind)
-                        {
-                            case SyntaxTokenKind.Comma:
-                            {
-                                var x0 = Advance();
-                                var x1 = ParseParameterDeclaration();
-                                SyntaxToken? temp = CreateNode(SyntaxTokenKind.Parameters, x0, x1);
-                                node = CreateNode(SyntaxTokenKind.Parameters, node, temp);
-                                break;
-                            }
-                            case SyntaxTokenKind.Identifier:
-                            {
-                                var x0 = ParseParameterDeclaration();
-                                SyntaxToken? temp = CreateNode(SyntaxTokenKind.Parameters, x0);
-                                node = CreateNode(SyntaxTokenKind.Parameters, node, temp);
-                                break;
-                            }
-                            default: return node;
-                        }
-                    }
-                    return node;
+                    Unexpected(SyntaxTokenKind.Identifier);
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken?>(current));
                 }
             }
         }

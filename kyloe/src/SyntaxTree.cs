@@ -21,7 +21,11 @@ namespace Kyloe
             this.diagnostics = diagnostics;
         }
 
-        public SyntaxToken? GetRoot() => root;
+        public void WriteTo(TextWriter writer) 
+        {
+            var treeWriter = new TreeWriter(writer);
+            treeWriter.Write(root);
+        }
 
         public SourceText GetSourceText() => sourceText;
 

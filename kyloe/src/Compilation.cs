@@ -38,7 +38,7 @@ namespace Kyloe
             var parser = new Parser(text.GetAllText(), syntaxErrors);
             var rootNode = parser.Parse();
             collector.AddRange(syntaxErrors);
-            var binder = new Binder(typeSystem, collector);
+            var binder = new BetterBinder(typeSystem, collector);
             var result = binder.Bind(rootNode);
 
             return new Compilation(assembly, collector.ToResult(), result);

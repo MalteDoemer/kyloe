@@ -7,7 +7,7 @@ using Kyloe.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-
+/*
 namespace Kyloe.Semantics
 {
     internal class Binder
@@ -567,4 +567,4 @@ namespace Kyloe.Semantics
             return method?.ReturnType;
         }
     }
-}
+} */
