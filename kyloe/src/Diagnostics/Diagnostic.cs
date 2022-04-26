@@ -2,14 +2,21 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    public abstract class Diagnostic
+    public sealed class Diagnostic
     {
-        public abstract DiagnosticSeverity Severity { get; }
+        public Diagnostic(DiagnosticKind kind, string message, SourceLocation? location)
+        {
+            Kind = kind;
+            Message = message;
+            Location = location;
+        }
 
-        public abstract DiagnosticKind Kind { get; }
+        public DiagnosticSeverity Severity => DiagnosticSeverity.Error;
 
-        public abstract SourceLocation? Location { get; }
+        public DiagnosticKind Kind { get; }
 
-        public abstract string Message();
+        public string Message { get; }
+
+        public SourceLocation? Location { get; }
     }
 }

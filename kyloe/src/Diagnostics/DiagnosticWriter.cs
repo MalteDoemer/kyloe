@@ -37,7 +37,7 @@ namespace Kyloe.Diagnostics
                         writer.Write($"{line}:{col}: ");
             }
 
-            writer.WriteLine(diagnostic.Message());
+            writer.WriteLine(diagnostic.Message);
 
             ResetColor();
         }

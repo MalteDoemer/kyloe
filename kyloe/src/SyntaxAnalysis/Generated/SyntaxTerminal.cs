@@ -21,7 +21,7 @@ namespace Kyloe.Syntax
         
         public bool Invalid { get; }
         
-        public override IEnumerable<SyntaxToken> Children()
+        public override IEnumerable<SyntaxToken?> Children()
         {
             return Enumerable.Empty<SyntaxToken>();
         }

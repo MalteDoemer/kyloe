@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Kyloe.Syntax
@@ -8,6 +9,6 @@ namespace Kyloe.Syntax
         
         public abstract Kyloe.Utility.SourceLocation Location { get; }
         
-        public abstract IEnumerable<SyntaxToken> Children();
+        public abstract IEnumerable<SyntaxToken?> Children();
     }
 }

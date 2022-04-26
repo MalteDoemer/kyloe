@@ -27,6 +27,8 @@ namespace Kyloe
             treeWriter.Write(root);
         }
 
+        public SyntaxToken? GetRoot() => root;
+
         public SourceText GetSourceText() => sourceText;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
@@ -35,13 +37,9 @@ namespace Kyloe
 
         public static SyntaxTree Parse(SourceText sourceText) 
         {
-            var errors = new List<SyntaxError>();
-            var parser = new Parser(sourceText.GetAllText(), errors);
-            var tree = parser.Parse();
-
             var collector = new DiagnosticCollector(sourceText);
-            collector.AddRange(errors);
-
+            var parser = new Parser(sourceText.GetAllText(), collector);
+            var tree = parser.Parse();
             return new SyntaxTree(tree, sourceText, collector.ToResult());
         }
 

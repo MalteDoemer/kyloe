@@ -34,11 +34,9 @@ namespace Kyloe
             var typeSystem = Symbols.TypeSystem.Create();
 
             var collector = new DiagnosticCollector(text);
-            var syntaxErrors = new List<SyntaxError>();
-            var parser = new Parser(text.GetAllText(), syntaxErrors);
+            var parser = new Parser(text.GetAllText(), collector);
             var rootNode = parser.Parse();
-            collector.AddRange(syntaxErrors);
-            var binder = new BetterBinder(typeSystem, collector);
+            var binder = new Binder(typeSystem, collector);
             var result = binder.Bind(rootNode);
 
             return new Compilation(assembly, collector.ToResult(), result);

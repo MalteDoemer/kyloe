@@ -6,6 +6,8 @@ namespace Kyloe.Syntax
 {
     public sealed class SyntaxNode : SyntaxToken
     {
+        private IEnumerable<SyntaxToken> nonNullTokens => Tokens.Where(t => t is not null)!;
+        
         public SyntaxNode(SyntaxTokenKind kind, ImmutableArray<SyntaxToken?> tokens)
         {
             Kind = kind;
@@ -16,11 +18,11 @@ namespace Kyloe.Syntax
         
         public ImmutableArray<SyntaxToken?> Tokens { get; }
         
-        public override Kyloe.Utility.SourceLocation Location => Kyloe.Utility.SourceLocation.CreateAround(Children().First().Location, Children().Last().Location);
+        public override Kyloe.Utility.SourceLocation Location => Kyloe.Utility.SourceLocation.CreateAround(nonNullTokens.First().Location, nonNullTokens.Last().Location);
         
-        public override IEnumerable<SyntaxToken> Children()
+        public override IEnumerable<SyntaxToken?> Children()
         {
-            return Tokens.Where(t => t is not null)!;
+            return Tokens;
         }
     }
 }

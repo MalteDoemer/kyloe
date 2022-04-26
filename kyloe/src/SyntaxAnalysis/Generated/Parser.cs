@@ -10,7 +10,7 @@ namespace Kyloe.Syntax
         
         private readonly HashSet<SyntaxTokenKind> stopTerminals;
         
-        private readonly ICollection<Kyloe.Diagnostics.SyntaxError> errors;
+        private readonly ICollection<Kyloe.Diagnostics.Diagnostic> errors;
         
         private int pos;
         
@@ -18,7 +18,7 @@ namespace Kyloe.Syntax
         
         private SyntaxTerminal current => pos < terminals.Length ? terminals[pos] : terminals[terminals.Length - 1];
         
-        public Parser(string text, ICollection<Kyloe.Diagnostics.SyntaxError> errors)
+        public Parser(string text, ICollection<Kyloe.Diagnostics.Diagnostic> errors)
         {
             this.pos = 0;
             this.isValid = true;
@@ -29,7 +29,7 @@ namespace Kyloe.Syntax
             {
                 if (terminal.Kind == SyntaxTokenKind.Error)
                 {
-                    errors.Add(new Kyloe.Diagnostics.SyntaxError(Kyloe.Diagnostics.DiagnosticKind.InvalidCharacterError, string.Format("invalid character: \\u{0:x4}", (int)(terminal.Text[0])), terminal.Location));
+                    errors.Add(new Kyloe.Diagnostics.Diagnostic(Kyloe.Diagnostics.DiagnosticKind.InvalidCharacterError, string.Format("invalid character: \\u{0:x4}", (int)(terminal.Text[0])), terminal.Location));
                 }
                 else 
                 {
@@ -86,7 +86,7 @@ namespace Kyloe.Syntax
             {
                 msg = $"expected one of ({string.Join(", ", expected)}), got {current.Kind}";
             }
-            errors.Add(new Kyloe.Diagnostics.SyntaxError(Kyloe.Diagnostics.DiagnosticKind.UnexpectedTokenError, msg, current.Location));
+            errors.Add(new Kyloe.Diagnostics.Diagnostic(Kyloe.Diagnostics.DiagnosticKind.UnexpectedTokenError, msg, current.Location));
         }
         
         private SyntaxToken? CreateNode(SyntaxTokenKind kind, params SyntaxToken?[] tokens)

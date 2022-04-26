@@ -25,7 +25,7 @@
         "AccessModifier": "Public"
     },
     "ErrorClass": {
-        "Name": "Kyloe.Diagnostics.SyntaxError",
+        "Name": "Kyloe.Diagnostics.Diagnostic",
         "AccessModifier": "Public"
     },
     "ErrorKindEnum": {
