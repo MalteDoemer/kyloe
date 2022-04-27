@@ -6,6 +6,7 @@ using System.Linq;
 using Kyloe.Diagnostics;
 using Kyloe.Symbols;
 using Kyloe.Syntax;
+using Kyloe.Utility;
 
 namespace Kyloe.Semantics
 {
@@ -130,6 +131,7 @@ namespace Kyloe.Semantics
             // ├── TypeClause (optional)
             // └── BlockStatement
 
+            Debug.Assert(token.Kind == SyntaxTokenKind.FunctionDefinition);
             var functionDeclaration = (SyntaxNode)token;
 
             var nameTerminal = GetTerminal(functionDeclaration.Tokens[1]);
@@ -163,9 +165,46 @@ namespace Kyloe.Semantics
 
             var function = new FunctionType(name, functionGroup.Group, returnType);
 
-            var paramSyntax = Collect(parameters, SyntaxTokenKind.Parameters, SyntaxTokenKind.ParameterDeclaration).Where(t => t.Kind == SyntaxTokenKind.ParameterDeclaration).ToList(); 
-            
-            throw new NotImplementedException();
+            var paramSyntax = Collect(parameters, SyntaxTokenKind.Parameters, SyntaxTokenKind.ParameterDeclaration).Where(t => t.Kind == SyntaxTokenKind.ParameterDeclaration);
+
+            foreach (var param in paramSyntax)
+                function.Parameters.Add(BindParameter(param));
+
+            bool alreadyExists = false;
+
+            foreach (var otherFunction in functionGroup.Group.Functions)
+            {
+                if (TypeSequenceEquals(function.Parameters.Select(param => param.Type), otherFunction.Parameters.Select(param => param.Type)))
+                {
+                    if (symbol is not ErrorSymbol)
+                        diagnostics.OverloadWithSameParametersExistsError(nameTerminal.Location, name);
+                    alreadyExists = true;
+                    break;
+                }
+            }
+
+            if (!alreadyExists)
+                functionGroup.Group.Functions.Add(function);
+
+            return function;
+        }
+
+        private ParameterSymbol BindParameter(SyntaxToken parameter)
+        {
+            // ParameterDeclaration
+            // ├── Identifier
+            // └── TypeClause
+
+            Debug.Assert(parameter.Kind == SyntaxTokenKind.ParameterDeclaration);
+
+            var node = GetNode(parameter);
+
+            var nameTerminal = GetTerminal(node.Tokens[0]);
+            var typeClause = GetTerminal(node.Tokens[0]);
+
+            var type = BindTypeClause(typeClause);
+
+            return new ParameterSymbol(nameTerminal.Text, type, nameTerminal.Location);
         }
 
         private TypeSpecifier BindFunctionTypeClause(SyntaxToken typeClause)
@@ -173,8 +212,37 @@ namespace Kyloe.Semantics
             if (typeClause is EmptySytaxToken)
                 return typeSystem.Void;
 
-            var node = GetNode(typeClause);
+            if (typeClause.Kind == SyntaxTokenKind.Error)
+                return typeSystem.Error;
 
+            Debug.Assert(typeClause.Kind == SyntaxTokenKind.TrailingTypeClause);
+
+            var node = GetNode(typeClause);
+            var nameTerminal = GetTerminal(node.Tokens[1]);
+            var symbol = LookupSymbol(nameTerminal.Text);
+
+            if (symbol is null)
+            {
+                diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
+                return typeSystem.Error;
+            }
+
+            return symbol.Type;
+        }
+
+
+        private TypeSpecifier BindTypeClause(SyntaxToken clause)
+        {
+            // TypeClause
+            // ├── Colon
+            // └── Identifier
+
+            if (clause.Kind == SyntaxTokenKind.Error)
+                return typeSystem.Error;
+
+            Debug.Assert(clause.Kind == SyntaxTokenKind.TypeClause);
+
+            var node = GetNode(clause);
             var nameTerminal = GetTerminal(node.Tokens[1]);
 
             var symbol = LookupSymbol(nameTerminal.Text);
@@ -184,15 +252,37 @@ namespace Kyloe.Semantics
                 diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
                 return typeSystem.Error;
             }
-            else
-            {
-                return symbol.Type;
-            }
+
+            return symbol.Type;
         }
 
         private BoundFunctionDefinition BindFunctionDefinition(SyntaxToken funcDef, FunctionType funcType)
         {
-            throw new NotImplementedException();
+            // FunctionDefinition
+            // ├── FuncKeyword
+            // ├── Identifier
+            // ├── LeftParen
+            // ├── Parameters (optional)
+            // ├── RightParen
+            // ├── TypeClause (optional)
+            // └── BlockStatement
+
+            Debug.Assert(funcDef.Kind == SyntaxTokenKind.FunctionDefinition);
+            var node = GetNode(funcDef);
+
+            EnterNewScope(); // this scope contains the parameters
+
+            foreach (var param in funcType.Parameters)
+                if (!DeclareSymbol(param))
+                    diagnostics.RedefinedParameterError((SourceLocation)param.Loaction!, param.Name);
+
+            var body = GetNode(node.Tokens[6]);
+
+            var boundBody = BindBlockStatement(body);
+
+            ExitCurrentScope();
+
+            return new BoundFunctionDefinition(funcType, boundBody);
         }
 
         private BoundDeclarationStatement BindDeclarationStatement(SyntaxToken global)
@@ -200,5 +290,9 @@ namespace Kyloe.Semantics
             throw new NotImplementedException();
         }
 
+        private BoundBlockStatement BindBlockStatement(SyntaxNode body)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
