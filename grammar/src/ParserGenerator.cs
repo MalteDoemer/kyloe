@@ -13,6 +13,8 @@ namespace Kyloe.Grammar
         private readonly List<TokenKind> terminals;
         private readonly List<TokenKind> nonTerminals;
 
+        private readonly IEnumerable<TokenKind> epsilonSet = new TokenKind[] { TokenKind.Epsilon };
+
         public ParserGenerator(FinalGrammar grammar, GeneratorInfo info)
         {
             this.grammar = grammar;
@@ -513,7 +515,8 @@ namespace Kyloe.Grammar
                 .AddLine("if (current.Kind == expected) return Advance();")
                 .AddLine("Unexpected(expected);")
                 .AddLine($"var forged = new {info.TerminalClass.Name}(expected, current.Text, current.Location, invalid: true);")
-                .AddLine($"if (next.Length != 0) SkipInput(next);")
+                .AddLine($"if (next.Length != 0) SkipInput(expected, next);")
+                .AddLine("if (current.Kind == expected) return Advance();")
                 .AddLine("return forged;");
 
             var skipInputMethod = new Method(
@@ -521,9 +524,11 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 "void",
                 "SkipInput")
+                .AddArg($"{info.TokenKindEnum.Name} expected")
                 .AddArg($"params {info.TokenKindEnum.Name}[] next")
-                .AddLine("var nextSet = next.ToHashSet();")
-                .AddStatement(new WhileLoop("!next.Contains(current.Kind) && ! stopTerminals.Contains(current.Kind)")
+                .AddLine("var skipSet = next.ToHashSet();")
+                .AddLine("skipSet.Add(expected);")
+                .AddStatement(new WhileLoop("!skipSet.Contains(current.Kind) && !stopTerminals.Contains(current.Kind)")
                     .AddLine("pos += 1;"));
 
             var unexpectedMethod = new Method(
@@ -613,9 +618,13 @@ namespace Kyloe.Grammar
 
         private void GenerateParseMethodBody(Method method, ProductionRule rule)
         {
-            var sw = new SwitchStatement("current.Kind");
+            if (rule.Productions.Length == 1 && !rule.IsOptional)
+            {
+                GenerateProductionParsingBlock("return", "n", string.Empty, method.Body, rule, rule.Productions[0]);
+                return;
+            }
 
-            var expected = new List<TokenKind>();
+            var sw = new SwitchStatement("current.Kind");
 
             foreach (var prod in rule.Productions)
             {
@@ -630,26 +639,25 @@ namespace Kyloe.Grammar
 
                     hasAny = true;
                     sw.AddCase(TokenKindAccessString(token));
-                    expected.Add(token);
                 }
 
                 if (hasAny)
                 {
                     var block = new BlockStatement();
-                    GenerateProductionParsingBlock("return", "n", block, rule, prod);
+                    GenerateProductionParsingBlock("return", "n", string.Empty, block, rule, prod);
                     sw.AddStatement(block);
                 }
 
             }
-            if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
+
+            if (rule.IsOptional)
                 sw.AddLine($"default: return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Epsilon)}, ImmutableArray<{info.TokenClass.Name}>.Empty);");
             else
             {
                 sw.AddLine("default:");
                 var defaultBlock = new BlockStatement();
-
+                var expected = grammar.FirstSet(rule.Kind).Except(epsilonSet);
                 var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
-
                 defaultBlock.AddLine($"Unexpected({args});");
                 defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}>(current));");
 
@@ -661,13 +669,16 @@ namespace Kyloe.Grammar
 
         private void GenerateLeftRecursiveParseMethodBody(Method method, ProductionRule rule)
         {
+            if (rule.NonLeftRecursiveProductions.Count() == 1 && !rule.IsOptional)
+            {
+                GenerateLeftRecursiveLoop(method.Body, rule, rule.NonLeftRecursiveProductions.First());
+                return;
+            }
+
             var outerSwitch = new SwitchStatement("current.Kind");
 
-            var expected = new List<TokenKind>();
-
-            for (int i = rule.FirstNonLeftRecursiveProduction; i < rule.Productions.Length; i++)
+            foreach (var prod in rule.NonLeftRecursiveProductions)
             {
-                var prod = rule.Productions[i];
                 var first = grammar.FirstSet(rule.Kind, prod);
 
                 bool hasAny = false;
@@ -679,7 +690,6 @@ namespace Kyloe.Grammar
 
                     hasAny = true;
                     outerSwitch.AddCase(TokenKindAccessString(token));
-                    expected.Add(token);
                 }
 
                 if (hasAny)
@@ -690,7 +700,7 @@ namespace Kyloe.Grammar
                 }
             }
 
-            if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
+            if (rule.IsOptional)
             {
                 outerSwitch.AddLine("default:");
                 var block = new BlockStatement();
@@ -701,7 +711,7 @@ namespace Kyloe.Grammar
             {
                 outerSwitch.AddLine("default:");
                 var defaultBlock = new BlockStatement();
-
+                var expected = grammar.FirstSet(rule.Kind).Except(epsilonSet);
                 var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
 
                 defaultBlock.AddLine($"Unexpected({args});");
@@ -715,17 +725,17 @@ namespace Kyloe.Grammar
 
         private void GenerateLeftRecursiveLoop(BlockStatement block, ProductionRule rule, Production production)
         {
-            GenerateProductionParsingBlock($"{info.TokenClass.Name} node =", "n", block, rule, production);
+            GenerateProductionParsingBlock($"{info.TokenClass.Name} node =", "n", string.Empty, block, rule, production);
 
             var condition = new StringBuilder();
 
-            for (int i = 0; i < rule.FirstNonLeftRecursiveProduction; i++)
+            foreach (var p in rule.LeftRecursiveProductions)
             {
-                var prod = GetProductionWithoutLeftRecursiveTerm(rule.Productions[i]);
+                var prod = GetProductionWithoutLeftRecursiveTerm(p);
 
                 IEnumerable<TokenKind> first;
 
-                if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
+                if (rule.IsOptional)
                     first = grammar.FirstSet(rule.Kind).Union(grammar.FollowSet(rule.Kind));
                 else
                     first = grammar.FirstSet(rule.Kind, prod);
@@ -745,40 +755,20 @@ namespace Kyloe.Grammar
 
             var whileLoop = new WhileLoop(condition.ToString());
 
-            var innerSwitch = new SwitchStatement("current.Kind");
-
-            for (int i = 0; i < rule.FirstNonLeftRecursiveProduction; i++)
+            if (rule.LeftRecursiveProductions.Count() == 1 && !rule.IsOptional)
             {
-                var prod = GetProductionWithoutLeftRecursiveTerm(rule.Productions[i]);
-
-                var first = grammar.FirstSet(rule.Kind, prod);
-
-                bool hasAny = false;
-
-                foreach (var token in first)
-                {
-                    if (token == TokenKind.Epsilon)
-                        continue;
-
-                    hasAny = true;
-                    innerSwitch.AddCase(TokenKindAccessString(token));
-                }
-
-                if (hasAny)
-                {
-                    var innerBlock = new BlockStatement();
-                    GenerateProductionParsingBlock($"var temp =", "x", innerBlock, rule, prod);
-                    innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
-                    innerBlock.AddLine("break;");
-                    innerSwitch.AddStatement(innerBlock);
-                }
+                var prod = GetProductionWithoutLeftRecursiveTerm(rule.LeftRecursiveProductions.First());
+                GenerateProductionParsingBlock($"node =", "x", ", node", whileLoop.Body, rule, prod);
             }
-
-            if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
+            else
             {
-                for (int i = rule.FirstNonLeftRecursiveProduction; i < rule.Productions.Length; i++)
+
+                var innerSwitch = new SwitchStatement("current.Kind");
+
+                foreach (var p in rule.LeftRecursiveProductions)
                 {
-                    var prod = rule.Productions[i];
+                    var prod = GetProductionWithoutLeftRecursiveTerm(p);
+
                     var first = grammar.FirstSet(rule.Kind, prod);
 
                     bool hasAny = false;
@@ -788,32 +778,62 @@ namespace Kyloe.Grammar
                         if (token == TokenKind.Epsilon)
                             continue;
 
-                        innerSwitch.AddCase(TokenKindAccessString(token));
                         hasAny = true;
-
-
+                        innerSwitch.AddCase(TokenKindAccessString(token));
                     }
 
                     if (hasAny)
                     {
                         var innerBlock = new BlockStatement();
-                        GenerateProductionParsingBlock($"var temp =", "x", innerBlock, rule, prod);
-                        innerBlock.AddLine($"node = CreateNode({TokenKindAccessString(rule.Kind)}, node, temp);");
+                        GenerateProductionParsingBlock($"node =", "x", ", node", innerBlock, rule, prod);
                         innerBlock.AddLine("break;");
-
                         innerSwitch.AddStatement(innerBlock);
                     }
                 }
 
-                innerSwitch.AddLine("default: return node;");
+                if (rule.IsOptional)
+                {
+                    // for (int i = rule.FirstNonLeftRecursiveProduction; i < rule.Productions.Length; i++)
+                    foreach (var prod in rule.NonLeftRecursiveProductions)
+                    {
+                        // var prod = rule.Productions[i];
+                        var first = grammar.FirstSet(rule.Kind, prod);
+
+                        bool hasAny = false;
+
+                        foreach (var token in first)
+                        {
+                            if (token == TokenKind.Epsilon)
+                                continue;
+
+                            innerSwitch.AddCase(TokenKindAccessString(token));
+                            hasAny = true;
+                        }
+
+                        if (hasAny)
+                        {
+                            var innerBlock = new BlockStatement();
+                            GenerateProductionParsingBlock($"node =", "x", ", node", innerBlock, rule, prod);
+                            innerBlock.AddLine("break;");
+
+                            innerSwitch.AddStatement(innerBlock);
+                        }
+                    }
+
+                    innerSwitch.AddLine("default: return node;");
+                }
+
+                whileLoop.AddStatement(innerSwitch);
             }
 
-            whileLoop.AddStatement(innerSwitch);
             block.Add(whileLoop);
             block.AddLine("return node;");
+
         }
 
-        private void GenerateProductionParsingBlock(string result, string varname, BlockStatement statement, ProductionRule rule, Production production)
+
+
+        private void GenerateProductionParsingBlock(string result, string varname, string additionalArgs, BlockStatement statement, ProductionRule rule, Production production)
         {
             if (production is EmptyProduction)
             {
@@ -830,16 +850,31 @@ namespace Kyloe.Grammar
 
                 if (!child.IsTerminal)
                     statement.AddLine($"var {varname}{n} = {ParseMethodName(child)}();");
-                else if (n == 0)
-                    statement.AddLine($"var {varname}{n} = Advance();");
                 else if (n == children.Length - 1)
                     statement.AddLine($"var {varname}{n} = Expect({TokenKindAccessString(child)});");
                 else
                 {
-                    var next = children[n + 1];
-                    var firstNext = grammar.FirstSet(next);
-                    var args = string.Join(", ", firstNext.Select(t => TokenKindAccessString(t)));
-                    statement.AddLine($"var {varname}{n} = Expect({TokenKindAccessString(child)}, {args});");
+                    var nextSet = new HashSet<TokenKind>();
+
+                    for (int i = n + 1; i < children.Length; i++)
+                    {
+                        var first = grammar.FirstSet(children[i]);
+
+                        nextSet.UnionWith(first);
+                        nextSet.Remove(TokenKind.Epsilon);
+
+                        if (!first.Contains(TokenKind.Epsilon))
+                            break;
+
+                        if (i == children.Length - 1)
+                            nextSet.Add(TokenKind.Epsilon);
+                    }
+
+                    // TODO: add case where firstSetFollowing contains epsilon
+
+                    var args = string.Join(string.Empty, nextSet.Select(t => $", {TokenKindAccessString(t)}"));
+
+                    statement.AddLine($"var {varname}{n} = Expect({TokenKindAccessString(child)}{args});");
                 }
             }
 
@@ -847,9 +882,9 @@ namespace Kyloe.Grammar
 
             code.Append(result);
             code.Append(" CreateNode(");
-            code.Append(info.TokenKindEnum.Name);
-            code.Append('.');
-            code.Append(grammar.GetName(rule.Kind));
+            code.Append(TokenKindAccessString(rule.Kind));
+
+            code.Append(additionalArgs);
 
             for (int i = 0; i < n; i++)
                 code.Append(", ").Append(varname).Append(i);

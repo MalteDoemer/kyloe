@@ -70,6 +70,17 @@ namespace Kyloe.Semantics
             return true;
         }
 
+        private MethodType? FindMethodOverload(MethodGroupType group, IEnumerable<TypeSpecifier> parameterTypes, bool isStatic)
+        {
+            foreach (var method in group.Methods)
+            {
+                if (method.IsStatic == isStatic && TypeSequenceEquals(method.Parameters.Select(param => param.Type), parameterTypes))
+                    return method;
+            }
+
+            return null;
+        }
+
         private SyntaxNode GetNode(SyntaxToken token)
         {
             Debug.Assert(token is SyntaxNode);
@@ -129,7 +140,7 @@ namespace Kyloe.Semantics
             foreach (var (funcType, funcDef) in functionTypes.Zip(functionSyntax))
                 functions.Add(BindFunctionDefinition(funcDef, funcType));
 
-            return new BoundCompilationUnit(globals.MoveToImmutable(), functions.MoveToImmutable());
+            return new BoundCompilationUnit(globals.ToImmutable(), functions.ToImmutable());
         }
 
         private FunctionType BindFunctionDeclaration(SyntaxToken token)
@@ -316,7 +327,13 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindExpressionStatement(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            // ExpressionStatement
+            // ├── Expression
+            // └── SemiColon
+
+            var statement = GetNode(token, SyntaxTokenKind.ExpressionStatement);
+            var bound = BindExpression(statement.Tokens[0]);
+            return new BoundExpressionStatement(bound);
         }
 
         private BoundDeclarationStatement BindDeclarationStatement(SyntaxToken token)
@@ -395,14 +412,13 @@ namespace Kyloe.Semantics
                 case SyntaxTokenKind.Float:
                 case SyntaxTokenKind.Bool:
                 case SyntaxTokenKind.String:
-                case SyntaxTokenKind.Identifier:
                     return BindLiteral(token);
-
+                case SyntaxTokenKind.Identifier:
+                    return BindIdentifier(token);
                 default:
                     throw new Exception($"unexpected kind: {token.Kind}");
             }
         }
-
 
         private BoundExpression BindAssignmentHelper(SyntaxToken token)
         {
@@ -422,7 +438,28 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindBinary(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            // Binary
+            // ├── Expr
+            // ├── Operator
+            // └── Expr
+
+            var binary = GetNode(token);
+
+            var leftSyntax = binary.Tokens[0];
+            var opTerminal = GetTerminal(binary.Tokens[1]);
+            var rightSyntax = binary.Tokens[2];
+
+            var left = BindExpression(leftSyntax);
+            var op = SemanticInfo.GetBinaryOperation(opTerminal.Kind);
+            var right = BindExpression(rightSyntax);
+
+            var resultType = GetBinaryOperationResult(left, op, right);
+
+            if (resultType is not null)
+                return new BoundBinaryExpression(left, op, right, resultType);
+
+            diagnostics.UnsupportedBinaryOperation(token.Location, op, left.ResultType, right.ResultType);
+            return new BoundBinaryExpression(left, op, right, typeSystem.Error);
         }
 
         private BoundExpression BindPrefix(SyntaxToken token)
@@ -448,7 +485,96 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindLiteral(SyntaxToken token)
         {
+            var terminal = GetTerminal(token);
+            var type = SemanticInfo.GetTypeFromLiteral(typeSystem, token.Kind);
+            var value = GetValueForLiteral(terminal, type);
+
+            if (value is not null) 
+                return new BoundLiteralExpression(type, value);
+
+            
+            diagnostics.InvalidLiteralError(token.Location);
+            return new BoundInvalidExpression(typeSystem);
+        }
+
+        private object? GetValueForLiteral(SyntaxTerminal token, TypeSpecifier type)
+        {
+            var text = token.Text;
+
+            switch (token.Kind)
+            {
+                case SyntaxTokenKind.Int:
+                    long.TryParse(text, out var res1);
+                    return res1;
+                case SyntaxTokenKind.Float:
+                    double.TryParse(text, out var res2);
+                    return res2;
+                case SyntaxTokenKind.Bool:
+                    bool.TryParse(text, out var res3);
+                    return res3;
+                case SyntaxTokenKind.String:
+                    return token.Text;
+                default:
+                    throw new System.Exception($"Unexpected literal type: {token.Kind}");
+            }
+        }
+
+        private BoundExpression BindIdentifier(SyntaxToken token)
+        {
             throw new NotImplementedException();
+        }
+
+        private TypeSpecifier? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
+        {
+            Debug.Assert(op.IsBinaryOperation());
+
+            var leftType = left.ResultType;
+            var rightType = right.ResultType;
+
+            if (leftType is ErrorType || rightType is ErrorType)
+                return typeSystem.Error;
+
+            if (!left.IsValue || !right.IsValue)
+                return null;
+
+            var name = SemanticInfo.GetFunctionNameFromOperation(op);
+
+            var methodGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
+
+            if (methodGroup is null)
+                return null;
+
+            var args = new[] { leftType, rightType };
+
+            var method = FindMethodOverload(methodGroup, args, true);
+
+            return method?.ReturnType;
+        }
+
+        private TypeSpecifier? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
+        {
+            Debug.Assert(op.IsUnaryOperation());
+
+            var type = expr.ResultType;
+
+            if (type is ErrorType)
+                return typeSystem.Error;
+
+            if (!expr.IsValue)
+                return null;
+
+            var name = SemanticInfo.GetFunctionNameFromOperation(op);
+
+            var methodGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.MethodGroup;
+
+            if (methodGroup is null)
+                return null;
+
+            var args = new[] { type };
+
+            var method = FindMethodOverload(methodGroup, args, true);
+
+            return method?.ReturnType;
         }
     }
 }

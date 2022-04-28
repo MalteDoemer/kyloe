@@ -33,6 +33,12 @@ namespace Kyloe.Diagnostics
             Add(new Diagnostic(kind, message, location));
         }
 
+        public void InvalidLiteralError(SourceLocation location) 
+        {
+            var msg = "invalid literal";
+            AddDiagnostic(DiagnosticKind.InvalidLiteralError, msg, location);
+        }
+
         public void ExpectedModifiableValueError(SourceLocation location)
         {
             var msg = $"expected a modifiable value";

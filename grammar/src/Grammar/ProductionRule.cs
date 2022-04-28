@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,9 @@ namespace Kyloe.Grammar
         public TokenKind Kind { get; }
         public int FirstNonLeftRecursiveProduction { get; }
         public ImmutableArray<Production> Productions { get; }
+
+        public IEnumerable<Production> LeftRecursiveProductions => Productions.TakeWhile((p, i) => i < FirstNonLeftRecursiveProduction);
+        public IEnumerable<Production> NonLeftRecursiveProductions => Productions.SkipWhile((p, i) => i < FirstNonLeftRecursiveProduction);
 
         public bool IsLeftRecursive => FirstNonLeftRecursiveProduction > 0;
         public bool IsOptional { get; }

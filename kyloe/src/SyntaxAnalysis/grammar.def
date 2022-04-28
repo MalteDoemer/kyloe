@@ -83,7 +83,8 @@ OptionalParameters = Parameters | #;
 Parameters = (Parameters, Comma, ParameterDeclaration) | ParameterDeclaration;
 ParameterDeclaration = Identifier, TypeClause;
 
-TypeClause = (Colon, Identifier) | #;
+TypeClause = (Colon, Identifier);
+OptionalTypeClause = TypeClause | #;
 
 Statement = BlockStatement | IfStatement | DeclarationStatement | ExpressionStatement | SemiColon;
 ExpressionStatement = (Expression, SemiColon);
@@ -118,4 +119,4 @@ Postfix =  (Postfix, (LeftParen, Arguments, RightParen) | (LeftSquare, Arguments
 Arguments = (Arguments, Comma, Expression) | Expression | #;
 
 Primary = Int | Float | Bool | String | Identifier | Parenthesized;
-Parenthesized = (LeftParen, Sum, RightParen);
+Parenthesized = (LeftParen, Expression, RightParen);

@@ -20,5 +20,6 @@ namespace Kyloe.Diagnostics
         NameAlreadyExistsError, 
         OverloadWithSameParametersExistsError,
         RedefinedParameterError,
+        InvalidLiteralError,            // TODO: add a test
     }
 }

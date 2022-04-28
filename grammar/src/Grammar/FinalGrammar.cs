@@ -118,9 +118,8 @@ namespace Kyloe.Grammar
             // -    Add ε to FIRST(A, α)
 
             var firstSet = new HashSet<TokenKind>();
-
             var children = production.Children();
-            var last = production.Children().Last();
+            var last = children.Last();
 
             foreach (var (i, child) in children.EnumerateIndex())
             {
