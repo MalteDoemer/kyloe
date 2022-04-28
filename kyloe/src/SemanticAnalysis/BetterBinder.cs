@@ -178,7 +178,7 @@ namespace Kyloe.Semantics
             }
             else
             {
-                if (symbol is not ErrorSymbol)
+                if (symbol is not ErrorSymbol && !nameTerminal.Invalid)
                     diagnostics.NameAlreadyExistsError(nameTerminal.Location, name);
                 functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
             }
@@ -190,7 +190,19 @@ namespace Kyloe.Semantics
             var paramSyntax = Collect(parameters, SyntaxTokenKind.Parameters, SyntaxTokenKind.ParameterDeclaration).Where(t => t.Kind == SyntaxTokenKind.ParameterDeclaration);
 
             foreach (var param in paramSyntax)
-                function.Parameters.Add(BindParameter(param));
+            {
+                // ParameterDeclaration
+                // ├── Identifier
+                // └── TypeClause
+
+                var parameter = GetNode(param, SyntaxTokenKind.ParameterDeclaration);
+                var paramNameTerminal = GetTerminal(parameter.Tokens[0], SyntaxTokenKind.Identifier);
+                var type = BindTypeClause(GetNode(parameter.Tokens[1]));
+                var paramSymbol = new ParameterSymbol(nameTerminal.Text, type);
+
+                if (!paramNameTerminal.Invalid)
+                    function.Parameters.Add(paramSymbol);
+            }
 
             bool alreadyExists = false;
 
@@ -211,22 +223,6 @@ namespace Kyloe.Semantics
             return function;
         }
 
-        private ParameterSymbol BindParameter(SyntaxToken token)
-        {
-            // ParameterDeclaration
-            // ├── Identifier
-            // └── TypeClause
-
-            var parameter = GetNode(token, SyntaxTokenKind.ParameterDeclaration);
-
-            var nameTerminal = GetTerminal(parameter.Tokens[0], SyntaxTokenKind.Identifier);
-            var typeClause = GetNode(parameter.Tokens[0]);
-
-            var type = BindTypeClause(typeClause);
-
-            return new ParameterSymbol(nameTerminal.Text, type, nameTerminal.Location);
-        }
-
         private TypeSpecifier BindFunctionTypeClause(SyntaxToken token)
         {
             if (token.Kind == SyntaxTokenKind.Epsilon)
@@ -242,7 +238,8 @@ namespace Kyloe.Semantics
 
             if (symbol is null)
             {
-                diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
+                if (!nameTerminal.Invalid)
+                    diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
                 return typeSystem.Error;
             }
 
@@ -265,7 +262,8 @@ namespace Kyloe.Semantics
 
             if (symbol is null)
             {
-                diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
+                if (!nameTerminal.Invalid)
+                    diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
                 return typeSystem.Error;
             }
 
@@ -289,7 +287,8 @@ namespace Kyloe.Semantics
 
             foreach (var param in type.Parameters)
                 if (!DeclareSymbol(param))
-                    diagnostics.RedefinedParameterError((SourceLocation)param.Loaction!, param.Name);
+                    if (param.Location is SourceLocation loc)
+                        diagnostics.RedefinedParameterError(loc, param.Name);
 
             var body = GetNode(function.Tokens[6]);
             var boundBody = BindBlockStatement(body);
@@ -383,7 +382,6 @@ namespace Kyloe.Semantics
             yield return repeat.Tokens[1];
         }
 
-
         private BoundExpression BindExpression(SyntaxToken token)
         {
             switch (token.Kind)
@@ -458,13 +456,34 @@ namespace Kyloe.Semantics
             if (resultType is not null)
                 return new BoundBinaryExpression(left, op, right, resultType);
 
-            diagnostics.UnsupportedBinaryOperation(token.Location, op, left.ResultType, right.ResultType);
+            if (!opTerminal.Invalid)
+                diagnostics.UnsupportedBinaryOperation(token.Location, op, left.ResultType, right.ResultType);
             return new BoundBinaryExpression(left, op, right, typeSystem.Error);
         }
 
         private BoundExpression BindPrefix(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            // Prefix
+            // ├── Operator
+            // └── Expr
+
+            var prefix = GetNode(token, SyntaxTokenKind.Prefix);
+
+            var opTerminal = GetTerminal(prefix.Tokens[0]);
+            var exprSyntax = prefix.Tokens[1];
+
+            var op = SemanticInfo.GetUnaryOperation(opTerminal.Kind);
+            var expr = BindExpression(exprSyntax);
+
+            var resultType = GetUnaryOperationResult(op, expr);
+
+            if (resultType is not null)
+                return new BoundUnaryExpression(expr, op, resultType);
+
+            if (!opTerminal.Invalid)
+                diagnostics.UnsupportedUnaryOperation(token.Location, op, expr.ResultType);
+
+            return new BoundUnaryExpression(expr, op, typeSystem.Error);
         }
 
         private BoundExpression BindPostfix(SyntaxToken token)
@@ -489,11 +508,11 @@ namespace Kyloe.Semantics
             var type = SemanticInfo.GetTypeFromLiteral(typeSystem, token.Kind);
             var value = GetValueForLiteral(terminal, type);
 
-            if (value is not null) 
+            if (value is not null)
                 return new BoundLiteralExpression(type, value);
 
-            
-            diagnostics.InvalidLiteralError(token.Location);
+            if (!terminal.Invalid)
+                diagnostics.InvalidLiteralError(token.Location);
             return new BoundInvalidExpression(typeSystem);
         }
 

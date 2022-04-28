@@ -19,6 +19,7 @@ namespace Kyloe.Semantics
         Equal,
         NotEqual,
 
+        Identity,
         Negation,
         BitwiseNot,
         LogicalNot,

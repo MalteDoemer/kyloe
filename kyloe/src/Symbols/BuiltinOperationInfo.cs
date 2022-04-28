@@ -43,6 +43,11 @@ namespace Kyloe.Symbols
                 BoundOperation.Negation
             );
 
+            public static readonly ImmutableArray<BoundOperation> Identity = ImmutableArray.Create<BoundOperation>
+            (
+                BoundOperation.Identity
+            );
+
             public static readonly ImmutableArray<BoundOperation> BitwiseNot = ImmutableArray.Create<BoundOperation>
             (
                 BoundOperation.BitwiseNot
@@ -53,7 +58,11 @@ namespace Kyloe.Symbols
                 BoundOperation.LogicalNot
             );
 
-            public static readonly ImmutableArray<BoundOperation> NegationAndBitwiseNot = Negation.Concat(BitwiseNot).ToImmutableArray();
+            public static readonly ImmutableArray<BoundOperation> NegationAndIdenity = Negation.Concat(Identity).ToImmutableArray();
+
+            public static readonly ImmutableArray<BoundOperation> NegationIdentityAndBitwiseNot = Negation.Concat(Identity).Concat(BitwiseNot).ToImmutableArray();
+
+            public static readonly ImmutableArray<BoundOperation> IdentityAndBitwiseNot = Identity.Concat(BitwiseNot).ToImmutableArray();
 
             public static readonly ImmutableArray<BoundOperation> EqualityAndComparisonOperations = EqualityOperations.Concat(ComparisonOperations).ToImmutableArray();
 
@@ -97,18 +106,18 @@ namespace Kyloe.Symbols
 
             public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind arg)>
             (
-                (NegationAndBitwiseNot, BuiltinTypeKind.I8, BuiltinTypeKind.I8),
-                (NegationAndBitwiseNot, BuiltinTypeKind.I16, BuiltinTypeKind.I16),
-                (NegationAndBitwiseNot, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
-                (NegationAndBitwiseNot, BuiltinTypeKind.I64, BuiltinTypeKind.I64),
+                (NegationIdentityAndBitwiseNot, BuiltinTypeKind.I8, BuiltinTypeKind.I8),
+                (NegationIdentityAndBitwiseNot, BuiltinTypeKind.I16, BuiltinTypeKind.I16),
+                (NegationIdentityAndBitwiseNot, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
+                (NegationIdentityAndBitwiseNot, BuiltinTypeKind.I64, BuiltinTypeKind.I64),
 
-                (BitwiseNot, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
-                (BitwiseNot, BuiltinTypeKind.U16, BuiltinTypeKind.U16),
-                (BitwiseNot, BuiltinTypeKind.U32, BuiltinTypeKind.U32),
-                (BitwiseNot, BuiltinTypeKind.U64, BuiltinTypeKind.U64),
+                (IdentityAndBitwiseNot, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
+                (IdentityAndBitwiseNot, BuiltinTypeKind.U16, BuiltinTypeKind.U16),
+                (IdentityAndBitwiseNot, BuiltinTypeKind.U32, BuiltinTypeKind.U32),
+                (IdentityAndBitwiseNot, BuiltinTypeKind.U64, BuiltinTypeKind.U64),
 
-                (Negation, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
-                (Negation, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
+                (NegationAndIdenity, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
+                (NegationAndIdenity, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
 
                 (LogicalNot, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool)
             );

@@ -39,6 +39,7 @@ namespace Kyloe.Semantics
                 case BoundOperation.LessThan: return "op_LessThan";
                 case BoundOperation.GreaterThan: return "op_GreaterThan";
                 case BoundOperation.Negation: return "op_UnaryNegation";
+                case BoundOperation.Identity: return "op_UnaryPlus";
                 case BoundOperation.BitwiseNot: return "op_OnesComplement";
                 case BoundOperation.LogicalNot: return "op_LogicalNot";
 
@@ -68,6 +69,7 @@ namespace Kyloe.Semantics
                 case "op_LessThan": return BoundOperation.LessThan;
                 case "op_GreaterThan": return BoundOperation.GreaterThan;
                 case "op_UnaryNegation": return BoundOperation.Negation;
+                case "op_UnaryPlus": return BoundOperation.Identity;
                 case "op_OnesComplement": return BoundOperation.BitwiseNot;
                 case "op_LogicalNot": return BoundOperation.LogicalNot;
                 default:
@@ -80,6 +82,7 @@ namespace Kyloe.Semantics
             switch (operation)
             {
                 case BoundOperation.Negation:
+                case BoundOperation.Identity:
                 case BoundOperation.BitwiseNot:
                 case BoundOperation.LogicalNot:
                     return true;
@@ -157,6 +160,7 @@ namespace Kyloe.Semantics
                 case SyntaxTokenKind.Tilde: return BoundOperation.BitwiseNot;
                 case SyntaxTokenKind.Bang: return BoundOperation.LogicalNot;
                 case SyntaxTokenKind.Minus: return BoundOperation.Negation;
+                case SyntaxTokenKind.Plus: return BoundOperation.Identity;
                 default:
                     throw new System.Exception($"Unexpected unary operation type: {type}");
             }
