@@ -6,7 +6,7 @@ namespace Kyloe.Syntax
 {
     public sealed class SyntaxNode : SyntaxToken
     {
-        private IEnumerable<SyntaxToken> nonEmptyChildren => Tokens.Where(t => t is not EmptySytaxToken);
+        private IEnumerable<SyntaxToken> nonEmptyChildren => Tokens.Where(t => t.Kind != SyntaxTokenKind.Epsilon);
         
         public SyntaxNode(SyntaxTokenKind kind, ImmutableArray<SyntaxToken> tokens)
         {

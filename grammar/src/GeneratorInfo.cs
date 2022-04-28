@@ -20,7 +20,6 @@ namespace Kyloe.Grammar
         public ClassInfo TokenKindEnum { get; set; }
         public ClassInfo ExtensionClass { get; set; }
         public ClassInfo TokenClass { get; set; }
-        public ClassInfo EmptyTokenClass { get; set; }
         public ClassInfo TerminalClass { get; set; }
         public ClassInfo NodeClass { get; set; }
         public ClassInfo LocationClass { get; set; }

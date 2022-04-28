@@ -40,11 +40,6 @@ namespace Kyloe.Grammar
                 .AddUsing("using System.Collections.Generic;")
                 .AddItem(new Namespace(info.Namespace).Add(CreateTokenClass())));
 
-            yield return (info.EmptyTokenClass.Name, new CompilationUnit()
-                .AddUsing("using System.Linq;")
-                .AddUsing("using System.Collections.Generic;")
-                .AddItem(new Namespace(info.Namespace).Add(CreateEmptyTokenClass())));
-
             yield return (info.TerminalClass.Name, new CompilationUnit()
                 .AddUsing("using System.Linq;")
                 .AddUsing("using System.Collections.Generic;")
@@ -76,7 +71,6 @@ namespace Kyloe.Grammar
                 .Add(CreateTokenKindEnum())
                 .Add(CreateExtensionClass())
                 .Add(CreateTokenClass())
-                .Add(CreateEmptyTokenClass())
                 .Add(CreateTerminalClass())
                 .Add(CreateNodeClass())
                 .Add(CreateLexerClass())
@@ -157,47 +151,6 @@ namespace Kyloe.Grammar
                 .Add(childrenMethod);
         }
 
-        public Class CreateEmptyTokenClass()
-        {
-            var kindProp = new SimpleProperty(
-                AccessModifier.Public,
-                InheritanceModifier.Override,
-                info.TokenKindEnum.Name,
-                "Kind",
-                $"=> {TokenKindAccessString(TokenKind.Epsilon)};");
-
-            var locationProp = new SimpleProperty(
-                AccessModifier.Public,
-                InheritanceModifier.Override,
-                info.LocationClass.Name,
-                "Location",
-                $"=> default({info.LocationClass.Name});");
-
-            var childrenMethod = new Method(
-               AccessModifier.Public,
-               InheritanceModifier.Override,
-               $"IEnumerable<{info.TokenClass.Name}>",
-               "Children")
-               .AddLine($"return Enumerable.Empty<{info.TokenClass.Name}>();");
-
-            var ctor = new Method(
-                AccessModifier.Public,
-                InheritanceModifier.None,
-                info.EmptyTokenClass.Name,
-                null
-            );
-
-            return new Class(
-                info.EmptyTokenClass.AccessModifiers,
-                InheritanceModifier.Sealed,
-                info.EmptyTokenClass.Name,
-                info.TokenClass.Name)
-                .Add(ctor)
-                .Add(kindProp)
-                .Add(locationProp)
-                .Add(childrenMethod);
-        }
-
         public Class CreateTerminalClass()
         {
             var kindProp = new SimpleProperty(
@@ -273,7 +226,7 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 $"IEnumerable<{info.TokenClass.Name}>",
                 "nonEmptyChildren",
-                $"=> Tokens.Where(t => t is not {info.EmptyTokenClass.Name});"
+                $"=> Tokens.Where(t => t.Kind != {TokenKindAccessString(TokenKind.Epsilon)});"
             );
 
             var kindProp = new SimpleProperty(
@@ -597,7 +550,7 @@ namespace Kyloe.Grammar
                 .AddArg($"{info.TokenKindEnum.Name} kind")
                 .AddArg($"params {info.TokenClass.Name}[] tokens")
                 .AddLine("var arr = tokens.ToImmutableArray();")
-                .AddLine($"if (arr.Length == 0) return new {info.EmptyTokenClass.Name}();")
+                .AddLine($"if (arr.Length == 0) return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Epsilon)}, ImmutableArray<{info.TokenClass.Name}>.Empty);")
                 .AddLine("else if (arr.Length == 1) return arr[0];")
                 .AddLine($"else return new {info.NodeClass.Name}(kind, arr);");
 
@@ -689,7 +642,7 @@ namespace Kyloe.Grammar
 
             }
             if (grammar.FirstSet(rule.Kind).Contains(TokenKind.Epsilon))
-                sw.AddLine($"default: return new {info.EmptyTokenClass.Name}();");
+                sw.AddLine($"default: return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Epsilon)}, ImmutableArray<{info.TokenClass.Name}>.Empty);");
             else
             {
                 sw.AddLine("default:");
@@ -864,7 +817,7 @@ namespace Kyloe.Grammar
         {
             if (production is EmptyProduction)
             {
-                statement.AddLine($"{result} new {info.EmptyTokenClass.Name}();");
+                statement.AddLine($"{result} new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Epsilon)}, ImmutableArray<{info.TokenClass.Name}>.Empty);");
                 return;
             }
 

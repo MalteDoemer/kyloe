@@ -17,5 +17,6 @@ namespace Kyloe.Semantics
         BoundCallExpression,
         BoundFunctionDefinition,
         BoundCompilationUnit,
+        BoundInvalidStatement,
     }
 }

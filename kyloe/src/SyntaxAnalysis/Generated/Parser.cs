@@ -92,7 +92,7 @@ namespace Kyloe.Syntax
         private SyntaxToken CreateNode(SyntaxTokenKind kind, params SyntaxToken[] tokens)
         {
             var arr = tokens.ToImmutableArray();
-            if (arr.Length == 0) return new EmptySytaxToken();
+            if (arr.Length == 0) return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             else if (arr.Length == 1) return arr[0];
             else return new SyntaxNode(kind, arr);
         }
@@ -115,7 +115,7 @@ namespace Kyloe.Syntax
                     var n0 = ParseCompilationUnit();
                     return CreateNode(SyntaxTokenKind.Start, n0);
                 }
-                default: return new EmptySytaxToken();
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
         }
         
@@ -152,7 +152,7 @@ namespace Kyloe.Syntax
             {
                 default:
                 {
-                    SyntaxToken node = new EmptySytaxToken();
+                    SyntaxToken node = new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
                     while (current.Kind == SyntaxTokenKind.FuncKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.End)
                     {
                         switch (current.Kind)
@@ -230,7 +230,7 @@ namespace Kyloe.Syntax
                     var n1 = Expect(SyntaxTokenKind.Identifier);
                     return CreateNode(SyntaxTokenKind.TrailingTypeClause, n0, n1);
                 }
-                default: return new EmptySytaxToken();
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
         }
         
@@ -243,7 +243,7 @@ namespace Kyloe.Syntax
                     var n0 = ParseParameters();
                     return CreateNode(SyntaxTokenKind.OptionalParameters, n0);
                 }
-                default: return new EmptySytaxToken();
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
         }
         
@@ -307,7 +307,7 @@ namespace Kyloe.Syntax
                     var n1 = Expect(SyntaxTokenKind.Identifier);
                     return CreateNode(SyntaxTokenKind.TypeClause, n0, n1);
                 }
-                default: return new EmptySytaxToken();
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
         }
         
@@ -406,7 +406,7 @@ namespace Kyloe.Syntax
             {
                 default:
                 {
-                    SyntaxToken node = new EmptySytaxToken();
+                    SyntaxToken node = new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
                     while (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.RightCurly)
                     {
                         switch (current.Kind)
@@ -467,7 +467,7 @@ namespace Kyloe.Syntax
                     var n0 = ParseElseStatement();
                     return CreateNode(SyntaxTokenKind.OptionalElseStatement, n0);
                 }
-                default: return new EmptySytaxToken();
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
         }
         
@@ -657,7 +657,7 @@ namespace Kyloe.Syntax
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
-                default: return new EmptySytaxToken();
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
         }
         
@@ -1197,7 +1197,7 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
-                    SyntaxToken node = new EmptySytaxToken();
+                    SyntaxToken node = new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
                     while (current.Kind == SyntaxTokenKind.Comma || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.RightParen || current.Kind == SyntaxTokenKind.RightSquare)
                     {
                         switch (current.Kind)

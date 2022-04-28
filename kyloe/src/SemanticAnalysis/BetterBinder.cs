@@ -76,9 +76,23 @@ namespace Kyloe.Semantics
             return (SyntaxNode)token;
         }
 
+        private SyntaxNode GetNode(SyntaxToken token, SyntaxTokenKind kind)
+        {
+            Debug.Assert(token is SyntaxNode);
+            Debug.Assert(token.Kind == kind);
+            return (SyntaxNode)token;
+        }
+
         private SyntaxTerminal GetTerminal(SyntaxToken token)
         {
             Debug.Assert(token is SyntaxTerminal);
+            return (SyntaxTerminal)token;
+        }
+
+        private SyntaxTerminal GetTerminal(SyntaxToken token, SyntaxTokenKind kind)
+        {
+            Debug.Assert(token is SyntaxTerminal);
+            Debug.Assert(token.Kind == kind);
             return (SyntaxTerminal)token;
         }
 
@@ -96,9 +110,8 @@ namespace Kyloe.Semantics
 
         public BoundNode Bind(SyntaxToken token)
         {
-            if (token is EmptySytaxToken)
+            if (token.Kind == SyntaxTokenKind.Epsilon)
                 return new BoundCompilationUnit(ImmutableArray<BoundDeclarationStatement>.Empty, ImmutableArray<BoundFunctionDefinition>.Empty);
-
 
             var functionSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.FunctionDefinition).Where(t => t.Kind == SyntaxTokenKind.FunctionDefinition);
             var globalSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.DeclarationStatement).Where(t => t.Kind == SyntaxTokenKind.DeclarationStatement);
@@ -119,7 +132,6 @@ namespace Kyloe.Semantics
             return new BoundCompilationUnit(globals.MoveToImmutable(), functions.MoveToImmutable());
         }
 
-
         private FunctionType BindFunctionDeclaration(SyntaxToken token)
         {
             // FunctionDefinition
@@ -131,12 +143,11 @@ namespace Kyloe.Semantics
             // ├── TypeClause (optional)
             // └── BlockStatement
 
-            Debug.Assert(token.Kind == SyntaxTokenKind.FunctionDefinition);
-            var functionDeclaration = (SyntaxNode)token;
+            var functionDeclaration = GetNode(token, SyntaxTokenKind.FunctionDefinition);
 
-            var nameTerminal = GetTerminal(functionDeclaration.Tokens[1]);
-            var parameters = functionDeclaration.Tokens[3];
-            var typeClause = functionDeclaration.Tokens[5];
+            var nameTerminal = GetTerminal(functionDeclaration.Tokens[1], SyntaxTokenKind.Identifier);
+            var parameters = GetNode(functionDeclaration.Tokens[3]);
+            var typeClause = GetNode(functionDeclaration.Tokens[5]);
             var body = GetNode(functionDeclaration.Tokens[6]);
 
             var name = nameTerminal.Text;
@@ -189,36 +200,33 @@ namespace Kyloe.Semantics
             return function;
         }
 
-        private ParameterSymbol BindParameter(SyntaxToken parameter)
+        private ParameterSymbol BindParameter(SyntaxToken token)
         {
             // ParameterDeclaration
             // ├── Identifier
             // └── TypeClause
 
-            Debug.Assert(parameter.Kind == SyntaxTokenKind.ParameterDeclaration);
+            var parameter = GetNode(token, SyntaxTokenKind.ParameterDeclaration);
 
-            var node = GetNode(parameter);
-
-            var nameTerminal = GetTerminal(node.Tokens[0]);
-            var typeClause = GetTerminal(node.Tokens[0]);
+            var nameTerminal = GetTerminal(parameter.Tokens[0], SyntaxTokenKind.Identifier);
+            var typeClause = GetNode(parameter.Tokens[0]);
 
             var type = BindTypeClause(typeClause);
 
             return new ParameterSymbol(nameTerminal.Text, type, nameTerminal.Location);
         }
 
-        private TypeSpecifier BindFunctionTypeClause(SyntaxToken typeClause)
+        private TypeSpecifier BindFunctionTypeClause(SyntaxToken token)
         {
-            if (typeClause is EmptySytaxToken)
+            if (token.Kind == SyntaxTokenKind.Epsilon)
                 return typeSystem.Void;
 
-            if (typeClause.Kind == SyntaxTokenKind.Error)
+            if (token.Kind == SyntaxTokenKind.Error)
                 return typeSystem.Error;
 
-            Debug.Assert(typeClause.Kind == SyntaxTokenKind.TrailingTypeClause);
+            var typeClause = GetNode(token, SyntaxTokenKind.TrailingTypeClause);
+            var nameTerminal = GetTerminal(typeClause.Tokens[1], SyntaxTokenKind.Identifier);
 
-            var node = GetNode(typeClause);
-            var nameTerminal = GetTerminal(node.Tokens[1]);
             var symbol = LookupSymbol(nameTerminal.Text);
 
             if (symbol is null)
@@ -230,20 +238,17 @@ namespace Kyloe.Semantics
             return symbol.Type;
         }
 
-
-        private TypeSpecifier BindTypeClause(SyntaxToken clause)
+        private TypeSpecifier BindTypeClause(SyntaxToken token)
         {
             // TypeClause
             // ├── Colon
             // └── Identifier
 
-            if (clause.Kind == SyntaxTokenKind.Error)
+            if (token.Kind == SyntaxTokenKind.Error)
                 return typeSystem.Error;
 
-            Debug.Assert(clause.Kind == SyntaxTokenKind.TypeClause);
-
-            var node = GetNode(clause);
-            var nameTerminal = GetTerminal(node.Tokens[1]);
+            var typeClause = GetNode(token, SyntaxTokenKind.TypeClause);
+            var nameTerminal = GetTerminal(typeClause.Tokens[1], SyntaxTokenKind.Identifier);
 
             var symbol = LookupSymbol(nameTerminal.Text);
 
@@ -256,7 +261,7 @@ namespace Kyloe.Semantics
             return symbol.Type;
         }
 
-        private BoundFunctionDefinition BindFunctionDefinition(SyntaxToken funcDef, FunctionType funcType)
+        private BoundFunctionDefinition BindFunctionDefinition(SyntaxToken token, FunctionType type)
         {
             // FunctionDefinition
             // ├── FuncKeyword
@@ -267,30 +272,181 @@ namespace Kyloe.Semantics
             // ├── TypeClause (optional)
             // └── BlockStatement
 
-            Debug.Assert(funcDef.Kind == SyntaxTokenKind.FunctionDefinition);
-            var node = GetNode(funcDef);
+            var function = GetNode(token, SyntaxTokenKind.FunctionDefinition);
 
             EnterNewScope(); // this scope contains the parameters
 
-            foreach (var param in funcType.Parameters)
+            foreach (var param in type.Parameters)
                 if (!DeclareSymbol(param))
                     diagnostics.RedefinedParameterError((SourceLocation)param.Loaction!, param.Name);
 
-            var body = GetNode(node.Tokens[6]);
-
+            var body = GetNode(function.Tokens[6]);
             var boundBody = BindBlockStatement(body);
 
             ExitCurrentScope();
 
-            return new BoundFunctionDefinition(funcType, boundBody);
+            return new BoundFunctionDefinition(type, boundBody);
         }
 
-        private BoundDeclarationStatement BindDeclarationStatement(SyntaxToken global)
+        private BoundStatement BindStatement(SyntaxToken token)
+        {
+            switch (token.Kind)
+            {
+                case SyntaxTokenKind.Error:
+                    return new BoundInvalidStatement();
+                case SyntaxTokenKind.SemiColon:
+                    return new BoundEmptyStatement();
+                case SyntaxTokenKind.DeclarationStatement:
+                    return BindDeclarationStatement(token);
+                case SyntaxTokenKind.BlockStatement:
+                    return BindBlockStatement(token);
+                case SyntaxTokenKind.ExpressionStatement:
+                    return BindExpressionStatement(token);
+                case SyntaxTokenKind.IfStatement:
+                    return BindIfStatement(token);
+                default:
+                    throw new Exception($"unexpected kind: {token.Kind}");
+            }
+        }
+
+        private BoundStatement BindIfStatement(SyntaxToken token)
         {
             throw new NotImplementedException();
         }
 
-        private BoundBlockStatement BindBlockStatement(SyntaxNode body)
+        private BoundStatement BindExpressionStatement(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundDeclarationStatement BindDeclarationStatement(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundBlockStatement BindBlockStatement(SyntaxToken token)
+        {
+            // BlockStatement
+            // ├── LeftCurly
+            // ├── RepeatedStatement
+            // └── RightCurly
+
+            if (token.Kind == SyntaxTokenKind.Error)
+                return new BoundBlockStatement(ImmutableArray<BoundStatement>.Empty);
+
+            var block = GetNode(token, SyntaxTokenKind.BlockStatement);
+
+            var body = block.Tokens[1];
+
+            var statements = CollectStatements(body);
+
+            var builder = ImmutableArray.CreateBuilder<BoundStatement>();
+
+
+            foreach (var stmt in statements)
+                builder.Add(BindStatement(stmt));
+
+            return new BoundBlockStatement(builder.ToImmutable());
+        }
+
+        private IEnumerable<SyntaxToken> CollectStatements(SyntaxToken token)
+        {
+            // RepeatedStatement
+            // ├── RepeatedStatement (optional)
+            // └── Statement
+
+            if (token.Kind == SyntaxTokenKind.Error || token.Kind == SyntaxTokenKind.Epsilon)
+                yield break;
+
+            var repeat = GetNode(token, SyntaxTokenKind.RepeatedStatement);
+
+            foreach (var stmt in CollectStatements(repeat.Tokens[0]))
+                yield return stmt;
+
+            yield return repeat.Tokens[1];
+        }
+
+
+        private BoundExpression BindExpression(SyntaxToken token)
+        {
+            switch (token.Kind)
+            {
+                case SyntaxTokenKind.Error:
+                    return new BoundInvalidExpression(typeSystem);
+                case SyntaxTokenKind.AssignmentHelper:
+                    return BindAssignmentHelper(token);
+                case SyntaxTokenKind.LogicalOr:
+                case SyntaxTokenKind.LogicalAnd:
+                case SyntaxTokenKind.BitOr:
+                case SyntaxTokenKind.BitXor:
+                case SyntaxTokenKind.BitAnd:
+                case SyntaxTokenKind.Equality:
+                case SyntaxTokenKind.Comparison:
+                case SyntaxTokenKind.Sum:
+                case SyntaxTokenKind.Mult:
+                    return BindBinary(token);
+                case SyntaxTokenKind.Prefix:
+                    return BindPrefix(token);
+                case SyntaxTokenKind.Postfix:
+                    return BindPostfix(token);
+                case SyntaxTokenKind.Parenthesized:
+                    return BindParenthesized(token);
+                case SyntaxTokenKind.Int:
+                case SyntaxTokenKind.Float:
+                case SyntaxTokenKind.Bool:
+                case SyntaxTokenKind.String:
+                case SyntaxTokenKind.Identifier:
+                    return BindLiteral(token);
+
+                default:
+                    throw new Exception($"unexpected kind: {token.Kind}");
+            }
+        }
+
+
+        private BoundExpression BindAssignmentHelper(SyntaxToken token)
+        {
+            // AssignmentHelper
+            // ├── Expr
+            // └── Assignment (optional)
+
+            var helper = GetNode(token, SyntaxTokenKind.AssignmentHelper);
+
+            var rhs = BindExpression(helper.Tokens[0]);
+
+            if (helper.Tokens[1].Kind == SyntaxTokenKind.Epsilon)
+                return rhs;
+
+            throw new NotImplementedException();
+        }
+
+        private BoundExpression BindBinary(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundExpression BindPrefix(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundExpression BindPostfix(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundExpression BindParenthesized(SyntaxToken token)
+        {
+            // Parenthesized
+            // ├── LeftParen
+            // ├── Expression
+            // └── RightParen
+
+            var node = GetNode(token, SyntaxTokenKind.Parenthesized);
+            return BindExpression(node.Tokens[1]);
+        }
+
+        private BoundExpression BindLiteral(SyntaxToken token)
         {
             throw new NotImplementedException();
         }
