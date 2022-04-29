@@ -163,8 +163,14 @@ namespace Kyloe.Tests.Parsing
             };
 
             yield return new object[] {
-                "1 + if * 5",
+                "hello(,);",
                 DiagnosticKind.UnexpectedTokenError,
+            };
+
+            yield return new object[] {
+                "1 + if * 5",
+                DiagnosticKind.UnexpectedTokenError, // the if keyword
+                DiagnosticKind.UnexpectedTokenError, // the semicolon
             };
 
             yield return new object[] {
@@ -183,9 +189,20 @@ namespace Kyloe.Tests.Parsing
                 func main() {
                     global += CONSTANT;
                     println(CONSTANT);
-                }
-",
-        };
+                }",
+            };
+
+
+            yield return new object[] {
+                @"
+                var global = 1 + var;
+                func main() {
+                    println(,);
+                }",
+                
+                DiagnosticKind.UnexpectedTokenError, // var keyword
+                DiagnosticKind.UnexpectedTokenError, // println statement
+            };
         }
     }
 }

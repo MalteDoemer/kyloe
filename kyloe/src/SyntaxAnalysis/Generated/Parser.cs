@@ -133,8 +133,14 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
+                    var erroneous = current;
                     Unexpected(SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.RightCurly);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
+                    SkipInput(SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.RightCurly);
+                    if (current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.RightCurly)
+                    {
+                        return ParseStop();
+                    }
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
                 }
             }
         }
@@ -168,8 +174,14 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
+                    var erroneous = current;
                     Unexpected(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
+                    SkipInput(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.End, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
+                    if (current.Kind == SyntaxTokenKind.FuncKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
+                    {
+                        return ParseTopLevelItem();
+                    }
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
                 }
             }
         }
@@ -292,8 +304,14 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
+                    var erroneous = current;
                     Unexpected(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
+                    SkipInput(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
+                    if (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon)
+                    {
+                        return ParseStatement();
+                    }
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
                 }
             }
         }
@@ -372,33 +390,26 @@ namespace Kyloe.Syntax
             }
         }
         
-        private SyntaxToken ParseElseStatement()
-        {
-            var n0 = Expect(SyntaxTokenKind.ElseKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.LeftCurly);
-            var n1 = ParseIfStatementOrBlockStatement();
-            return CreateNode(SyntaxTokenKind.ElseStatement, n0, n1);
-        }
-        
-        private SyntaxToken ParseIfStatementOrBlockStatement()
+        private SyntaxToken ParseOptionalIfClause()
         {
             switch (current.Kind)
             {
                 case SyntaxTokenKind.IfKeyword:
                 {
-                    var n0 = ParseIfStatement();
-                    return CreateNode(SyntaxTokenKind.IfStatementOrBlockStatement, n0);
+                    var n0 = Expect(SyntaxTokenKind.IfKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n1 = ParseExpression();
+                    return CreateNode(SyntaxTokenKind.OptionalIfClause, n0, n1);
                 }
-                case SyntaxTokenKind.LeftCurly:
-                {
-                    var n0 = ParseBlockStatement();
-                    return CreateNode(SyntaxTokenKind.IfStatementOrBlockStatement, n0);
-                }
-                default:
-                {
-                    Unexpected(SyntaxTokenKind.IfKeyword, SyntaxTokenKind.LeftCurly);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
-                }
+                default: return new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
             }
+        }
+        
+        private SyntaxToken ParseElseStatement()
+        {
+            var n0 = Expect(SyntaxTokenKind.ElseKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.LeftCurly);
+            var n1 = ParseOptionalIfClause();
+            var n2 = ParseBlockStatement();
+            return CreateNode(SyntaxTokenKind.ElseStatement, n0, n1, n2);
         }
         
         private SyntaxToken ParseDeclarationStatement()
@@ -427,8 +438,14 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
+                    var erroneous = current;
                     Unexpected(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
+                    SkipInput(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.End, SyntaxTokenKind.FuncKeyword);
+                    if (current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
+                    {
+                        return ParseDeclarationStatement();
+                    }
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
                 }
             }
         }
@@ -732,8 +749,14 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
+                    var erroneous = current;
                     Unexpected(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
+                    SkipInput(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.Comma, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.SemiColon, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Pipe, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Star, SyntaxTokenKind.Slash);
+                    if (current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
+                    {
+                        return ParsePrefix();
+                    }
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
                 }
             }
         }
@@ -843,8 +866,14 @@ namespace Kyloe.Syntax
                 }
                 default:
                 {
+                    var erroneous = current;
                     Unexpected(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(current));
+                    SkipInput(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.Comma, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.SemiColon, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Pipe, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Dot);
+                    if (current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
+                    {
+                        return ParsePrimary();
+                    }
+                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
                 }
             }
         }

@@ -671,11 +671,7 @@ namespace Kyloe.Grammar
             {
                 sw.AddLine("default:");
                 var defaultBlock = new BlockStatement();
-                var expected = grammar.FirstSet(rule.Kind).Except(epsilonSet);
-                var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
-                defaultBlock.AddLine($"Unexpected({args});");
-                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}>(current));");
-
+                GenerateUnexpectedDefault(defaultBlock, rule);
                 sw.AddStatement(defaultBlock);
             }
 
@@ -726,12 +722,7 @@ namespace Kyloe.Grammar
             {
                 outerSwitch.AddLine("default:");
                 var defaultBlock = new BlockStatement();
-                var expected = grammar.FirstSet(rule.Kind).Except(epsilonSet);
-                var args = string.Join(", ", expected.Select(t => TokenKindAccessString(t)));
-
-                defaultBlock.AddLine($"Unexpected({args});");
-                defaultBlock.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}>(current));");
-
+                GenerateUnexpectedDefault(defaultBlock, rule);
                 outerSwitch.AddStatement(defaultBlock);
             }
 
@@ -843,6 +834,30 @@ namespace Kyloe.Grammar
 
             block.Add(whileLoop);
             block.AddLine("return node;");
+
+        }
+
+        private void GenerateUnexpectedDefault(BlockStatement block, ProductionRule rule)
+        {
+            var firstSet = grammar.FirstSet(rule.Kind);
+            var followSet = grammar.FollowSet(rule.Kind);
+
+            block.AddLine("var erroneous = current;");
+
+            var unexpectedArgs = string.Join(", ", firstSet.Select(t => TokenKindAccessString(t)));
+            block.AddLine($"Unexpected({unexpectedArgs});");
+
+            var skipInputArgs = string.Join(", ", firstSet.Concat(followSet).Select(t => TokenKindAccessString(t)));
+            block.AddLine($"SkipInput({skipInputArgs});");
+
+            var condition = new List<string>(firstSet.Count);
+            foreach (var terminal in firstSet)
+                condition.Add($"current.Kind == {TokenKindAccessString(terminal)}");
+
+            block.Add(new IfStatement(string.Join(" || ", condition))
+                .AddLine($"return {ParseMethodName(rule.Kind)}();"));
+
+            block.AddLine($"return new {info.NodeClass.Name}({TokenKindAccessString(TokenKind.Error)}, ImmutableArray.Create<{info.TokenClass.Name}>(erroneous));");
 
         }
 

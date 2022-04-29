@@ -95,8 +95,8 @@ RepeatedStatement = (RepeatedStatement, Statement) | #;
 IfStatement = IfKeyword, Expression, BlockStatement, OptionalElseStatement;
 
 OptionalElseStatement = ElseStatement | #;
-ElseStatement = ElseKeyword, IfStatementOrBlockStatement;
-IfStatementOrBlockStatement = (IfStatement | BlockStatement);
+OptionalIfClause = (IfKeyword, Expression) | #;
+ElseStatement = ElseKeyword, OptionalIfClause, BlockStatement;
 
 DeclarationStatement = (VarKeyword | ConstKeyword), Identifier, OptionalTypeClause, Equal, Expression, SemiColon;
 
