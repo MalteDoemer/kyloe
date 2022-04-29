@@ -77,7 +77,7 @@ namespace Kyloe.Diagnostics
 
         public void MissmatchedTypeError(SourceLocation location, TypeSpecifier expected, TypeSpecifier provided)
         {
-            var msg = $"missmatched types, expected '{expected}', got '{provided}'";
+            var msg = $"missmatched types, expected '{expected.FullName()}', got '{provided.FullName()}'";
             AddDiagnostic(DiagnosticKind.MissmatchedTypeError, msg, location);
         }
 

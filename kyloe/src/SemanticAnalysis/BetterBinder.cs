@@ -366,6 +366,7 @@ namespace Kyloe.Semantics
             // DeclarationStatement
             // ├── VarKeyword/ConstKeyword
             // ├── Identifier
+            // ├── TypeClause (optional)
             // ├── Equal
             // ├── Expr
             // └── SemiColon
@@ -373,14 +374,27 @@ namespace Kyloe.Semantics
             var declaration = GetNode(token, SyntaxTokenKind.DeclarationStatement);
             var declKeyword = GetTerminal(declaration.Tokens[0]);
             var nameTerminal = GetTerminal(declaration.Tokens[1], SyntaxTokenKind.Identifier);
-            var exprSyntax = GetNode(declaration.Tokens[3]);
+            var typeClause = GetNode(declaration.Tokens[2]);
+            var exprSyntax = declaration.Tokens[4];
 
             bool isConst = declKeyword.Kind == SyntaxTokenKind.ConstKeyword;
 
             var expr = BindExpression(exprSyntax);
             var exprType = GetResultType(expr, exprSyntax.Location, mustBeValue: true, mustBeModifiableValue: false, mustBeTypeName: false);
 
-            var varType = exprType;
+            TypeSpecifier varType;
+
+            if (typeClause.Kind == SyntaxTokenKind.Epsilon)
+                varType = exprType;
+            else
+            {
+                varType = BindTypeClause(typeClause);
+                if (IsTypeMissmatch(varType, exprType))
+                {
+                    diagnostics.MissmatchedTypeError(exprSyntax.Location, varType, exprType);
+                    varType = typeSystem.Error;
+                }
+            }
 
             var name = nameTerminal.Text;
 

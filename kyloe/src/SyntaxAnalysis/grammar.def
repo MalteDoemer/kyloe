@@ -98,7 +98,7 @@ OptionalElseStatement = ElseStatement | #;
 ElseStatement = ElseKeyword, IfStatementOrBlockStatement;
 IfStatementOrBlockStatement = (IfStatement | BlockStatement);
 
-DeclarationStatement = (VarKeyword | ConstKeyword), Identifier, Equal, Expression, SemiColon;
+DeclarationStatement = (VarKeyword | ConstKeyword), Identifier, OptionalTypeClause, Equal, Expression, SemiColon;
 
 Expression = AssignmentHelper;
 

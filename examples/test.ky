@@ -1,5 +1,7 @@
-func main() {
-    var x = 5.3;
+var global = 5;
 
-    x |= 4;    
+const CONSTANT = 76;
+
+func main() -> void {
+    global += CONSTANT;
 }

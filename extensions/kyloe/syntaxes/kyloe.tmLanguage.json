@@ -8,7 +8,7 @@
 		},
 		{
 			"name": "keyword.other.kyloe",
-			"match": "\\b(func|struct|public|private|this|true|false|const|var|char|i8|i16|i32|i64|u8|u16|u32|u64|float|double|bool|string)\\b"
+			"match": "\\b(func|struct|public|private|this|true|false|const|var|char|i8|i16|i32|i64|u8|u16|u32|u64|float|double|bool|string|void)\\b"
 		},
 		{
 			"name": "string.quoted.double.kyloe",

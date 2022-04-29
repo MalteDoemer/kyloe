@@ -423,20 +423,22 @@ namespace Kyloe.Syntax
                 case SyntaxTokenKind.VarKeyword:
                 {
                     var n0 = Expect(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.Identifier);
-                    var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.Equal);
-                    var n2 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    var n3 = ParseExpression();
-                    var n4 = Expect(SyntaxTokenKind.SemiColon);
-                    return CreateNode(SyntaxTokenKind.DeclarationStatement, n0, n1, n2, n3, n4);
+                    var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.Colon, SyntaxTokenKind.Equal);
+                    var n2 = ParseOptionalTypeClause();
+                    var n3 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n4 = ParseExpression();
+                    var n5 = Expect(SyntaxTokenKind.SemiColon);
+                    return CreateNode(SyntaxTokenKind.DeclarationStatement, n0, n1, n2, n3, n4, n5);
                 }
                 case SyntaxTokenKind.ConstKeyword:
                 {
                     var n0 = Expect(SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Identifier);
-                    var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.Equal);
-                    var n2 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    var n3 = ParseExpression();
-                    var n4 = Expect(SyntaxTokenKind.SemiColon);
-                    return CreateNode(SyntaxTokenKind.DeclarationStatement, n0, n1, n2, n3, n4);
+                    var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.Colon, SyntaxTokenKind.Equal);
+                    var n2 = ParseOptionalTypeClause();
+                    var n3 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n4 = ParseExpression();
+                    var n5 = Expect(SyntaxTokenKind.SemiColon);
+                    return CreateNode(SyntaxTokenKind.DeclarationStatement, n0, n1, n2, n3, n4, n5);
                 }
                 default:
                 {
