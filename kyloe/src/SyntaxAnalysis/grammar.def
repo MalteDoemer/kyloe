@@ -115,8 +115,10 @@ Comparison = (Comparison, Less | LessEqual | Greater | GreaterEqual, Sum) | Sum;
 Sum = (Sum, Plus | Minus, Mult) | Mult;
 Mult = (Mult, Star | Slash, Prefix) | Prefix;
 Prefix = (Plus | Minus, Prefix) | Postfix;
-Postfix =  (Postfix, (LeftParen, Arguments, RightParen) | (LeftSquare, Arguments, RightSquare) | (Dot, Primary)) | Primary;
-Arguments = (Arguments, Comma, Expression) | Expression | #;
+Postfix =  (Postfix, (LeftParen, OptionalArguments, RightParen) | (LeftSquare, Arguments, RightSquare) | (Dot, Primary)) | Primary;
+
+OptionalArguments = Arguments | #;
+Arguments = (Arguments, Comma, Expression) | Expression;
 
 Primary = Int | Float | Bool | String | Identifier | Parenthesized;
 Parenthesized = (LeftParen, Expression, RightParen);

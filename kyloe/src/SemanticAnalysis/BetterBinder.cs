@@ -81,6 +81,17 @@ namespace Kyloe.Semantics
             return null;
         }
 
+        private FunctionType? FindFunctionOverload(FunctionGroupType group, IEnumerable<TypeSpecifier> parameterTypes)
+        {
+            foreach (var func in group.Functions)
+            {
+                if (TypeSequenceEquals(func.Parameters.Select(param => param.Type), parameterTypes))
+                    return func;
+            }
+
+            return null;
+        }
+
         private TypeSpecifier GetResultType(BoundExpression expr, SourceLocation src, bool mustBeValue, bool mustBeModifiableValue, bool mustBeTypeName)
         {
             if (expr.ResultType is ErrorType)
@@ -646,7 +657,76 @@ namespace Kyloe.Semantics
             // ├── Arguments (optional)
             // └── RightParen
 
+            var call = GetNode(token, SyntaxTokenKind.Postfix);
+            var exprSyntax = call.Tokens[0];
+
+            var args = BindArguments(call.Tokens[2]);
+            var expr = BindExpression(exprSyntax);
+
+            if (expr.ResultType is FunctionGroupType functionGroup)
+            {
+                var function = FindFunctionOverload(functionGroup, args.Arguments.Select(arg => arg.ResultType));
+
+                if (function is null)
+                {
+                    diagnostics.NoMatchingOverloadError(exprSyntax.Location, functionGroup.FullName(), args);
+                    return new BoundInvalidExpression(typeSystem);
+                }
+
+                return new BoundFunctionCallExpression(function, expr, args);
+            }
+            else if (expr.ResultType is MethodGroupType methodGroup)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                if (expr.ResultType is not ErrorType)
+                    diagnostics.NotCallableError(exprSyntax.Location);
+                return new BoundInvalidExpression(typeSystem);
+            }
+
             throw new NotImplementedException();
+        }
+
+        private IEnumerable<SyntaxToken> CollectArgs(SyntaxToken token)
+        {
+            if (token.Kind == SyntaxTokenKind.Error || token.Kind == SyntaxTokenKind.Epsilon)
+                yield break;
+
+            if (token.Kind == SyntaxTokenKind.Arguments)
+            {
+                // Arguments
+                // ├── Expr
+                // ├── Comma
+                // └── Expr
+
+                var args = GetNode(token, SyntaxTokenKind.Arguments);
+
+                foreach (var child in CollectArgs(args.Tokens[0]))
+                    yield return child;
+
+                foreach (var child in CollectArgs(args.Tokens[2]))
+                    yield return child;
+            }
+            else
+            {
+                yield return token;
+            }
+        }
+
+        private BoundArguments BindArguments(SyntaxToken token)
+        {
+            var builder = ImmutableArray.CreateBuilder<BoundExpression>();
+            var args = CollectArgs(token);
+
+            foreach (var arg in args)
+            {
+                var bound = BindExpression(arg);
+                builder.Add(bound);
+            }
+
+            return new BoundArguments(builder.ToImmutable());
         }
 
         private BoundExpression BindArrayAccess(SyntaxToken token)

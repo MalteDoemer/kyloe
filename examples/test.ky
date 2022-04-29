@@ -4,4 +4,6 @@ const CONSTANT = 76;
 
 func main() -> void {
     global += CONSTANT;
+
+    println(global);
 }
