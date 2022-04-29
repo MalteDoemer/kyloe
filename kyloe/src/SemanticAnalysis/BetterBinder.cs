@@ -235,7 +235,7 @@ namespace Kyloe.Semantics
                 var parameter = GetNode(param, SyntaxTokenKind.ParameterDeclaration);
                 var paramNameTerminal = GetTerminal(parameter.Tokens[0], SyntaxTokenKind.Identifier);
                 var type = BindTypeClause(GetNode(parameter.Tokens[1]));
-                var paramSymbol = new ParameterSymbol(nameTerminal.Text, type);
+                var paramSymbol = new ParameterSymbol(paramNameTerminal.Text, type, paramNameTerminal.Location);
 
                 if (!paramNameTerminal.Invalid)
                     function.Parameters.Add(paramSymbol);
@@ -323,9 +323,11 @@ namespace Kyloe.Semantics
             EnterNewScope(); // this scope contains the parameters
 
             foreach (var param in type.Parameters)
+            {
                 if (!DeclareSymbol(param))
                     if (param.Location is SourceLocation loc)
                         diagnostics.RedefinedParameterError(loc, param.Name);
+            }
 
             var body = GetNode(function.Tokens[6]);
             var boundBody = BindBlockStatement(body);
@@ -672,7 +674,8 @@ namespace Kyloe.Semantics
 
                 if (function is null)
                 {
-                    diagnostics.NoMatchingOverloadError(exprSyntax.Location, functionGroup.FullName(), args);
+                    if (args.AllArgumentsValid)
+                        diagnostics.NoMatchingOverloadError(exprSyntax.Location, functionGroup.FullName(), args);
                     return new BoundInvalidExpression(typeSystem);
                 }
 

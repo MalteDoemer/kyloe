@@ -1,1 +1,8 @@
-var v = var;
+func sayHello(name: ThisTypeDoesNotExist) {
+    println('Hello');
+    println(name);
+}
+
+func main() {
+    sayHello('Kyloe');
+}

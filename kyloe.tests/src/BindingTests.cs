@@ -305,6 +305,21 @@ namespace Kyloe.Tests.Binding
 
             yield return new object[] {
                 @"
+                func sayHello(name: ThisTypeDoesNotExist) {
+                    println('Hello');
+                    println(name);
+                }
+
+                func main() {
+                    sayHello('Kyloe');
+                }
+                ",
+                DiagnosticKind.NonExistantNameError,
+                DiagnosticKind.NoMatchingOverloadError,
+            };
+
+            yield return new object[] {
+                @"
                 func test(a: i32, a: float) {}
 
                 func main() {}

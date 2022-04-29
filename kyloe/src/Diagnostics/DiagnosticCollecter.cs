@@ -109,9 +109,9 @@ namespace Kyloe.Diagnostics
         {
             string msg;
             if (arguments.Arguments.Length == 0)
-                msg = $"cannot call {name} without arguments";
+                msg = $"cannot call '{name}' without arguments";
             else
-                msg = $"cannot call {name} with arguments ({arguments.JoinArgumentTypes()})";
+                msg = $"cannot call '{name}' with arguments ({arguments.JoinArgumentTypes()})";
 
             AddDiagnostic(DiagnosticKind.NoMatchingOverloadError, msg, location);
         }
