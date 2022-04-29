@@ -285,6 +285,12 @@ namespace Kyloe.Semantics
                     diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
                 return typeSystem.Error;
             }
+            else if (symbol is not TypeNameSymbol)
+            {
+                if (!nameTerminal.Invalid)
+                    diagnostics.ExpectedTypeNameError(nameTerminal.Location);
+                return typeSystem.Error;
+            }
 
             return symbol.Type;
         }
@@ -307,6 +313,12 @@ namespace Kyloe.Semantics
             {
                 if (!nameTerminal.Invalid)
                     diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
+                return typeSystem.Error;
+            }
+            else if (symbol is not TypeNameSymbol)
+            {
+                if (!nameTerminal.Invalid)
+                    diagnostics.ExpectedTypeNameError(nameTerminal.Location);
                 return typeSystem.Error;
             }
 
@@ -442,7 +454,7 @@ namespace Kyloe.Semantics
 
                     if (isElse)
                         diagnostics.IllegalElseStatement(elifSyntax.Location);
-                    else 
+                    else
                         diagnostics.IllegalElifStatement(elifSyntax.Location);
 
                     var body = BindStatement(blockSyntax);
