@@ -81,9 +81,13 @@ namespace Kyloe.Grammar
             {
                 return new NameGrammarNode(Advance());
             }
-            else if (current.Kind == GrammarTokenKind.String)
+            else if (current.Kind == GrammarTokenKind.RegexString)
             {
-                return new LiteralGrammarNode(Advance());
+                return new LiteralGrammarNode(Advance(), isRegex: true);
+            }
+            else if (current.Kind == GrammarTokenKind.LiteralString)
+            {
+                return new LiteralGrammarNode(Advance(), isRegex: false);
             }
             else if (current.Kind == GrammarTokenKind.Hash)
             {

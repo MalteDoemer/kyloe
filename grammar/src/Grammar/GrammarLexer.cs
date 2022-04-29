@@ -71,7 +71,7 @@ namespace Kyloe.Grammar
         }
 
 
-        private GrammarToken LexQuoted()
+        private GrammarToken LexQuoted(GrammarTokenKind kind)
         {
             var quote = Advance();
 
@@ -89,7 +89,7 @@ namespace Kyloe.Grammar
 
             var str = text.Substring(location.Start, location.Length);
 
-            return new GrammarToken(GrammarTokenKind.String, str, location);
+            return new GrammarToken(kind, str, location);
         }
 
         private GrammarToken LexIdentifier()
@@ -173,7 +173,11 @@ namespace Kyloe.Grammar
             }
             else if (current == '\'')
             {
-                return LexQuoted();
+                return LexQuoted(GrammarTokenKind.RegexString);
+            }
+            else if (current == '\"')
+            {
+                return LexQuoted(GrammarTokenKind.LiteralString);
             }
             else if (char.IsLetter(current))
             {

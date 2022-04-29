@@ -56,6 +56,7 @@ namespace Kyloe.Grammar
             yield return (info.LexerClass.Name, new CompilationUnit()
                 .AddUsing("using System;")
                 .AddUsing("using System.Linq;")
+                .AddUsing("using System.Collections.Immutable;")
                 .AddUsing("using System.Collections.Generic;")
                 .AddUsing("using System.Text.RegularExpressions;")
                 .AddItem(new Namespace(info.Namespace).Add(CreateLexerClass())));
@@ -284,33 +285,36 @@ namespace Kyloe.Grammar
 
         public Class CreateLexerClass()
         {
-            var groups = new List<string>();
+            var groups = new List<(TokenKind, string, string)>();
 
             foreach (var terminal in Enumerable.Reverse(terminals))
             {
                 if (grammar.Terminals.TryGetValue(terminal, out var t))
-                    groups.Add($"(?<{t.Name}>\\G{t.Text})");
+                {
+                    if (t.IsRegex)
+                    {
+                        var regexStr = CreateRawString($"\\G{t.Text}");
+                        groups.Add((terminal, "string.Empty", $"new Regex({regexStr}, RegexOptions.Compiled | RegexOptions.Multiline)"));
+                    }
+                    else
+                    {
+                        groups.Add((terminal, CreateRawString(t.Text), "null"));
+                    }
+                }
             }
 
-            var regexString = CreateRawString(string.Join('|', groups));
 
-            var dict = $"Dictionary<string, {info.TokenKindEnum.Name}>";
             var set = $"HashSet<{info.TokenKindEnum.Name}>";
 
+            var typeArgs = $"<({info.TokenKindEnum.Name}, string, Regex?)>";
 
-            var regexField = new Field(
+            var patternsField = new Field(
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 @readonly: true,
-                type: "Regex",
-                name: "regex");
-
-            var groupNamesField = new Field(
-                AccessModifier.Private,
-                InheritanceModifier.None,
-                @readonly: true,
-                type: dict,
-                name: "groupNames");
+                type: $"ImmutableArray{typeArgs}",
+                "patterns"
+            );
 
             var discardField = new Field(
                 AccessModifier.Private,
@@ -341,14 +345,11 @@ namespace Kyloe.Grammar
                 .AddArg("string text")
                 .AddLine("this.pos = 0;")
                 .AddLine("this.text = text;")
-                .AddLine($"this.groupNames = new {dict}();")
-                .AddLine($"this.regex = new Regex({regexString}, RegexOptions.Compiled | RegexOptions.Multiline);")
                 .AddLine("")
-                .AddLine($"var names = Enum.GetNames<{info.TokenKindEnum.Name}>();")
-                .AddLine($"var values = Enum.GetValues<{info.TokenKindEnum.Name}>();")
-                .AddStatement(new ForLoop("int i = 0; i < names.Length; i++")
-                    .AddLine("groupNames.Add(names[i], values[i]);"));
-
+                .AddLine($"var builder = ImmutableArray.CreateBuilder{typeArgs}({groups.Count});")
+                .AddLines(groups.Select(t => $"builder.Add(({TokenKindAccessString(t.Item1)}, {t.Item2} , {t.Item3}));"))
+                .AddLine("this.patterns = builder.MoveToImmutable();")
+                ;
 
             if (grammar.DiscardRule is not null)
             {
@@ -372,8 +373,7 @@ namespace Kyloe.Grammar
                     info.LexerClass.AccessModifiers,
                     InheritanceModifier.Sealed,
                     info.LexerClass.Name)
-                    .Add(regexField)
-                    .Add(groupNamesField)
+                    .Add(patternsField)
                     .Add(discardField)
                     .Add(textField)
                     .Add(posField)
@@ -387,8 +387,7 @@ namespace Kyloe.Grammar
                     info.LexerClass.AccessModifiers,
                     InheritanceModifier.Sealed,
                     info.LexerClass.Name)
-                    .Add(regexField)
-                    .Add(groupNamesField)
+                    .Add(patternsField)
                     .Add(textField)
                     .Add(posField)
                     .Add(ctor)
@@ -404,18 +403,37 @@ namespace Kyloe.Grammar
                     $"IEnumerable<{info.TerminalClass.Name}>",
                     name)
                     .AddStatement(new WhileLoop("pos < text.Length")
-                        .AddLine("var match = regex.Match(text, pos);")
-                        .AddStatement(new IfStatement("match.Success")
-                            .AddLine("var group = match.Groups.OfType<System.Text.RegularExpressions.Group>().Where(g => g.Success).Last();")
-                            .AddLine($"var location = {info.LocationClass.Name}.FromLength(match.Index, match.Length);")
-                            .AddLine($"var terminal = new {info.TerminalClass.Name}(groupNames[group.Name], match.Value, location);")
-                            .AddLine("pos += location.Length;")
-                            .AddLine("yield return terminal;"))
-                        .AddStatement(new ElseStatement()
-                            .AddLine($"var location = {info.LocationClass.Name}.FromLength(pos, 1);")
-                            .AddLine($"var terminal = new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.Error, text[pos].ToString(), location);")
+                        .AddLine("bool didMatch = false;")
+                        .AddStatement(new ForeachLoop("var (kind, str, regex) in patterns")
+                            .AddStatement(new IfStatement("regex is null")
+                                .AddLine("var leftover = text.Length - pos;")
+                                .AddLine("")
+                                .AddLine("if (str.Length > leftover) continue;")
+                                .AddLine("")
+                                .AddLine("var match = string.CompareOrdinal(text, pos, str, 0, str.Length);")
+                                .AddLine("")
+                                .AddLine("if (match != 0) continue;")
+                                .AddLine("")
+                                .AddLine($"var location = {info.LocationClass.Name}.FromLength(pos, str.Length);")
+                                .AddLine($"var terminal = new {info.TerminalClass.Name}(kind, str, location);")
+                                .AddLine("pos += location.Length;")
+                                .AddLine("didMatch = true;")
+                                .AddLine("yield return terminal;")
+                                .AddLine("break;"))
+                            .AddStatement(new ElseStatement()
+                                .AddLine("var match = regex.Match(text, pos);")
+                                .AddLine("if (!match.Success) continue;")
+                                .AddLine("")
+                                .AddLine($"var location = {info.LocationClass.Name}.FromLength(match.Index, match.Length);")
+                                .AddLine($"var terminal = new {info.TerminalClass.Name}(kind, match.Value, location);")
+                                .AddLine("pos += location.Length;")
+                                .AddLine("didMatch = true;")
+                                .AddLine("yield return terminal;")
+                                .AddLine("break;")))
+                        .AddStatement(new IfStatement("!didMatch")
+                            .AddLine($"var errTerminal = new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.Error, text[pos].ToString(), {info.LocationClass.Name}.FromLength(pos, 1));")
                             .AddLine("pos += 1;")
-                            .AddLine("yield return terminal;")))
+                            .AddLine("yield return errTerminal;")))
                     .AddLine($"yield return new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.End, \"<end>\", {info.LocationClass.Name}.FromLength(pos, 0));");
         }
 
@@ -830,8 +848,6 @@ namespace Kyloe.Grammar
             block.AddLine("return node;");
 
         }
-
-
 
         private void GenerateProductionParsingBlock(string result, string varname, string additionalArgs, BlockStatement statement, ProductionRule rule, Production production)
         {

@@ -21,12 +21,15 @@ namespace Kyloe.Grammar
 
     internal sealed class LiteralGrammarNode : GrammarNode
     {
-        public LiteralGrammarNode(GrammarToken literalToken)
+        public LiteralGrammarNode(GrammarToken literalToken, bool isRegex)
         {
             LiteralToken = literalToken;
+            IsRegex = isRegex;
         }
 
         public GrammarToken LiteralToken { get; }
+        
+        public bool IsRegex { get; }
 
         public override GrammarLocation Location => LiteralToken.Location;
 

@@ -49,7 +49,7 @@ namespace Kyloe.Grammar
                 if (kind.IsTerminal)
                 {
                     var literalNode = (LiteralGrammarNode)stmt.Node;
-                    var def = new TerminalDefinition(name, kind, literalNode.LiteralToken.Text);
+                    var def = new TerminalDefinition(name, kind, literalNode.LiteralToken.Text, literalNode.IsRegex);
                     terminals.Add(kind, def);
                 }
                 else

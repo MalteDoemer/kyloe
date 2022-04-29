@@ -8,6 +8,6 @@ Intel Core i5-8250U CPU 1.60GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical c
 
 
 ```
-|    Method |     Mean |   Error |  StdDev |
-|---------- |---------:|--------:|--------:|
-| LexSimple | 246.5 μs | 4.82 μs | 5.73 μs |
+|    Method |     Mean |    Error |   StdDev |
+|---------- |---------:|---------:|---------:|
+| LexSimple | 12.83 ms | 0.073 ms | 0.065 ms |

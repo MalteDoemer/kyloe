@@ -5,54 +5,54 @@ BlockComment = '\/\*.*\*\/';
 Discard = Whitespace | LineComment | BlockComment;
 
 (* Punctuation *)
-Comma = '\,';
-Dot = '\.';
-Colon = '\:';
-SemiColon = '\;';
-SmallArrow = '\-\>';
+Comma = ",";
+Dot = ".";
+Colon = ":";
+SemiColon = ";";
+SmallArrow = "->";
 
 (* Comparison Operators *)
-LessEqual = '\<\=';
-Less = '\<';
-GreaterEqual = '\>\=';
-Greater = '\>';
-DoubleEqual = '\=\=';
-NotEqual = '\!\=';
+LessEqual = "<=";
+Less = "<";
+GreaterEqual = ">=";
+Greater = ">";
+DoubleEqual = "==";
+NotEqual = "!=";
 
 (* Assignment Operators *)
-PlusEqual = '\+\=';
-MinusEqual = '\-\=';
-StarEqual = '\*\=';
-SlashEqual = '\/\=';
-PercentEqual = '\%\=';
-AmpersandEqual = '\&\=';
-PipeEqual = '\|\=';
-HatEqual = '\^\=';
-Equal = '\=';
+PlusEqual = "+=";
+MinusEqual = "-=";
+StarEqual = "*=";
+SlashEqual = "/=";
+PercentEqual = "%=";
+AmpersandEqual = "&=";
+PipeEqual = "|=";
+HatEqual = "^=";
+Equal = "=";
 
 (* Binary Operators *)
-Plus = '\+';
-Minus = '\-';
-Star = '\*';
-Slash = '\/';
-Percent = '\%';
-DoubleAmpersand = '\&\&';
-Ampersand = '\&';
-DoublePipe = '\|\|';
-Pipe = '\|';
-Hat = '\^';
+Plus = "+";
+Minus = "-";
+Star = "*";
+Slash = "/";
+Percent = "%";
+DoubleAmpersand = "&&";
+Ampersand = "&";
+DoublePipe = "||";
+Pipe = "|";
+Hat = "^";
 
 (* Unary Operators *)
-Tilde = '\~';
-Bang = '\!';
+Tilde = "~";
+Bang = "!";
 
 (* Brackets *)
-LeftParen = '\(';
-RightParen = '\)';
-LeftSquare = '\[';
-RightSquare = '\]';
-LeftCurly = '\{';
-RightCurly = '\}';
+LeftParen = "(";
+RightParen = ")";
+LeftSquare = "[";
+RightSquare = "]";
+LeftCurly = "{";
+RightCurly = "}";
 
 (* Literals *)
 Float = '\b\d+\.\d+';

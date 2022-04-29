@@ -1,0 +1,49 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 1 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet restore  /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in /home/malte/dev/c#/kyloe/kyloe.bench/bin/release/net6.0/09566f66-6fa6-4dce-a5a0-31988d65ea24
+// command took 1.33s and exited with 0
+// start dotnet build -c Release  --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in /home/malte/dev/c#/kyloe/kyloe.bench/bin/release/net6.0/09566f66-6fa6-4dce-a5a0-31988d65ea24
+// command took 2.6s and exited with 0
+// ***** Done, took 00:00:04 (4.08 sec)   *****
+// Found 1 benchmarks:
+//   BenchLexer.LexSimple: DefaultJob
+
+// **************************
+// Benchmark: BenchLexer.LexSimple: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet "09566f66-6fa6-4dce-a5a0-31988d65ea24.dll" --benchmarkName "Kyloe.Benchmarks.BenchLexer.LexSimple" --job "Default" --benchmarkId 0 in /home/malte/dev/c#/kyloe/kyloe.bench/bin/release/net6.0/09566f66-6fa6-4dce-a5a0-31988d65ea24/bin/Release/net6.0
+Failed to set up high priority. Make sure you have the right permissions. Message: Permission denied
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET 6.0.4 (6.0.422.16404), X64 RyuJIT
+// GC=Concurrent Workstation
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 340917.00 ns, 340.9170 us/op
+WorkloadJitting  1: 1 op, 71030451.00 ns, 71.0305 ms/op
+
+WorkloadPilot    1: 2 op, 51479794.00 ns, 25.7399 ms/op
+WorkloadPilot    2: 3 op, 66299739.00 ns, 22.0999 ms/op
+WorkloadPilot    3: 4 op, 80816965.00 ns, 20.2042 ms/op
+WorkloadPilot    4: 5 op, 92345836.00 ns, 18.4692 ms/op
+WorkloadPilot    5: 6 op, 106159026.00 ns, 17.6932 ms/op
+WorkloadPilot    6: 7 op, 127554657.00 ns, 18.2221 ms/op
+WorkloadPilot    7: 8 op, 129759479.00 ns, 16.2199 ms/op
+WorkloadPilot    8: 9 op, 141348495.00 ns, 15.7054 ms/op
+WorkloadPilot    9: 10 op, 160620161.00 ns, 16.0620 ms/op
+WorkloadPilot   10: 11 op, 170934515.00 ns, 15.5395 ms/op
+WorkloadPilot   11: 12 op, 176598678.00 ns, 14.7166 ms/op
+WorkloadPilot   12: 13 op, 181025969.00 ns, 13.9251 ms/op
+WorkloadPilot   13: 14 op, 197679983.00 ns, 14.1200 ms/op
+WorkloadPilot   14: 15 op, 243900737.00 ns, 16.2600 ms/op
+WorkloadPilot   15: 16 op, 228493194.00 ns, 14.2808 ms/op
+WorkloadPilot   16: 32 op, 424572634.00 ns, 13.2679 ms/op
+WorkloadPilot   17: 64 op, 805719944.00 ns, 12.5894 ms/op
+
+WorkloadWarmup   1: 64 op, 819745221.00 ns, 12.8085 ms/op
+WorkloadWarmup   2: 64 op, 809977944.00 ns, 12.6559 ms/op
+// Benchmark Process 43560 has exited with code 130.

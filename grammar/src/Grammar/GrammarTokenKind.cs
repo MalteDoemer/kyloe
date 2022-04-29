@@ -4,7 +4,8 @@ namespace Kyloe.Grammar
     {
         Identifier,
         Equal,
-        String,
+        RegexString,
+        LiteralString,
         SemiColon,
         RightParen,
         LeftParen,

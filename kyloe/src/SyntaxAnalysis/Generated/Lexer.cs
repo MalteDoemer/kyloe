@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -7,9 +8,7 @@ namespace Kyloe.Syntax
 {
     public sealed class Lexer
     {
-        private readonly Regex regex;
-        
-        private readonly Dictionary<string, SyntaxTokenKind> groupNames;
+        private readonly ImmutableArray<(SyntaxTokenKind, string, Regex?)> patterns;
         
         private readonly HashSet<SyntaxTokenKind> discardTerminals;
         
@@ -21,15 +20,60 @@ namespace Kyloe.Syntax
         {
             this.pos = 0;
             this.text = text;
-            this.groupNames = new Dictionary<string, SyntaxTokenKind>();
-            this.regex = new Regex(@"(?<Whitespace>\G\s+)|(?<LineComment>\G\/\/.*\n)|(?<BlockComment>\G\/\*.*\*\/)|(?<Comma>\G\,)|(?<Dot>\G\.)|(?<Colon>\G\:)|(?<SemiColon>\G\;)|(?<SmallArrow>\G\-\>)|(?<LessEqual>\G\<\=)|(?<Less>\G\<)|(?<GreaterEqual>\G\>\=)|(?<Greater>\G\>)|(?<DoubleEqual>\G\=\=)|(?<NotEqual>\G\!\=)|(?<PlusEqual>\G\+\=)|(?<MinusEqual>\G\-\=)|(?<StarEqual>\G\*\=)|(?<SlashEqual>\G\/\=)|(?<PercentEqual>\G\%\=)|(?<AmpersandEqual>\G\&\=)|(?<PipeEqual>\G\|\=)|(?<HatEqual>\G\^\=)|(?<Equal>\G\=)|(?<Plus>\G\+)|(?<Minus>\G\-)|(?<Star>\G\*)|(?<Slash>\G\/)|(?<Percent>\G\%)|(?<DoubleAmpersand>\G\&\&)|(?<Ampersand>\G\&)|(?<DoublePipe>\G\|\|)|(?<Pipe>\G\|)|(?<Hat>\G\^)|(?<Tilde>\G\~)|(?<Bang>\G\!)|(?<LeftParen>\G\()|(?<RightParen>\G\))|(?<LeftSquare>\G\[)|(?<RightSquare>\G\])|(?<LeftCurly>\G\{)|(?<RightCurly>\G\})|(?<Float>\G\b\d+\.\d+)|(?<Int>\G\b\d+\b)|(?<Bool>\G\b(true|false)\b)|(?<String>\G(\"".*\""|\u0027.*\u0027))|(?<VarKeyword>\G\bvar\b)|(?<ConstKeyword>\G\bconst\b)|(?<IfKeyword>\G\bif\b)|(?<ElseKeyword>\G\belse\b)|(?<FuncKeyword>\G\bfunc\b)|(?<Identifier>\G\b[a-zA-Z_]([a-zA-Z_]|\d)*\b)", RegexOptions.Compiled | RegexOptions.Multiline);
             
-            var names = Enum.GetNames<SyntaxTokenKind>();
-            var values = Enum.GetValues<SyntaxTokenKind>();
-            for (int i = 0; i < names.Length; i++)
-            {
-                groupNames.Add(names[i], values[i]);
-            }
+            var builder = ImmutableArray.CreateBuilder<(SyntaxTokenKind, string, Regex?)>(51);
+            builder.Add((SyntaxTokenKind.Whitespace, string.Empty , new Regex(@"\G\s+", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.LineComment, string.Empty , new Regex(@"\G\/\/.*\n", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.BlockComment, string.Empty , new Regex(@"\G\/\*.*\*\/", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.Comma, @"," , null));
+            builder.Add((SyntaxTokenKind.Dot, @"." , null));
+            builder.Add((SyntaxTokenKind.Colon, @":" , null));
+            builder.Add((SyntaxTokenKind.SemiColon, @";" , null));
+            builder.Add((SyntaxTokenKind.SmallArrow, @"->" , null));
+            builder.Add((SyntaxTokenKind.LessEqual, @"<=" , null));
+            builder.Add((SyntaxTokenKind.Less, @"<" , null));
+            builder.Add((SyntaxTokenKind.GreaterEqual, @">=" , null));
+            builder.Add((SyntaxTokenKind.Greater, @">" , null));
+            builder.Add((SyntaxTokenKind.DoubleEqual, @"==" , null));
+            builder.Add((SyntaxTokenKind.NotEqual, @"!=" , null));
+            builder.Add((SyntaxTokenKind.PlusEqual, @"+=" , null));
+            builder.Add((SyntaxTokenKind.MinusEqual, @"-=" , null));
+            builder.Add((SyntaxTokenKind.StarEqual, @"*=" , null));
+            builder.Add((SyntaxTokenKind.SlashEqual, @"/=" , null));
+            builder.Add((SyntaxTokenKind.PercentEqual, @"%=" , null));
+            builder.Add((SyntaxTokenKind.AmpersandEqual, @"&=" , null));
+            builder.Add((SyntaxTokenKind.PipeEqual, @"|=" , null));
+            builder.Add((SyntaxTokenKind.HatEqual, @"^=" , null));
+            builder.Add((SyntaxTokenKind.Equal, @"=" , null));
+            builder.Add((SyntaxTokenKind.Plus, @"+" , null));
+            builder.Add((SyntaxTokenKind.Minus, @"-" , null));
+            builder.Add((SyntaxTokenKind.Star, @"*" , null));
+            builder.Add((SyntaxTokenKind.Slash, @"/" , null));
+            builder.Add((SyntaxTokenKind.Percent, @"%" , null));
+            builder.Add((SyntaxTokenKind.DoubleAmpersand, @"&&" , null));
+            builder.Add((SyntaxTokenKind.Ampersand, @"&" , null));
+            builder.Add((SyntaxTokenKind.DoublePipe, @"||" , null));
+            builder.Add((SyntaxTokenKind.Pipe, @"|" , null));
+            builder.Add((SyntaxTokenKind.Hat, @"^" , null));
+            builder.Add((SyntaxTokenKind.Tilde, @"~" , null));
+            builder.Add((SyntaxTokenKind.Bang, @"!" , null));
+            builder.Add((SyntaxTokenKind.LeftParen, @"(" , null));
+            builder.Add((SyntaxTokenKind.RightParen, @")" , null));
+            builder.Add((SyntaxTokenKind.LeftSquare, @"[" , null));
+            builder.Add((SyntaxTokenKind.RightSquare, @"]" , null));
+            builder.Add((SyntaxTokenKind.LeftCurly, @"{" , null));
+            builder.Add((SyntaxTokenKind.RightCurly, @"}" , null));
+            builder.Add((SyntaxTokenKind.Float, string.Empty , new Regex(@"\G\b\d+\.\d+", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.Int, string.Empty , new Regex(@"\G\b\d+\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.Bool, string.Empty , new Regex(@"\G\b(true|false)\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.String, string.Empty , new Regex(@"\G(\"".*\""|\u0027.*\u0027)", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.VarKeyword, string.Empty , new Regex(@"\G\bvar\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.ConstKeyword, string.Empty , new Regex(@"\G\bconst\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.IfKeyword, string.Empty , new Regex(@"\G\bif\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.ElseKeyword, string.Empty , new Regex(@"\G\belse\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.FuncKeyword, string.Empty , new Regex(@"\G\bfunc\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.Identifier, string.Empty , new Regex(@"\G\b[a-zA-Z_]([a-zA-Z_]|\d)*\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            this.patterns = builder.MoveToImmutable();
             
             this.discardTerminals = new HashSet<SyntaxTokenKind>();
             this.discardTerminals.Add(SyntaxTokenKind.Whitespace);
@@ -41,21 +85,44 @@ namespace Kyloe.Syntax
         {
             while (pos < text.Length)
             {
-                var match = regex.Match(text, pos);
-                if (match.Success)
+                bool didMatch = false;
+                foreach (var (kind, str, regex) in patterns)
                 {
-                    var group = match.Groups.OfType<System.Text.RegularExpressions.Group>().Where(g => g.Success).Last();
-                    var location = Kyloe.Utility.SourceLocation.FromLength(match.Index, match.Length);
-                    var terminal = new SyntaxTerminal(groupNames[group.Name], match.Value, location);
-                    pos += location.Length;
-                    yield return terminal;
+                    if (regex is null)
+                    {
+                        var leftover = text.Length - pos;
+                        
+                        if (str.Length > leftover) continue;
+                        
+                        var match = string.CompareOrdinal(text, pos, str, 0, str.Length);
+                        
+                        if (match != 0) continue;
+                        
+                        var location = Kyloe.Utility.SourceLocation.FromLength(pos, str.Length);
+                        var terminal = new SyntaxTerminal(kind, str, location);
+                        pos += location.Length;
+                        didMatch = true;
+                        yield return terminal;
+                        break;
+                    }
+                    else 
+                    {
+                        var match = regex.Match(text, pos);
+                        if (!match.Success) continue;
+                        
+                        var location = Kyloe.Utility.SourceLocation.FromLength(match.Index, match.Length);
+                        var terminal = new SyntaxTerminal(kind, match.Value, location);
+                        pos += location.Length;
+                        didMatch = true;
+                        yield return terminal;
+                        break;
+                    }
                 }
-                else 
+                if (!didMatch)
                 {
-                    var location = Kyloe.Utility.SourceLocation.FromLength(pos, 1);
-                    var terminal = new SyntaxTerminal(SyntaxTokenKind.Error, text[pos].ToString(), location);
+                    var errTerminal = new SyntaxTerminal(SyntaxTokenKind.Error, text[pos].ToString(), Kyloe.Utility.SourceLocation.FromLength(pos, 1));
                     pos += 1;
-                    yield return terminal;
+                    yield return errTerminal;
                 }
             }
             yield return new SyntaxTerminal(SyntaxTokenKind.End, "<end>", Kyloe.Utility.SourceLocation.FromLength(pos, 0));
