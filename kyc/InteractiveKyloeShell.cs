@@ -21,16 +21,11 @@ namespace Kyc
                     else
                         break;
 
-                // var tree = SyntaxTree.Parse(input);
-                // Console.WriteLine();
-                // tree.GetDiagnostics().WriteTo(Console.Out);
-                // Console.WriteLine();
-                // tree.WriteTo(Console.Out);
-
-                var terminals = SyntaxTree.Terminals(input);
-
-                foreach (var t in terminals)
-                    Console.WriteLine($"{t.Kind}: {t.Text}");
+                var tree = SyntaxTree.Parse(input);
+                Console.WriteLine();
+                tree.GetDiagnostics().WriteTo(Console.Out);
+                Console.WriteLine();
+                tree.WriteTo(Console.Out);
             }
         }
 

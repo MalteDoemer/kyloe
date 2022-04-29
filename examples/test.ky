@@ -1,9 +1,1 @@
-var global = 5;
-
-const CONSTANT = 76;
-
-func main() -> void {
-    global += CONSTANT;
-
-    println(global);
-}
+var v = var;

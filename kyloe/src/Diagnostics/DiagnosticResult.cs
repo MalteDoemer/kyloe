@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using Kyloe.Utility;
+using System.Collections;
 
 namespace Kyloe.Diagnostics
 {
 
-    public sealed class DiagnosticResult
+    public sealed class DiagnosticResult : IEnumerable<Diagnostic>
     {
         private readonly SourceText sourceText;
         private ImmutableArray<Diagnostic> diagnostics;
@@ -38,6 +39,16 @@ namespace Kyloe.Diagnostics
         public bool HasDiagnostics() => diagnostics.Count() != 0;
         public bool HasErrors() => GetErrors().Count() != 0;
         public bool HasWarnings() => GetWarnings().Count() != 0;
+
+        public IEnumerator<Diagnostic> GetEnumerator()
+        {
+            return ((IEnumerable<Diagnostic>)diagnostics).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)diagnostics).GetEnumerator();
+        }
     }
 
 }

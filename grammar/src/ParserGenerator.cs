@@ -443,10 +443,7 @@ namespace Kyloe.Grammar
             if (grammar.StartRule is null)
                 throw new GrammarException("cannot create Parser class without a Start rule");
 
-            if (grammar.StopRule is null)
-                throw new GrammarException("cannot create Parser class without a Stop rule");
-
-            var stopTerminals = grammar.EnumerateTerminals(grammar.StopRule.Kind);
+            var stopTerminals = grammar.StopRule is not null ? grammar.EnumerateTerminals(grammar.StopRule.Kind) : Enumerable.Empty<TokenKind>();
 
             var terminalsField = new Field(
                 AccessModifier.Private,

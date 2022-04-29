@@ -141,29 +141,14 @@ namespace Kyloe.Syntax
         
         private SyntaxToken ParseCompilationUnit()
         {
-            switch (current.Kind)
+            var n0 = ParseTopLevelItem();
+            SyntaxToken node = CreateNode(SyntaxTokenKind.CompilationUnit, n0);
+            while (current.Kind == SyntaxTokenKind.FuncKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
             {
-                default:
-                {
-                    SyntaxToken node = new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
-                    while (current.Kind == SyntaxTokenKind.FuncKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.End)
-                    {
-                        switch (current.Kind)
-                        {
-                            case SyntaxTokenKind.FuncKeyword:
-                            case SyntaxTokenKind.VarKeyword:
-                            case SyntaxTokenKind.ConstKeyword:
-                            {
-                                var x0 = ParseTopLevelItem();
-                                node = CreateNode(SyntaxTokenKind.CompilationUnit, node, x0);
-                                break;
-                            }
-                            default: return node;
-                        }
-                    }
-                    return node;
-                }
+                var x0 = ParseTopLevelItem();
+                node = CreateNode(SyntaxTokenKind.CompilationUnit, node, x0);
             }
+            return node;
         }
         
         private SyntaxToken ParseTopLevelItem()

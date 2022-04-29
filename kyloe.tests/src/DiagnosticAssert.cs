@@ -23,10 +23,9 @@ namespace Kyloe.Tests
             Assert.Empty(result.GetWarnings());
         }
 
-        public static void HasAll(DiagnosticResult result, params DiagnosticKind[] kinds)
+        public static void Equals(DiagnosticResult result, params DiagnosticKind[] kinds)
         {
-            foreach (var kind in kinds)
-                Assert.Contains(result.GetAll(), d => d.Kind == kind);
+            Assert.Equal(kinds, result.Select(d => d.Kind));
         }
     }
 
