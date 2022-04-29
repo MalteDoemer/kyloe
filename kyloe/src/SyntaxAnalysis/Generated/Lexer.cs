@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Kyloe.Syntax
 {
-    public sealed class Lexer
+    internal sealed class Lexer
     {
         private readonly ImmutableArray<(SyntaxTokenKind, string, Regex?)> patterns;
         

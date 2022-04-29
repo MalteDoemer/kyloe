@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace Kyloe.Syntax
 {
-    public sealed class Parser
+    internal sealed class Parser
     {
         private readonly ImmutableArray<SyntaxTerminal> terminals;
         
         private readonly HashSet<SyntaxTokenKind> stopTerminals;
         
-        private readonly ICollection<Kyloe.Diagnostics.Diagnostic> errors;
+        private readonly Kyloe.Diagnostics.DiagnosticCollector errors;
         
         private int pos;
         
@@ -18,7 +18,7 @@ namespace Kyloe.Syntax
         
         private SyntaxTerminal current => pos < terminals.Length ? terminals[pos] : terminals[terminals.Length - 1];
         
-        public Parser(string text, ICollection<Kyloe.Diagnostics.Diagnostic> errors)
+        public Parser(string text, Kyloe.Diagnostics.DiagnosticCollector errors)
         {
             this.pos = 0;
             this.isValid = true;
@@ -28,13 +28,9 @@ namespace Kyloe.Syntax
             foreach (var terminal in lexer.Terminals())
             {
                 if (terminal.Kind == SyntaxTokenKind.Error)
-                {
-                    errors.Add(new Kyloe.Diagnostics.Diagnostic(Kyloe.Diagnostics.DiagnosticKind.InvalidCharacterError, string.Format("invalid character: \\u{0:x4}", (int)(terminal.Text[0])), terminal.Location));
-                }
-                else 
-                {
+                    errors.InvalidCharacterError(terminal.Location, terminal.Text[0]);
+                else
                     builder.Add(terminal);
-                }
             }
             this.terminals = builder.ToImmutable();
             this.stopTerminals = new HashSet<SyntaxTokenKind>();
@@ -74,21 +70,9 @@ namespace Kyloe.Syntax
         
         private void Unexpected(params SyntaxTokenKind[] expected)
         {
-            if (!isValid)
-            {
-                return;
-            }
+            if (!isValid) return;
             isValid = false;
-            string msg;
-            if (expected.Length == 1)
-            {
-                msg = $"expected {expected[0]}, got {current.Kind}";
-            }
-            else 
-            {
-                msg = $"expected one of ({string.Join(", ", expected)}), got {current.Kind}";
-            }
-            errors.Add(new Kyloe.Diagnostics.Diagnostic(Kyloe.Diagnostics.DiagnosticKind.UnexpectedTokenError, msg, current.Location));
+            errors.UnexpectedTokenError(current, expected);
         }
         
         private SyntaxToken CreateNode(SyntaxTokenKind kind, params SyntaxToken[] tokens)
@@ -110,39 +94,6 @@ namespace Kyloe.Syntax
         {
             var n0 = ParseCompilationUnit();
             return CreateNode(SyntaxTokenKind.Start, n0);
-        }
-        
-        private SyntaxToken ParseStop()
-        {
-            switch (current.Kind)
-            {
-                case SyntaxTokenKind.SemiColon:
-                {
-                    var n0 = Expect(SyntaxTokenKind.SemiColon);
-                    return CreateNode(SyntaxTokenKind.Stop, n0);
-                }
-                case SyntaxTokenKind.LeftCurly:
-                {
-                    var n0 = Expect(SyntaxTokenKind.LeftCurly);
-                    return CreateNode(SyntaxTokenKind.Stop, n0);
-                }
-                case SyntaxTokenKind.RightCurly:
-                {
-                    var n0 = Expect(SyntaxTokenKind.RightCurly);
-                    return CreateNode(SyntaxTokenKind.Stop, n0);
-                }
-                default:
-                {
-                    var erroneous = current;
-                    Unexpected(SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.RightCurly);
-                    SkipInput(SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.RightCurly);
-                    if (current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.RightCurly)
-                    {
-                        return ParseStop();
-                    }
-                    return new SyntaxNode(SyntaxTokenKind.Error, ImmutableArray.Create<SyntaxToken>(erroneous));
-                }
-            }
         }
         
         private SyntaxToken ParseCompilationUnit()
@@ -176,7 +127,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
-                    SkipInput(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.End);
+                    SkipInput(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.End, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
                     if (current.Kind == SyntaxTokenKind.FuncKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
                     {
                         return ParseTopLevelItem();
@@ -313,7 +264,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
-                    SkipInput(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
+                    SkipInput(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
                     if (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.WhileKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon)
                     {
                         return ParseStatement();
@@ -452,7 +403,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
-                    SkipInput(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.End);
+                    SkipInput(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.End, SyntaxTokenKind.FuncKeyword);
                     if (current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
                     {
                         return ParseDeclarationStatement();
@@ -782,7 +733,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    SkipInput(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Hat, SyntaxTokenKind.Pipe, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.Comma, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.SemiColon, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.Percent, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    SkipInput(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.Percent, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Pipe, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.Comma, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     if (current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
                     {
                         return ParsePrefix();
@@ -901,7 +852,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    SkipInput(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Hat, SyntaxTokenKind.Pipe, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.Comma, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.SemiColon, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.Percent, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Dot);
+                    SkipInput(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.Percent, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Pipe, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.Comma, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Dot);
                     if (current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
                     {
                         return ParsePrimary();

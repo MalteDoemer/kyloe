@@ -120,39 +120,14 @@ namespace Kyloe.Syntax
             }
         }
 
-        /*
-
-        public static object? GetDefaultValue(SyntaxTokenKind kind)
+        public static string GetSymbolOrName(this SyntaxTokenKind kind) 
         {
-            switch (kind)
-            {
-                case SyntaxTokenKind.Invalid:
-                    return '\0';
-                case SyntaxTokenKind.IntLiteral:
-                    return 0;
-                case SyntaxTokenKind.FloatLiteral:
-                    return 0.0;
-                case SyntaxTokenKind.BoolLiteral:
-                    return false;
-                case SyntaxTokenKind.StringLiteral:
-                    return string.Empty;
-                case SyntaxTokenKind.Identifier:
-                    return string.Empty;
-                default:
-                    return null;
-            }
+            var sym = GetSimpleTerminalString(kind);
+
+            if (sym is not null)
+                return sym;
+
+            return kind.ToString();
         }
-
-        public static string TokenKindString(this SyntaxTokenKind kind)
-        {
-            if (GetSimpleTokenString(kind) is string s)
-                return s;
-
-            if  (System.Enum.GetName(kind) is string n)
-                return n;
-
-            return string.Empty;
-        }*/
-
     }
 }
