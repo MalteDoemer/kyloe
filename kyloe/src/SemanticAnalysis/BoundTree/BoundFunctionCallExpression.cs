@@ -19,6 +19,6 @@ namespace Kyloe.Semantics
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 
-        public override BoundNodeKind Kind => BoundNodeKind.BoundCallExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundFunctionCallExpression;
     }
 }
