@@ -148,6 +148,10 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "if true {} elif false {} elif true {} else {}"
+            };
+
+            yield return new object[] {
                 "var x: i64 = 5;"
             };
 
@@ -277,6 +281,16 @@ namespace Kyloe.Tests.Binding
                     x = 2;
                 }",
                 DiagnosticKind.ExpectedModifiableValueError,
+            };
+
+            yield return new object[] {
+                "if true {} else {} else {}",
+                DiagnosticKind.IllegalElseStatement
+            };
+
+            yield return new object[] {
+                "if true {} else {} elif true {}",
+                DiagnosticKind.IllegalElifStatement,
             };
         }
 

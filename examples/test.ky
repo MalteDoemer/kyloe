@@ -1,8 +1,16 @@
-func sayHello(name: ThisTypeDoesNotExist) {
-    println('Hello');
-    println(name);
-}
-
 func main() {
-    sayHello('Kyloe');
+
+    var x = 5;
+
+    if x == 1 {
+        println("cant be");
+    } elif x == 7 {
+        println("also impossible");
+    } elif (x == 5) {
+        println("yeah");
+    } else {
+        println("oh nonononoooo");
+    } elif false {
+        x += false;
+    }
 }

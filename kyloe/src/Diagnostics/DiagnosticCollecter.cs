@@ -122,6 +122,18 @@ namespace Kyloe.Diagnostics
             AddDiagnostic(DiagnosticKind.OverloadWithSameParametersExistsError, msg, location);
         }
 
+        public void IllegalElifStatement(SourceLocation location) 
+        {
+            var msg = "unexpected elif statement";
+            AddDiagnostic(DiagnosticKind.IllegalElifStatement, msg, location);
+        }
+
+        public void IllegalElseStatement(SourceLocation location) 
+        {
+            var msg = "unexpected else statement";
+            AddDiagnostic(DiagnosticKind.IllegalElseStatement, msg, location);
+        }
+
         public void Clear()
         {
             diagnostics.Clear();

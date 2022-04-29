@@ -92,10 +92,16 @@ namespace Kyloe.Semantics
             return null;
         }
 
-        private TypeSpecifier GetResultType(BoundExpression expr, SourceLocation src, bool mustBeValue, bool mustBeModifiableValue, bool mustBeTypeName)
+        private TypeSpecifier GetResultType(BoundExpression expr, SourceLocation src, TypeSpecifier? expectedType = null, bool mustBeValue = false, bool mustBeModifiableValue = false, bool mustBeTypeName = false)
         {
             if (expr.ResultType is ErrorType)
                 return typeSystem.Error;
+
+            if (expectedType is not null && IsTypeMissmatch(expectedType, expr.ResultType))
+            {
+                diagnostics.MissmatchedTypeError(src, expectedType, expr.ResultType);
+                return typeSystem.Error;
+            }
 
             if (mustBeTypeName && !expr.IsTypeName)
             {
@@ -360,7 +366,95 @@ namespace Kyloe.Semantics
 
         private BoundStatement BindIfStatement(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            // IfStatement
+            // ├── IfKeyword
+            // ├── Expr
+            // ├── BlockStatement
+            // └── ElifStatement (optional)
+
+            var ifStatement = GetNode(token, SyntaxTokenKind.IfStatement);
+
+            var exprSyntax = ifStatement.Tokens[1];
+            var blockSyntax = ifStatement.Tokens[2];
+            var elifSyntax = ifStatement.Tokens[3];
+
+            var expr = BindExpression(exprSyntax);
+            var _result = GetResultType(expr, exprSyntax.Location, typeSystem.Bool, mustBeValue: true);
+
+            var body = BindStatement(blockSyntax);
+            var elifStatement = BindElifStatement(elifSyntax);
+
+            return new BoundIfStatement(expr, body, elifStatement);
+        }
+
+        private BoundStatement BindElifStatement(SyntaxToken token)
+        {
+            if (token.Kind == SyntaxTokenKind.Epsilon)
+                return new BoundEmptyStatement();
+            else if (token.Kind == SyntaxTokenKind.Error)
+                return new BoundInvalidStatement();
+
+            // ElifStatement
+            // ├── ElifClause / ElseKeyword
+            // ├── BlockStatement
+            // │   ├── LeftCurly
+            // │   ├── Epsilon
+            // │   └── RightCurly
+            // └── ElifStatement (Optional)
+
+            var statement = GetNode(token, SyntaxTokenKind.ElifStatement);
+            var blockSyntax = statement.Tokens[1];
+            var elifSyntax = statement.Tokens[2];
+
+            bool isElif = statement.Tokens[0].Kind == SyntaxTokenKind.ElifClause;
+
+            if (isElif)
+            {
+                var clause = GetNode(statement.Tokens[0], SyntaxTokenKind.ElifClause);
+                var exprSyntax = clause.Tokens[1];
+
+                var expr = BindExpression(exprSyntax);
+                var _result = GetResultType(expr, exprSyntax.Location, typeSystem.Bool, mustBeValue: true);
+
+                var body = BindStatement(blockSyntax);
+                var elifStatement = BindElifStatement(elifSyntax);
+
+                return new BoundIfStatement(expr, body, elifStatement);
+            }
+            else
+            {
+                // HACK:
+                // There is a little problem in the parser, the statement:
+                //
+                //      if true {} else { } elif false { } else { }
+                // 
+                // would be correct, i.e. you can have as many else statements as you want.
+                // This is because the parser generator cannot deal with indirect recursion
+                // and the grammar had to be changed accordingly.
+                //
+                // This error is checked here in the Binder.
+
+                bool isIllegalSyntax = elifSyntax.Kind == SyntaxTokenKind.ElifStatement;
+
+                if (isIllegalSyntax)
+                {
+                    bool isElse = GetNode(elifSyntax).Tokens[0].Kind == SyntaxTokenKind.ElseKeyword;
+
+                    if (isElse)
+                        diagnostics.IllegalElseStatement(elifSyntax.Location);
+                    else 
+                        diagnostics.IllegalElifStatement(elifSyntax.Location);
+
+                    var body = BindStatement(blockSyntax);
+
+                    // still bind the elif statment to catch non-related errors.
+                    BindElifStatement(elifSyntax);
+
+                    return body;
+                }
+
+                return BindStatement(blockSyntax);
+            }
         }
 
         private BoundStatement BindExpressionStatement(SyntaxToken token)
@@ -391,32 +485,22 @@ namespace Kyloe.Semantics
             var exprSyntax = declaration.Tokens[4];
 
             bool isConst = declKeyword.Kind == SyntaxTokenKind.ConstKeyword;
+            bool hasTypeClause = typeClause.Kind != SyntaxTokenKind.Epsilon;
 
             var expr = BindExpression(exprSyntax);
-            var exprType = GetResultType(expr, exprSyntax.Location, mustBeValue: true, mustBeModifiableValue: false, mustBeTypeName: false);
 
-            TypeSpecifier varType;
+            var expectedType = hasTypeClause ? BindTypeClause(typeClause) : null;
 
-            if (typeClause.Kind == SyntaxTokenKind.Epsilon)
-                varType = exprType;
-            else
-            {
-                varType = BindTypeClause(typeClause);
-                if (IsTypeMissmatch(varType, exprType))
-                {
-                    diagnostics.MissmatchedTypeError(exprSyntax.Location, varType, exprType);
-                    varType = typeSystem.Error;
-                }
-            }
+            var exprType = GetResultType(expr, exprSyntax.Location, expectedType, mustBeValue: true);
 
             var name = nameTerminal.Text;
 
             Symbol symbol;
 
             if (InGlobalScope())
-                symbol = new GlobalVariableSymbol(name, varType, isConst);
+                symbol = new GlobalVariableSymbol(name, exprType, isConst);
             else
-                symbol = new LocalVariableSymbol(name, varType, isConst);
+                symbol = new LocalVariableSymbol(name, exprType, isConst);
 
             if (!DeclareSymbol(symbol))
             {
@@ -553,8 +637,8 @@ namespace Kyloe.Semantics
                 right = BindExpression(exprSyntax);
 
 
-            var leftType = GetResultType(left, toAssign.Location, mustBeValue: true, mustBeModifiableValue: true, mustBeTypeName: false);
-            var rightType = GetResultType(right, rightLocation, mustBeValue: true, mustBeModifiableValue: false, mustBeTypeName: false);
+            var leftType = GetResultType(left, toAssign.Location, mustBeValue: true, mustBeModifiableValue: true);
+            var rightType = GetResultType(right, rightLocation, mustBeValue: true);
 
             if (op == AssignmentOperation.Assign)
             {
