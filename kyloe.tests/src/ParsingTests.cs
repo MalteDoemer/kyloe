@@ -1,6 +1,5 @@
 using Xunit;
 
-using Kyloe.Syntax;
 using Kyloe.Diagnostics;
 using System.Collections.Generic;
 
@@ -26,7 +25,7 @@ namespace Kyloe.Tests.Parsing
         public void Test_Parsing_Expression(string text, params DiagnosticKind[] errors)
         {
             var tree = ParseExpression(text);
-            DiagnosticAssert.Equals(tree.GetDiagnostics(), errors);
+            DiagnosticAssert.Equal(tree.GetDiagnostics(), errors);
         }
 
         [Theory]
@@ -34,7 +33,7 @@ namespace Kyloe.Tests.Parsing
         public void Test_Parsing_Statements(string text, params DiagnosticKind[] errors)
         {
             var tree = ParseStatement(text);
-            DiagnosticAssert.Equals(tree.GetDiagnostics(), errors);
+            DiagnosticAssert.Equal(tree.GetDiagnostics(), errors);
         }
 
         [Theory]
@@ -42,7 +41,7 @@ namespace Kyloe.Tests.Parsing
         public void Test_Parsing_Program(string text, params DiagnosticKind[] errors)
         {
             var tree = SyntaxTree.Parse(text);
-            DiagnosticAssert.Equals(tree.GetDiagnostics(), errors);
+            DiagnosticAssert.Equal(tree.GetDiagnostics(), errors);
         }
 
         public static IEnumerable<object[]> GetExpressionData()

@@ -176,7 +176,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
-                    SkipInput(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.End, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
+                    SkipInput(SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.End);
                     if (current.Kind == SyntaxTokenKind.FuncKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
                     {
                         return ParseTopLevelItem();
@@ -287,6 +287,8 @@ namespace Kyloe.Syntax
                 }
                 case SyntaxTokenKind.Plus:
                 case SyntaxTokenKind.Minus:
+                case SyntaxTokenKind.Bang:
+                case SyntaxTokenKind.Tilde:
                 case SyntaxTokenKind.Int:
                 case SyntaxTokenKind.Float:
                 case SyntaxTokenKind.Bool:
@@ -305,9 +307,9 @@ namespace Kyloe.Syntax
                 default:
                 {
                     var erroneous = current;
-                    Unexpected(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
-                    SkipInput(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
-                    if (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon)
+                    Unexpected(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon);
+                    SkipInput(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
+                    if (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon)
                     {
                         return ParseStatement();
                     }
@@ -325,7 +327,7 @@ namespace Kyloe.Syntax
         
         private SyntaxToken ParseBlockStatement()
         {
-            var n0 = Expect(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
+            var n0 = Expect(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
             var n1 = ParseRepeatedStatement();
             var n2 = Expect(SyntaxTokenKind.RightCurly);
             return CreateNode(SyntaxTokenKind.BlockStatement, n0, n1, n2);
@@ -338,7 +340,7 @@ namespace Kyloe.Syntax
                 default:
                 {
                     SyntaxToken node = new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
-                    while (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.RightCurly)
+                    while (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.RightCurly)
                     {
                         switch (current.Kind)
                         {
@@ -348,6 +350,8 @@ namespace Kyloe.Syntax
                             case SyntaxTokenKind.ConstKeyword:
                             case SyntaxTokenKind.Plus:
                             case SyntaxTokenKind.Minus:
+                            case SyntaxTokenKind.Bang:
+                            case SyntaxTokenKind.Tilde:
                             case SyntaxTokenKind.Int:
                             case SyntaxTokenKind.Float:
                             case SyntaxTokenKind.Bool:
@@ -370,7 +374,7 @@ namespace Kyloe.Syntax
         
         private SyntaxToken ParseIfStatement()
         {
-            var n0 = Expect(SyntaxTokenKind.IfKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+            var n0 = Expect(SyntaxTokenKind.IfKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
             var n1 = ParseExpression();
             var n2 = ParseBlockStatement();
             var n3 = ParseOptionalElseStatement();
@@ -396,7 +400,7 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenKind.IfKeyword:
                 {
-                    var n0 = Expect(SyntaxTokenKind.IfKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.IfKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseExpression();
                     return CreateNode(SyntaxTokenKind.OptionalIfClause, n0, n1);
                 }
@@ -421,7 +425,7 @@ namespace Kyloe.Syntax
                     var n0 = Expect(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.Identifier);
                     var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.Colon, SyntaxTokenKind.Equal);
                     var n2 = ParseOptionalTypeClause();
-                    var n3 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n3 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n4 = ParseExpression();
                     var n5 = Expect(SyntaxTokenKind.SemiColon);
                     return CreateNode(SyntaxTokenKind.DeclarationStatement, n0, n1, n2, n3, n4, n5);
@@ -431,7 +435,7 @@ namespace Kyloe.Syntax
                     var n0 = Expect(SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Identifier);
                     var n1 = Expect(SyntaxTokenKind.Identifier, SyntaxTokenKind.Colon, SyntaxTokenKind.Equal);
                     var n2 = ParseOptionalTypeClause();
-                    var n3 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n3 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n4 = ParseExpression();
                     var n5 = Expect(SyntaxTokenKind.SemiColon);
                     return CreateNode(SyntaxTokenKind.DeclarationStatement, n0, n1, n2, n3, n4, n5);
@@ -440,7 +444,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
-                    SkipInput(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.End, SyntaxTokenKind.FuncKeyword);
+                    SkipInput(SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.End);
                     if (current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword)
                     {
                         return ParseDeclarationStatement();
@@ -469,63 +473,63 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenKind.Equal:
                 {
-                    var n0 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.Equal, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.PlusEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.PlusEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.PlusEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.MinusEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.MinusEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.MinusEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.StarEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.StarEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.StarEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.SlashEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.SlashEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.SlashEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.PercentEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.PercentEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.PercentEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.AmpersandEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.PipeEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.PipeEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.PipeEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
                 }
                 case SyntaxTokenKind.HatEqual:
                 {
-                    var n0 = Expect(SyntaxTokenKind.HatEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.HatEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParseLogicalOr();
                     var n2 = ParseAssignment();
                     return CreateNode(SyntaxTokenKind.Assignment, n0, n1, n2);
@@ -540,7 +544,7 @@ namespace Kyloe.Syntax
             SyntaxToken node = CreateNode(SyntaxTokenKind.LogicalOr, n0);
             while (current.Kind == SyntaxTokenKind.DoublePipe)
             {
-                var x0 = Expect(SyntaxTokenKind.DoublePipe, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                var x0 = Expect(SyntaxTokenKind.DoublePipe, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                 var x1 = ParseLogicalAnd();
                 node = CreateNode(SyntaxTokenKind.LogicalOr, node, x0, x1);
             }
@@ -553,7 +557,7 @@ namespace Kyloe.Syntax
             SyntaxToken node = CreateNode(SyntaxTokenKind.LogicalAnd, n0);
             while (current.Kind == SyntaxTokenKind.DoubleAmpersand)
             {
-                var x0 = Expect(SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                var x0 = Expect(SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                 var x1 = ParseBitOr();
                 node = CreateNode(SyntaxTokenKind.LogicalAnd, node, x0, x1);
             }
@@ -566,7 +570,7 @@ namespace Kyloe.Syntax
             SyntaxToken node = CreateNode(SyntaxTokenKind.BitOr, n0);
             while (current.Kind == SyntaxTokenKind.Pipe)
             {
-                var x0 = Expect(SyntaxTokenKind.Pipe, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                var x0 = Expect(SyntaxTokenKind.Pipe, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                 var x1 = ParseBitXor();
                 node = CreateNode(SyntaxTokenKind.BitOr, node, x0, x1);
             }
@@ -579,7 +583,7 @@ namespace Kyloe.Syntax
             SyntaxToken node = CreateNode(SyntaxTokenKind.BitXor, n0);
             while (current.Kind == SyntaxTokenKind.Hat)
             {
-                var x0 = Expect(SyntaxTokenKind.Hat, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                var x0 = Expect(SyntaxTokenKind.Hat, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                 var x1 = ParseBitAnd();
                 node = CreateNode(SyntaxTokenKind.BitXor, node, x0, x1);
             }
@@ -592,7 +596,7 @@ namespace Kyloe.Syntax
             SyntaxToken node = CreateNode(SyntaxTokenKind.BitAnd, n0);
             while (current.Kind == SyntaxTokenKind.Ampersand)
             {
-                var x0 = Expect(SyntaxTokenKind.Ampersand, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                var x0 = Expect(SyntaxTokenKind.Ampersand, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                 var x1 = ParseEquality();
                 node = CreateNode(SyntaxTokenKind.BitAnd, node, x0, x1);
             }
@@ -609,14 +613,14 @@ namespace Kyloe.Syntax
                 {
                     case SyntaxTokenKind.DoubleEqual:
                     {
-                        var x0 = Expect(SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseComparison();
                         node = CreateNode(SyntaxTokenKind.Equality, node, x0, x1);
                         break;
                     }
                     case SyntaxTokenKind.NotEqual:
                     {
-                        var x0 = Expect(SyntaxTokenKind.NotEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.NotEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseComparison();
                         node = CreateNode(SyntaxTokenKind.Equality, node, x0, x1);
                         break;
@@ -636,28 +640,28 @@ namespace Kyloe.Syntax
                 {
                     case SyntaxTokenKind.Less:
                     {
-                        var x0 = Expect(SyntaxTokenKind.Less, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.Less, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseSum();
                         node = CreateNode(SyntaxTokenKind.Comparison, node, x0, x1);
                         break;
                     }
                     case SyntaxTokenKind.LessEqual:
                     {
-                        var x0 = Expect(SyntaxTokenKind.LessEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.LessEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseSum();
                         node = CreateNode(SyntaxTokenKind.Comparison, node, x0, x1);
                         break;
                     }
                     case SyntaxTokenKind.Greater:
                     {
-                        var x0 = Expect(SyntaxTokenKind.Greater, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.Greater, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseSum();
                         node = CreateNode(SyntaxTokenKind.Comparison, node, x0, x1);
                         break;
                     }
                     case SyntaxTokenKind.GreaterEqual:
                     {
-                        var x0 = Expect(SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseSum();
                         node = CreateNode(SyntaxTokenKind.Comparison, node, x0, x1);
                         break;
@@ -677,14 +681,14 @@ namespace Kyloe.Syntax
                 {
                     case SyntaxTokenKind.Plus:
                     {
-                        var x0 = Expect(SyntaxTokenKind.Plus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.Plus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseMult();
                         node = CreateNode(SyntaxTokenKind.Sum, node, x0, x1);
                         break;
                     }
                     case SyntaxTokenKind.Minus:
                     {
-                        var x0 = Expect(SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseMult();
                         node = CreateNode(SyntaxTokenKind.Sum, node, x0, x1);
                         break;
@@ -698,20 +702,27 @@ namespace Kyloe.Syntax
         {
             var n0 = ParsePrefix();
             SyntaxToken node = CreateNode(SyntaxTokenKind.Mult, n0);
-            while (current.Kind == SyntaxTokenKind.Star || current.Kind == SyntaxTokenKind.Slash)
+            while (current.Kind == SyntaxTokenKind.Star || current.Kind == SyntaxTokenKind.Slash || current.Kind == SyntaxTokenKind.Percent)
             {
                 switch (current.Kind)
                 {
                     case SyntaxTokenKind.Star:
                     {
-                        var x0 = Expect(SyntaxTokenKind.Star, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.Star, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParsePrefix();
                         node = CreateNode(SyntaxTokenKind.Mult, node, x0, x1);
                         break;
                     }
                     case SyntaxTokenKind.Slash:
                     {
-                        var x0 = Expect(SyntaxTokenKind.Slash, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.Slash, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x1 = ParsePrefix();
+                        node = CreateNode(SyntaxTokenKind.Mult, node, x0, x1);
+                        break;
+                    }
+                    case SyntaxTokenKind.Percent:
+                    {
+                        var x0 = Expect(SyntaxTokenKind.Percent, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParsePrefix();
                         node = CreateNode(SyntaxTokenKind.Mult, node, x0, x1);
                         break;
@@ -727,13 +738,25 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenKind.Plus:
                 {
-                    var n0 = Expect(SyntaxTokenKind.Plus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.Plus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParsePrefix();
                     return CreateNode(SyntaxTokenKind.Prefix, n0, n1);
                 }
                 case SyntaxTokenKind.Minus:
                 {
-                    var n0 = Expect(SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n0 = Expect(SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n1 = ParsePrefix();
+                    return CreateNode(SyntaxTokenKind.Prefix, n0, n1);
+                }
+                case SyntaxTokenKind.Bang:
+                {
+                    var n0 = Expect(SyntaxTokenKind.Bang, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    var n1 = ParsePrefix();
+                    return CreateNode(SyntaxTokenKind.Prefix, n0, n1);
+                }
+                case SyntaxTokenKind.Tilde:
+                {
+                    var n0 = Expect(SyntaxTokenKind.Tilde, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                     var n1 = ParsePrefix();
                     return CreateNode(SyntaxTokenKind.Prefix, n0, n1);
                 }
@@ -750,9 +773,9 @@ namespace Kyloe.Syntax
                 default:
                 {
                     var erroneous = current;
-                    Unexpected(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    SkipInput(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.Comma, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.SemiColon, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Pipe, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Star, SyntaxTokenKind.Slash);
-                    if (current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
+                    Unexpected(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    SkipInput(SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Pipe, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.Comma, SyntaxTokenKind.Epsilon, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.Percent, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                    if (current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
                     {
                         return ParsePrefix();
                     }
@@ -771,7 +794,7 @@ namespace Kyloe.Syntax
                 {
                     case SyntaxTokenKind.LeftParen:
                     {
-                        var x0 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.RightParen);
+                        var x0 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.RightParen);
                         var x1 = ParseOptionalArguments();
                         var x2 = Expect(SyntaxTokenKind.RightParen);
                         node = CreateNode(SyntaxTokenKind.Postfix, node, x0, x1, x2);
@@ -779,7 +802,7 @@ namespace Kyloe.Syntax
                     }
                     case SyntaxTokenKind.LeftSquare:
                     {
-                        var x0 = Expect(SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                        var x0 = Expect(SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                         var x1 = ParseArguments();
                         var x2 = Expect(SyntaxTokenKind.RightSquare);
                         node = CreateNode(SyntaxTokenKind.Postfix, node, x0, x1, x2);
@@ -803,6 +826,8 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenKind.Plus:
                 case SyntaxTokenKind.Minus:
+                case SyntaxTokenKind.Bang:
+                case SyntaxTokenKind.Tilde:
                 case SyntaxTokenKind.Int:
                 case SyntaxTokenKind.Float:
                 case SyntaxTokenKind.Bool:
@@ -823,7 +848,7 @@ namespace Kyloe.Syntax
             SyntaxToken node = CreateNode(SyntaxTokenKind.Arguments, n0);
             while (current.Kind == SyntaxTokenKind.Comma)
             {
-                var x0 = Expect(SyntaxTokenKind.Comma, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+                var x0 = Expect(SyntaxTokenKind.Comma, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
                 var x1 = ParseExpression();
                 node = CreateNode(SyntaxTokenKind.Arguments, node, x0, x1);
             }
@@ -868,7 +893,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
-                    SkipInput(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.Epsilon, SyntaxTokenKind.Comma, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.SemiColon, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Pipe, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Dot);
+                    SkipInput(SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Less, SyntaxTokenKind.LessEqual, SyntaxTokenKind.Greater, SyntaxTokenKind.GreaterEqual, SyntaxTokenKind.DoubleEqual, SyntaxTokenKind.NotEqual, SyntaxTokenKind.Pipe, SyntaxTokenKind.DoublePipe, SyntaxTokenKind.Equal, SyntaxTokenKind.PlusEqual, SyntaxTokenKind.MinusEqual, SyntaxTokenKind.StarEqual, SyntaxTokenKind.SlashEqual, SyntaxTokenKind.PercentEqual, SyntaxTokenKind.AmpersandEqual, SyntaxTokenKind.PipeEqual, SyntaxTokenKind.HatEqual, SyntaxTokenKind.SemiColon, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.RightParen, SyntaxTokenKind.RightSquare, SyntaxTokenKind.Comma, SyntaxTokenKind.Epsilon, SyntaxTokenKind.DoubleAmpersand, SyntaxTokenKind.Hat, SyntaxTokenKind.Ampersand, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Star, SyntaxTokenKind.Slash, SyntaxTokenKind.Percent, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.LeftSquare, SyntaxTokenKind.Dot);
                     if (current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen)
                     {
                         return ParsePrimary();
@@ -880,7 +905,7 @@ namespace Kyloe.Syntax
         
         private SyntaxToken ParseParenthesized()
         {
-            var n0 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+            var n0 = Expect(SyntaxTokenKind.LeftParen, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
             var n1 = ParseExpression();
             var n2 = Expect(SyntaxTokenKind.RightParen);
             return CreateNode(SyntaxTokenKind.Parenthesized, n0, n1, n2);

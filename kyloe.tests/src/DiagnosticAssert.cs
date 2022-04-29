@@ -23,7 +23,7 @@ namespace Kyloe.Tests
             Assert.Empty(result.GetWarnings());
         }
 
-        public static void Equals(DiagnosticResult result, params DiagnosticKind[] kinds)
+        public static void Equal(DiagnosticResult result, params DiagnosticKind[] kinds)
         {
             Assert.Equal(kinds, result.Select(d => d.Kind));
         }

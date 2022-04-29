@@ -113,8 +113,8 @@ BitAnd = (BitAnd, Ampersand, Equality) | Equality;
 Equality = (Equality, DoubleEqual | NotEqual, Comparison) | Comparison;
 Comparison = (Comparison, Less | LessEqual | Greater | GreaterEqual, Sum) | Sum;
 Sum = (Sum, Plus | Minus, Mult) | Mult;
-Mult = (Mult, Star | Slash, Prefix) | Prefix;
-Prefix = (Plus | Minus, Prefix) | Postfix;
+Mult = (Mult, Star | Slash | Percent, Prefix) | Prefix;
+Prefix = (Plus | Minus | Bang | Tilde, Prefix) | Postfix;
 Postfix =  (Postfix, (LeftParen, OptionalArguments, RightParen) | (LeftSquare, Arguments, RightSquare) | (Dot, Primary)) | Primary;
 
 OptionalArguments = Arguments | #;
