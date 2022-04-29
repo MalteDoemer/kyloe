@@ -4,7 +4,7 @@
 	"patterns": [
 		{
 			"name": "keyword.control.kyloe",
-			"match": "\\b(if|elif|else|while|do|for|break|continue|return|match|import)\\b"
+			"match": "\\b(if|elif|else|while|for|break|continue|return|match|import)\\b"
 		},
 		{
 			"name": "keyword.other.kyloe",

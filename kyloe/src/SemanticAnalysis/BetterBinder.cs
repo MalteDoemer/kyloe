@@ -371,6 +371,8 @@ namespace Kyloe.Semantics
                     return BindExpressionStatement(token);
                 case SyntaxTokenKind.IfStatement:
                     return BindIfStatement(token);
+                case SyntaxTokenKind.WhileStatement:
+                    return BindWhileStatement(token);
                 default:
                     throw new Exception($"unexpected kind: {token.Kind}");
             }
@@ -467,6 +469,26 @@ namespace Kyloe.Semantics
 
                 return BindStatement(blockSyntax);
             }
+        }
+
+        private BoundStatement BindWhileStatement(SyntaxToken token)
+        {
+            // WhileStatement
+            // ├── WhileKeyword
+            // ├── Expr
+            // └── BlockStatement
+
+            var whileStatement = GetNode(token, SyntaxTokenKind.WhileStatement);
+
+            var exprSyntax = whileStatement.Tokens[1];
+            var blockSyntax = whileStatement.Tokens[2];
+
+            var expr = BindExpression(exprSyntax);
+            var _result = GetResultType(expr, exprSyntax.Location, typeSystem.Bool, mustBeValue: true);
+
+            var body = BindStatement(blockSyntax);
+
+            return new BoundWhileStatement(expr, body);
         }
 
         private BoundStatement BindExpressionStatement(SyntaxToken token)

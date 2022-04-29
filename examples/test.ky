@@ -1,4 +1,5 @@
-func hey() {}
-
-func main() -> hey {
+func main() {
+    while true {
+        println('hi');
+    }
 }
