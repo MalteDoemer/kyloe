@@ -175,7 +175,7 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
-                "~'f'",
+                "~'f';",
                 DiagnosticKind.UnsupportedUnaryOperation,
             };
 

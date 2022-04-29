@@ -443,9 +443,12 @@ namespace Kyloe.Semantics
 
             var builder = ImmutableArray.CreateBuilder<BoundStatement>();
 
+            EnterNewScope();
 
             foreach (var stmt in statements)
                 builder.Add(BindStatement(stmt));
+
+            ExitCurrentScope();
 
             return new BoundBlockStatement(builder.ToImmutable());
         }
