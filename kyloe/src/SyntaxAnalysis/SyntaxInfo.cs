@@ -1,30 +1,51 @@
 namespace Kyloe.Syntax
 {
     public static class SyntaxInfo
-    {   /// This function returns the string that
-        /// corresponds to the SyntaxTokenType.
-        /// It returns null for more complex tokens such as IntLiteral
-        /* public static string? GetSimpleTokenString(SyntaxTokenKind kind)
+    {
+
+        /// <summary>
+        /// Check whether kind is a keyword.
+        /// </summary>
+        public static bool IsKeyword(this SyntaxTokenKind kind)
         {
             switch (kind)
             {
-                case SyntaxTokenKind.Equals:
+                case SyntaxTokenKind.VarKeyword:
+                case SyntaxTokenKind.ConstKeyword:
+                case SyntaxTokenKind.IfKeyword:
+                case SyntaxTokenKind.ElseKeyword:
+                case SyntaxTokenKind.FuncKeyword:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// For terminals that only have one single string representation, this string will be returned.
+        /// For more compelx terminals, null will be returned.
+        /// </summary>
+        public static string? GetSimpleTerminalString(SyntaxTokenKind kind)
+        {
+            switch (kind)
+            {
+                case SyntaxTokenKind.Equal:
                     return "=";
-                case SyntaxTokenKind.PlusEquals:
+                case SyntaxTokenKind.PlusEqual:
                     return "+=";
-                case SyntaxTokenKind.MinusEquals:
+                case SyntaxTokenKind.MinusEqual:
                     return "-=";
-                case SyntaxTokenKind.StarEquals:
+                case SyntaxTokenKind.StarEqual:
                     return "*=";
-                case SyntaxTokenKind.SlashEquals:
+                case SyntaxTokenKind.SlashEqual:
                     return "/=";
-                case SyntaxTokenKind.PercentEquals:
+                case SyntaxTokenKind.PercentEqual:
                     return "%=";
-                case SyntaxTokenKind.AmpersandEquals:
+                case SyntaxTokenKind.AmpersandEqual:
                     return "&=";
-                case SyntaxTokenKind.PipeEquals:
+                case SyntaxTokenKind.PipeEqual:
                     return "|=";
-                case SyntaxTokenKind.HatEquals:
+                case SyntaxTokenKind.HatEqual:
                     return "^=";
                 case SyntaxTokenKind.Less:
                     return "<";
@@ -84,10 +105,22 @@ namespace Kyloe.Syntax
                     return ";";
                 case SyntaxTokenKind.SmallArrow:
                     return "->";
+                case SyntaxTokenKind.VarKeyword:
+                    return "var";
+                case SyntaxTokenKind.ConstKeyword:
+                    return "const";
+                case SyntaxTokenKind.IfKeyword:
+                    return "if";
+                case SyntaxTokenKind.ElseKeyword:
+                    return "else";
+                case SyntaxTokenKind.FuncKeyword:
+                    return "func";
                 default:
                     return null;
             }
         }
+
+        /*
 
         public static object? GetDefaultValue(SyntaxTokenKind kind)
         {
