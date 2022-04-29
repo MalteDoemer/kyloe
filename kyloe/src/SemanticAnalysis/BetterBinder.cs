@@ -81,6 +81,32 @@ namespace Kyloe.Semantics
             return null;
         }
 
+        private TypeSpecifier GetResultType(BoundExpression expr, SourceLocation src, bool mustBeValue, bool mustBeModifiableValue, bool mustBeTypeName)
+        {
+            if (expr.ResultType is ErrorType)
+                return typeSystem.Error;
+
+            if (mustBeTypeName && !expr.IsTypeName)
+            {
+                diagnostics.ExpectedTypeNameError(src);
+                return typeSystem.Error;
+            }
+
+            if (mustBeValue && !expr.IsValue)
+            {
+                diagnostics.ExpectedValueError(src);
+                return typeSystem.Error;
+            }
+
+            if (mustBeModifiableValue && !expr.IsModifiableValue)
+            {
+                diagnostics.ExpectedModifiableValueError(src);
+                return typeSystem.Error;
+            }
+
+            return expr.ResultType;
+        }
+
         private SyntaxNode GetNode(SyntaxToken token)
         {
             Debug.Assert(token is SyntaxNode);
@@ -337,7 +363,41 @@ namespace Kyloe.Semantics
 
         private BoundDeclarationStatement BindDeclarationStatement(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            // DeclarationStatement
+            // ├── VarKeyword/ConstKeyword
+            // ├── Identifier
+            // ├── Equal
+            // ├── Expr
+            // └── SemiColon
+
+            var declaration = GetNode(token, SyntaxTokenKind.DeclarationStatement);
+            var declKeyword = GetTerminal(declaration.Tokens[0]);
+            var nameTerminal = GetTerminal(declaration.Tokens[1], SyntaxTokenKind.Identifier);
+            var exprSyntax = GetNode(declaration.Tokens[3]);
+
+            bool isConst = declKeyword.Kind == SyntaxTokenKind.ConstKeyword;
+
+            var expr = BindExpression(exprSyntax);
+            var exprType = GetResultType(expr, exprSyntax.Location, mustBeValue: true, mustBeModifiableValue: false, mustBeTypeName: false);
+
+            var varType = exprType;
+
+            var name = nameTerminal.Text;
+
+            Symbol symbol;
+
+            if (InGlobalScope())
+                symbol = new GlobalVariableSymbol(name, varType, isConst);
+            else
+                symbol = new LocalVariableSymbol(name, varType, isConst);
+
+            if (!DeclareSymbol(symbol))
+            {
+                if (!nameTerminal.Invalid)
+                    diagnostics.NameAlreadyExistsError(nameTerminal.Location, name);
+            }
+
+            return new BoundDeclarationStatement(symbol, expr);
         }
 
         private BoundBlockStatement BindBlockStatement(SyntaxToken token)
@@ -423,15 +483,66 @@ namespace Kyloe.Semantics
             // AssignmentHelper
             // ├── Expr
             // └── Assignment (optional)
+            //     ├── Equal
+            //     ├── Expr
+            //     └── Assignment (optional)
 
             var helper = GetNode(token, SyntaxTokenKind.AssignmentHelper);
 
-            var rhs = BindExpression(helper.Tokens[0]);
+            if (helper.Tokens[1].Kind != SyntaxTokenKind.Assignment)
+                return BindExpression(helper.Tokens[0]);
 
-            if (helper.Tokens[1].Kind == SyntaxTokenKind.Epsilon)
-                return rhs;
+            return BindAssignment(helper.Tokens[0], helper.Tokens[1]);
+        }
 
-            throw new NotImplementedException();
+        private BoundExpression BindAssignment(SyntaxToken toAssign, SyntaxToken token)
+        {
+            // Assignment
+            // ├── Equal
+            // ├── Expr
+            // └── Assignment (optional)
+
+            var assignment = GetNode(token, SyntaxTokenKind.Assignment);
+            var assignmentLocation = SourceLocation.CreateAround(toAssign.Location, assignment.Location);
+
+            var opSyntax = GetTerminal(assignment.Tokens[0]);
+            var exprSyntax = assignment.Tokens[1];
+
+            var left = BindExpression(toAssign);
+            var op = SemanticInfo.GetAssignmentOperation(opSyntax.Kind);
+
+            var childAssign = assignment.Tokens[2];
+            bool hasChildAssign = childAssign.Kind == SyntaxTokenKind.Assignment;
+
+            var rightLocation = hasChildAssign ? SourceLocation.CreateAround(exprSyntax.Location, childAssign.Location) : exprSyntax.Location;
+
+            BoundExpression right;
+            if (childAssign.Kind == SyntaxTokenKind.Assignment)
+                right = BindAssignment(exprSyntax, childAssign);
+            else
+                right = BindExpression(exprSyntax);
+
+
+            var leftType = GetResultType(left, toAssign.Location, mustBeValue: true, mustBeModifiableValue: true, mustBeTypeName: false);
+            var rightType = GetResultType(right, rightLocation, mustBeValue: true, mustBeModifiableValue: false, mustBeTypeName: false);
+
+            if (op == AssignmentOperation.Assign)
+            {
+                if (IsTypeMissmatch(leftType, rightType))
+                    diagnostics.MissmatchedTypeError(assignmentLocation, leftType, rightType);
+            }
+            else
+            {
+                var binaryOperation = SemanticInfo.GetOperationForAssignment(op);
+                var binaryOperationResult = GetBinaryOperationResult(left, binaryOperation, right);
+
+                if (binaryOperationResult is null)
+                    diagnostics.UnsupportedAssignmentOperation(assignmentLocation, op, leftType, rightType);
+                else if (IsTypeMissmatch(leftType, binaryOperationResult))
+                    diagnostics.MissmatchedTypeError(assignmentLocation, leftType, binaryOperationResult);
+            }
+
+            return new BoundAssignmentExpression(typeSystem, left, op, right);
         }
 
         private BoundExpression BindBinary(SyntaxToken token)
@@ -488,6 +599,50 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindPostfix(SyntaxToken token)
         {
+            var postfix = GetNode(token);
+
+            switch (postfix.Tokens[1].Kind)
+            {
+                case SyntaxTokenKind.Dot:
+                    return BindMeberAccess(token);
+                case SyntaxTokenKind.LeftParen:
+                    return BindCallExpression(token);
+                case SyntaxTokenKind.LeftSquare:
+                    return BindArrayAccess(token);
+                default:
+                    throw new Exception($"Unexpected token kind: {token.Kind}");
+            }
+        }
+
+        private BoundExpression BindMeberAccess(SyntaxToken token)
+        {
+            // Postfix
+            // ├── Expr
+            // ├── Dot
+            // └── Expr
+
+            throw new NotImplementedException();
+        }
+
+        private BoundExpression BindCallExpression(SyntaxToken token)
+        {
+            // Postfix
+            // ├── Expr
+            // ├── LeftParen
+            // ├── Arguments (optional)
+            // └── RightParen
+
+            throw new NotImplementedException();
+        }
+
+        private BoundExpression BindArrayAccess(SyntaxToken token)
+        {
+            // Postfix
+            // ├── Expr
+            // ├── LeftSquare
+            // ├── Arguments
+            // └── RightSquare
+
             throw new NotImplementedException();
         }
 
@@ -540,7 +695,17 @@ namespace Kyloe.Semantics
 
         private BoundExpression BindIdentifier(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            var nameTerminal = GetTerminal(token, SyntaxTokenKind.Identifier);
+            var name = nameTerminal.Text;
+            var symbol = LookupSymbol(name);
+
+            if (symbol is not null)
+                return new BoundSymbolExpression(symbol);
+
+            if (symbol is not ErrorSymbol && !nameTerminal.Invalid)
+                diagnostics.NonExistantNameError(nameTerminal.Location, name);
+
+            return new BoundInvalidExpression(typeSystem);
         }
 
         private TypeSpecifier? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)

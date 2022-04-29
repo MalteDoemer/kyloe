@@ -69,9 +69,10 @@ namespace Kyloe.Diagnostics
             AddDiagnostic(DiagnosticKind.UnsupportedUnaryOperation, msg, location);
         }
 
-        public void UnsupportedAssignmentOperation(SourceLocation location, BoundOperation operation, TypeSpecifier left, TypeSpecifier right)
+        public void UnsupportedAssignmentOperation(SourceLocation location, AssignmentOperation operation, TypeSpecifier left, TypeSpecifier right)
         {
             var msg = $"operator '{operation}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
+            AddDiagnostic(DiagnosticKind.UnsupportedAssignmentOperation, msg, location);
         }
 
         public void MissmatchedTypeError(SourceLocation location, TypeSpecifier expected, TypeSpecifier provided)

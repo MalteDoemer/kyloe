@@ -49,8 +49,8 @@ LeftCurly = '\{';
 RightCurly = '\}';
 
 (* Literals *)
-Int = '\b\d+\b';
 Float = '\b\d+\.\d+';
+Int = '\b\d+\b';
 Bool = '\b(true|false)\b';
 String = '(\".*\"|\u0027.*\u0027)';
 
