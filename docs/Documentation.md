@@ -12,10 +12,13 @@ As well as utility types [Utility](#utility) and the main public interfaces [Com
 
 ## Syntax Analysis
 
-The syntax analysis is done by the two main classes [Lexer](../kyloe/src/SyntaxAnalysis/Lexer.cs) [Parser](../kyloe/src/SyntaxAnalysis/Parser.cs).
+The syntax analysis is done by the two main classes [Lexer](../kyloe/src/SyntaxAnalysis/Generated/Lexer.cs) [Parser](../kyloe/src/SyntaxAnalysis/Generated/Parser.cs).
 
 ### Lexer
-The job of the lexer is to transform the text read from a `System.IO.TextReader` into a stream of [SyntaxTokens](../kyloe/src/SyntaxAnalysis/SyntaxToken.cs).
+The job of the lexer is to transform the text  into a stream of [SyntaxTerminals](../kyloe/src/SyntaxAnalysis/Generated/SyntaxTerminal.cs).
+
+### Parser
+The parser reads the terminals from the lexer and builds the parse tree, consiting of [SyntaxTerminals](../kyloe/src/SyntaxAnalysis/Generated/SyntaxTerminal.cs) and [SyntaxNodes](../kyloe/src/SyntaxAnalysis/Generated/SyntaxNode.cs). The parser is a recursive descent parser, with the additional ability to parse left recursive productions using while loops.
 
 ## Semantic Analysis
 TODO
