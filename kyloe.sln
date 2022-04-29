@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "grammar", "grammar\grammar.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "codegen", "codegen\codegen.csproj", "{2B018883-8546-418C-9B0A-C7E5264A9D40}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe.bench", "kyloe.bench\kyloe.bench.csproj", "{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{2B018883-8546-418C-9B0A-C7E5264A9D40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B018883-8546-418C-9B0A-C7E5264A9D40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B018883-8546-418C-9B0A-C7E5264A9D40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

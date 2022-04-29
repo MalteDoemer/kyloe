@@ -1,0 +1,142 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 1 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet restore  /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in /home/malte/dev/c#/kyloe/kyloe.bench/bin/release/net6.0/acc5a53e-d19b-4b29-b769-7fd370c68b37
+// command took 1.44s and exited with 0
+// start dotnet build -c Release  --no-restore /p:UseSharedCompilation=false /p:BuildInParallel=false /m:1 /p:Deterministic=true /p:Optimize=true in /home/malte/dev/c#/kyloe/kyloe.bench/bin/release/net6.0/acc5a53e-d19b-4b29-b769-7fd370c68b37
+// command took 5.52s and exited with 0
+// ***** Done, took 00:00:07 (7.09 sec)   *****
+// Found 1 benchmarks:
+//   BenchLexer.LexSimple: DefaultJob
+
+// **************************
+// Benchmark: BenchLexer.LexSimple: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet "acc5a53e-d19b-4b29-b769-7fd370c68b37.dll" --benchmarkName "Kyloe.Benchmarks.BenchLexer.LexSimple" --job "Default" --benchmarkId 0 in /home/malte/dev/c#/kyloe/kyloe.bench/bin/release/net6.0/acc5a53e-d19b-4b29-b769-7fd370c68b37/bin/Release/net6.0
+Failed to set up high priority. Make sure you have the right permissions. Message: Permission denied
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET 6.0.4 (6.0.422.16404), X64 RyuJIT
+// GC=Concurrent Workstation
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 801925.00 ns, 801.9250 us/op
+WorkloadJitting  1: 1 op, 106933967.00 ns, 106.9340 ms/op
+
+WorkloadPilot    1: 2 op, 96638404.00 ns, 48.3192 ms/op
+WorkloadPilot    2: 3 op, 124505553.00 ns, 41.5019 ms/op
+WorkloadPilot    3: 4 op, 168340483.00 ns, 42.0851 ms/op
+WorkloadPilot    4: 5 op, 180835365.00 ns, 36.1671 ms/op
+WorkloadPilot    5: 6 op, 198384899.00 ns, 33.0641 ms/op
+WorkloadPilot    6: 7 op, 218096987.00 ns, 31.1567 ms/op
+WorkloadPilot    7: 8 op, 276517962.00 ns, 34.5647 ms/op
+WorkloadPilot    8: 9 op, 260888538.00 ns, 28.9876 ms/op
+WorkloadPilot    9: 10 op, 294378932.00 ns, 29.4379 ms/op
+WorkloadPilot   10: 11 op, 314639924.00 ns, 28.6036 ms/op
+WorkloadPilot   11: 12 op, 345442717.00 ns, 28.7869 ms/op
+WorkloadPilot   12: 13 op, 363555527.00 ns, 27.9658 ms/op
+WorkloadPilot   13: 14 op, 388548367.00 ns, 27.7535 ms/op
+WorkloadPilot   14: 15 op, 409643665.00 ns, 27.3096 ms/op
+WorkloadPilot   15: 16 op, 484266782.00 ns, 30.2667 ms/op
+WorkloadPilot   16: 32 op, 866486407.00 ns, 27.0777 ms/op
+
+WorkloadWarmup   1: 32 op, 824629742.00 ns, 25.7697 ms/op
+WorkloadWarmup   2: 32 op, 835111894.00 ns, 26.0972 ms/op
+WorkloadWarmup   3: 32 op, 823906445.00 ns, 25.7471 ms/op
+WorkloadWarmup   4: 32 op, 822074941.00 ns, 25.6898 ms/op
+WorkloadWarmup   5: 32 op, 842389945.00 ns, 26.3247 ms/op
+WorkloadWarmup   6: 32 op, 823846111.00 ns, 25.7452 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 32 op, 829629171.00 ns, 25.9259 ms/op
+WorkloadActual   2: 32 op, 833979396.00 ns, 26.0619 ms/op
+WorkloadActual   3: 32 op, 834073930.00 ns, 26.0648 ms/op
+WorkloadActual   4: 32 op, 828611368.00 ns, 25.8941 ms/op
+WorkloadActual   5: 32 op, 823510999.00 ns, 25.7347 ms/op
+WorkloadActual   6: 32 op, 822626666.00 ns, 25.7071 ms/op
+WorkloadActual   7: 32 op, 831535989.00 ns, 25.9855 ms/op
+WorkloadActual   8: 32 op, 837433900.00 ns, 26.1698 ms/op
+WorkloadActual   9: 32 op, 829794166.00 ns, 25.9311 ms/op
+WorkloadActual  10: 32 op, 833998374.00 ns, 26.0624 ms/op
+WorkloadActual  11: 32 op, 824412306.00 ns, 25.7629 ms/op
+WorkloadActual  12: 32 op, 835191443.00 ns, 26.0997 ms/op
+WorkloadActual  13: 32 op, 826273989.00 ns, 25.8211 ms/op
+WorkloadActual  14: 32 op, 836766510.00 ns, 26.1490 ms/op
+WorkloadActual  15: 32 op, 854240633.00 ns, 26.6950 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 32 op, 829629171.00 ns, 25.9259 ms/op
+WorkloadResult   2: 32 op, 833979396.00 ns, 26.0619 ms/op
+WorkloadResult   3: 32 op, 834073930.00 ns, 26.0648 ms/op
+WorkloadResult   4: 32 op, 828611368.00 ns, 25.8941 ms/op
+WorkloadResult   5: 32 op, 823510999.00 ns, 25.7347 ms/op
+WorkloadResult   6: 32 op, 822626666.00 ns, 25.7071 ms/op
+WorkloadResult   7: 32 op, 831535989.00 ns, 25.9855 ms/op
+WorkloadResult   8: 32 op, 837433900.00 ns, 26.1698 ms/op
+WorkloadResult   9: 32 op, 829794166.00 ns, 25.9311 ms/op
+WorkloadResult  10: 32 op, 833998374.00 ns, 26.0624 ms/op
+WorkloadResult  11: 32 op, 824412306.00 ns, 25.7629 ms/op
+WorkloadResult  12: 32 op, 835191443.00 ns, 26.0997 ms/op
+WorkloadResult  13: 32 op, 826273989.00 ns, 25.8211 ms/op
+WorkloadResult  14: 32 op, 836766510.00 ns, 26.1490 ms/op
+
+// AfterAll
+// Benchmark Process 26734 has exited with code 0.
+
+Mean = 25.955 ms, StdErr = 0.041 ms (0.16%), N = 14, StdDev = 0.155 ms
+Min = 25.707 ms, Q1 = 25.839 ms, Median = 25.958 ms, Q3 = 26.064 ms, Max = 26.170 ms
+IQR = 0.225 ms, LowerFence = 25.502 ms, UpperFence = 26.402 ms
+ConfidenceInterval = [25.781 ms; 26.129 ms] (CI 99.9%), Margin = 0.174 ms (0.67% of Mean)
+Skewness = -0.22, Kurtosis = 1.53, MValue = 2
+
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts/results/Kyloe.Benchmarks.BenchLexer-report.csv
+  BenchmarkDotNet.Artifacts/results/Kyloe.Benchmarks.BenchLexer-report-github.md
+  BenchmarkDotNet.Artifacts/results/Kyloe.Benchmarks.BenchLexer-report.html
+
+// * Detailed results *
+BenchLexer.LexSimple: DefaultJob
+Runtime = .NET 6.0.4 (6.0.422.16404), X64 RyuJIT; GC = Concurrent Workstation
+Mean = 25.955 ms, StdErr = 0.041 ms (0.16%), N = 14, StdDev = 0.155 ms
+Min = 25.707 ms, Q1 = 25.839 ms, Median = 25.958 ms, Q3 = 26.064 ms, Max = 26.170 ms
+IQR = 0.225 ms, LowerFence = 25.502 ms, UpperFence = 26.402 ms
+ConfidenceInterval = [25.781 ms; 26.129 ms] (CI 99.9%), Margin = 0.174 ms (0.67% of Mean)
+Skewness = -0.22, Kurtosis = 1.53, MValue = 2
+-------------------- Histogram --------------------
+[25.623 ms ; 26.254 ms) | @@@@@@@@@@@@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet=v0.13.1, OS=ubuntu 20.04
+Intel Core i5-8250U CPU 1.60GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical cores
+.NET SDK=6.0.202
+  [Host]     : .NET 6.0.4 (6.0.422.16404), X64 RyuJIT
+  DefaultJob : .NET 6.0.4 (6.0.422.16404), X64 RyuJIT
+
+
+|    Method |     Mean |    Error |   StdDev |
+|---------- |---------:|---------:|---------:|
+| LexSimple | 25.95 ms | 0.174 ms | 0.155 ms |
+
+// * Hints *
+Outliers
+  BenchLexer.LexSimple: Default -> 1 outlier  was  removed (26.70 ms)
+
+// * Legends *
+  Mean   : Arithmetic mean of all measurements
+  Error  : Half of 99.9% confidence interval
+  StdDev : Standard deviation of all measurements
+  1 ms   : 1 Millisecond (0.001 sec)
+
+// ***** BenchmarkRunner: End *****
+// ** Remained 0 benchmark(s) to run **
+Run time: 00:00:23 (23.42 sec), executed benchmarks: 1
+
+Global total time: 00:00:30 (30.53 sec), executed benchmarks: 1
+// * Artifacts cleanup *
