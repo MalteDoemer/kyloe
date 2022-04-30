@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
 using Kyloe.Syntax;
@@ -33,7 +34,7 @@ namespace Kyloe.Diagnostics
             Add(new Diagnostic(kind, message, location));
         }
 
-        public void InvalidLiteralError(SourceLocation location) 
+        public void InvalidLiteralError(SourceLocation location)
         {
             var msg = "invalid literal";
             AddDiagnostic(DiagnosticKind.InvalidLiteralError, msg, location);
@@ -57,21 +58,39 @@ namespace Kyloe.Diagnostics
             AddDiagnostic(DiagnosticKind.ExpectedTypeNameError, msg, location);
         }
 
+        public void InvalidCharacterError(SourceLocation location, char character)
+        {
+            var msg = string.Format("invalid character: \\u{0:x4}", (int)(character));
+            AddDiagnostic(DiagnosticKind.InvalidCharacterError, msg, location);
+        }
+
+        public void UnexpectedTokenError(SyntaxToken actual, SyntaxTokenKind[] expected)
+        {
+            string msg;
+
+            if (expected.Length == 1)
+                msg = $"expected {expected[0].GetSymbolOrName()}, got {actual.Kind.GetSymbolOrName()}";
+            else
+                msg = $"expected one of ({string.Join(", ", expected.Select(t => t.GetSymbolOrName()))}), got {actual.Kind.GetSymbolOrName()}";
+
+            AddDiagnostic(DiagnosticKind.UnexpectedTokenError, msg, actual.Location);
+        }
+
         public void UnsupportedBinaryOperation(SourceLocation location, BoundOperation operation, TypeSpecifier left, TypeSpecifier right)
         {
-            var msg = $"operator '{operation}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
+            var msg = $"binary operator '{operation.GetSymbolOrName()}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
             AddDiagnostic(DiagnosticKind.UnsupportedBinaryOperation, msg, location);
         }
 
         public void UnsupportedUnaryOperation(SourceLocation location, BoundOperation operation, TypeSpecifier type)
         {
-            var msg = $"operator '{operation}' cannot be used with type '{type.FullName()}'";
+            var msg = $"unary operator '{operation.GetSymbolOrName()}' cannot be used with type '{type.FullName()}'";
             AddDiagnostic(DiagnosticKind.UnsupportedUnaryOperation, msg, location);
         }
 
         public void UnsupportedAssignmentOperation(SourceLocation location, AssignmentOperation operation, TypeSpecifier left, TypeSpecifier right)
         {
-            var msg = $"operator '{operation}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
+            var msg = $"assignment operator '{operation.GetSymbolOrName()}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
             AddDiagnostic(DiagnosticKind.UnsupportedAssignmentOperation, msg, location);
         }
 
@@ -122,13 +141,13 @@ namespace Kyloe.Diagnostics
             AddDiagnostic(DiagnosticKind.OverloadWithSameParametersExistsError, msg, location);
         }
 
-        public void IllegalElifStatement(SourceLocation location) 
+        public void IllegalElifStatement(SourceLocation location)
         {
             var msg = "unexpected elif statement";
             AddDiagnostic(DiagnosticKind.IllegalElifStatement, msg, location);
         }
 
-        public void IllegalElseStatement(SourceLocation location) 
+        public void IllegalElseStatement(SourceLocation location)
         {
             var msg = "unexpected else statement";
             AddDiagnostic(DiagnosticKind.IllegalElseStatement, msg, location);

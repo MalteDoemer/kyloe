@@ -11,7 +11,6 @@ namespace Kyloe.Benchmarks
         public void LexSimple()
         {
             var text = "if true { } else { }";
-            var lexer = new Lexer(text);
             var terminals = SyntaxTree.Terminals(text);
 
             var consumer = new Consumer();

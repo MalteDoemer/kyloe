@@ -117,7 +117,6 @@ namespace Kyloe.Semantics
             }
         }
 
-
         public static bool IsUnaryOperationName(string name)
         {
             return GetOperationFromFunctionName(name) is BoundOperation op && op.IsUnaryOperation();
@@ -201,6 +200,102 @@ namespace Kyloe.Semantics
                 default:
                     throw new Exception($"no corresponding binary operation for assignment: {op}");
             }
+        }
+
+        internal static string? GetSymbol(this BoundOperation op)
+        {
+            switch (op)
+            {
+                case BoundOperation.Addition:
+                    return "+";
+                case BoundOperation.Subtraction:
+                    return "-";
+                case BoundOperation.Multiplication:
+                    return "*";
+                case BoundOperation.Division:
+                    return "/";
+                case BoundOperation.Modulo:
+                    return "%";
+                case BoundOperation.BitwiseAnd:
+                    return "&";
+                case BoundOperation.BitwiseOr:
+                    return "|";
+                case BoundOperation.BitwiseXor:
+                    return "^";
+                case BoundOperation.LogicalAnd:
+                    return "&&";
+                case BoundOperation.LogicalOr:
+                    return "||";
+                case BoundOperation.LessThan:
+                    return "<";
+                case BoundOperation.GreaterThan:
+                    return ">";
+                case BoundOperation.LessThanOrEqual:
+                    return "<=";
+                case BoundOperation.GreaterThanOrEqual:
+                    return ">=";
+                case BoundOperation.Equal:
+                    return "==";
+                case BoundOperation.NotEqual:
+                    return "!=";
+                case BoundOperation.Identity:
+                    return "+";
+                case BoundOperation.Negation:
+                    return "-";
+                case BoundOperation.BitwiseNot:
+                    return "~";
+                case BoundOperation.LogicalNot:
+                    return "!";
+                default:
+                    return null;
+            }
+        }
+
+        internal static string? GetSymbol(this AssignmentOperation op)
+        {
+            switch (op)
+            {
+                case AssignmentOperation.Assign:
+                    return "=";
+                case AssignmentOperation.AddAssign:
+                    return "+=";
+                case AssignmentOperation.SubAssign:
+                    return "-=";
+                case AssignmentOperation.MulAssign:
+                    return "*=";
+                case AssignmentOperation.DivAssign:
+                    return "/=";
+                case AssignmentOperation.ModAssign:
+                    return "%=";
+                case AssignmentOperation.AndAssign:
+                    return "&=";
+                case AssignmentOperation.OrAssign:
+                    return "|=";
+                case AssignmentOperation.XorAssign:
+                    return "^=";
+                default:
+                    return null;
+            }
+        }
+
+        internal static string GetSymbolOrName(this BoundOperation op) 
+        {
+            var sym = op.GetSymbol();
+
+            if (sym is not null)
+                return sym;
+
+            return op.ToString();
+        }
+
+        internal static string GetSymbolOrName(this AssignmentOperation op) 
+        {
+            var sym = op.GetSymbol();
+
+            if (sym is not null)
+                return sym;
+
+            return op.ToString();
         }
     }
 }

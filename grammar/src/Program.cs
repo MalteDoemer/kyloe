@@ -122,7 +122,7 @@ namespace Kyloe.Grammar
                 var json = File.ReadAllText(args[2]);
                 var outDir = args[3];
                 var opts = new JsonSerializerOptions() { Converters = { new JsonStringEnumConverter() } };
-                var info = JsonSerializer.Deserialize<GeneratorInfo>(json);
+                var info = JsonSerializer.Deserialize<GeneratorInfo>(json, opts);
 
                 var generator = new ParserGenerator(grammar, info);
 

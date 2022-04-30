@@ -184,6 +184,12 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                @"while true {
+                    println('hi');
+                }"
+            };
+
+            yield return new object[] {
                 "if (1) {}",
                 DiagnosticKind.MissmatchedTypeError,
             };
@@ -285,13 +291,21 @@ namespace Kyloe.Tests.Binding
 
             yield return new object[] {
                 "if true {} else {} else {}",
-                DiagnosticKind.IllegalElseStatement
+                DiagnosticKind.IllegalElseStatement,
             };
 
             yield return new object[] {
                 "if true {} else {} elif true {}",
                 DiagnosticKind.IllegalElifStatement,
             };
+
+            yield return new object[] {
+                @"while 1 {
+                    println('hi');
+                }",
+                DiagnosticKind.MissmatchedTypeError,
+            };
+
         }
 
         public static IEnumerable<object[]> GetWholeProgramData()

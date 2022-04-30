@@ -439,7 +439,6 @@ namespace Kyloe.Grammar
 
         public Class CreateParserClass()
         {
-
             if (grammar.StartRule is null)
                 throw new GrammarException("cannot create Parser class without a Start rule");
 
@@ -464,7 +463,7 @@ namespace Kyloe.Grammar
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 @readonly: true,
-                type: $"ICollection<{info.ErrorClass.Name}>",
+                type: info.ErrorCollectorClass.Name,
                 name: "errors");
 
             var posField = new Field(
@@ -494,17 +493,17 @@ namespace Kyloe.Grammar
                 info.ParserClass.Name,
                 null)
                 .AddArg("string text")
-                .AddArg($"ICollection<{info.ErrorClass.Name}> errors")
+                .AddArg($"{info.ErrorCollectorClass.Name} errors")
                 .AddLine("this.pos = 0;")
                 .AddLine("this.isValid = true;")
                 .AddLine("this.errors = errors;")
                 .AddLine($"var lexer = new {info.LexerClass.Name}(text);")
                 .AddLine($"var builder = ImmutableArray.CreateBuilder<{info.TerminalClass.Name}>();")
                 .AddStatement(new ForeachLoop("var terminal in lexer.Terminals()")
-                    .AddStatement(new IfStatement($"terminal.Kind == {info.TokenKindEnum.Name}.Error")
-                        .AddLine($"errors.Add(new {info.ErrorClass.Name}({info.ErrorKindEnum.Name}.InvalidCharacterError, string.Format(\"invalid character: \\\\u{{0:x4}}\", (int)(terminal.Text[0])), terminal.Location));"))
-                    .AddStatement(new ElseStatement()
-                        .AddLine("builder.Add(terminal);")))
+                    .AddLine($"if (terminal.Kind == {info.TokenKindEnum.Name}.Error)")
+                    .AddLine($"    errors.InvalidCharacterError(terminal.Location, terminal.Text[0]);")
+                    .AddLine("else")
+                    .AddLine("    builder.Add(terminal);"))
                 .AddLine("this.terminals = builder.ToImmutable();")
                 .AddLine($"this.stopTerminals = new HashSet<{info.TokenKindEnum.Name}>();")
                 .AddLines(stopTerminals.Select(t => $"this.stopTerminals.Add({TokenKindAccessString(t)});"))
@@ -552,15 +551,9 @@ namespace Kyloe.Grammar
                 "void",
                 "Unexpected")
                 .AddArg($"params {info.TokenKindEnum.Name}[] expected")
-                .AddStatement(new IfStatement("!isValid")
-                    .AddLine("return;"))
+                .AddLine("if (!isValid) return;")
                 .AddLine("isValid = false;")
-                .AddLine($"string msg;")
-                .AddStatement(new IfStatement("expected.Length == 1")
-                    .AddLine("msg = $\"expected {expected[0]}, got {current.Kind}\";"))
-                .AddStatement(new ElseStatement()
-                    .AddLine("msg = $\"expected one of ({string.Join(\", \", expected)}), got {current.Kind}\";"))
-                .AddLine($"errors.Add(new {info.ErrorClass.Name}({info.ErrorKindEnum.Name}.UnexpectedTokenError, msg, current.Location));");
+                .AddLine($"errors.UnexpectedTokenError(current, expected);");
 
             var createNodeMethod = new Method(
                 AccessModifier.Private,
@@ -607,12 +600,12 @@ namespace Kyloe.Grammar
                 .Add(unexpectedMethod)
                 .Add(createNodeMethod)
                 .Add(parseMethod)
-                .AddRange(rules.Select(t => CreateParseMethod(t)));
+                .AddRange(rules.Where(t => grammar.StopRule is null || t != grammar.StopRule.Kind)
+                               .Select(t => CreateParseMethod(t)));
         }
 
         private Method CreateParseMethod(TokenKind nonTerminal)
         {
-
             var name = ParseMethodName(nonTerminal);
 
             var method = new Method(

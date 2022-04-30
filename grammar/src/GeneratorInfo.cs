@@ -23,8 +23,7 @@ namespace Kyloe.Grammar
         public ClassInfo TerminalClass { get; set; }
         public ClassInfo NodeClass { get; set; }
         public ClassInfo LocationClass { get; set; }
-        public ClassInfo ErrorClass { get; set; }
-        public ClassInfo ErrorKindEnum { get; set; }
+        public ClassInfo ErrorCollectorClass { get; set; }
         public ClassInfo LexerClass { get; set; }
         public ClassInfo ParserClass { get; set; }
     }

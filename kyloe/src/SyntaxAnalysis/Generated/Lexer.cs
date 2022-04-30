@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Kyloe.Syntax
 {
-    public sealed class Lexer
+    internal sealed class Lexer
     {
         private readonly ImmutableArray<(SyntaxTokenKind, string, Regex?)> patterns;
         
@@ -21,7 +21,7 @@ namespace Kyloe.Syntax
             this.pos = 0;
             this.text = text;
             
-            var builder = ImmutableArray.CreateBuilder<(SyntaxTokenKind, string, Regex?)>(52);
+            var builder = ImmutableArray.CreateBuilder<(SyntaxTokenKind, string, Regex?)>(53);
             builder.Add((SyntaxTokenKind.Whitespace, string.Empty , new Regex(@"\G\s+", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.LineComment, string.Empty , new Regex(@"\G\/\/.*\n", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.BlockComment, string.Empty , new Regex(@"\G\/\*.*\*\/", RegexOptions.Compiled | RegexOptions.Multiline)));
@@ -69,10 +69,11 @@ namespace Kyloe.Syntax
             builder.Add((SyntaxTokenKind.String, string.Empty , new Regex(@"\G(\"".*\""|\u0027.*\u0027)", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.VarKeyword, string.Empty , new Regex(@"\G\bvar\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ConstKeyword, string.Empty , new Regex(@"\G\bconst\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.FuncKeyword, string.Empty , new Regex(@"\G\bfunc\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.IfKeyword, string.Empty , new Regex(@"\G\bif\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ElseKeyword, string.Empty , new Regex(@"\G\belse\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ElifKeyword, string.Empty , new Regex(@"\G\belif\b", RegexOptions.Compiled | RegexOptions.Multiline)));
-            builder.Add((SyntaxTokenKind.FuncKeyword, string.Empty , new Regex(@"\G\bfunc\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.WhileKeyword, string.Empty , new Regex(@"\G\bwhile\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.Identifier, string.Empty , new Regex(@"\G\b[a-zA-Z_]([a-zA-Z_]|\d)*\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             this.patterns = builder.MoveToImmutable();
             

@@ -63,10 +63,11 @@ String = '(\".*\"|\u0027.*\u0027)';
 (* Keywords *)
 VarKeyword = '\bvar\b';
 ConstKeyword = '\bconst\b';
+FuncKeyword = '\bfunc\b';
 IfKeyword = '\bif\b';
 ElseKeyword = '\belse\b';
 ElifKeyword = '\belif\b';
-FuncKeyword = '\bfunc\b';
+WhileKeyword = '\bwhile\b';
 
 Identifier = '\b[a-zA-Z_]([a-zA-Z_]|\d)*\b';
 
@@ -87,7 +88,7 @@ ParameterDeclaration = Identifier, TypeClause;
 TypeClause = (Colon, Identifier);
 OptionalTypeClause = TypeClause | #;
 
-Statement = BlockStatement | IfStatement | DeclarationStatement | ExpressionStatement | SemiColon;
+Statement = BlockStatement | IfStatement | WhileStatement | DeclarationStatement | ExpressionStatement | SemiColon;
 ExpressionStatement = (Expression, SemiColon);
 
 BlockStatement = LeftCurly, RepeatedStatement, RightCurly;
@@ -96,6 +97,8 @@ RepeatedStatement = (RepeatedStatement, Statement) | #;
 IfStatement = IfKeyword, Expression, BlockStatement, ElifStatement;
 ElifClause = (ElifKeyword, Expression);
 ElifStatement = ((ElseKeyword | ElifClause), BlockStatement, ElifStatement) | #;
+
+WhileStatement = WhileKeyword, Expression, BlockStatement;
 
 DeclarationStatement = (VarKeyword | ConstKeyword), Identifier, OptionalTypeClause, Equal, Expression, SemiColon;
 
