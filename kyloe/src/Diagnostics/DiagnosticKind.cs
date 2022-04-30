@@ -24,5 +24,6 @@ namespace Kyloe.Diagnostics
         IllegalElseStatement,
         IllegalElifStatement,
         IllegalReturnStatement,
+        MissingMainFunction,
     }
 }

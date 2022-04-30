@@ -64,7 +64,8 @@ namespace Kyc
             try
             {
                 var text = SourceText.FromFile(extra[0]);
-                var compilation = Compilation.Compile(text);
+                var opts = new CompilationOptions() { RequireMain = true };
+                var compilation = Compilation.Compile(text, opts);
                 compilation.GetDiagnostics().WriteTo(Console.Out);
             }
             catch (IOException ioException)

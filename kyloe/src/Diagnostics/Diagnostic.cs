@@ -4,14 +4,15 @@ namespace Kyloe.Diagnostics
 {
     public sealed class Diagnostic
     {
-        public Diagnostic(DiagnosticKind kind, string message, SourceLocation? location)
+        public Diagnostic(DiagnosticSeverity severity, DiagnosticKind kind, string message, SourceLocation? location)
         {
+            Severity = severity;
             Kind = kind;
             Message = message;
             Location = location;
         }
 
-        public DiagnosticSeverity Severity => DiagnosticSeverity.Error;
+        public DiagnosticSeverity Severity { get; }
 
         public DiagnosticKind Kind { get; }
 

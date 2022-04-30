@@ -165,10 +165,10 @@ namespace Kyloe.Semantics
             }
         }
 
-        public BoundNode Bind(SyntaxToken token)
+        public BoundCompilationUnit BindCompilationUnit(SyntaxToken token)
         {
             if (token.Kind == SyntaxTokenKind.Epsilon)
-                return new BoundCompilationUnit(ImmutableArray<BoundDeclarationStatement>.Empty, ImmutableArray<BoundFunctionDefinition>.Empty);
+                return new BoundCompilationUnit(ImmutableArray<BoundDeclarationStatement>.Empty, ImmutableArray<BoundFunctionDefinition>.Empty, null);
 
             var functionSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.FunctionDefinition).Where(t => t.Kind == SyntaxTokenKind.FunctionDefinition);
             var globalSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.DeclarationStatement).Where(t => t.Kind == SyntaxTokenKind.DeclarationStatement);
@@ -186,7 +186,13 @@ namespace Kyloe.Semantics
             foreach (var (funcType, funcDef) in functionTypes.Zip(functionSyntax))
                 functions.Add(BindFunctionDefinition(funcDef, funcType));
 
-            return new BoundCompilationUnit(globals.ToImmutable(), functions.ToImmutable());
+            if (LookupSymbol("main") is FunctionGroupSymbol mainSymbol && FindFunctionOverload(mainSymbol.Group, Enumerable.Empty<TypeSpecifier>()) is FunctionType mainType)
+            {
+                var mainFunction = functions.Where(f => f.FunctionType.Equals(mainType)).FirstOrDefault();
+                return new BoundCompilationUnit(globals.ToImmutable(), functions.ToImmutable(), mainFunction);
+            }
+
+            return new BoundCompilationUnit(globals.ToImmutable(), functions.ToImmutable(), null);
         }
 
         private FunctionType BindFunctionDeclaration(SyntaxToken token)
