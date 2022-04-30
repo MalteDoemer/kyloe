@@ -20,5 +20,6 @@ namespace Kyloe.Semantics
         BoundAssignmentExpression,
         BoundSymbolExpression,
         BoundFunctionCallExpression,
+        BoundReturnStatement,
     }
 }

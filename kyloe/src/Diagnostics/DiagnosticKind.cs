@@ -23,5 +23,6 @@ namespace Kyloe.Diagnostics
         InvalidLiteralError,            // TODO: add a test
         IllegalElseStatement,
         IllegalElifStatement,
+        IllegalReturnStatement,
     }
 }

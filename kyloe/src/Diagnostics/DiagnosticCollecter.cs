@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -151,6 +152,12 @@ namespace Kyloe.Diagnostics
         {
             var msg = "unexpected else statement";
             AddDiagnostic(DiagnosticKind.IllegalElseStatement, msg, location);
+        }
+
+        public void IllegalReturnStatement(SourceLocation location)
+        {
+            var msg = "illeagal return statement outside a function";
+            AddDiagnostic(DiagnosticKind.IllegalReturnStatement, msg, location);
         }
 
         public void Clear()

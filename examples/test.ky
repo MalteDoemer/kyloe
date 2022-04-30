@@ -1,8 +1,6 @@
+func add(a: i32, b: i32) -> float {
+    return a + b;
+}
+
 func main() {
-    
-    var x = 5;
-
-    x += false;
-
-
 }

@@ -16,10 +16,13 @@ namespace Kyloe.Semantics
         private readonly DiagnosticCollector diagnostics;
         private readonly Stack<SymbolScope> symbolStack;
 
+        private readonly Stack<FunctionType> functionStack;
+
         public Binder(TypeSystem typeSystem, DiagnosticCollector diagnostics)
         {
             this.typeSystem = typeSystem;
             this.diagnostics = diagnostics;
+            this.functionStack = new Stack<FunctionType>();
             this.symbolStack = new Stack<SymbolScope>();
             this.symbolStack.Push(typeSystem.GlobalScope);
         }
@@ -338,6 +341,7 @@ namespace Kyloe.Semantics
 
             var function = GetNode(token, SyntaxTokenKind.FunctionDefinition);
 
+            functionStack.Push(type);
             EnterNewScope(); // this scope contains the parameters
 
             foreach (var param in type.Parameters)
@@ -351,6 +355,7 @@ namespace Kyloe.Semantics
             var boundBody = BindBlockStatement(body);
 
             ExitCurrentScope();
+            functionStack.Pop();
 
             return new BoundFunctionDefinition(type, boundBody);
         }
@@ -373,8 +378,68 @@ namespace Kyloe.Semantics
                     return BindIfStatement(token);
                 case SyntaxTokenKind.WhileStatement:
                     return BindWhileStatement(token);
+                case SyntaxTokenKind.ReturnStatement:
+                    return BindReturnStatement(token);
+                case SyntaxTokenKind.BreakStatement:
+                    return BindBreakStatement(token);
+                case SyntaxTokenKind.ContinueStatement:
+                    return BindContinueStatement(token);
                 default:
                     throw new Exception($"unexpected kind: {token.Kind}");
+            }
+        }
+
+        private BoundStatement BindContinueStatement(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundStatement BindBreakStatement(SyntaxToken token)
+        {
+            throw new NotImplementedException();
+        }
+
+        private BoundStatement BindReturnStatement(SyntaxToken token)
+        {
+            // ReturnStatement
+            // ├── ReturnKeyword
+            // ├── Expression (optional)
+            // └── SemiColon
+
+            var returnStatement = GetNode(token, SyntaxTokenKind.ReturnStatement);
+            var returnKeyword = GetTerminal(returnStatement.Tokens[0], SyntaxTokenKind.ReturnKeyword);
+            var exprSyntax = returnStatement.Tokens[1];
+            bool hasExpr = exprSyntax.Kind != SyntaxTokenKind.Epsilon;
+
+
+            if (functionStack.Count == 0)
+            {
+                if (!returnKeyword.Invalid)
+                    diagnostics.IllegalReturnStatement(token.Location);
+
+                return new BoundInvalidStatement();
+            }
+
+            var function = functionStack.Peek();
+
+
+            if (hasExpr)
+            {
+                var expr = BindExpression(exprSyntax);
+                var _result = GetResultType(expr, exprSyntax.Location, function.ReturnType, mustBeValue: true);
+                return new BoundReturnStatement(expr);
+            }
+            else
+            {
+                if (IsTypeMissmatch(function.ReturnType, typeSystem.Void))
+                {
+                    if (!returnKeyword.Invalid)
+                        diagnostics.MissmatchedTypeError(token.Location, function.ReturnType, typeSystem.Void);
+
+                    return new BoundInvalidStatement();
+                }
+
+                return new BoundReturnStatement(null);
             }
         }
 
