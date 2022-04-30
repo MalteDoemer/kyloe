@@ -832,15 +832,17 @@ namespace Kyloe.Grammar
 
         private void GenerateUnexpectedDefault(BlockStatement block, ProductionRule rule)
         {
-            var firstSet = grammar.FirstSet(rule.Kind);
-            var followSet = grammar.FollowSet(rule.Kind);
+            var firstSet = grammar.FirstSet(rule.Kind).ToList();
+            firstSet.Sort();
+            var followSet = grammar.FollowSet(rule.Kind).ToList();
+            followSet.Sort();
 
             block.AddLine("var erroneous = current;");
 
             var unexpectedArgs = string.Join(", ", firstSet.Select(t => TokenKindAccessString(t)));
             block.AddLine($"Unexpected({unexpectedArgs});");
 
-            var skipInputArgs = string.Join(", ", firstSet.Concat(followSet).Select(t => TokenKindAccessString(t)));
+            var skipInputArgs = string.Join(", ", firstSet.Union(followSet).Select(t => TokenKindAccessString(t)));
             block.AddLine($"SkipInput({skipInputArgs});");
 
             var condition = new List<string>(firstSet.Count);
