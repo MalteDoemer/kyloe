@@ -17,14 +17,16 @@ namespace Kyloe
     {
         private readonly AssemblyDefinition assembly;
         private readonly DiagnosticResult diagnostics;
-        private readonly BoundCompilationUnit result;
+        private readonly BoundCompilationUnit compilationUnit;
 
-        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, BoundCompilationUnit result)
+        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, BoundCompilationUnit compilationUnit)
         {
             this.assembly = assembly;
             this.diagnostics = diagnostics;
-            this.result = result;
+            this.compilationUnit = compilationUnit;
         }
+
+        internal BoundCompilationUnit GetCompilationUnit() => compilationUnit;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 

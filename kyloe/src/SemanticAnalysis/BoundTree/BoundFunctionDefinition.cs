@@ -4,14 +4,16 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundFunctionDefinition : BoundNode
     {
-        public BoundFunctionDefinition(FunctionType functionType, BoundBlockStatement body)
+        public BoundFunctionDefinition(BoundFunctionDeclaration declaration, BoundBlockStatement body)
         {
-            FunctionType = functionType;
+            Declaration = declaration;
             Body = body;
         }
 
-        public FunctionType FunctionType { get; }
+        public BoundFunctionDeclaration Declaration { get; }
         public BoundBlockStatement Body { get; }
+
+        public FunctionType Type => Declaration.Type;
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundFunctionDefinition;
     }

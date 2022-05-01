@@ -3,7 +3,11 @@ namespace Kyloe.Semantics
     public enum BoundNodeKind
     {
         BoundCompilationUnit,
+        BoundFunctionDeclaration,
         BoundFunctionDefinition,
+        BoundParameters,
+        BoundTypeClause,
+        BoundArguments,
 
         BoundBlockStatement,
         BoundEmptyStatement,
@@ -21,5 +25,6 @@ namespace Kyloe.Semantics
         BoundSymbolExpression,
         BoundFunctionCallExpression,
         BoundReturnStatement,
+
     }
 }

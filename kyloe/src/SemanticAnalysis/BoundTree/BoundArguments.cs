@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -5,7 +6,7 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Semantics
 {
-    internal sealed class BoundArguments
+    internal sealed class BoundArguments : BoundNode
     {
         public BoundArguments(ImmutableArray<BoundExpression> arguments)
         {
@@ -16,12 +17,8 @@ namespace Kyloe.Semantics
 
         public bool AllArgumentsValid => Arguments.All(a => a.ResultType is not ErrorType && a.IsValue);
 
-        public string JoinArgumentTypes()
-        {
-            var builder = new StringBuilder();
-            builder.AppendJoin(", ", Arguments.Select(arg => arg.ResultType.FullName()));
+        public IEnumerable<TypeSpecifier> ArgumentTypes => Arguments.Select(a => a.ResultType);
 
-            return builder.ToString();
-        }
+        public override BoundNodeKind Kind => BoundNodeKind.BoundArguments;
     }
 }

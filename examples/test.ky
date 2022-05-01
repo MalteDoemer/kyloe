@@ -1,3 +1,5 @@
 
+func hi(a: i32, a: i32) {}
+
 func main() {
 }

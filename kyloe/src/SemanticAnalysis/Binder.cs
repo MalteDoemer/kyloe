@@ -173,29 +173,29 @@ namespace Kyloe.Semantics
             var functionSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.FunctionDefinition).Where(t => t.Kind == SyntaxTokenKind.FunctionDefinition);
             var globalSyntax = Collect(token, SyntaxTokenKind.CompilationUnit, SyntaxTokenKind.DeclarationStatement).Where(t => t.Kind == SyntaxTokenKind.DeclarationStatement);
 
-            var functionTypes = new List<FunctionType>();
+            var functionDecls = new List<BoundFunctionDeclaration>();
             var globals = ImmutableArray.CreateBuilder<BoundDeclarationStatement>();
-            var functions = ImmutableArray.CreateBuilder<BoundFunctionDefinition>();
+            var functionDefs = ImmutableArray.CreateBuilder<BoundFunctionDefinition>();
 
             foreach (var func in functionSyntax)
-                functionTypes.Add(BindFunctionDeclaration(func));
+                functionDecls.Add(BindFunctionDeclaration(func));
 
             foreach (var global in globalSyntax)
                 globals.Add(BindDeclarationStatement(global));
 
-            foreach (var (funcType, funcDef) in functionTypes.Zip(functionSyntax))
-                functions.Add(BindFunctionDefinition(funcDef, funcType));
+            foreach (var (funcDecl, funcSyntax) in functionDecls.Zip(functionSyntax))
+                functionDefs.Add(BindFunctionDefinition(funcSyntax, funcDecl));
 
             if (LookupSymbol("main") is FunctionGroupSymbol mainSymbol && FindFunctionOverload(mainSymbol.Group, Enumerable.Empty<TypeSpecifier>()) is FunctionType mainType)
             {
-                var mainFunction = functions.Where(f => f.FunctionType.Equals(mainType)).FirstOrDefault();
-                return new BoundCompilationUnit(globals.ToImmutable(), functions.ToImmutable(), mainFunction);
+                var mainFunction = functionDefs.Where(f => f.Type.Equals(mainType)).FirstOrDefault();
+                return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), mainFunction);
             }
 
-            return new BoundCompilationUnit(globals.ToImmutable(), functions.ToImmutable(), null);
+            return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), null);
         }
 
-        private FunctionType BindFunctionDeclaration(SyntaxToken token)
+        private BoundFunctionDeclaration BindFunctionDeclaration(SyntaxToken token)
         {
             // FunctionDefinition
             // ├── FuncKeyword
@@ -209,79 +209,83 @@ namespace Kyloe.Semantics
             var functionDeclaration = GetNode(token, SyntaxTokenKind.FunctionDefinition);
 
             var nameTerminal = GetTerminal(functionDeclaration.Tokens[1], SyntaxTokenKind.Identifier);
-            var parameters = GetNode(functionDeclaration.Tokens[3]);
-            var typeClause = GetNode(functionDeclaration.Tokens[5]);
-            var body = GetNode(functionDeclaration.Tokens[6]);
+            var parameterSyntax = GetNode(functionDeclaration.Tokens[3]);
+            var typeClauseSyntax = GetNode(functionDeclaration.Tokens[5]);
+
+
+            var typeClause = BindFunctionTypeClause(typeClauseSyntax);
+
+            var parameters = BindParameters(parameterSyntax);
 
             var name = nameTerminal.Text;
+            var groupSymbol = GetOrDeclareFunctionGroup(nameTerminal);
 
-            var symbol = LookupSymbol(name);
+            var functionType = new FunctionType(name, groupSymbol.Group, typeClause.Type);
+            foreach (var param in parameters.Parameters)
+                functionType.Parameters.Add(param.Symbol);
 
-            FunctionGroupSymbol functionGroup;
+            bool sameOverloadExists = FindFunctionOverload(groupSymbol.Group, parameters.ParameterTypes) is not null;
 
-            if (symbol is null)
-            {
-                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
-                DeclareSymbol(functionGroup);
-            }
-            else if (symbol is FunctionGroupSymbol groupSymbol)
-            {
-                functionGroup = groupSymbol;
-            }
+            if (sameOverloadExists && parameters.AllParametersValid && !nameTerminal.Invalid)
+                diagnostics.OverloadWithSameParametersExistsError(nameTerminal.Location, name);
             else
-            {
-                if (symbol is not ErrorSymbol && !nameTerminal.Invalid)
-                    diagnostics.NameAlreadyExistsError(nameTerminal.Location, name);
-                functionGroup = new FunctionGroupSymbol(new FunctionGroupType(name));
-            }
+                groupSymbol.Group.Functions.Add(functionType);
 
-            var returnType = BindFunctionTypeClause(typeClause);
-
-            var function = new FunctionType(name, functionGroup.Group, returnType);
-
-            var paramSyntax = Collect(parameters, SyntaxTokenKind.Parameters, SyntaxTokenKind.ParameterDeclaration).Where(t => t.Kind == SyntaxTokenKind.ParameterDeclaration);
-
-            foreach (var param in paramSyntax)
-            {
-                // ParameterDeclaration
-                // ├── Identifier
-                // └── TypeClause
-
-                var parameter = GetNode(param, SyntaxTokenKind.ParameterDeclaration);
-                var paramNameTerminal = GetTerminal(parameter.Tokens[0], SyntaxTokenKind.Identifier);
-                var type = BindTypeClause(GetNode(parameter.Tokens[1]));
-                var paramSymbol = new ParameterSymbol(paramNameTerminal.Text, type, paramNameTerminal.Location);
-
-                if (!paramNameTerminal.Invalid)
-                    function.Parameters.Add(paramSymbol);
-            }
-
-            bool alreadyExists = false;
-
-            foreach (var otherFunction in functionGroup.Group.Functions)
-            {
-                if (TypeSequenceEquals(function.Parameters.Select(param => param.Type), otherFunction.Parameters.Select(param => param.Type)))
-                {
-                    if (symbol is not ErrorSymbol)
-                        diagnostics.OverloadWithSameParametersExistsError(nameTerminal.Location, name);
-                    alreadyExists = true;
-                    break;
-                }
-            }
-
-            if (!alreadyExists)
-                functionGroup.Group.Functions.Add(function);
-
-            return function;
+            return new BoundFunctionDeclaration(functionType, parameters, typeClause);
         }
 
-        private TypeSpecifier BindFunctionTypeClause(SyntaxToken token)
+        private FunctionGroupSymbol GetOrDeclareFunctionGroup(SyntaxTerminal nameTerminal)
+        {
+            var name = nameTerminal.Text;
+            var symbol = LookupSymbol(name);
+
+            if (symbol is FunctionGroupSymbol existingGroup)
+                return existingGroup;
+
+            if (symbol is not null && symbol is not ErrorSymbol && !nameTerminal.Invalid)
+                diagnostics.NameAlreadyExistsError(nameTerminal.Location, name);
+
+            var groupSymbol = new FunctionGroupSymbol(new FunctionGroupType(name));
+
+            DeclareSymbol(groupSymbol); // Note: declare symbol does nothing if it already exists
+
+            return groupSymbol;
+        }
+
+        private BoundParameters BindParameters(SyntaxToken token)
+        {
+            var parameters = Collect(token, SyntaxTokenKind.Parameters, SyntaxTokenKind.ParameterDeclaration)
+                             .Where(t => t.Kind == SyntaxTokenKind.ParameterDeclaration);
+
+            var builder = ImmutableArray.CreateBuilder<BoundParameterDeclaration>();
+
+            foreach (var param in parameters)
+                builder.Add(BindParameterDeclaration(param));
+
+            return new BoundParameters(builder.ToImmutable());
+        }
+
+        private BoundParameterDeclaration BindParameterDeclaration(SyntaxToken token)
+        {
+            // ParameterDeclaration
+            // ├── Identifier
+            // └── TypeClause
+
+            var param = GetNode(token, SyntaxTokenKind.ParameterDeclaration);
+            var nameTerminal = GetTerminal(param.Tokens[0], SyntaxTokenKind.Identifier);
+            var typeClause = BindTypeClause(GetNode(param.Tokens[1]));
+            var symbol = new ParameterSymbol(nameTerminal.Text, typeClause.Type, nameTerminal.Location);
+
+            return new BoundParameterDeclaration(symbol);
+        }
+
+        private BoundTypeClause BindFunctionTypeClause(SyntaxToken token)
         {
             if (token.Kind == SyntaxTokenKind.Epsilon)
-                return typeSystem.Void;
+                return new BoundTypeClause(typeSystem.Void);
 
             if (token.Kind == SyntaxTokenKind.Error)
-                return typeSystem.Error;
+                return new BoundTypeClause(typeSystem.Error);
 
             var typeClause = GetNode(token, SyntaxTokenKind.TrailingTypeClause);
             var nameTerminal = GetTerminal(typeClause.Tokens[1], SyntaxTokenKind.Identifier);
@@ -292,26 +296,26 @@ namespace Kyloe.Semantics
             {
                 if (!nameTerminal.Invalid)
                     diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
-                return typeSystem.Error;
+                return new BoundTypeClause(typeSystem.Error);
             }
             else if (symbol is not TypeNameSymbol)
             {
                 if (!nameTerminal.Invalid)
                     diagnostics.ExpectedTypeNameError(nameTerminal.Location);
-                return typeSystem.Error;
+                return new BoundTypeClause(typeSystem.Error);
             }
 
-            return symbol.Type;
+            return new BoundTypeClause(symbol.Type);
         }
 
-        private TypeSpecifier BindTypeClause(SyntaxToken token)
+        private BoundTypeClause BindTypeClause(SyntaxToken token)
         {
             // TypeClause
             // ├── Colon
             // └── Identifier
 
             if (token.Kind == SyntaxTokenKind.Error)
-                return typeSystem.Error;
+                return new BoundTypeClause(typeSystem.Error);
 
             var typeClause = GetNode(token, SyntaxTokenKind.TypeClause);
             var nameTerminal = GetTerminal(typeClause.Tokens[1], SyntaxTokenKind.Identifier);
@@ -322,19 +326,19 @@ namespace Kyloe.Semantics
             {
                 if (!nameTerminal.Invalid)
                     diagnostics.NonExistantNameError(nameTerminal.Location, nameTerminal.Text);
-                return typeSystem.Error;
+                return new BoundTypeClause(typeSystem.Error);
             }
             else if (symbol is not TypeNameSymbol)
             {
                 if (!nameTerminal.Invalid)
                     diagnostics.ExpectedTypeNameError(nameTerminal.Location);
-                return typeSystem.Error;
+                return new BoundTypeClause(typeSystem.Error);
             }
 
-            return symbol.Type;
+            return new BoundTypeClause(symbol.Type);
         }
 
-        private BoundFunctionDefinition BindFunctionDefinition(SyntaxToken token, FunctionType type)
+        private BoundFunctionDefinition BindFunctionDefinition(SyntaxToken token, BoundFunctionDeclaration decl)
         {
             // FunctionDefinition
             // ├── FuncKeyword
@@ -347,10 +351,10 @@ namespace Kyloe.Semantics
 
             var function = GetNode(token, SyntaxTokenKind.FunctionDefinition);
 
-            functionStack.Push(type);
+            functionStack.Push(decl.Type);
             EnterNewScope(); // this scope contains the parameters
 
-            foreach (var param in type.Parameters)
+            foreach (var param in decl.Type.Parameters)
             {
                 if (!DeclareSymbol(param))
                     if (param.Location is SourceLocation loc)
@@ -363,7 +367,7 @@ namespace Kyloe.Semantics
             ExitCurrentScope();
             functionStack.Pop();
 
-            return new BoundFunctionDefinition(type, boundBody);
+            return new BoundFunctionDefinition(decl, boundBody);
         }
 
         private BoundStatement BindStatement(SyntaxToken token)
@@ -594,7 +598,7 @@ namespace Kyloe.Semantics
 
             var expr = BindExpression(exprSyntax);
 
-            var expectedType = hasTypeClause ? BindTypeClause(typeClause) : null;
+            var expectedType = hasTypeClause ? BindTypeClause(typeClause).Type : null;
 
             var exprType = GetResultType(expr, exprSyntax.Location, expectedType, mustBeValue: true);
 
@@ -859,7 +863,7 @@ namespace Kyloe.Semantics
 
             if (expr.ResultType is FunctionGroupType functionGroup)
             {
-                var function = FindFunctionOverload(functionGroup, args.Arguments.Select(arg => arg.ResultType));
+                var function = FindFunctionOverload(functionGroup, args.ArgumentTypes);
 
                 if (function is null)
                 {
