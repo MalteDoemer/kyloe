@@ -838,7 +838,7 @@ namespace Kyloe.Semantics
             throw new NotImplementedException();
         }
 
-        private BoundExpression BindCallExpression(SyntaxToken token)
+        private BoundCallExpression BindCallExpression(SyntaxToken token)
         {
             // Postfix
             // ├── Expr
@@ -860,16 +860,16 @@ namespace Kyloe.Semantics
                 {
                     if (args.AllArgumentsValid)
                         diagnostics.NoMatchingOverloadError(exprSyntax.Location, functionGroup.FullName(), args);
-                    return new BoundInvalidExpression(typeSystem, token);
+                    return new BoundCallExpression(typeSystem.Error, typeSystem.Error, expr, args, token);
                 }
 
-                return new BoundCallExpression(function, expr, args, token);
+                return new BoundCallExpression(function, function.ReturnType, expr, args, token);
             }
             else
             {
                 if (expr.ResultType is not ErrorType)
                     diagnostics.NotCallableError(exprSyntax.Location);
-                return new BoundInvalidExpression(typeSystem, token);
+                return new BoundCallExpression(typeSystem.Error, typeSystem.Error, expr, args, token);
             }
         }
 
@@ -937,7 +937,7 @@ namespace Kyloe.Semantics
             return new BoundParenthesizedExpression(expr, token);
         }
 
-        private BoundExpression BindLiteral(SyntaxToken token)
+        private BoundLiteralExpression BindLiteral(SyntaxToken token)
         {
             var terminal = GetTerminal(token);
             var type = SemanticInfo.GetTypeFromLiteral(typeSystem, token.Kind);
@@ -949,7 +949,7 @@ namespace Kyloe.Semantics
             if (!terminal.Invalid)
                 diagnostics.InvalidLiteralError(token.Location);
 
-            return new BoundInvalidExpression(typeSystem, token);
+            return new BoundLiteralExpression(typeSystem.Error, new object(), token);
         }
 
         private object? GetValueForLiteral(SyntaxTerminal token, TypeSpecifier type)
