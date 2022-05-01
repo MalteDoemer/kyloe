@@ -6,19 +6,24 @@ namespace Kyloe.Symbols
 {
     internal sealed class FunctionType : TypeSpecifier
     {
-        public FunctionType(string name, FunctionGroupType group, TypeSpecifier returnType)
+        public FunctionType(FunctionGroupType group, TypeSpecifier returnType, bool isStatic)
         {
-            Name = name;
             Group = group;
             ReturnType = returnType;
+            IsStatic = isStatic;
             Parameters = new List<ParameterSymbol>();
         }
 
-        public string Name { get; }
         public FunctionGroupType Group { get; }
         public TypeSpecifier ReturnType { get; }
+        public bool IsStatic { get; }
+
         public List<ParameterSymbol> Parameters { get; }
 
+        public string Name => Group.Name;
+
+        public TypeSpecifier? ParentType => Group.ParentType;
+        
         public override TypeKind Kind => TypeKind.FunctionType;
 
         public override IReadOnlySymbolScope? ReadOnlyScope => null;
@@ -30,7 +35,7 @@ namespace Kyloe.Symbols
             var builder = new StringBuilder();
 
             builder.Append("func ");
-            builder.Append(Name);
+            builder.Append(Group.FullName());
             builder.Append('(');
             builder.AppendJoin(',', Parameters.Select(param => param.Type.FullName()));
             builder.Append(") -> ");

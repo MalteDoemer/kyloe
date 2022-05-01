@@ -5,13 +5,14 @@ namespace Kyloe.Symbols
 {
     internal sealed class FunctionGroupType : TypeSpecifier
     {
-        public FunctionGroupType(string name)
+        public FunctionGroupType(string name, TypeSpecifier? parentType)
         {
             Name = name;
             Functions = new List<FunctionType>();
         }
 
         public string Name { get; }
+        public TypeSpecifier? ParentType { get; }
         public List<FunctionType> Functions { get; }
 
         public override TypeKind Kind => TypeKind.FunctionGroupType;
@@ -20,6 +21,6 @@ namespace Kyloe.Symbols
 
         public override bool Equals(TypeSpecifier? other) => object.ReferenceEquals(this, other);
 
-        public override string FullName() => Name;
+        public override string FullName() => ParentType is not null ? ParentType.FullName() + "." + Name : Name;
     }
 }

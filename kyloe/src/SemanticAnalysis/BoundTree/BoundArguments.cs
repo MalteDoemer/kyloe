@@ -3,14 +3,16 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Kyloe.Symbols;
+using Kyloe.Syntax;
 
 namespace Kyloe.Semantics
 {
     internal sealed class BoundArguments : BoundNode
     {
-        public BoundArguments(ImmutableArray<BoundExpression> arguments)
+        public BoundArguments(ImmutableArray<BoundExpression> arguments, SyntaxToken syntax)
         {
             Arguments = arguments;
+            Syntax = syntax;
         }
 
         public ImmutableArray<BoundExpression> Arguments { get; }
@@ -20,5 +22,6 @@ namespace Kyloe.Semantics
         public IEnumerable<TypeSpecifier> ArgumentTypes => Arguments.Select(a => a.ResultType);
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundArguments;
+        public override SyntaxToken Syntax { get; }
     }
 }

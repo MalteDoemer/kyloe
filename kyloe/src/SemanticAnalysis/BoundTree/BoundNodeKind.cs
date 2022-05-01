@@ -5,8 +5,9 @@ namespace Kyloe.Semantics
         BoundCompilationUnit,
         BoundFunctionDeclaration,
         BoundFunctionDefinition,
-        BoundParameters,
         BoundTypeClause,
+        BoundParameters,
+        BoundParameterDeclaration,
         BoundArguments,
 
         BoundBlockStatement,
@@ -19,12 +20,12 @@ namespace Kyloe.Semantics
 
         BoundLiteralExpression,
         BoundBinaryExpression,
+        BoundParenthesizedExpression,
         BoundInvalidExpression,
         BoundUnaryExpression,
         BoundAssignmentExpression,
         BoundSymbolExpression,
-        BoundFunctionCallExpression,
+        BoundCallExpression,
         BoundReturnStatement,
-
     }
 }

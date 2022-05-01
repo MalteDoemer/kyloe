@@ -1,13 +1,15 @@
 using Kyloe.Symbols;
+using Kyloe.Syntax;
 
 namespace Kyloe.Semantics
 {
     internal sealed class BoundFunctionDefinition : BoundNode
     {
-        public BoundFunctionDefinition(BoundFunctionDeclaration declaration, BoundBlockStatement body)
+        public BoundFunctionDefinition(BoundFunctionDeclaration declaration, BoundBlockStatement body, SyntaxToken syntax)
         {
             Declaration = declaration;
             Body = body;
+            Syntax = syntax;
         }
 
         public BoundFunctionDeclaration Declaration { get; }
@@ -15,6 +17,8 @@ namespace Kyloe.Semantics
 
         public FunctionType Type => Declaration.Type;
 
+        public override SyntaxToken Syntax { get; }
+        
         public override BoundNodeKind Kind => BoundNodeKind.BoundFunctionDefinition;
     }
 }

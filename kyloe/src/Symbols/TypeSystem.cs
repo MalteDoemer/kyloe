@@ -65,7 +65,7 @@ namespace Kyloe.Symbols
 
                 if (group is null)
                 {
-                    group = new FunctionGroupSymbol(new FunctionGroupType(name));
+                    group = new FunctionGroupSymbol(new FunctionGroupType(name, null));
                     Debug.Assert(GlobalScope.DeclareSymbol(group));
                 }
 
@@ -119,7 +119,7 @@ namespace Kyloe.Symbols
 
         private FunctionType CreateBuiltinFunction(string name, FunctionGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
         {
-            var func = new FunctionType(name, group, GetBuiltinType(ret));
+            var func = new FunctionType(group, GetBuiltinType(ret), true);
 
             foreach (var param in parameters)
                 func.Parameters.Add(new ParameterSymbol(param.name, GetBuiltinType(param.type)));
@@ -130,12 +130,12 @@ namespace Kyloe.Symbols
         private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var group = new MethodGroupType(name, left);
-            var method = new MethodType(name, group, ret, true);
+            var group = new FunctionGroupType(name, left);
+            var method = new FunctionType(group, ret, true);
 
             method.Parameters.Add(new ParameterSymbol("l", left));
             method.Parameters.Add(new ParameterSymbol("r", right));
-            group.Methods.Add(method);
+            group.Functions.Add(method);
 
             return new OperationSymbol(op, group);
         }
@@ -143,11 +143,11 @@ namespace Kyloe.Symbols
         private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var group = new MethodGroupType(name, arg);
-            var method = new MethodType(name, group, ret, true);
+            var group = new FunctionGroupType(name, arg);
+            var method = new FunctionType(group, ret, true);
 
             method.Parameters.Add(new ParameterSymbol("", arg));
-            group.Methods.Add(method);
+            group.Functions.Add(method);
 
             return new OperationSymbol(op, group);
         }
