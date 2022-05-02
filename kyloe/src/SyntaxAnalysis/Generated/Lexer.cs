@@ -66,7 +66,7 @@ namespace Kyloe.Syntax
             builder.Add((SyntaxTokenKind.Float, string.Empty , new Regex(@"\G\b\d+\.\d+", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.Int, string.Empty , new Regex(@"\G\b\d+\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.Bool, string.Empty , new Regex(@"\G\b(true|false)\b", RegexOptions.Compiled | RegexOptions.Multiline)));
-            builder.Add((SyntaxTokenKind.String, string.Empty , new Regex(@"\G(\"".*\""|\u0027.*\u0027)", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.String, string.Empty , new Regex(@"\G(\"".*?\""|\u0027.*?\u0027)", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.VarKeyword, string.Empty , new Regex(@"\G\bvar\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ConstKeyword, string.Empty , new Regex(@"\G\bconst\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.FuncKeyword, string.Empty , new Regex(@"\G\bfunc\b", RegexOptions.Compiled | RegexOptions.Multiline)));

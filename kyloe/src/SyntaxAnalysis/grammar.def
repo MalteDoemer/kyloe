@@ -58,7 +58,7 @@ RightCurly = "}";
 Float = '\b\d+\.\d+';
 Int = '\b\d+\b';
 Bool = '\b(true|false)\b';
-String = '(\".*\"|\u0027.*\u0027)';
+String = '(\".*?\"|\u0027.*?\u0027)';
 
 (* Keywords *)
 VarKeyword = '\bvar\b';
