@@ -4,6 +4,7 @@ namespace Kyloe.Lowering
     {
         LoweredCompilationUnit,
         LoweredFunctionDefinition,
+        LoweredArguments,
 
 
         LoweredLiteralExpression,
@@ -11,6 +12,7 @@ namespace Kyloe.Lowering
         LoweredUnaryExpression,
         LoweredAssignment,
         LoweredVariableAccessExpression,
+        LoweredFunctionAccessExpression,
 
         LoweredBlockStatement,
         LoweredContinueStatement,
@@ -25,5 +27,6 @@ namespace Kyloe.Lowering
         LoweredGotoStatement,
         LoweredConditionalGotoStatement,
         LoweredLabelStatement,
+        LoweredCallExpression,
     }
 }

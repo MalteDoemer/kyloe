@@ -6,38 +6,6 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Lowering
 {
-
-    internal sealed class LoweredCompilationUnit : LoweredNode 
-    {
-        public LoweredCompilationUnit(ImmutableArray<LoweredFunctionDefinition> loweredFunctions, LoweredStatement globalStatement, LoweredFunctionDefinition? mainFunction)
-        {
-            LoweredFunctions = loweredFunctions;
-            GlobalStatement = globalStatement;
-            MainFunction = mainFunction;
-        }
-
-        public ImmutableArray<LoweredFunctionDefinition> LoweredFunctions { get; }
-        public LoweredStatement GlobalStatement { get; }
-
-        public LoweredFunctionDefinition? MainFunction { get; }
-
-        public override LoweredNodeKind Kind => LoweredNodeKind.LoweredCompilationUnit;
-    }
-
-    internal sealed class LoweredFunctionDefinition : LoweredNode 
-    {
-        public LoweredFunctionDefinition(FunctionType type, LoweredStatement body)
-        {
-            Type = type;
-            Body = body;
-        }
-
-        public FunctionType Type { get; }
-        public LoweredStatement Body { get; }
-
-        public override LoweredNodeKind Kind => LoweredNodeKind.LoweredFunctionDefinition;
-    }
-
     internal class Lowerer
     {
 
@@ -51,7 +19,7 @@ namespace Kyloe.Lowering
             this.loopLableStack = new Stack<(LoweredLabel, LoweredLabel)>();
         }
 
-        public LoweredCompilationUnit LowerCompilationUnit(BoundCompilationUnit compilationUnit) 
+        public LoweredCompilationUnit LowerCompilationUnit(BoundCompilationUnit compilationUnit)
         {
             var globals = ImmutableArray.CreateBuilder<LoweredStatement>(compilationUnit.Globals.Length);
             var functions = ImmutableArray.CreateBuilder<LoweredFunctionDefinition>(compilationUnit.Functions.Length);
@@ -68,12 +36,11 @@ namespace Kyloe.Lowering
             return new LoweredCompilationUnit(functions.MoveToImmutable(), globalStatement, main);
         }
 
-        public LoweredFunctionDefinition LowerFunctionDefinition(BoundFunctionDefinition functionDefinition) 
+        private LoweredFunctionDefinition LowerFunctionDefinition(BoundFunctionDefinition functionDefinition)
         {
             var body = LowerStatement(functionDefinition.Body);
             return new LoweredFunctionDefinition(functionDefinition.Type, body);
         }
-
 
         private LoweredStatement LowerStatement(BoundStatement statement)
         {
@@ -195,7 +162,19 @@ namespace Kyloe.Lowering
 
         private LoweredExpression LowerCallExpression(BoundCallExpression expression)
         {
-            throw new NotImplementedException();
+            var expr = LowerExpression(expression.Expression);
+            var args = LowerArguments(expression.Arguments);
+            return new LoweredCallExpression((FunctionType)expression.FunctionType, expr, args);
+        }
+
+        private LoweredArguments LowerArguments(BoundArguments arguments)
+        {
+            var builder = ImmutableArray.CreateBuilder<LoweredExpression>(arguments.Arguments.Length);
+
+            foreach (var arg in arguments)
+                builder.Add(LowerExpression(arg));
+
+            return new LoweredArguments(builder.MoveToImmutable());
         }
 
         private LoweredExpression LowerSymbolExpression(BoundSymbolExpression expression)
@@ -208,6 +187,7 @@ namespace Kyloe.Lowering
                     return new LoweredVariableAccessExpression(expression.Symbol);
 
                 case SymbolKind.FunctionGroupSymbol:
+                    return new LoweredFunctionAccessExpression((FunctionGroupSymbol)expression.Symbol);
                 case SymbolKind.FieldSymbol:
                 case SymbolKind.TypeNameSymbol:
                     throw new NotImplementedException();

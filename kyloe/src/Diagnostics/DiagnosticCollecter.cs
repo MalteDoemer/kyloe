@@ -21,6 +21,10 @@ namespace Kyloe.Diagnostics
             this.sourceText = sourceText;
         }
 
+        public bool HasErrors() => diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
+        
+        public bool HasWarnings() => diagnostics.Any(d => d.Severity == DiagnosticSeverity.Warn);
+
         public int Count => diagnostics.Count;
 
         public bool IsReadOnly => ((ICollection<Diagnostic>)diagnostics).IsReadOnly;
@@ -131,7 +135,7 @@ namespace Kyloe.Diagnostics
             if (arguments.Arguments.Length == 0)
                 msg = $"cannot call '{name}' without arguments";
             else
-                msg = $"cannot call '{name}' with arguments ({string.Join(", ", arguments.ArgumentTypes)})";
+                msg = $"cannot call '{name}' with arguments ({string.Join(", ", arguments.ArgumentTypes.Select(a  => a.FullName()))})";
 
             AddError(DiagnosticKind.NoMatchingOverloadError, msg, location);
         }

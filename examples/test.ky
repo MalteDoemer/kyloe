@@ -1,5 +1,6 @@
 
-func hi(a: i32, a: i32) {}
+func hi(a: i64) {}
 
 func main() {
+    hi(5);
 }

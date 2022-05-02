@@ -18,16 +18,14 @@ namespace Kyloe
     {
         private readonly AssemblyDefinition assembly;
         private readonly DiagnosticResult diagnostics;
-        private readonly LoweredCompilationUnit compilationUnit;
+        private readonly LoweredCompilationUnit? compilationUnit;
 
-        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, LoweredCompilationUnit compilationUnit)
+        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
         {
             this.assembly = assembly;
             this.diagnostics = diagnostics;
             this.compilationUnit = compilationUnit;
         }
-
-        internal LoweredCompilationUnit GetCompilationUnit() => compilationUnit;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
@@ -49,10 +47,18 @@ namespace Kyloe
             if (opts.RequireMain && boundCompilationUnit.MainFunction is null)
                 diagnostics.MissingMainFunction();
 
-            var lowerer = new Lowerer(typeSystem);
-            var loweredCompilationUnit = lowerer.LowerCompilationUnit(boundCompilationUnit);
 
-            return new Compilation(assembly, diagnostics.ToResult(), loweredCompilationUnit);
+            if (!diagnostics.HasErrors())
+            {
+                var lowerer = new Lowerer(typeSystem);
+                var loweredCompilationUnit = lowerer.LowerCompilationUnit(boundCompilationUnit);
+
+                
+
+                return new Compilation(assembly, diagnostics.ToResult(), loweredCompilationUnit);
+            }
+
+            return new Compilation(assembly, diagnostics.ToResult(), null);
         }
 
     }
