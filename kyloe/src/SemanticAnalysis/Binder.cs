@@ -393,14 +393,14 @@ namespace Kyloe.Semantics
             }
         }
 
-        private BoundStatement BindContinueStatement(SyntaxToken token)
+        private BoundContinueStatement BindContinueStatement(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            return new BoundContinueStatement(token);
         }
 
-        private BoundStatement BindBreakStatement(SyntaxToken token)
+        private BoundBreakStatement BindBreakStatement(SyntaxToken token)
         {
-            throw new NotImplementedException();
+            return new BoundBreakStatement(token);
         }
 
         private BoundReturnStatement BindReturnStatement(SyntaxToken token)

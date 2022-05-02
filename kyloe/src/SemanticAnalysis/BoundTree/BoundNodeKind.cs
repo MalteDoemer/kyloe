@@ -27,5 +27,7 @@ namespace Kyloe.Semantics
         BoundSymbolExpression,
         BoundCallExpression,
         BoundReturnStatement,
+        BoundContinueStatement,
+        BoundBreakStatement,
     }
 }

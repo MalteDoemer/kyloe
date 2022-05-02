@@ -18,7 +18,7 @@ namespace Kyloe.Semantics
         public FunctionType Type => Declaration.Type;
 
         public override SyntaxToken Syntax { get; }
-        
+
         public override BoundNodeKind Kind => BoundNodeKind.BoundFunctionDefinition;
     }
 }
