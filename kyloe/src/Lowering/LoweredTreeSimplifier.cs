@@ -1,3 +1,4 @@
+using Kyloe.Semantics;
 using Kyloe.Symbols;
 using static Kyloe.Lowering.LoweredNodeFactory;
 
@@ -6,10 +7,11 @@ namespace Kyloe.Lowering
     /// <summary>
     /// This class rewrites all if statements and while loops and other sort of jumps 
     /// into conditional and unconditional gotos.
+    /// It also simplifies other statements such as assignment and declaration
     /// </summary>
-    internal sealed class LoweredGotoRewriter : LoweredTreeRewriter
+    internal sealed class LoweredTreeSimplifier : LoweredTreeRewriter
     {
-        public LoweredGotoRewriter(TypeSystem typeSystem) : base(typeSystem)
+        public LoweredTreeSimplifier(TypeSystem typeSystem) : base(typeSystem)
         {
         }
 
@@ -107,5 +109,43 @@ namespace Kyloe.Lowering
             }
         }
 
+        protected override LoweredExpression RewriteAssignment(LoweredAssignment expression)
+        {
+            if (expression.Operation == AssignmentOperation.Assign)
+                return base.RewriteAssignment(expression);
+
+            // expr1 += expr2
+
+            // expr1 = expr1 + expr2
+
+            var left = expression.LeftExpression;
+            var right = expression.RightExpression;
+            var op = SemanticInfo.GetOperationForAssignment(expression.Operation);
+            var binary = new LoweredBinaryExpression(left.Type, left, op, right);
+            var assign = new LoweredAssignment(typeSystem, left, AssignmentOperation.Assign, binary);
+
+            return base.RewriteAssignment(assign);
+        }
+
+        protected override LoweredStatement RewriteDeclarationStatement(LoweredDeclarationStatement statement)
+        {
+            if (statement.Initializer is not null)
+            {
+                // var x = 5;
+
+                // var x;
+                // x = 5;
+
+                var decl = new LoweredDeclarationStatement(statement.Symbol, null);
+
+                var initializer = RewriteExpression(statement.Initializer);
+                var localAccess = new LoweredVariableAccessExpression(statement.Symbol);
+                var assign = new LoweredAssignment(typeSystem, localAccess, AssignmentOperation.Assign, initializer);
+
+                return Block(decl, ExpressionStatement(assign));
+            }
+
+            return base.RewriteDeclarationStatement(statement);
+        }
     }
 }

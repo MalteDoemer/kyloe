@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Kyloe.Semantics;
 
 namespace Kyloe.Lowering 
 {
@@ -30,5 +31,9 @@ namespace Kyloe.Lowering
             return new LoweredConditionalGotoStatement(label, cond);
         }
 
+        public static LoweredExpressionStatement ExpressionStatement(LoweredExpression expr) 
+        {
+            return new LoweredExpressionStatement(expr);
+        }
     }
 }

@@ -6,7 +6,7 @@ namespace Kyloe.Lowering
 {
     internal abstract class LoweredTreeRewriter
     {
-        private readonly TypeSystem typeSystem;
+        protected readonly TypeSystem typeSystem;
 
         protected LoweredTreeRewriter(TypeSystem typeSystem)
         {
