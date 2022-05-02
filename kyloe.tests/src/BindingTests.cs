@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Kyloe.Diagnostics;
 using Xunit;
 
@@ -17,6 +18,20 @@ namespace Kyloe.Tests.Binding
         private static string AddMainFunction(string text)
         {
             return "func main() {" + text + "}";
+        }
+
+        private static string AddScope(string text)
+        {
+            return "{" + text + "}";
+        }
+
+
+        [Theory]
+        [MemberData(nameof(GetCombinedStatementData))]
+        public void Test_Binding_Statements_Combined(string text, IEnumerable<DiagnosticKind> errors)
+        {
+            var compilation = Compilation.Compile(AddMainFunction(text));
+            DiagnosticAssert.Equal(compilation.GetDiagnostics(), errors);
         }
 
         [Theory]
@@ -179,6 +194,11 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "!5;",
+                DiagnosticKind.UnsupportedUnaryOperation,
+            };
+
+            yield return new object[] {
                 "~'f';",
                 DiagnosticKind.UnsupportedUnaryOperation,
             };
@@ -264,12 +284,14 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
-                @"{
-                    1 % 8 = 5;
-                }",
+                "1 % 8 = 5;",
                 DiagnosticKind.ExpectedModifiableValueError,
             };
 
+            yield return new object[] {
+                "var x = i32;",
+                DiagnosticKind.ExpectedValueError,
+            };
 
             yield return new object[] {
                 @"{
@@ -306,6 +328,35 @@ namespace Kyloe.Tests.Binding
                 DiagnosticKind.MissmatchedTypeError,
             };
 
+            yield return new object[] {
+                "5(1, 2);",
+                DiagnosticKind.NotCallableError,
+            };
+
+
+            yield return new object[] {
+                "println('x')();",
+                DiagnosticKind.NotCallableError,
+            };
+
+            yield return new object[] {
+                "9223372036854775808;",
+                DiagnosticKind.InvalidLiteralError,
+            };
+        }
+
+        public static IEnumerable<object[]> GetCombinedStatementData()
+        {
+            var data = GetStatementData().Select(arr => ((string)arr[0], arr.Skip(1).Cast<DiagnosticKind>()));
+
+            foreach (var (d1, d2) in data.Zip(data))
+            {
+                // we have to add scopes, otherwise it could cause redefined name errors
+                var text = AddScope(d1.Item1) + AddScope(d2.Item1);
+                var errors = d1.Item2.Concat(d2.Item2);
+
+                yield return new object[] { text, errors };
+            }
         }
 
         public static IEnumerable<object[]> GetWholeProgramData()
@@ -348,11 +399,36 @@ namespace Kyloe.Tests.Binding
 
             yield return new object[] {
                 @"
+                func main() {
+                    sayHello('Kyloe');
+                }
+                ",
+                DiagnosticKind.NonExistantNameError,
+            };
+
+            yield return new object[] {
+                @"
+                func test(a: i32, b: float, c: double, b: float) {}
+                ",
+                DiagnosticKind.RedefinedParameterError
+            };
+
+            yield return new object[] {
+                @"
                 func test(a: i32, a: float) {}
 
                 func main() {}
                 ",
                 DiagnosticKind.RedefinedParameterError
+            };
+
+            yield return new object[] {
+                @"
+                func test() {}
+
+                func test() {}
+                ",
+                DiagnosticKind.OverloadWithSameParametersExistsError
             };
 
             yield return new object[] {
@@ -368,6 +444,16 @@ namespace Kyloe.Tests.Binding
 
             yield return new object[] {
                 @"
+                var test = 5;
+
+                func test(c: i32) {}
+
+                ",
+                DiagnosticKind.NameAlreadyExistsError,
+            };
+
+            yield return new object[] {
+                @"
                 func test(a: i64) {}
 
                 func main() {
@@ -377,6 +463,64 @@ namespace Kyloe.Tests.Binding
                 DiagnosticKind.NoMatchingOverloadError
             };
 
+            yield return new object[] {
+                @"
+                func test() -> i64 { return 6; }
+
+                func main() {
+                    var x: string = test();
+                }
+                ",
+                DiagnosticKind.MissmatchedTypeError,
+            };
+
+
+            yield return new object[] {
+                @"
+                const CONSTANT = 7;
+
+                func main() {
+                    CONSTANT = 5;    
+                }
+                ",
+                DiagnosticKind.ExpectedModifiableValueError,
+            };
+
+            yield return new object[] {
+                @"
+                func other() {}
+                func test() -> other { return 5; } 
+                ",
+                DiagnosticKind.ExpectedTypeNameError,
+            };
+
+            yield return new object[] {
+                @"
+                func test() -> i64 { return 5; } 
+                func main() {
+                    test() = 5;    
+                }
+                ",
+                DiagnosticKind.ExpectedModifiableValueError,
+            };
+
+            yield return new object[] {
+                @"
+                func main() {
+                    break;
+                }
+                ",
+                DiagnosticKind.IllegalBreakStatement,
+            };
+
+            yield return new object[] {
+                @"
+                func main() {
+                    continue;
+                }
+                ",
+                DiagnosticKind.IllegalContinueStatement,
+            };
 
         }
 

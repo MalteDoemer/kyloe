@@ -1,7 +1,7 @@
 using System.Linq;
 using Xunit;
 using Kyloe.Diagnostics;
-
+using System.Collections.Generic;
 
 namespace Kyloe.Tests
 {
@@ -23,7 +23,7 @@ namespace Kyloe.Tests
             Assert.Empty(result.GetWarnings());
         }
 
-        public static void Equal(DiagnosticResult result, params DiagnosticKind[] kinds)
+        public static void Equal(DiagnosticResult result, IEnumerable<DiagnosticKind> kinds)
         {
             Assert.Equal(kinds, result.Select(d => d.Kind));
         }

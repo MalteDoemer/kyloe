@@ -971,14 +971,17 @@ namespace Kyloe.Semantics
             switch (token.Kind)
             {
                 case SyntaxTokenKind.Int:
-                    long.TryParse(text, out var res1);
-                    return res1;
+                    if (long.TryParse(text, out var res1))
+                        return res1;
+                    return null;
                 case SyntaxTokenKind.Float:
-                    double.TryParse(text, out var res2);
-                    return res2;
+                    if (double.TryParse(text, out var res2))
+                        return res2;
+                    return null;
                 case SyntaxTokenKind.Bool:
-                    bool.TryParse(text, out var res3);
-                    return res3;
+                    if (bool.TryParse(text, out var res3))
+                        return res3;
+                    return null;
                 case SyntaxTokenKind.String:
                     return token.Text;
                 default:

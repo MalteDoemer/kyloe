@@ -14,18 +14,20 @@ namespace Kyloe.Diagnostics
         NonExistantNameError,
         ExpectedModifiableValueError,
         UnsupportedAssignmentOperation,
-        ExpectedTypeNameError,          // TODO: add a test
-        NotCallableError,               // TODO: add a test
+        ExpectedTypeNameError,
+        NotCallableError,
         NoMatchingOverloadError,
         NameAlreadyExistsError, 
         OverloadWithSameParametersExistsError,
         RedefinedParameterError,
-        InvalidLiteralError,            // TODO: add a test
+        InvalidLiteralError,
         IllegalElseStatement,
         IllegalElifStatement,
+
+        // TODO: tests
         IllegalReturnStatement,
-        MissingMainFunction,
         IllegalContinueStatement,
         IllegalBreakStatement,
+        MissingMainFunction,
     }
 }

@@ -1,12 +1,5 @@
 
-func hi(a: i64) {
-    println(a);
-}
 
 func main() {
-    if (true) {
-        hi(5);
-    } else {
-        hi(7);
-    }
+    var x = 9223372036854775808;
 }
