@@ -35,10 +35,32 @@ namespace Kyloe.Lowering
                     return RewriteEmptyStatement((LoweredEmptyStatement)statement);
                 case LoweredNodeKind.LoweredIfStatement:
                     return RewriteIfStatement((LoweredIfStatement)statement);
+                case LoweredNodeKind.LoweredGotoStatement:
+                    return RewriteGotoStatement((LoweredGotoStatement)statement);
+                case LoweredNodeKind.LoweredConditionalGotoStatement:
+                    return RewriteConditionalGotoStatement((LoweredConditionalGotoStatement)statement);
+                case LoweredNodeKind.LoweredLabelStatement:
+                    return RewriteLabelStatement((LoweredLabelStatement)statement);
 
                 default:
                     throw new Exception($"unexpected kind: {statement.Kind}");
             }
+        }
+
+        protected virtual LoweredStatement RewriteGotoStatement(LoweredGotoStatement statement)
+        {
+            return statement;
+        }
+
+        protected virtual LoweredStatement RewriteConditionalGotoStatement(LoweredConditionalGotoStatement statement)
+        {
+            var expr = RewriteExpression(statement.Condition);
+            return new LoweredConditionalGotoStatement(statement.Label, expr);
+        }
+
+        protected virtual LoweredStatement RewriteLabelStatement(LoweredLabelStatement statement)
+        {
+            return statement;
         }
 
         protected virtual LoweredStatement RewriteBlockStatement(LoweredBlockStatement statement)
@@ -92,12 +114,12 @@ namespace Kyloe.Lowering
             return new LoweredDeclarationStatement(statement.Symbol, initializer);
         }
 
-        private LoweredStatement RewriteEmptyStatement(LoweredEmptyStatement statement)
+        protected virtual LoweredStatement RewriteEmptyStatement(LoweredEmptyStatement statement)
         {
             return statement;
         }
 
-        private LoweredStatement RewriteIfStatement(LoweredIfStatement statement)
+        protected virtual LoweredStatement RewriteIfStatement(LoweredIfStatement statement)
         {
             var condition = RewriteExpression(statement.Condition);
             var body = RewriteStatement(statement.Body);
@@ -106,7 +128,7 @@ namespace Kyloe.Lowering
             return new LoweredIfStatement(condition, body, elsebody);
         }
 
-        public LoweredExpression RewriteExpression(LoweredExpression expression)
+        protected virtual LoweredExpression RewriteExpression(LoweredExpression expression)
         {
             switch (expression.Kind)
             {
