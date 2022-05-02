@@ -2,6 +2,10 @@ namespace Kyloe.Lowering
 {
     public enum LoweredNodeKind
     {
+        LoweredCompilationUnit,
+        LoweredFunctionDefinition,
+
+
         LoweredLiteralExpression,
         LoweredBinaryExpression,
         LoweredUnaryExpression,

@@ -5,6 +5,7 @@ using Kyloe.Diagnostics;
 using Kyloe.Utility;
 using Kyloe.Syntax;
 using Kyloe.Symbols;
+using Kyloe.Lowering;
 
 namespace Kyloe
 {
@@ -17,16 +18,16 @@ namespace Kyloe
     {
         private readonly AssemblyDefinition assembly;
         private readonly DiagnosticResult diagnostics;
-        private readonly BoundCompilationUnit compilationUnit;
+        private readonly LoweredCompilationUnit compilationUnit;
 
-        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, BoundCompilationUnit compilationUnit)
+        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, LoweredCompilationUnit compilationUnit)
         {
             this.assembly = assembly;
             this.diagnostics = diagnostics;
             this.compilationUnit = compilationUnit;
         }
 
-        internal BoundCompilationUnit GetCompilationUnit() => compilationUnit;
+        internal LoweredCompilationUnit GetCompilationUnit() => compilationUnit;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
@@ -43,12 +44,15 @@ namespace Kyloe
             var parser = new Parser(text.GetAllText(), diagnostics);
             var rootNode = parser.Parse();
             var binder = new Binder(typeSystem, diagnostics);
-            var result = binder.BindCompilationUnit(rootNode);
+            var boundCompilationUnit = binder.BindCompilationUnit(rootNode);
 
-            if (opts.RequireMain && result.MainFunction is null)
+            if (opts.RequireMain && boundCompilationUnit.MainFunction is null)
                 diagnostics.MissingMainFunction();
 
-            return new Compilation(assembly, diagnostics.ToResult(), result);
+            var lowerer = new Lowerer(typeSystem);
+            var loweredCompilationUnit = lowerer.LowerCompilationUnit(boundCompilationUnit);
+
+            return new Compilation(assembly, diagnostics.ToResult(), loweredCompilationUnit);
         }
 
     }

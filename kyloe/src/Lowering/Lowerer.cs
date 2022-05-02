@@ -7,6 +7,37 @@ using Kyloe.Symbols;
 namespace Kyloe.Lowering
 {
 
+    internal sealed class LoweredCompilationUnit : LoweredNode 
+    {
+        public LoweredCompilationUnit(ImmutableArray<LoweredFunctionDefinition> loweredFunctions, LoweredStatement globalStatement, LoweredFunctionDefinition? mainFunction)
+        {
+            LoweredFunctions = loweredFunctions;
+            GlobalStatement = globalStatement;
+            MainFunction = mainFunction;
+        }
+
+        public ImmutableArray<LoweredFunctionDefinition> LoweredFunctions { get; }
+        public LoweredStatement GlobalStatement { get; }
+
+        public LoweredFunctionDefinition? MainFunction { get; }
+
+        public override LoweredNodeKind Kind => LoweredNodeKind.LoweredCompilationUnit;
+    }
+
+    internal sealed class LoweredFunctionDefinition : LoweredNode 
+    {
+        public LoweredFunctionDefinition(FunctionType type, LoweredStatement body)
+        {
+            Type = type;
+            Body = body;
+        }
+
+        public FunctionType Type { get; }
+        public LoweredStatement Body { get; }
+
+        public override LoweredNodeKind Kind => LoweredNodeKind.LoweredFunctionDefinition;
+    }
+
     internal class Lowerer
     {
 
@@ -19,6 +50,30 @@ namespace Kyloe.Lowering
             this.typeSystem = typeSystem;
             this.loopLableStack = new Stack<(LoweredLabel, LoweredLabel)>();
         }
+
+        public LoweredCompilationUnit LowerCompilationUnit(BoundCompilationUnit compilationUnit) 
+        {
+            var globals = ImmutableArray.CreateBuilder<LoweredStatement>(compilationUnit.Globals.Length);
+            var functions = ImmutableArray.CreateBuilder<LoweredFunctionDefinition>(compilationUnit.Functions.Length);
+
+            foreach (var function in compilationUnit.Functions)
+                functions.Add(LowerFunctionDefinition(function));
+
+            foreach (var global in compilationUnit.Globals)
+                globals.Add(LowerStatement(global));
+
+            var globalStatement = new LoweredBlockStatement(globals.MoveToImmutable());
+            var main = compilationUnit.MainFunction is not null ? LowerFunctionDefinition(compilationUnit.MainFunction) : null;
+
+            return new LoweredCompilationUnit(functions.MoveToImmutable(), globalStatement, main);
+        }
+
+        public LoweredFunctionDefinition LowerFunctionDefinition(BoundFunctionDefinition functionDefinition) 
+        {
+            var body = LowerStatement(functionDefinition.Body);
+            return new LoweredFunctionDefinition(functionDefinition.Type, body);
+        }
+
 
         private LoweredStatement LowerStatement(BoundStatement statement)
         {
