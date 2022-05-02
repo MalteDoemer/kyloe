@@ -6,24 +6,6 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Lowering
 {
-    public enum LoweredNodeKind
-    {
-        LoweredLiteralExpression,
-        LoweredBinaryExpression,
-        LoweredUnaryExpression,
-        LoweredAssignment,
-        LoweredVariableAccessExpression,
-
-        LoweredStatementBlock,
-        LoweredContinueStatement,
-        LoweredBreakStatement,
-        LoweredReturnStatement,
-        LoweredWhileStatement,
-        LoweredExpressionStatement,
-        LoweredDeclarationStatement,
-        LoweredEmptyStatement,
-        LoweredIfStatement,
-    }
 
     internal class Lowerer
     {
@@ -73,7 +55,7 @@ namespace Kyloe.Lowering
             foreach (var stmt in statement.Statements)
                 builder.Add(LowerStatement(stmt));
 
-            return new LoweredStatementBlock(builder.MoveToImmutable());
+            return new LoweredBlockStatement(builder.MoveToImmutable());
         }
 
         private LoweredStatement LowerEmptyStatement(BoundEmptyStatement statement)

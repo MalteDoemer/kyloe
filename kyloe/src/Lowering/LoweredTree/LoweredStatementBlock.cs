@@ -4,16 +4,16 @@ using System.Collections.Immutable;
 
 namespace Kyloe.Lowering
 {
-    internal sealed class LoweredStatementBlock : LoweredStatement, IEnumerable<LoweredStatement>
+    internal sealed class LoweredBlockStatement : LoweredStatement, IEnumerable<LoweredStatement>
     {
-        public LoweredStatementBlock(ImmutableArray<LoweredStatement> statements)
+        public LoweredBlockStatement(ImmutableArray<LoweredStatement> statements)
         {
             Statements = statements;
         }
 
         public ImmutableArray<LoweredStatement> Statements { get; }
 
-        public override LoweredNodeKind Kind => LoweredNodeKind.LoweredStatementBlock;
+        public override LoweredNodeKind Kind => LoweredNodeKind.LoweredBlockStatement;
 
         public IEnumerator<LoweredStatement> GetEnumerator()
         {
