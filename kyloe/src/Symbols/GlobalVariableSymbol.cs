@@ -2,9 +2,9 @@ using Kyloe.Semantics;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class LocalVariableSymbol : Symbol
+    internal sealed class GlobalVariableSymbol : Symbol
     {
-        public LocalVariableSymbol(string name, TypeSpecifier type, bool isConst)
+        public GlobalVariableSymbol(string name, TypeSpecifier type, bool isConst)
         {
             Name = name;
             Type = type;
@@ -15,7 +15,7 @@ namespace Kyloe.Symbols
 
         public override string Name { get; }
 
-        public override SymbolKind Kind => SymbolKind.LocalVariableSymbol;
+        public override SymbolKind Kind => SymbolKind.GlobalVariableSymbol;
 
         public override TypeSpecifier Type { get; }
 

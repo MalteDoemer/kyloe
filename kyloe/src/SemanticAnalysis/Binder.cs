@@ -18,10 +18,13 @@ namespace Kyloe.Semantics
 
         private readonly Stack<FunctionType> functionStack;
 
+        private readonly Stack<SyntaxToken> loopStack;
+
         public Binder(TypeSystem typeSystem, DiagnosticCollector diagnostics)
         {
             this.typeSystem = typeSystem;
             this.diagnostics = diagnostics;
+            this.loopStack = new Stack<SyntaxToken>();
             this.functionStack = new Stack<FunctionType>();
             this.symbolStack = new Stack<SymbolScope>();
             this.symbolStack.Push(typeSystem.GlobalScope);
@@ -395,11 +398,17 @@ namespace Kyloe.Semantics
 
         private BoundContinueStatement BindContinueStatement(SyntaxToken token)
         {
+            if (loopStack.Count == 0)
+                diagnostics.IllegalContinueStatement(token.Location);
+
             return new BoundContinueStatement(token);
         }
 
         private BoundBreakStatement BindBreakStatement(SyntaxToken token)
         {
+            if (loopStack.Count == 0)
+                diagnostics.IllegalBreakStatement(token.Location);
+
             return new BoundBreakStatement(token);
         }
 
@@ -550,7 +559,9 @@ namespace Kyloe.Semantics
             var expr = BindExpression(exprSyntax);
             var _result = GetResultType(expr, exprSyntax.Location, typeSystem.Bool, mustBeValue: true);
 
+            loopStack.Push(whileStatement);
             var body = BindStatement(blockSyntax);
+            loopStack.Pop();
 
             return new BoundWhileStatement(expr, body, token);
         }

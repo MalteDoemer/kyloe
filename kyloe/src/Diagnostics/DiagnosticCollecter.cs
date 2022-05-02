@@ -160,6 +160,18 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.IllegalReturnStatement, msg, location);
         }
 
+        internal void IllegalBreakStatement(SourceLocation location)
+        {
+            var msg = "illegal break statement outside a loop";
+            AddError(DiagnosticKind.IllegalBreakStatement, msg, location);
+        }
+
+        internal void IllegalContinueStatement(SourceLocation location)
+        {
+            var msg = "illegal continue statement outside a loop";
+            AddError(DiagnosticKind.IllegalContinueStatement, msg, location);
+        }
+
         public void MissingMainFunction()
         {
             var msg = "the program does not contain a suitable 'main' function";

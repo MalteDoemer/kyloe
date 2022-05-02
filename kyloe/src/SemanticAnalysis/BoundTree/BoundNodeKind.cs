@@ -17,6 +17,9 @@ namespace Kyloe.Semantics
         BoundExpressionStatement,
         BoundInvalidStatement,
         BoundWhileStatement,
+        BoundReturnStatement,
+        BoundContinueStatement,
+        BoundBreakStatement,
 
         BoundLiteralExpression,
         BoundBinaryExpression,
@@ -26,8 +29,5 @@ namespace Kyloe.Semantics
         BoundAssignmentExpression,
         BoundSymbolExpression,
         BoundCallExpression,
-        BoundReturnStatement,
-        BoundContinueStatement,
-        BoundBreakStatement,
     }
 }
