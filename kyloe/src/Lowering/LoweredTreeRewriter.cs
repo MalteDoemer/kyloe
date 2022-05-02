@@ -55,6 +55,10 @@ namespace Kyloe.Lowering
         protected virtual LoweredStatement RewriteConditionalGotoStatement(LoweredConditionalGotoStatement statement)
         {
             var expr = RewriteExpression(statement.Condition);
+
+            if (expr == statement.Condition)
+                return statement;
+
             return new LoweredConditionalGotoStatement(statement.Label, expr);
         }
 
@@ -89,6 +93,10 @@ namespace Kyloe.Lowering
                 return statement;
 
             var expr = RewriteExpression(statement.Expression);
+
+            if (expr == statement.Expression)
+                return statement;
+
             return new LoweredReturnStatement(expr);
         }
 
@@ -96,12 +104,20 @@ namespace Kyloe.Lowering
         {
             var condition = RewriteExpression(statement.Condition);
             var body = RewriteStatement(statement.Body);
+
+            if (condition == statement.Condition && body == statement.Body)
+                return statement;
+
             return new LoweredWhileStatement(statement.BreakLabel, statement.ContinueLabel, condition, body);
         }
 
         protected virtual LoweredStatement RewriteExpressionStatement(LoweredExpressionStatement statement)
         {
             var expr = RewriteExpression(statement.Expression);
+
+            if (expr == statement.Expression)
+                return statement;
+
             return new LoweredExpressionStatement(expr);
         }
 
@@ -111,6 +127,10 @@ namespace Kyloe.Lowering
                 return statement;
 
             var initializer = RewriteExpression(statement.Initializer);
+
+            if (initializer == statement.Initializer)
+                return statement;
+
             return new LoweredDeclarationStatement(statement.Symbol, initializer);
         }
 
@@ -124,6 +144,9 @@ namespace Kyloe.Lowering
             var condition = RewriteExpression(statement.Condition);
             var body = RewriteStatement(statement.Body);
             var elsebody = RewriteStatement(statement.ElseStatment);
+
+            if (condition == statement.Condition && body == statement.Body && elsebody == statement.ElseStatment)
+                return statement;
 
             return new LoweredIfStatement(condition, body, elsebody);
         }
@@ -157,12 +180,20 @@ namespace Kyloe.Lowering
         {
             var left = RewriteExpression(expression.LeftExpression);
             var right = RewriteExpression(expression.RightExpression);
+
+            if (left == expression.LeftExpression && right == expression.RightExpression)
+                return expression;
+
             return new LoweredBinaryExpression(expression.Type, left, expression.Operation, right);
         }
 
         protected virtual LoweredExpression RewriteUnaryExpression(LoweredUnaryExpression expression)
         {
             var expr = RewriteExpression(expression.Expression);
+
+            if (expr == expression.Expression)
+                return expression;
+
             return new LoweredUnaryExpression(expression.Type, expr, expression.Operation);
         }
 
@@ -170,6 +201,10 @@ namespace Kyloe.Lowering
         {
             var left = RewriteExpression(expression.LeftExpression);
             var right = RewriteExpression(expression.RightExpression);
+
+            if (left == expression.LeftExpression && right == expression.RightExpression)
+                return expression;
+
             return new LoweredAssignment(typeSystem, left, expression.Operation, right);
         }
 
