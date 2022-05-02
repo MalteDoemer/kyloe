@@ -15,6 +15,8 @@ namespace Kyloe.Lowering
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredArguments;
 
+        public override IEnumerable<LoweredNode> Children() => Arguments;
+
         public IEnumerator<LoweredExpression> GetEnumerator()
         {
             return ((IEnumerable<LoweredExpression>)Arguments).GetEnumerator();

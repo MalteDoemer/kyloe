@@ -15,6 +15,11 @@ namespace Kyloe.Lowering
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredBlockStatement;
 
+        public override IEnumerable<LoweredNode> Children()
+        {
+            return Statements;
+        }
+
         public IEnumerator<LoweredStatement> GetEnumerator()
         {
             return ((IEnumerable<LoweredStatement>)Statements).GetEnumerator();

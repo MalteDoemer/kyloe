@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
 
@@ -20,5 +21,10 @@ namespace Kyloe.Lowering
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredLiteralExpression;
+
+        public override IEnumerable<LoweredNode> Children()
+        {
+            yield break;
+        }
     }
 }

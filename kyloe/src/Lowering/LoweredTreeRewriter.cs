@@ -13,7 +13,30 @@ namespace Kyloe.Lowering
             this.typeSystem = typeSystem;
         }
 
-        public virtual LoweredStatement RewriteStatement(LoweredStatement statement)
+
+        public virtual LoweredCompilationUnit RewriteCompilationUnit(LoweredCompilationUnit compilationUnit)
+        {
+            var global = RewriteStatement(compilationUnit.GlobalStatement);
+
+            var builder = ImmutableArray.CreateBuilder<LoweredFunctionDefinition>(compilationUnit.LoweredFunctions.Length);
+
+            foreach (var func in compilationUnit.LoweredFunctions)
+                builder.Add(RewriteFunctionDefinition(func));
+
+            return new LoweredCompilationUnit(builder.MoveToImmutable(), global, compilationUnit.MainFunctionIndex);
+        }
+
+        protected virtual LoweredFunctionDefinition RewriteFunctionDefinition(LoweredFunctionDefinition functionDefinition)
+        {
+            var body = RewriteBlockStatement(functionDefinition.Body);
+
+            if (body == functionDefinition.Body)
+                return functionDefinition;
+
+            return new LoweredFunctionDefinition(functionDefinition.Type, body);
+        }
+
+        protected virtual LoweredStatement RewriteStatement(LoweredStatement statement)
         {
             switch (statement.Kind)
             {
@@ -67,7 +90,7 @@ namespace Kyloe.Lowering
             return statement;
         }
 
-        protected virtual LoweredStatement RewriteBlockStatement(LoweredBlockStatement statement)
+        protected virtual LoweredBlockStatement RewriteBlockStatement(LoweredBlockStatement statement)
         {
             var builder = ImmutableArray.CreateBuilder<LoweredStatement>(statement.Statements.Length);
 
@@ -165,10 +188,34 @@ namespace Kyloe.Lowering
                     return RewriteAssignment((LoweredAssignment)expression);
                 case LoweredNodeKind.LoweredVariableAccessExpression:
                     return RewriteVariableAccessExpression((LoweredVariableAccessExpression)expression);
-
+                case LoweredNodeKind.LoweredCallExpression:
+                    return RewriteCallExpression((LoweredCallExpression)expression);
+                case LoweredNodeKind.LoweredFunctionAccessExpression:
+                    return RewriteFunctionAccessExpression((LoweredFunctionAccessExpression)expression);
                 default:
                     throw new Exception($"unexpected kind: {expression.Kind}");
             }
+        }
+
+        protected virtual LoweredExpression RewriteCallExpression(LoweredCallExpression expression)
+        {
+            var expr = RewriteExpression(expression.Expression);
+            var args = RewriteArguments(expression.Arguments);
+
+            if (expr == expression.Expression && args == expression.Arguments)
+                return expression;
+
+            return new LoweredCallExpression(expression.FunctionType, expr, args);
+        }
+
+        protected virtual LoweredArguments RewriteArguments(LoweredArguments arguments) 
+        {
+            var builder = ImmutableArray.CreateBuilder<LoweredExpression>(arguments.Arguments.Length);
+
+            foreach (var arg in arguments)
+                builder.Add(RewriteExpression(arg));
+
+            return new LoweredArguments(builder.MoveToImmutable());
         }
 
         protected virtual LoweredExpression RewriteLiteralExpression(LoweredLiteralExpression expression)
@@ -209,6 +256,11 @@ namespace Kyloe.Lowering
         }
 
         protected virtual LoweredExpression RewriteVariableAccessExpression(LoweredVariableAccessExpression expression)
+        {
+            return expression;
+        }
+ 
+        protected virtual LoweredExpression RewriteFunctionAccessExpression(LoweredFunctionAccessExpression expression)
         {
             return expression;
         }

@@ -1,6 +1,12 @@
 
-func hi(a: i64) {}
+func hi(a: i64) {
+    println(a);
+}
 
 func main() {
-    hi(5);
+    if (true) {
+        hi(5);
+    } else {
+        hi(7);
+    }
 }

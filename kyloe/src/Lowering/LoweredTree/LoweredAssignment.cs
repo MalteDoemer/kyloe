@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
 
@@ -25,5 +26,10 @@ namespace Kyloe.Lowering
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredAssignment;
 
+        public override IEnumerable<LoweredNode> Children()
+        {
+            yield return LeftExpression;
+            yield return RightExpression;
+        }
     }
 }

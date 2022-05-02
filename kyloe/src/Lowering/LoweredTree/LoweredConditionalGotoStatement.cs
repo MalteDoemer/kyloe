@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Kyloe.Lowering
 {
     internal sealed class LoweredConditionalGotoStatement : LoweredStatement
@@ -12,5 +14,10 @@ namespace Kyloe.Lowering
         public LoweredExpression Condition { get; }
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredConditionalGotoStatement;
+
+        public override IEnumerable<LoweredNode> Children()
+        {
+            yield return Condition;
+        }
     }
 }

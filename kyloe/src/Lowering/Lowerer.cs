@@ -24,21 +24,27 @@ namespace Kyloe.Lowering
             var globals = ImmutableArray.CreateBuilder<LoweredStatement>(compilationUnit.Globals.Length);
             var functions = ImmutableArray.CreateBuilder<LoweredFunctionDefinition>(compilationUnit.Functions.Length);
 
-            foreach (var function in compilationUnit.Functions)
+            var mainIndex = -1;
+
+            foreach (var (i, function) in compilationUnit.Functions.EnumerateIndex())
+            {
+                if (object.ReferenceEquals(function, compilationUnit.MainFunction))
+                    mainIndex = i;
+
                 functions.Add(LowerFunctionDefinition(function));
+            }
 
             foreach (var global in compilationUnit.Globals)
                 globals.Add(LowerStatement(global));
 
             var globalStatement = new LoweredBlockStatement(globals.MoveToImmutable());
-            var main = compilationUnit.MainFunction is not null ? LowerFunctionDefinition(compilationUnit.MainFunction) : null;
 
-            return new LoweredCompilationUnit(functions.MoveToImmutable(), globalStatement, main);
+            return new LoweredCompilationUnit(functions.MoveToImmutable(), globalStatement, mainIndex);
         }
 
         private LoweredFunctionDefinition LowerFunctionDefinition(BoundFunctionDefinition functionDefinition)
         {
-            var body = LowerStatement(functionDefinition.Body);
+            var body = LowerBlockStatement(functionDefinition.Body);
             return new LoweredFunctionDefinition(functionDefinition.Type, body);
         }
 
@@ -70,7 +76,7 @@ namespace Kyloe.Lowering
             }
         }
 
-        private LoweredStatement LowerBlockStatement(BoundBlockStatement statement)
+        private LoweredBlockStatement LowerBlockStatement(BoundBlockStatement statement)
         {
             var builder = ImmutableArray.CreateBuilder<LoweredStatement>(statement.Statements.Length);
 

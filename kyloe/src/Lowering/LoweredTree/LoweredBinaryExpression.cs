@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
 
@@ -24,5 +25,11 @@ namespace Kyloe.Lowering
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredBinaryExpression;
+
+        public override IEnumerable<LoweredNode> Children()
+        {
+            yield return LeftExpression;
+            yield return RightExpression;
+        }
     }
 }

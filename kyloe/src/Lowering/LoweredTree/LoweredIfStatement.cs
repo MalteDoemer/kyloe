@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Kyloe.Lowering
 {
     internal sealed class LoweredIfStatement : LoweredStatement
@@ -14,5 +16,12 @@ namespace Kyloe.Lowering
         public LoweredStatement ElseStatment { get; }
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredIfStatement;
+
+        public override IEnumerable<LoweredNode> Children()
+        {
+            yield return Condition;
+            yield return Body;
+            yield return ElseStatment;
+        }
     }
 }

@@ -6,6 +6,7 @@ using Kyloe.Utility;
 using Kyloe.Syntax;
 using Kyloe.Symbols;
 using Kyloe.Lowering;
+using System.IO;
 
 namespace Kyloe
 {
@@ -20,12 +21,15 @@ namespace Kyloe
         private readonly DiagnosticResult diagnostics;
         private readonly LoweredCompilationUnit? compilationUnit;
 
+
         private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
         {
             this.assembly = assembly;
             this.diagnostics = diagnostics;
             this.compilationUnit = compilationUnit;
         }
+
+        public LoweredNode? GetRoot() => compilationUnit;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
@@ -53,9 +57,13 @@ namespace Kyloe
                 var lowerer = new Lowerer(typeSystem);
                 var loweredCompilationUnit = lowerer.LowerCompilationUnit(boundCompilationUnit);
 
-                
+                var simplifier = new LoweredTreeSimplifier(typeSystem);
+                var simplifiedCompilationUnit = simplifier.RewriteCompilationUnit(loweredCompilationUnit);
 
-                return new Compilation(assembly, diagnostics.ToResult(), loweredCompilationUnit);
+                var flattener = new LoweredTreeFlattener(typeSystem);
+                var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
+
+                return new Compilation(assembly, diagnostics.ToResult(), flattenedCompilationUnit);
             }
 
             return new Compilation(assembly, diagnostics.ToResult(), null);

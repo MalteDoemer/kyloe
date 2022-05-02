@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Kyloe.Lowering
 {
     internal sealed class LoweredWhileStatement : LoweredStatement
@@ -17,5 +19,11 @@ namespace Kyloe.Lowering
         public LoweredStatement Body { get; }
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredWhileStatement;
+
+        public override IEnumerable<LoweredNode> Children()
+        {
+            yield return Condition;
+            yield return Body;
+        }
     }
 }

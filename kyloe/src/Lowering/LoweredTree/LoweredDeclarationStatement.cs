@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyloe.Symbols;
 
 namespace Kyloe.Lowering
@@ -14,5 +15,11 @@ namespace Kyloe.Lowering
         public LoweredExpression? Initializer { get; }
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredDeclarationStatement;
+
+        public override IEnumerable<LoweredNode> Children()
+        {
+            if (Initializer is not null)
+                yield return Initializer;
+        }
     }
 }
