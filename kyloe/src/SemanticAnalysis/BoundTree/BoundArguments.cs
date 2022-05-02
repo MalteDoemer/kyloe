@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -7,7 +8,7 @@ using Kyloe.Syntax;
 
 namespace Kyloe.Semantics
 {
-    internal sealed class BoundArguments : BoundNode
+    internal sealed class BoundArguments : BoundNode, IEnumerable<BoundExpression>
     {
         public BoundArguments(ImmutableArray<BoundExpression> arguments, SyntaxToken syntax)
         {
@@ -23,5 +24,15 @@ namespace Kyloe.Semantics
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundArguments;
         public override SyntaxToken Syntax { get; }
+
+        public IEnumerator<BoundExpression> GetEnumerator()
+        {
+            return ((IEnumerable<BoundExpression>)Arguments).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)Arguments).GetEnumerator();
+        }
     }
 }

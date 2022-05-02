@@ -6,11 +6,10 @@ namespace Kyloe.Symbols
 {
     internal sealed class ParameterSymbol : Symbol
     {
-        public ParameterSymbol(string name, TypeSpecifier type, SourceLocation? location = null)
+        public ParameterSymbol(string name, TypeSpecifier type)
         {
             Name = name;
             Type = type;
-            Location = location;
         }
 
         public override string Name { get; }
@@ -20,7 +19,5 @@ namespace Kyloe.Symbols
         public override TypeSpecifier Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
-
-        public SourceLocation? Location { get; }
     }
 }

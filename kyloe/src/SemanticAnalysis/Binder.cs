@@ -267,7 +267,7 @@ namespace Kyloe.Semantics
             var param = GetNode(token, SyntaxTokenKind.ParameterDeclaration);
             var nameTerminal = GetTerminal(param.Tokens[0], SyntaxTokenKind.Identifier);
             var typeClause = BindTypeClause(GetNode(param.Tokens[1]));
-            var symbol = new ParameterSymbol(nameTerminal.Text, typeClause.Type, nameTerminal.Location);
+            var symbol = new ParameterSymbol(nameTerminal.Text, typeClause.Type);
 
             return new BoundParameterDeclaration(symbol, token);
         }
@@ -347,11 +347,12 @@ namespace Kyloe.Semantics
             functionStack.Push(decl.Type);
             EnterNewScope(); // this scope contains the parameters
 
-            foreach (var param in decl.Type.Parameters)
+            foreach (var paramDecl in decl.Parameters)
             {
-                if (!DeclareSymbol(param))
-                    if (param.Location is SourceLocation loc)
-                        diagnostics.RedefinedParameterError(loc, param.Name);
+                if (!DeclareSymbol(paramDecl.Symbol))
+                {
+                    diagnostics.RedefinedParameterError(paramDecl.Syntax.Location, paramDecl.Symbol.Name);
+                }
             }
 
             var body = GetNode(function.Tokens[6]);
