@@ -7,8 +7,6 @@ namespace Kyloe.Lowering
     {
         public abstract TypeSpecifier Type { get; }
 
-        public abstract bool HasKnownValue { get; }
-
         public abstract ValueCategory ValueCategory { get; }
 
         public bool IsValue => ValueCategory == ValueCategory.ReadableValue || ValueCategory == ValueCategory.ModifiableValue;

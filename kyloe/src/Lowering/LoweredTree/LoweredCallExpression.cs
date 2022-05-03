@@ -19,8 +19,6 @@ namespace Kyloe.Lowering
 
         public override TypeSpecifier Type => FunctionType.ReturnType;
 
-        public override bool HasKnownValue => false;
-
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredCallExpression;

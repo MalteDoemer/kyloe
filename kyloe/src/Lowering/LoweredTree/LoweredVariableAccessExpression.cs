@@ -15,8 +15,6 @@ namespace Kyloe.Lowering
 
         public override TypeSpecifier Type => VariableSymbol.Type;
 
-        public override bool HasKnownValue => false;
-
         public override ValueCategory ValueCategory => VariableSymbol.ValueCategory;
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredVariableAccessExpression;

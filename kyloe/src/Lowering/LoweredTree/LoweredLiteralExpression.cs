@@ -16,8 +16,6 @@ namespace Kyloe.Lowering
 
         public override TypeSpecifier Type { get; }
 
-        public override bool HasKnownValue => true;
-
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredLiteralExpression;
