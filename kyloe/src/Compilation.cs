@@ -29,6 +29,18 @@ namespace Kyloe
             this.compilationUnit = compilationUnit;
         }
 
+        public void WriteTo(TextWriter writer) 
+        {
+            if (compilationUnit is not null)
+            {
+                var treeWriter = new LoweredTreeWriter(writer);
+                treeWriter.WriteNode(compilationUnit);
+                return;
+            }
+            
+            writer.WriteLine("(null)");
+        }
+
         public LoweredNode? GetRoot() => compilationUnit;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;

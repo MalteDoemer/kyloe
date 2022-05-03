@@ -33,7 +33,7 @@ namespace Kyloe.Lowering
             // 
 
 
-            var checkConditionLabel = LoweredLabel.Create();
+            var checkConditionLabel = LoweredLabel.Create("check");
 
             var block = Block(
                 Goto(checkConditionLabel),
@@ -69,7 +69,7 @@ namespace Kyloe.Lowering
                 // end:
 
 
-                var endLabel = LoweredLabel.Create();
+                var endLabel = LoweredLabel.Create("end");
 
                 var block = Block(
                     GotoIfNot(endLabel, statement.Condition),
@@ -93,8 +93,8 @@ namespace Kyloe.Lowering
                 //      elseBody
                 // end:
 
-                var elseLabel = LoweredLabel.Create();
-                var endLabel = LoweredLabel.Create();
+                var elseLabel = LoweredLabel.Create("else");
+                var endLabel = LoweredLabel.Create("end");
 
                 var block = Block(
                     GotoIfNot(elseLabel, statement.Condition),

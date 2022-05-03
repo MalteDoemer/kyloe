@@ -114,7 +114,7 @@ namespace Kyloe.Lowering
 
         private LoweredStatement LowerWhileStatement(BoundWhileStatement statement)
         {
-            var lables = (LoweredLabel.Create(), LoweredLabel.Create());
+            var lables = (LoweredLabel.Create("break"), LoweredLabel.Create("continue"));
 
             var condition = LowerExpression(statement.Condition);
 

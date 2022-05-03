@@ -13,6 +13,7 @@ namespace Kyloe.Lowering
         LoweredAssignment,
         LoweredVariableAccessExpression,
         LoweredFunctionAccessExpression,
+        LoweredCallExpression,
 
         LoweredBlockStatement,
         LoweredContinueStatement,
@@ -23,10 +24,8 @@ namespace Kyloe.Lowering
         LoweredDeclarationStatement,
         LoweredEmptyStatement,
         LoweredIfStatement,
-        
         LoweredGotoStatement,
         LoweredConditionalGotoStatement,
         LoweredLabelStatement,
-        LoweredCallExpression,
     }
 }

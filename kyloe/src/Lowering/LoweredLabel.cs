@@ -7,17 +7,21 @@ namespace Kyloe.Lowering
     {
         private static int Counter = 0;
 
-        public static LoweredLabel Create()
+        public static LoweredLabel Create(string name)
         {
             var id = Interlocked.Increment(ref Counter);
-            return new LoweredLabel(id);
+            return new LoweredLabel(name, id);
         }
 
-        private LoweredLabel(int value)
+        private LoweredLabel(string name, int value)
         {
+            Name = name;
             Value = value;
         }
 
+        public string Name { get; }
         public int Value { get; }
+
+        public override string ToString() => $"{Name}.{Value}";
     }
 }
