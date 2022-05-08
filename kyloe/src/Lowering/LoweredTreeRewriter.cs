@@ -33,7 +33,7 @@ namespace Kyloe.Lowering
             if (body == functionDefinition.Body)
                 return functionDefinition;
 
-            return new LoweredFunctionDefinition(functionDefinition.FunctionType, body);
+            return new LoweredFunctionDefinition(functionDefinition.Type, body);
         }
 
         protected virtual LoweredStatement RewriteStatement(LoweredStatement statement)

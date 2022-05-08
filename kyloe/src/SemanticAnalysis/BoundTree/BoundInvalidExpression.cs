@@ -12,7 +12,7 @@ namespace Kyloe.Semantics
             Syntax = syntax;
         }
 
-        public override TypeInfo ResultType { get; }
+        public override TypeSpecifier ResultType { get; }
 
         public override SyntaxToken Syntax { get; }
         

@@ -21,7 +21,7 @@ namespace Kyloe.Semantics
 
         public bool AllParametersValid => Parameters.All(p => p.Type is not ErrorType);
 
-        public IEnumerable<TypeInfo> ParameterTypes => Parameters.Select(p => p.Type);
+        public IEnumerable<TypeSpecifier> ParameterTypes => Parameters.Select(p => p.Type);
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundParameters;
 

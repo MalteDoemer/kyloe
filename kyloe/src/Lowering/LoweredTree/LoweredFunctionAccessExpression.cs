@@ -13,7 +13,7 @@ namespace Kyloe.Lowering
 
         public FunctionGroupSymbol FunctionGroup { get; }
 
-        public override TypeInfo Type => FunctionGroup.Type;
+        public override TypeSpecifier Type => FunctionGroup.Type;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

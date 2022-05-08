@@ -15,7 +15,7 @@ namespace Kyloe.Semantics
 
         public override SyntaxToken Syntax { get; }
 
-        public override TypeInfo ResultType => Symbol.Type;
+        public override TypeSpecifier ResultType => Symbol.Type;
 
         public override ValueCategory ValueCategory => Symbol.ValueCategory;
 

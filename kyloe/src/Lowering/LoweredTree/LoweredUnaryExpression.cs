@@ -6,7 +6,7 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredUnaryExpression : LoweredExpression 
     {
-        public LoweredUnaryExpression(TypeInfo type, LoweredExpression Expression, BoundOperation operation)
+        public LoweredUnaryExpression(TypeSpecifier type, LoweredExpression Expression, BoundOperation operation)
         {
             Type = type;
             this.Expression = Expression;
@@ -16,7 +16,7 @@ namespace Kyloe.Lowering
         public LoweredExpression Expression { get; }
         public BoundOperation Operation { get; }
 
-        public override TypeInfo Type { get; }
+        public override TypeSpecifier Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

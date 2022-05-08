@@ -27,19 +27,19 @@ namespace Kyloe.Codegen
         private readonly Mono.Cecil.TypeSystem cecilTypeSystem;
         private readonly IEnumerable<AssemblyDefinition> assemblies;
 
-        private readonly Dictionary<Symbols.TypeSpecifier, TypeReference> typeCache;
-        private readonly Dictionary<Symbols.FunctionType, MethodReference> functionCache;
+        private readonly Dictionary<Symbols.TypeInfo, TypeReference> typeCache;
+        private readonly Dictionary<Symbols.FunctionTypeInfo, MethodReference> functionCache;
 
         public TypeResolver(Symbols.TypeSystem kyloeTypeSystem, Mono.Cecil.TypeSystem cecilTypeSystem, IEnumerable<AssemblyDefinition> assemblies)
         {
             this.kyloeTypeSystem = kyloeTypeSystem;
             this.cecilTypeSystem = cecilTypeSystem;
             this.assemblies = assemblies;
-            this.typeCache = new Dictionary<TypeSpecifier, TypeReference>();
+            this.typeCache = new Dictionary<TypeInfo, TypeReference>();
             this.functionCache = new Dictionary<Symbols.FunctionType, MethodReference>();
         }
 
-        public TypeReference ResolveType(Symbols.TypeSpecifier type)
+        public TypeReference ResolveType(Symbols.TypeInfo type)
         {
             if (typeCache.TryGetValue(type, out var cached))
                 return cached;
@@ -51,7 +51,7 @@ namespace Kyloe.Codegen
             return resolved;
         }
 
-        private TypeReference ResolveTypeImpl(Symbols.TypeSpecifier type)
+        private TypeReference ResolveTypeImpl(Symbols.TypeInfo type)
         {
             switch (type.Kind)
             {

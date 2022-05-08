@@ -117,7 +117,7 @@ namespace Kyloe.Symbols
             }
         }
 
-        private FunctionTypeInfo CreateBuiltinFunction(string name, FunctionGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
+        private FunctionType CreateBuiltinFunction(string name, FunctionGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
         {
             var func = new FunctionType(group, GetBuiltinType(ret), isStatic: true, isBuiltin: true);
 
@@ -127,7 +127,7 @@ namespace Kyloe.Symbols
             return func;
         }
 
-        private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeInfo ret, TypeInfo left, TypeInfo right)
+        private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
             var group = new FunctionGroupType(name, left);
@@ -140,7 +140,7 @@ namespace Kyloe.Symbols
             return new OperationSymbol(op, group);
         }
 
-        private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, TypeInfo ret, TypeInfo arg)
+        private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
         {
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
             var group = new FunctionGroupType(name, arg);

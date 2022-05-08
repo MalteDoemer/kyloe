@@ -17,7 +17,7 @@ namespace Kyloe.Semantics
         public BoundExpression LeftExpression { get; }
         public AssignmentOperation Operation { get; }
         public BoundExpression RightExpression { get; }
-        public override TypeInfo ResultType { get; }
+        public override TypeSpecifier ResultType { get; }
 
         public override SyntaxToken Syntax { get; }
 

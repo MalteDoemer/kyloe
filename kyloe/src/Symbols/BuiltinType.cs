@@ -2,7 +2,7 @@ using System;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class BuiltinType : ValueTypeInfo
+    internal sealed class BuiltinType : TypeSpecifier
     {
         public BuiltinType(string name)
         {

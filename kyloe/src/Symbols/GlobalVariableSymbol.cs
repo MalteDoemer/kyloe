@@ -4,7 +4,7 @@ namespace Kyloe.Symbols
 {
     internal sealed class GlobalVariableSymbol : Symbol
     {
-        public GlobalVariableSymbol(string name, TypeInfo type, bool isConst)
+        public GlobalVariableSymbol(string name, TypeSpecifier type, bool isConst)
         {
             Name = name;
             Type = type;
@@ -17,7 +17,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.GlobalVariableSymbol;
 
-        public override TypeInfo Type { get; }
+        public override TypeSpecifier Type { get; }
 
         public override ValueCategory ValueCategory => IsConst ? ValueCategory.ReadableValue : ValueCategory.ModifiableValue;
     }

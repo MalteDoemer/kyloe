@@ -16,7 +16,7 @@ namespace Kyloe.Semantics
         private readonly DiagnosticCollector diagnostics;
         private readonly Stack<SymbolScope> symbolStack;
 
-        private readonly Stack<FunctionTypeInfo> functionStack;
+        private readonly Stack<FunctionType> functionStack;
 
         private readonly Stack<SyntaxToken> loopStack;
 
@@ -56,7 +56,7 @@ namespace Kyloe.Semantics
 
         private bool InGlobalScope() => symbolStack.Count == 1;
 
-        private bool IsTypeMissmatch(TypeInfo expectedType, TypeInfo rightType)
+        private bool IsTypeMissmatch(TypeSpecifier expectedType, TypeSpecifier rightType)
         {
             if (expectedType is ErrorType || rightType is ErrorType)
                 return false;
@@ -64,7 +64,7 @@ namespace Kyloe.Semantics
             return !expectedType.Equals(rightType);
         }
 
-        private bool TypeSequenceEquals(IEnumerable<TypeInfo> seq1, IEnumerable<TypeInfo> seq2)
+        private bool TypeSequenceEquals(IEnumerable<TypeSpecifier> seq1, IEnumerable<TypeSpecifier> seq2)
         {
             if (seq1.Count() != seq2.Count())
                 return false;
@@ -76,7 +76,7 @@ namespace Kyloe.Semantics
             return true;
         }
 
-        private FunctionTypeInfo? FindFunctionOverload(FunctionGroupType group, IEnumerable<TypeInfo> parameterTypes, bool mustBeStatic = false)
+        private FunctionType? FindFunctionOverload(FunctionGroupType group, IEnumerable<TypeSpecifier> parameterTypes, bool mustBeStatic = false)
         {
             foreach (var func in group.Functions)
             {
@@ -91,7 +91,7 @@ namespace Kyloe.Semantics
             return null;
         }
 
-        private TypeInfo GetResultType(BoundExpression expr, SourceLocation src, TypeInfo? expectedType = null, bool mustBeValue = false, bool mustBeModifiableValue = false, bool mustBeTypeName = false)
+        private TypeSpecifier GetResultType(BoundExpression expr, SourceLocation src, TypeSpecifier? expectedType = null, bool mustBeValue = false, bool mustBeModifiableValue = false, bool mustBeTypeName = false)
         {
             if (expr.ResultType is ErrorType)
                 return typeSystem.Error;
@@ -182,7 +182,7 @@ namespace Kyloe.Semantics
             foreach (var (funcDecl, funcSyntax) in functionDecls.Zip(functionSyntax))
                 functionDefs.Add(BindFunctionDefinition(funcDecl));
 
-            if (LookupSymbol("main") is FunctionGroupSymbol mainSymbol && FindFunctionOverload(mainSymbol.Group, Enumerable.Empty<TypeInfo>()) is FunctionType mainType)
+            if (LookupSymbol("main") is FunctionGroupSymbol mainSymbol && FindFunctionOverload(mainSymbol.Group, Enumerable.Empty<TypeSpecifier>()) is FunctionType mainType)
             {
                 var mainFunction = functionDefs.Where(f => f.Type.Equals(mainType)).FirstOrDefault();
                 return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), mainFunction, token);
@@ -964,7 +964,7 @@ namespace Kyloe.Semantics
             return new BoundLiteralExpression(typeSystem.Error, new object(), token);
         }
 
-        private object? GetValueForLiteral(SyntaxTerminal token, TypeInfo type)
+        private object? GetValueForLiteral(SyntaxTerminal token, TypeSpecifier type)
         {
             var text = token.Text;
 
@@ -1007,7 +1007,7 @@ namespace Kyloe.Semantics
             return new BoundSymbolExpression(symbol, token);
         }
 
-        private TypeInfo? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
+        private TypeSpecifier? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
         {
             Debug.Assert(op.IsBinaryOperation());
 
@@ -1034,7 +1034,7 @@ namespace Kyloe.Semantics
             return function?.ReturnType;
         }
 
-        private TypeInfo? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
+        private TypeSpecifier? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
         {
             Debug.Assert(op.IsUnaryOperation());
 

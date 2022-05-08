@@ -30,7 +30,7 @@ namespace Kyloe.Lowering
             RewriteBlockStatement(functionDefinition.Body);
             var flat = statements.ToImmutable();
             statements.Clear();
-            return new LoweredFunctionDefinition(functionDefinition.FunctionType, new LoweredBlockStatement(flat));
+            return new LoweredFunctionDefinition(functionDefinition.Type, new LoweredBlockStatement(flat));
         }
     }
 }

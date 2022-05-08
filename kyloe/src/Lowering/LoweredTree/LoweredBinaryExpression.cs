@@ -6,7 +6,7 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredBinaryExpression : LoweredExpression 
     {
-        public LoweredBinaryExpression(TypeInfo type, LoweredExpression leftExpression, BoundOperation operation, LoweredExpression rightExpression)
+        public LoweredBinaryExpression(TypeSpecifier type, LoweredExpression leftExpression, BoundOperation operation, LoweredExpression rightExpression)
         {
             Type = type;
             LeftExpression = leftExpression;
@@ -18,7 +18,7 @@ namespace Kyloe.Lowering
         public BoundOperation Operation { get; }
         public LoweredExpression RightExpression { get; }
 
-        public override TypeInfo Type { get; }
+        public override TypeSpecifier Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

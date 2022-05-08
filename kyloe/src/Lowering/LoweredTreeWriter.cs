@@ -88,7 +88,7 @@ namespace Kyloe.Lowering
         private void WriteFunctionDefinition(LoweredFunctionDefinition node)
         {
             WriteLine();
-            writer.Write(node.FunctionType.FullName());
+            writer.Write(node.Type.FullName());
             writer.Write(' ');
             WriteNode(node.Body);
         }

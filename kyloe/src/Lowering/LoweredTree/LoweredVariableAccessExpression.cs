@@ -13,7 +13,7 @@ namespace Kyloe.Lowering
 
         public Symbol VariableSymbol { get; }
 
-        public override TypeInfo Type => VariableSymbol.Type;
+        public override TypeSpecifier Type => VariableSymbol.Type;
 
         public override ValueCategory ValueCategory => VariableSymbol.ValueCategory;
 

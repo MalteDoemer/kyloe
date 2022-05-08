@@ -4,7 +4,7 @@ namespace Kyloe.Semantics
 {
     internal abstract class BoundExpression : BoundNode
     {
-        public abstract TypeInfo ResultType { get; }
+        public abstract TypeSpecifier ResultType { get; }
 
         public abstract ValueCategory ValueCategory { get; }
 

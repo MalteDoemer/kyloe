@@ -14,7 +14,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.TypeNameSymbol;
 
-        public override TypeInfo Type { get; }
+        public override TypeSpecifier Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.TypeName;
     }

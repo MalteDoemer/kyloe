@@ -7,7 +7,7 @@ namespace Kyloe.Semantics
 {
     public static class SemanticInfo
     {
-        internal static TypeInfo GetTypeFromLiteral(TypeSystem typeSystem, SyntaxTokenKind tokenKind)
+        internal static TypeSpecifier GetTypeFromLiteral(TypeSystem typeSystem, SyntaxTokenKind tokenKind)
         {
             switch (tokenKind)
             {

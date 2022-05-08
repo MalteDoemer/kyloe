@@ -5,7 +5,7 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundLiteralExpression : BoundExpression
     {
-        public BoundLiteralExpression(TypeInfo result, object value, SyntaxToken syntax)
+        public BoundLiteralExpression(TypeSpecifier result, object value, SyntaxToken syntax)
         {
             ResultType = result;
             Value = value;
@@ -16,7 +16,7 @@ namespace Kyloe.Semantics
         
         public override SyntaxToken Syntax { get; }
 
-        public override TypeInfo ResultType { get; }
+        public override TypeSpecifier ResultType { get; }
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundLiteralExpression;
 

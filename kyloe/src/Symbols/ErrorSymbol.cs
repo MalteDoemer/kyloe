@@ -13,7 +13,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.ErrorSymbol;
 
-        public override TypeInfo Type { get; }
+        public override TypeSpecifier Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.None;
     }
