@@ -2,6 +2,7 @@ using Xunit;
 using System.Collections.Generic;
 
 using static Kyloe.Tests.Lowering.VerifyNode;
+using System.Linq;
 
 namespace Kyloe.Tests.Lowering
 {
@@ -11,8 +12,11 @@ namespace Kyloe.Tests.Lowering
         [MemberData(nameof(GetStatementData))]
         public void Test_Statement_Lowering(string text, params VerifyNode[] statements)
         {
+            var newStatements = statements.ToList();
+            newStatements.Add(ReturnStatement(null));
+
             text = $"func main() {{ {text} }}";
-            var node = CompilationUnit(BlockStatement(), FunctionDefinition(statements));
+            var node = CompilationUnit(BlockStatement(), FunctionDefinition(newStatements.ToArray()));
 
             var compilation = Compilation.Compile(text);
 
@@ -167,7 +171,7 @@ namespace Kyloe.Tests.Lowering
                 "func main() { }",
                 VerifyNode.CompilationUnit(
                     BlockStatement(),
-                    FunctionDefinition()
+                    FunctionDefinition(ReturnStatement(null))
                 )
             };
         }

@@ -7,6 +7,7 @@ using Kyloe.Syntax;
 using Kyloe.Symbols;
 using Kyloe.Lowering;
 using System.IO;
+using Kyloe.Codegen;
 
 namespace Kyloe
 {
@@ -18,16 +19,17 @@ namespace Kyloe
     public class Compilation
     {
         private readonly DiagnosticResult diagnostics;
+        private readonly Symbols.TypeSystem typeSystem;
         private readonly LoweredCompilationUnit? compilationUnit;
 
-
-        private Compilation(DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
+        private Compilation(Symbols.TypeSystem typeSystem, DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
         {
             this.diagnostics = diagnostics;
             this.compilationUnit = compilationUnit;
+            this.typeSystem = typeSystem;
         }
 
-        public void WriteTo(TextWriter writer) 
+        public void WriteTo(TextWriter writer)
         {
             if (compilationUnit is not null)
             {
@@ -35,8 +37,17 @@ namespace Kyloe
                 treeWriter.WriteNode(compilationUnit);
                 return;
             }
-            
+
             writer.WriteLine("(null)");
+        }
+
+        public void CreateProgram(string programName, string programPath)
+        {
+            var generator = new CodeGenerator(programName, typeSystem);
+            if (compilationUnit is not null)
+                generator.GenerateCompiationUnit(compilationUnit);
+
+            generator.WriteTo(programPath);
         }
 
         public LoweredNode? GetRoot() => compilationUnit;
@@ -70,10 +81,10 @@ namespace Kyloe
                 var flattener = new LoweredTreeFlattener(typeSystem);
                 var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
 
-                return new Compilation(diagnostics.ToResult(), flattenedCompilationUnit);
+                return new Compilation(typeSystem, diagnostics.ToResult(), flattenedCompilationUnit);
             }
 
-            return new Compilation(diagnostics.ToResult(), null);
+            return new Compilation(typeSystem, diagnostics.ToResult(), null);
         }
 
     }
