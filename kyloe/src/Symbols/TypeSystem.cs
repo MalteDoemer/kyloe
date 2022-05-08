@@ -42,7 +42,7 @@ namespace Kyloe.Symbols
             Void = new BuiltinType("void");
             Char = new BuiltinType("char");
             I8 = new BuiltinType("i8");
-            I16 = new BuiltinType("i8");
+            I16 = new BuiltinType("i16");
             I32 = new BuiltinType("i32");
             I64 = new BuiltinType("i64");
             U8 = new BuiltinType("u8");
@@ -119,7 +119,7 @@ namespace Kyloe.Symbols
 
         private FunctionType CreateBuiltinFunction(string name, FunctionGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
         {
-            var func = new FunctionType(group, GetBuiltinType(ret), true);
+            var func = new FunctionType(group, GetBuiltinType(ret), isStatic: true, isBuiltin: true);
 
             foreach (var param in parameters)
                 func.Parameters.Add(new ParameterSymbol(param.name, GetBuiltinType(param.type)));

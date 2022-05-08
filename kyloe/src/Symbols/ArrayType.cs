@@ -1,3 +1,5 @@
+using System;
+
 namespace Kyloe.Symbols
 {
     internal sealed class ArrayType : TypeSpecifier
@@ -15,8 +17,6 @@ namespace Kyloe.Symbols
         public override TypeKind Kind => TypeKind.ArrayType;
 
         public override IReadOnlySymbolScope? ReadOnlyScope => Scope;
-
-        public override bool Equals(TypeSpecifier? other) => other is ArrayType array && array.ElementType.Equals(ElementType);
 
         public override string FullName() => ElementType.FullName() + "[]";
     }

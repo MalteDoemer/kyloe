@@ -2,14 +2,14 @@ using System;
 
 namespace Kyloe.Symbols
 {
-    internal abstract class TypeSpecifier : IEquatable<TypeSpecifier>
+    internal abstract class TypeSpecifier
     {
         public abstract TypeKind Kind { get; }
 
         public abstract IReadOnlySymbolScope? ReadOnlyScope { get; }
 
-        public abstract bool Equals(TypeSpecifier? other);
-
         public abstract string FullName();
+
+        public override string ToString() => FullName();
     }
 }

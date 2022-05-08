@@ -1,3 +1,5 @@
+using System;
+
 namespace Kyloe.Symbols
 {
     internal sealed class BuiltinType : TypeSpecifier
@@ -14,8 +16,6 @@ namespace Kyloe.Symbols
         public override TypeKind Kind => TypeKind.BuiltinType;
 
         public override IReadOnlySymbolScope? ReadOnlyScope => Scope;
-
-        public override bool Equals(TypeSpecifier? other) => object.ReferenceEquals(this, other);
 
         public override string FullName() => Name;
     }

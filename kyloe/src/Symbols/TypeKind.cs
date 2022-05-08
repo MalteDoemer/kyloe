@@ -7,7 +7,5 @@ namespace Kyloe.Symbols
         FunctionType,
         FunctionGroupType,
         ArrayType,
-        MethodGroupType,
-        MethodType,
     }
 }
