@@ -6,7 +6,7 @@ namespace Kyloe.Symbols
     {
         public abstract string Name { get; }
         public abstract SymbolKind Kind { get; }
-        public abstract TypeSpecifier Type { get; }
+        public abstract TypeInfo Type { get; }
         public abstract ValueCategory ValueCategory { get; }
     }
 }

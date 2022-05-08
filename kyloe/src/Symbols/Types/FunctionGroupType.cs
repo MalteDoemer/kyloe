@@ -5,18 +5,18 @@ using System.Text;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class FunctionGroupType : TypeSpecifier
+    internal sealed class FunctionGroupType : TypeInfo
     {
-        public FunctionGroupType(string name, TypeSpecifier? parentType)
+        public FunctionGroupType(string name, ValueTypeInfo? parentType)
         {
             Name = name;
-            Functions = new List<FunctionType>();
+            Functions = new List<FunctionTypeInfo>();
         }
 
         public string Name { get; }
-        public TypeSpecifier? ParentType { get; }
+        public ValueTypeInfo? ParentType { get; }
 
-        public List<FunctionType> Functions { get; }
+        public List<FunctionTypeInfo> Functions { get; }
 
         public override TypeKind Kind => TypeKind.FunctionGroupType;
 

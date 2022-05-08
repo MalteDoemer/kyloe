@@ -20,7 +20,7 @@ namespace Kyloe.Semantics
 
         public bool AllArgumentsValid => Arguments.All(a => a.ResultType is not ErrorType && a.IsValue);
 
-        public IEnumerable<TypeSpecifier> ArgumentTypes => Arguments.Select(a => a.ResultType);
+        public IEnumerable<TypeInfo> ArgumentTypes => Arguments.Select(a => a.ResultType);
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundArguments;
         public override SyntaxToken Syntax { get; }

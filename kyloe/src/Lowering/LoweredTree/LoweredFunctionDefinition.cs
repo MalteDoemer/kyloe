@@ -5,13 +5,13 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredFunctionDefinition : LoweredNode 
     {
-        public LoweredFunctionDefinition(FunctionType type, LoweredBlockStatement body)
+        public LoweredFunctionDefinition(FunctionTypeInfo functionType, LoweredBlockStatement body)
         {
-            Type = type;
+            FunctionType = functionType;
             Body = body;
         }
 
-        public FunctionType Type { get; }
+        public FunctionTypeInfo FunctionType { get; }
         public LoweredBlockStatement Body { get; }
 
         public override LoweredNodeKind Kind => LoweredNodeKind.LoweredFunctionDefinition;

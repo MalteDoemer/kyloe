@@ -6,7 +6,7 @@ namespace Kyloe.Symbols
 {
     internal sealed class ParameterSymbol : Symbol
     {
-        public ParameterSymbol(string name, TypeSpecifier type)
+        public ParameterSymbol(string name, TypeInfo type)
         {
             Name = name;
             Type = type;
@@ -16,7 +16,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.ParameterSymbol;
 
-        public override TypeSpecifier Type { get; }
+        public override TypeInfo Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }

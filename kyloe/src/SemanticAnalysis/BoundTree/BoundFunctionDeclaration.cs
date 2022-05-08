@@ -5,7 +5,7 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundFunctionDeclaration : BoundNode
     {
-        public BoundFunctionDeclaration(FunctionType type, BoundParameters parameters, BoundTypeClause typeClause, SyntaxToken syntax)
+        public BoundFunctionDeclaration(FunctionTypeInfo type, BoundParameters parameters, BoundTypeClause typeClause, SyntaxToken syntax)
         {
             Type = type;
             Parameters = parameters;
@@ -13,7 +13,7 @@ namespace Kyloe.Semantics
             Syntax = syntax;
         }
 
-        public FunctionType Type { get; }
+        public FunctionTypeInfo Type { get; }
         public BoundParameters Parameters { get; }
         public BoundTypeClause TypeClause { get; }
         

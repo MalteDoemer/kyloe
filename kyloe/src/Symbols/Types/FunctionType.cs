@@ -3,10 +3,10 @@ using System.Linq;
 using System.Text;
 
 namespace Kyloe.Symbols
-{
-    internal sealed class FunctionType : TypeSpecifier
+{ /*
+    internal sealed class FunctionType : TypeInfo
     {
-        public FunctionType(FunctionGroupType group, TypeSpecifier returnType, bool isStatic, bool isBuiltin = false)
+        public FunctionType(FunctionGroupType group, TypeInfo returnType, bool isStatic, bool isBuiltin = false)
         {
             Group = group;
             ReturnType = returnType;
@@ -16,7 +16,7 @@ namespace Kyloe.Symbols
         }
 
         public FunctionGroupType Group { get; }
-        public TypeSpecifier ReturnType { get; }
+        public TypeInfo ReturnType { get; }
         public bool IsStatic { get; }
         public bool IsBuiltin { get; }
 
@@ -24,7 +24,7 @@ namespace Kyloe.Symbols
 
         public string Name => Group.Name;
 
-        public TypeSpecifier? ParentType => Group.ParentType;
+        public TypeInfo? ParentType => Group.ParentType;
         
         public override TypeKind Kind => TypeKind.FunctionType;
 
@@ -43,5 +43,5 @@ namespace Kyloe.Symbols
 
             return builder.ToString();
         }
-    }
+    } */
 }

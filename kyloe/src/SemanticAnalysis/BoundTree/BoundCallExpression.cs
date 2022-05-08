@@ -5,7 +5,7 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundCallExpression : BoundExpression
     {
-        public BoundCallExpression(TypeSpecifier functionType, TypeSpecifier resultType, BoundExpression expression, BoundArguments arguments, SyntaxToken syntax)
+        public BoundCallExpression(TypeInfo functionType, TypeInfo resultType, BoundExpression expression, BoundArguments arguments, SyntaxToken syntax)
         {
             FunctionType = functionType;
             ResultType = resultType;
@@ -14,13 +14,13 @@ namespace Kyloe.Semantics
             Syntax = syntax;
         }
 
-        public TypeSpecifier FunctionType { get; }
+        public TypeInfo FunctionType { get; }
         public BoundExpression Expression { get; }
         public BoundArguments Arguments { get; }
         
         public override  SyntaxToken Syntax { get; }
 
-        public override TypeSpecifier ResultType { get; }
+        public override TypeInfo ResultType { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

@@ -18,7 +18,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.OperationSymbol;
 
-        public override TypeSpecifier Type => FunctionGroup;
+        public override TypeInfo Type => FunctionGroup;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
     }

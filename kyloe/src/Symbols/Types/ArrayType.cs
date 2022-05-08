@@ -2,15 +2,15 @@ using System;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class ArrayType : TypeSpecifier
+    internal sealed class ArrayType : ValueTypeInfo
     {
-        public ArrayType(TypeSpecifier elementType)
+        public ArrayType(TypeInfo elementType)
         {
             ElementType = elementType;
             Scope = new SymbolScope();
         }
 
-        public TypeSpecifier ElementType { get; }
+        public TypeInfo ElementType { get; }
 
         public SymbolScope Scope { get; }
 

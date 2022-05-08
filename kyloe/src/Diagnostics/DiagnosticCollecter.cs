@@ -81,25 +81,25 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.UnexpectedTokenError, msg, actual.Location);
         }
 
-        public void UnsupportedBinaryOperation(SourceLocation location, BoundOperation operation, TypeSpecifier left, TypeSpecifier right)
+        public void UnsupportedBinaryOperation(SourceLocation location, BoundOperation operation, TypeInfo left, TypeInfo right)
         {
             var msg = $"binary operator '{operation.GetSymbolOrName()}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
             AddError(DiagnosticKind.UnsupportedBinaryOperation, msg, location);
         }
 
-        public void UnsupportedUnaryOperation(SourceLocation location, BoundOperation operation, TypeSpecifier type)
+        public void UnsupportedUnaryOperation(SourceLocation location, BoundOperation operation, TypeInfo type)
         {
             var msg = $"unary operator '{operation.GetSymbolOrName()}' cannot be used with type '{type.FullName()}'";
             AddError(DiagnosticKind.UnsupportedUnaryOperation, msg, location);
         }
 
-        public void UnsupportedAssignmentOperation(SourceLocation location, AssignmentOperation operation, TypeSpecifier left, TypeSpecifier right)
+        public void UnsupportedAssignmentOperation(SourceLocation location, AssignmentOperation operation, TypeInfo left, TypeInfo right)
         {
             var msg = $"assignment operator '{operation.GetSymbolOrName()}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
             AddError(DiagnosticKind.UnsupportedAssignmentOperation, msg, location);
         }
 
-        public void MissmatchedTypeError(SourceLocation location, TypeSpecifier expected, TypeSpecifier provided)
+        public void MissmatchedTypeError(SourceLocation location, TypeInfo expected, TypeInfo provided)
         {
             var msg = $"missmatched types, expected '{expected.FullName()}', got '{provided.FullName()}'";
             AddError(DiagnosticKind.MissmatchedTypeError, msg, location);

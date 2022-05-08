@@ -15,7 +15,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.FunctionGroupSymbol;
 
-        public override TypeSpecifier Type => Group;
+        public override TypeInfo Type => Group;
 
         public override ValueCategory ValueCategory => ValueCategory.None;
     }

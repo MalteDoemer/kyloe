@@ -2,7 +2,7 @@ using System;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class ErrorType : TypeSpecifier
+    internal sealed class ErrorType : TypeInfo
     {
         public override IReadOnlySymbolScope? ReadOnlyScope => null;
 
