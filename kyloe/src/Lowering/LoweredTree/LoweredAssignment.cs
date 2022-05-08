@@ -18,7 +18,7 @@ namespace Kyloe.Lowering
         public AssignmentOperation Operation { get; }
         public LoweredExpression RightExpression { get; }
         
-        public override TypeSpecifier Type { get; }
+        public override TypeInfo Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.None;
 

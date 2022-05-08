@@ -5,7 +5,7 @@ namespace Kyloe.Lowering
 {
     internal abstract class LoweredExpression : LoweredNode
     {
-        public abstract TypeSpecifier Type { get; }
+        public abstract TypeInfo Type { get; }
 
         public abstract ValueCategory ValueCategory { get; }
 

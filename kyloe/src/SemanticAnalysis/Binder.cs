@@ -56,7 +56,7 @@ namespace Kyloe.Semantics
 
         private bool InGlobalScope() => symbolStack.Count == 1;
 
-        private bool IsTypeMissmatch(TypeSpecifier expectedType, TypeSpecifier rightType)
+        private bool IsTypeMissmatch(TypeInfo expectedType, TypeInfo rightType)
         {
             if (expectedType is ErrorType || rightType is ErrorType)
                 return false;
@@ -64,7 +64,7 @@ namespace Kyloe.Semantics
             return !expectedType.Equals(rightType);
         }
 
-        private bool TypeSequenceEquals(IEnumerable<TypeSpecifier> seq1, IEnumerable<TypeSpecifier> seq2)
+        private bool TypeSequenceEquals(IEnumerable<TypeInfo> seq1, IEnumerable<TypeInfo> seq2)
         {
             if (seq1.Count() != seq2.Count())
                 return false;
@@ -76,22 +76,18 @@ namespace Kyloe.Semantics
             return true;
         }
 
-        private FunctionType? FindFunctionOverload(FunctionGroupType group, IEnumerable<TypeSpecifier> parameterTypes, bool mustBeStatic = false)
+        private CallableType? FindCallOverload(CallableGroupType group, IEnumerable<TypeInfo> parameterTypes)
         {
-            foreach (var func in group.Functions)
+            foreach (var callable in group.Callables)
             {
-                if (TypeSequenceEquals(func.Parameters.Select(param => param.Type), parameterTypes))
-                {
-                    if (mustBeStatic && !func.IsStatic)
-                        continue;
-                    return func;
-                }
+                if (TypeSequenceEquals(callable.ParameterTypes, parameterTypes))
+                    return callable;
             }
 
             return null;
         }
 
-        private TypeSpecifier GetResultType(BoundExpression expr, SourceLocation src, TypeSpecifier? expectedType = null, bool mustBeValue = false, bool mustBeModifiableValue = false, bool mustBeTypeName = false)
+        private TypeInfo GetResultType(BoundExpression expr, SourceLocation src, TypeInfo? expectedType = null, bool mustBeValue = false, bool mustBeModifiableValue = false, bool mustBeTypeName = false)
         {
             if (expr.ResultType is ErrorType)
                 return typeSystem.Error;
@@ -182,10 +178,17 @@ namespace Kyloe.Semantics
             foreach (var (funcDecl, funcSyntax) in functionDecls.Zip(functionSyntax))
                 functionDefs.Add(BindFunctionDefinition(funcDecl));
 
-            if (LookupSymbol("main") is FunctionGroupSymbol mainSymbol && FindFunctionOverload(mainSymbol.Group, Enumerable.Empty<TypeSpecifier>()) is FunctionType mainType)
+            var mainSymbol = LookupSymbol("main");
+
+            if (mainSymbol is CallableGroupSymbol mainGroup) 
             {
-                var mainFunction = functionDefs.Where(f => f.Type.Equals(mainType)).FirstOrDefault();
-                return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), mainFunction, token);
+                // TODO: maybe give a warning here ?
+
+                if (FindCallOverload(mainGroup.Group, Enumerable.Empty<TypeInfo>()) is FunctionType mainFunctionType) 
+                {
+                    var mainFunctionDef = functionDefs.Where(f => f.FunctionType.Equals(mainFunctionType)).FirstOrDefault();
+                    return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), mainFunctionDef, token);
+                }
             }
 
             return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), null, token);
@@ -214,34 +217,34 @@ namespace Kyloe.Semantics
             var parameters = BindParameters(parameterSyntax);
 
             var name = nameTerminal.Text;
-            var groupSymbol = GetOrDeclareFunctionGroup(nameTerminal);
+            var groupSymbol = GetOrDeclareCallableGroup(nameTerminal);
 
-            var functionType = new FunctionType(groupSymbol.Group, typeClause.Type, true);
+            var functionType = new FunctionType(groupSymbol.Group, typeClause.Type);
             foreach (var param in parameters.Parameters)
                 functionType.Parameters.Add(param.Symbol);
 
-            bool sameOverloadExists = FindFunctionOverload(groupSymbol.Group, parameters.ParameterTypes) is not null;
+            bool sameOverloadExists = FindCallOverload(groupSymbol.Group, parameters.ParameterTypes) is not null;
 
             if (sameOverloadExists && parameters.AllParametersValid && !nameTerminal.Invalid)
                 diagnostics.OverloadWithSameParametersExistsError(nameTerminal.Location, name);
             else
-                groupSymbol.Group.Functions.Add(functionType);
+                groupSymbol.Group.Callables.Add(functionType);
 
             return new BoundFunctionDeclaration(functionType, parameters, typeClause, token);
         }
 
-        private FunctionGroupSymbol GetOrDeclareFunctionGroup(SyntaxTerminal nameTerminal)
+        private CallableGroupSymbol GetOrDeclareCallableGroup(SyntaxTerminal nameTerminal)
         {
             var name = nameTerminal.Text;
             var symbol = LookupSymbol(name);
 
-            if (symbol is FunctionGroupSymbol existingGroup)
+            if (symbol is CallableGroupSymbol existingGroup)
                 return existingGroup;
 
             if (symbol is not null && symbol is not ErrorSymbol && !nameTerminal.Invalid)
                 diagnostics.NameAlreadyExistsError(nameTerminal.Location, name);
 
-            var groupSymbol = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+            var groupSymbol = new CallableGroupSymbol(new CallableGroupType(name, null));
 
             DeclareSymbol(groupSymbol); // Note: declare symbol does nothing if it already exists
 
@@ -347,7 +350,7 @@ namespace Kyloe.Semantics
 
             var function = GetNode(decl.Syntax, SyntaxTokenKind.FunctionDefinition);
 
-            functionStack.Push(decl.Type);
+            functionStack.Push(decl.FunctionType);
             EnterNewScope(); // this scope contains the parameters
 
             foreach (var paramDecl in decl.Parameters)
@@ -864,18 +867,18 @@ namespace Kyloe.Semantics
             var args = BindArguments(call.Tokens[2]);
             var expr = BindExpression(exprSyntax);
 
-            if (expr.ResultType is FunctionGroupType functionGroup)
+            if (expr.ResultType is CallableGroupType callGroup)
             {
-                var function = FindFunctionOverload(functionGroup, args.ArgumentTypes);
+                var callable = FindCallOverload(callGroup, args.ArgumentTypes);
 
-                if (function is null)
+                if (callable is null)
                 {
                     if (args.AllArgumentsValid)
-                        diagnostics.NoMatchingOverloadError(exprSyntax.Location, functionGroup.FullName(), args);
+                        diagnostics.NoMatchingOverloadError(exprSyntax.Location, callGroup.FullName(), args);
                     return new BoundCallExpression(typeSystem.Error, typeSystem.Error, expr, args, token);
                 }
 
-                return new BoundCallExpression(function, function.ReturnType, expr, args, token);
+                return new BoundCallExpression(callable, callable.ReturnType, expr, args, token);
             }
             else
             {
@@ -964,7 +967,7 @@ namespace Kyloe.Semantics
             return new BoundLiteralExpression(typeSystem.Error, new object(), token);
         }
 
-        private object? GetValueForLiteral(SyntaxTerminal token, TypeSpecifier type)
+        private object? GetValueForLiteral(SyntaxTerminal token, TypeInfo type)
         {
             var text = token.Text;
 
@@ -1007,7 +1010,7 @@ namespace Kyloe.Semantics
             return new BoundSymbolExpression(symbol, token);
         }
 
-        private TypeSpecifier? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
+        private TypeInfo? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
         {
             Debug.Assert(op.IsBinaryOperation());
 
@@ -1022,19 +1025,22 @@ namespace Kyloe.Semantics
 
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
 
-            var functionGroup = (leftType.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.FunctionGroup;
+            var group = leftType.ReadOnlyScope?.LookupSymbol(name) as CallableGroupSymbol;
 
-            if (functionGroup is null)
+            if (group is null)
                 return null;
 
             var args = new[] { leftType, rightType };
 
-            var function = FindFunctionOverload(functionGroup, args, mustBeStatic: true);
+            var method = FindCallOverload(group.Group, args) as MethodType;
 
-            return function?.ReturnType;
+            if (method is null || !method.IsOperator)
+                return null;
+
+            return method.ReturnType;
         }
 
-        private TypeSpecifier? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
+        private TypeInfo? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
         {
             Debug.Assert(op.IsUnaryOperation());
 
@@ -1048,16 +1054,19 @@ namespace Kyloe.Semantics
 
             var name = SemanticInfo.GetFunctionNameFromOperation(op);
 
-            var functionGroup = (type.ReadOnlyScope?.LookupSymbol(name) as OperationSymbol)?.FunctionGroup;
+            var group = type.ReadOnlyScope?.LookupSymbol(name) as CallableGroupSymbol;
 
-            if (functionGroup is null)
+            if (group is null)
                 return null;
 
             var args = new[] { type };
 
-            var function = FindFunctionOverload(functionGroup, args, mustBeStatic: true);
+            var method = FindCallOverload(group.Group, args) as MethodType;
 
-            return function?.ReturnType;
+            if (method is null || !method.IsOperator)
+                return null;
+
+            return method.ReturnType;
         }
     }
 }

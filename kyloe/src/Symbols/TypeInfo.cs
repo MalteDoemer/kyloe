@@ -2,7 +2,7 @@ using System;
 
 namespace Kyloe.Symbols
 {
-    internal abstract class TypeSpecifier
+    internal abstract class TypeInfo
     {
         public abstract TypeKind Kind { get; }
 

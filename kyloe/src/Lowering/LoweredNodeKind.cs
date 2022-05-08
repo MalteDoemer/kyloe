@@ -11,8 +11,7 @@ namespace Kyloe.Lowering
         LoweredBinaryExpression,
         LoweredUnaryExpression,
         LoweredAssignment,
-        LoweredVariableAccessExpression,
-        LoweredFunctionAccessExpression,
+        LoweredSymbolExpression,
         LoweredCallExpression,
 
         LoweredBlockStatement,

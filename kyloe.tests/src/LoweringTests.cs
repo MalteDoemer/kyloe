@@ -26,7 +26,7 @@ namespace Kyloe.Tests.Lowering
                 "var x = 5;",
                 DeclarationStatement(null),
                 ExpressionStatement(Assignment(
-                    VariableAccessExpression(),
+                    SymbolAccessExpression(),
                     LiteralExpression()
                 )),
             };
@@ -35,13 +35,13 @@ namespace Kyloe.Tests.Lowering
                 "var x = 1; x += 1;",
                 DeclarationStatement(null),
                 ExpressionStatement(Assignment(
-                    VariableAccessExpression(),
+                    SymbolAccessExpression(),
                     LiteralExpression()
                 )),
                 ExpressionStatement(Assignment(
-                    VariableAccessExpression(),
+                    SymbolAccessExpression(),
                     BinaryExpression(
-                        VariableAccessExpression(),
+                        SymbolAccessExpression(),
                         LiteralExpression()
                     )
                 )),
@@ -56,17 +56,17 @@ namespace Kyloe.Tests.Lowering
                 }",
                 DeclarationStatement(null),
                 ExpressionStatement(Assignment(
-                    VariableAccessExpression(),
+                    SymbolAccessExpression(),
                     LiteralExpression()
                 )),
                 DeclarationStatement(null),
                 ExpressionStatement(Assignment(
-                    VariableAccessExpression(),
+                    SymbolAccessExpression(),
                     LiteralExpression()
                 )),
             };
 
-            var printVerifyNode = ExpressionStatement(CallExpression(FunctionAccessExpression(), LiteralExpression()));
+            var printVerifyNode = ExpressionStatement(CallExpression(SymbolAccessExpression(), LiteralExpression()));
 
             yield return new object[] {
                 @"{
@@ -137,14 +137,14 @@ namespace Kyloe.Tests.Lowering
                 
 
                 DeclarationStatement(null),
-                ExpressionStatement(Assignment(VariableAccessExpression(), LiteralExpression())),
+                ExpressionStatement(Assignment(SymbolAccessExpression(), LiteralExpression())),
                 GotoStatement(),  // goto check_condition
                 LabelStatement(), // continue:
                 printVerifyNode, // println('hi');
-                ConditionalGotoStatement(UnaryExpression(BinaryExpression(VariableAccessExpression(), LiteralExpression()))), // goto end if not condition
+                ConditionalGotoStatement(UnaryExpression(BinaryExpression(SymbolAccessExpression(), LiteralExpression()))), // goto end if not condition
                 GotoStatement(),  // goto break 
                 LabelStatement(), // end:
-                ExpressionStatement(Assignment(VariableAccessExpression(), BinaryExpression(VariableAccessExpression(), LiteralExpression()))), // x += 1
+                ExpressionStatement(Assignment(SymbolAccessExpression(), BinaryExpression(SymbolAccessExpression(), LiteralExpression()))), // x += 1
                 LabelStatement(), // check_condition:
                 ConditionalGotoStatement(LiteralExpression()), // goto continue if condition
                 LabelStatement(), // break:

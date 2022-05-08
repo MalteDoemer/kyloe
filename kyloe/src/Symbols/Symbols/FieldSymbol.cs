@@ -4,7 +4,7 @@ namespace Kyloe.Symbols
 {
     internal sealed class FieldSymbol : Symbol
     {
-        public FieldSymbol(string name, TypeSpecifier type, bool isReadonly, bool isStatic)
+        public FieldSymbol(string name, TypeInfo type, bool isReadonly, bool isStatic)
         {
             Name = name;
             Type = type;
@@ -19,7 +19,7 @@ namespace Kyloe.Symbols
 
         public override SymbolKind Kind => SymbolKind.FieldSymbol;
 
-        public override TypeSpecifier Type { get; }
+        public override TypeInfo Type { get; }
 
         public override ValueCategory ValueCategory => IsReadonly ? ValueCategory.ReadableValue : ValueCategory.ModifiableValue;
     }

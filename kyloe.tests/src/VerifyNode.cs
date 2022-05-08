@@ -52,14 +52,9 @@ namespace Kyloe.Tests.Lowering
             return new VerifyNode(LoweredNodeKind.LoweredAssignment, left, right);
         }
 
-        public static VerifyNode VariableAccessExpression()
+        public static VerifyNode SymbolAccessExpression()
         {
-            return new VerifyNode(LoweredNodeKind.LoweredVariableAccessExpression);
-        }
-
-        public static VerifyNode FunctionAccessExpression()
-        {
-            return new VerifyNode(LoweredNodeKind.LoweredFunctionAccessExpression);
+            return new VerifyNode(LoweredNodeKind.LoweredSymbolExpression);
         }
 
         public static VerifyNode BlockStatement(params VerifyNode[] statements)

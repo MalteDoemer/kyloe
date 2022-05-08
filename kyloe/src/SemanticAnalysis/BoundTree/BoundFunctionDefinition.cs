@@ -15,7 +15,7 @@ namespace Kyloe.Semantics
         public BoundFunctionDeclaration Declaration { get; }
         public BoundBlockStatement Body { get; }
 
-        public FunctionType Type => Declaration.Type;
+        public FunctionType FunctionType => Declaration.FunctionType;
 
         public override SyntaxToken Syntax { get; }
 

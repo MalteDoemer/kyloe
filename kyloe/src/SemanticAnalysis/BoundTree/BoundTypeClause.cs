@@ -5,13 +5,13 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundTypeClause : BoundNode
     {
-        public BoundTypeClause(TypeSpecifier type, SyntaxToken syntax)
+        public BoundTypeClause(TypeInfo type, SyntaxToken syntax)
         {
             Type = type;
             Syntax = syntax;
         }
 
-        public TypeSpecifier Type { get; }
+        public TypeInfo Type { get; }
 
         public override SyntaxToken Syntax { get; }
 

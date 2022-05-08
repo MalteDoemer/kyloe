@@ -45,7 +45,7 @@ namespace Kyloe.Lowering
         private LoweredFunctionDefinition LowerFunctionDefinition(BoundFunctionDefinition functionDefinition)
         {
             var body = LowerBlockStatement(functionDefinition.Body);
-            return new LoweredFunctionDefinition(functionDefinition.Type, body);
+            return new LoweredFunctionDefinition(functionDefinition.FunctionType, body);
         }
 
         private LoweredStatement LowerStatement(BoundStatement statement)
@@ -170,7 +170,7 @@ namespace Kyloe.Lowering
         {
             var expr = LowerExpression(expression.Expression);
             var args = LowerArguments(expression.Arguments);
-            return new LoweredCallExpression((FunctionType)expression.FunctionType, expr, args);
+            return new LoweredCallExpression((CallableType)expression.FunctionType, expr, args);
         }
 
         private LoweredArguments LowerArguments(BoundArguments arguments)
@@ -185,22 +185,7 @@ namespace Kyloe.Lowering
 
         private LoweredExpression LowerSymbolExpression(BoundSymbolExpression expression)
         {
-            switch (expression.Symbol.Kind)
-            {
-                case SymbolKind.LocalVariableSymbol:
-                case SymbolKind.GlobalVariableSymbol:
-                case SymbolKind.ParameterSymbol:
-                    return new LoweredVariableAccessExpression(expression.Symbol);
-
-                case SymbolKind.FunctionGroupSymbol:
-                    return new LoweredFunctionAccessExpression((FunctionGroupSymbol)expression.Symbol);
-                case SymbolKind.FieldSymbol:
-                case SymbolKind.TypeNameSymbol:
-                    throw new NotImplementedException();
-
-                default:
-                    throw new Exception($"unexpected symbol: {expression.Symbol.Kind}");
-            }
+            return new LoweredSymbolExpression(expression.Symbol);
         }
 
         private LoweredExpression LowerAssignmentExpression(BoundAssignmentExpression expression)

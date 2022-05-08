@@ -37,7 +37,6 @@ namespace Kyloe.Symbols
         {
             GlobalScope = new SymbolScope();
 
-
             Error = new ErrorType();
             Void = new BuiltinType("void");
             Char = new BuiltinType("char");
@@ -61,15 +60,15 @@ namespace Kyloe.Symbols
 
             foreach (var (name, ret, parameters) in BuiltinFunctionInfo.BuiltinFunctions)
             {
-                var group = GlobalScope.LookupSymbol(name) as FunctionGroupSymbol;
+                var group = GlobalScope.LookupSymbol(name) as CallableGroupSymbol;
 
                 if (group is null)
                 {
-                    group = new FunctionGroupSymbol(new FunctionGroupType(name, null));
+                    group = new CallableGroupSymbol(new CallableGroupType(name, null));
                     Debug.Assert(GlobalScope.DeclareSymbol(group));
                 }
 
-                group.Group.Functions.Add(CreateBuiltinFunction(name, group.Group, ret, parameters));
+                group.Group.Callables.Add(CreateBuiltinFunction(name, group.Group, ret, parameters));
             }
 
             foreach (var binary in BuiltinOperationInfo.BinaryOperations)
@@ -79,7 +78,18 @@ namespace Kyloe.Symbols
                 var ret = GetBuiltinType(binary.ret);
 
                 foreach (var op in binary.ops)
-                    left.Scope.DeclareSymbol(CreateBuiltinBinaryOperation(op, ret, left, right));
+                {
+                    var name = SemanticInfo.GetFunctionNameFromOperation(op);
+                    var group = left.Scope.LookupSymbol(name) as CallableGroupSymbol;
+
+                    if (group is null)
+                    {
+                        group = new CallableGroupSymbol(new CallableGroupType(name, left));
+                        Debug.Assert(left.Scope.DeclareSymbol(group));
+                    }
+
+                    AddBuiltinBinaryOperation(group.Group, op, ret, left, right);
+                }
             }
 
             foreach (var unary in BuiltinOperationInfo.UnaryOperations)
@@ -88,12 +98,20 @@ namespace Kyloe.Symbols
                 var ret = GetBuiltinType(unary.ret);
 
                 foreach (var op in unary.ops)
-                    arg.Scope.DeclareSymbol(CreateBuiltinUnaryOperation(op, ret, arg));
+                {
+                    var name = SemanticInfo.GetFunctionNameFromOperation(op);
+                    var group = arg.Scope.LookupSymbol(name) as CallableGroupSymbol;
+
+                    if (group is null)
+                    {
+                        group = new CallableGroupSymbol(new CallableGroupType(name, arg));
+                        Debug.Assert(arg.Scope.DeclareSymbol(group));
+                    }
+
+                    AddBuiltinUnaryOperation(group.Group, op, ret, arg);
+                }
             }
-
         }
-
-
 
         private BuiltinType GetBuiltinType(BuiltinTypeKind type)
         {
@@ -117,9 +135,9 @@ namespace Kyloe.Symbols
             }
         }
 
-        private FunctionType CreateBuiltinFunction(string name, FunctionGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
+        private BuiltinFunctionType CreateBuiltinFunction(string name, CallableGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
         {
-            var func = new FunctionType(group, GetBuiltinType(ret), isStatic: true, isBuiltin: true);
+            var func = new BuiltinFunctionType(group, GetBuiltinType(ret));
 
             foreach (var param in parameters)
                 func.Parameters.Add(new ParameterSymbol(param.name, GetBuiltinType(param.type)));
@@ -127,29 +145,19 @@ namespace Kyloe.Symbols
             return func;
         }
 
-        private static OperationSymbol CreateBuiltinBinaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier left, TypeSpecifier right)
+        private static void AddBuiltinBinaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo left, TypeInfo right)
         {
-            var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var group = new FunctionGroupType(name, left);
-            var method = new FunctionType(group, ret, true);
-
-            method.Parameters.Add(new ParameterSymbol("l", left));
-            method.Parameters.Add(new ParameterSymbol("r", right));
-            group.Functions.Add(method);
-
-            return new OperationSymbol(op, group);
+            var method = new MethodType(group, ret, isStatic: true, isOperator: true);
+            method.Parameters.Add(new ParameterSymbol("", left));
+            method.Parameters.Add(new ParameterSymbol("", right));
+            group.Callables.Add(method);
         }
 
-        private static OperationSymbol CreateBuiltinUnaryOperation(BoundOperation op, TypeSpecifier ret, TypeSpecifier arg)
+        private static void AddBuiltinUnaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo arg)
         {
-            var name = SemanticInfo.GetFunctionNameFromOperation(op);
-            var group = new FunctionGroupType(name, arg);
-            var method = new FunctionType(group, ret, true);
-
+            var method = new MethodType(group, ret, isStatic: true, isOperator: true);
             method.Parameters.Add(new ParameterSymbol("", arg));
-            group.Functions.Add(method);
-
-            return new OperationSymbol(op, group);
+            group.Callables.Add(method);
         }
     }
 }

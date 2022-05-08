@@ -13,7 +13,7 @@ namespace Kyloe.Semantics
 
         public ParameterSymbol Symbol { get; }
 
-        public TypeSpecifier Type => Symbol.Type;
+        public TypeInfo Type => Symbol.Type;
 
         public override SyntaxToken Syntax { get; }
         public override BoundNodeKind Kind => BoundNodeKind.BoundParameterDeclaration;

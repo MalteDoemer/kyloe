@@ -186,12 +186,10 @@ namespace Kyloe.Lowering
                     return RewriteUnaryExpression((LoweredUnaryExpression)expression);
                 case LoweredNodeKind.LoweredAssignment:
                     return RewriteAssignment((LoweredAssignment)expression);
-                case LoweredNodeKind.LoweredVariableAccessExpression:
-                    return RewriteVariableAccessExpression((LoweredVariableAccessExpression)expression);
+                case LoweredNodeKind.LoweredSymbolExpression:
+                    return RewriteVariableAccessExpression((LoweredSymbolExpression)expression);
                 case LoweredNodeKind.LoweredCallExpression:
                     return RewriteCallExpression((LoweredCallExpression)expression);
-                case LoweredNodeKind.LoweredFunctionAccessExpression:
-                    return RewriteFunctionAccessExpression((LoweredFunctionAccessExpression)expression);
                 default:
                     throw new Exception($"unexpected kind: {expression.Kind}");
             }
@@ -205,10 +203,10 @@ namespace Kyloe.Lowering
             if (expr == expression.Expression && args == expression.Arguments)
                 return expression;
 
-            return new LoweredCallExpression(expression.FunctionType, expr, args);
+            return new LoweredCallExpression(expression.CallableType, expr, args);
         }
 
-        protected virtual LoweredArguments RewriteArguments(LoweredArguments arguments) 
+        protected virtual LoweredArguments RewriteArguments(LoweredArguments arguments)
         {
             var builder = ImmutableArray.CreateBuilder<LoweredExpression>(arguments.Arguments.Length);
 
@@ -255,14 +253,10 @@ namespace Kyloe.Lowering
             return new LoweredAssignment(typeSystem, left, expression.Operation, right);
         }
 
-        protected virtual LoweredExpression RewriteVariableAccessExpression(LoweredVariableAccessExpression expression)
+        protected virtual LoweredExpression RewriteVariableAccessExpression(LoweredSymbolExpression expression)
         {
             return expression;
         }
- 
-        protected virtual LoweredExpression RewriteFunctionAccessExpression(LoweredFunctionAccessExpression expression)
-        {
-            return expression;
-        }
+
     }
 }

@@ -6,7 +6,7 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredLiteralExpression : LoweredExpression
     {
-        public LoweredLiteralExpression(TypeSpecifier type, object value)
+        public LoweredLiteralExpression(TypeInfo type, object value)
         {
             Value = value;
             Type = type;
@@ -14,7 +14,7 @@ namespace Kyloe.Lowering
 
         public object Value { get;  }
 
-        public override TypeSpecifier Type { get; }
+        public override TypeInfo Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

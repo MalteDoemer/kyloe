@@ -139,7 +139,7 @@ namespace Kyloe.Lowering
                 var decl = new LoweredDeclarationStatement(statement.Symbol, null);
 
                 var initializer = RewriteExpression(statement.Initializer);
-                var localAccess = new LoweredVariableAccessExpression(statement.Symbol);
+                var localAccess = new LoweredSymbolExpression(statement.Symbol);
                 var assign = new LoweredAssignment(typeSystem, localAccess, AssignmentOperation.Assign, initializer);
 
                 return Block(decl, ExpressionStatement(assign));

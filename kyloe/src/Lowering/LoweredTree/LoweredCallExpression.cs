@@ -6,18 +6,18 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredCallExpression : LoweredExpression
     {
-        public LoweredCallExpression(FunctionType functionType, LoweredExpression expression, LoweredArguments arguments)
+        public LoweredCallExpression(CallableType callableType, LoweredExpression expression, LoweredArguments arguments)
         {
-            FunctionType = functionType;
+            CallableType = callableType;
             Expression = expression;
             Arguments = arguments;
         }
 
-        public FunctionType FunctionType { get; }
+        public CallableType CallableType { get; }
         public LoweredExpression Expression { get; }
         public LoweredArguments Arguments { get; }
 
-        public override TypeSpecifier Type => FunctionType.ReturnType;
+        public override TypeInfo Type => CallableType.ReturnType;
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

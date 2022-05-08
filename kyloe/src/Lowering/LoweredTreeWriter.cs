@@ -36,10 +36,8 @@ namespace Kyloe.Lowering
                     WriteUnaryExpression((LoweredUnaryExpression)node); break;
                 case LoweredNodeKind.LoweredAssignment:
                     WriteAssignment((LoweredAssignment)node); break;
-                case LoweredNodeKind.LoweredVariableAccessExpression:
-                    WriteVariableAccessExpression((LoweredVariableAccessExpression)node); break;
-                case LoweredNodeKind.LoweredFunctionAccessExpression:
-                    WriteFunctionAccessExpression((LoweredFunctionAccessExpression)node); break;
+                case LoweredNodeKind.LoweredSymbolExpression:
+                    WriteVariableAccessExpression((LoweredSymbolExpression)node); break;
                 case LoweredNodeKind.LoweredCallExpression:
                     WriteCallExpression((LoweredCallExpression)node); break;
                 case LoweredNodeKind.LoweredBlockStatement:
@@ -132,14 +130,9 @@ namespace Kyloe.Lowering
             writer.Write(')');
         }
 
-        private void WriteVariableAccessExpression(LoweredVariableAccessExpression node)
+        private void WriteVariableAccessExpression(LoweredSymbolExpression node)
         {
-            writer.Write(node.VariableSymbol.Name);
-        }
-
-        private void WriteFunctionAccessExpression(LoweredFunctionAccessExpression node)
-        {
-            writer.Write(node.FunctionGroup.Name);
+            writer.Write(node.Symbol.Name);
         }
 
         private void WriteCallExpression(LoweredCallExpression node)
