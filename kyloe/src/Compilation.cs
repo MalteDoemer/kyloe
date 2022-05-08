@@ -17,14 +17,12 @@ namespace Kyloe
 
     public class Compilation
     {
-        private readonly AssemblyDefinition assembly;
         private readonly DiagnosticResult diagnostics;
         private readonly LoweredCompilationUnit? compilationUnit;
 
 
-        private Compilation(AssemblyDefinition assembly, DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
+        private Compilation(DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
         {
-            this.assembly = assembly;
             this.diagnostics = diagnostics;
             this.compilationUnit = compilationUnit;
         }
@@ -49,9 +47,6 @@ namespace Kyloe
 
         public static Compilation Compile(SourceText text, CompilationOptions opts = default(CompilationOptions))
         {
-            var assemblyName = new AssemblyNameDefinition("test", new Version(0, 1));
-            var assembly = AssemblyDefinition.CreateAssembly(assemblyName, "<test>", ModuleKind.Dll);
-
             var typeSystem = Symbols.TypeSystem.Create();
 
             var diagnostics = new DiagnosticCollector(text);
@@ -75,10 +70,10 @@ namespace Kyloe
                 var flattener = new LoweredTreeFlattener(typeSystem);
                 var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
 
-                return new Compilation(assembly, diagnostics.ToResult(), flattenedCompilationUnit);
+                return new Compilation(diagnostics.ToResult(), flattenedCompilationUnit);
             }
 
-            return new Compilation(assembly, diagnostics.ToResult(), null);
+            return new Compilation(diagnostics.ToResult(), null);
         }
 
     }
