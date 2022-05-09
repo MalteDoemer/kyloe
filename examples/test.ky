@@ -1,16 +1,4 @@
 
-
-func test(a: i64) -> i64 {
-    if a == 5 {
-        return 0;
-    } else {
-        return a * 6;
-    }
-}
-
 func main() {
-    var x = 5;
-    x = test(x);
-
-    println(x);
+    1;
 }

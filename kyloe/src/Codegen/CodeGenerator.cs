@@ -47,6 +47,8 @@ namespace Kyloe.Codegen
             foreach (var (i, func) in unit.LoweredFunctions.EnumerateIndex())
             {
                 var method = resolver.ResolveCallable(func.Type).Resolve();
+                
+                mainClass.Methods.Add(method);
 
                 if (i == unit.MainFunctionIndex)
                     mainClass.Module.EntryPoint = method;

@@ -63,11 +63,16 @@ namespace Kyc
 
             try
             {
-                var text = SourceText.FromFile(extra[0]);
+                var filePath = extra[0];
+                var fileName = Path.GetFileNameWithoutExtension(filePath);
+                var outFile = Path.Join(Path.GetDirectoryName(filePath), fileName + ".dll");
+                var text = SourceText.FromFile(filePath);
                 var opts = new CompilationOptions() { RequireMain = true };
                 var compilation = Compilation.Compile(text, opts);
                 compilation.GetDiagnostics().WriteTo(Console.Out);
                 compilation.WriteTo(Console.Out);
+                compilation.CreateProgram(fileName, outFile);
+
             }
             catch (IOException ioException)
             {
