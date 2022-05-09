@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Kyloe.Lowering;
+using Kyloe.Semantics;
 using Kyloe.Symbols;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -20,6 +21,9 @@ namespace Kyloe.Codegen
         private readonly TypeResolver resolver;
 
 
+        private readonly Dictionary<LocalVariableSymbol, VariableDefinition> locals;
+
+
         public CodeGenerator(string programName, Symbols.TypeSystem kyloeTypeSystem)
         {
             this.kyloeTypeSystem = kyloeTypeSystem;
@@ -30,14 +34,16 @@ namespace Kyloe.Codegen
             this.mainClass = new TypeDefinition("", programName, TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed, cecilTypeSystem.Object);
             this.assembly.MainModule.Types.Add(mainClass);
             this.resolver = new TypeResolver(kyloeTypeSystem, mainClass);
+
+            this.locals = new Dictionary<LocalVariableSymbol, VariableDefinition>();
         }
 
-        public void WriteTo(string path) 
+        public void WriteTo(string path)
         {
             WriteTo(new FileStream(path, FileMode.Create));
         }
 
-        public void WriteTo(Stream stream) 
+        public void WriteTo(Stream stream)
         {
             assembly.Write(stream);
         }
@@ -47,7 +53,7 @@ namespace Kyloe.Codegen
             foreach (var (i, func) in unit.LoweredFunctions.EnumerateIndex())
             {
                 var method = resolver.ResolveCallable(func.Type).Resolve();
-                
+
                 mainClass.Methods.Add(method);
 
                 if (i == unit.MainFunctionIndex)
@@ -63,8 +69,6 @@ namespace Kyloe.Codegen
 
             foreach (var stmt in func.Body)
                 GenerateStatement(stmt, ilProcessor);
-
-
         }
 
         private void GenerateStatement(LoweredStatement stmt, ILProcessor ilProcessor)
@@ -111,12 +115,15 @@ namespace Kyloe.Codegen
 
         private void GenerateDeclarationStatement(LoweredDeclarationStatement stmt, ILProcessor ilProcessor)
         {
-            throw new NotImplementedException();
+            var symbol = (LocalVariableSymbol)stmt.Symbol;
+            var local = new VariableDefinition(resolver.ResolveType(symbol.Type));
+
+            locals.Add(symbol, local);
+            ilProcessor.Body.Variables.Add(local);
         }
 
         private void GenerateEmptyStatement(LoweredEmptyStatement stmt, ILProcessor ilProcessor)
         {
-            throw new NotImplementedException();
         }
 
         private void GenerateGotoStatement(LoweredGotoStatement stmt, ILProcessor ilProcessor)
@@ -178,12 +185,72 @@ namespace Kyloe.Codegen
 
         private void GenerateBinaryExpression(LoweredBinaryExpression expr, ILProcessor ilProcessor)
         {
-            throw new NotImplementedException();
+
+            GenerateExpression(expr.LeftExpression, ilProcessor);
+            GenerateExpression(expr.RightExpression, ilProcessor);
+
+            switch (expr.Operation)
+            {
+                case BoundOperation.Addition:
+                    ilProcessor.Emit(OpCodes.Add); break;
+                case BoundOperation.Subtraction:
+                    ilProcessor.Emit(OpCodes.Sub); break;
+                case BoundOperation.Multiplication:
+                    ilProcessor.Emit(OpCodes.Mul); break;
+                case BoundOperation.Division:
+                    ilProcessor.Emit(OpCodes.Div); break;
+                case BoundOperation.Modulo:
+                    ilProcessor.Emit(OpCodes.Rem); break;
+                case BoundOperation.BitwiseAnd:
+                    ilProcessor.Emit(OpCodes.And); break;
+                case BoundOperation.BitwiseOr:
+                    ilProcessor.Emit(OpCodes.Or); break;
+                case BoundOperation.BitwiseXor:
+                    ilProcessor.Emit(OpCodes.Xor); break;
+                case BoundOperation.LessThan:
+                    ilProcessor.Emit(OpCodes.Clt); break;
+                case BoundOperation.GreaterThan:
+                    ilProcessor.Emit(OpCodes.Cgt); break;
+                case BoundOperation.LessThanOrEqual:
+                    ilProcessor.Emit(OpCodes.Cgt);
+                    ilProcessor.Emit(OpCodes.Ceq);
+                    break;
+                case BoundOperation.GreaterThanOrEqual:
+                    ilProcessor.Emit(OpCodes.Clt);
+                    ilProcessor.Emit(OpCodes.Ceq);
+                    break;
+                case BoundOperation.Equal:
+                    ilProcessor.Emit(OpCodes.Ceq); break;
+                case BoundOperation.NotEqual:
+                    ilProcessor.Emit(OpCodes.Ceq);
+                    ilProcessor.Emit(OpCodes.Ldc_I4_0);
+                    ilProcessor.Emit(OpCodes.Ceq);
+                    break;
+                default:
+                    throw new Exception($"unknown operation {expr.Operation}");
+            }
         }
 
         private void GenerateUnaryExpression(LoweredUnaryExpression expr, ILProcessor ilProcessor)
         {
-            throw new NotImplementedException();
+            GenerateExpression(expr.Expression, ilProcessor);
+
+            switch (expr.Operation)
+            {
+                case BoundOperation.Identity:
+                    break;
+                case BoundOperation.Negation:
+                    ilProcessor.Emit(OpCodes.Neg); break;
+                case BoundOperation.BitwiseNot:
+                    ilProcessor.Emit(OpCodes.Not); break;
+                case BoundOperation.LogicalNot:
+                    ilProcessor.Emit(OpCodes.Ldc_I4_0);
+                    ilProcessor.Emit(OpCodes.Ceq);
+                    break;
+
+                default:
+                    throw new Exception($"unknown operation {expr.Operation}");
+            }
         }
 
         private void GenerateAssignment(LoweredAssignment expr, ILProcessor ilProcessor)
@@ -310,6 +377,10 @@ namespace Kyloe.Codegen
         {
             var returnType = ResolveType(callable.ReturnType);
             var method = new MethodDefinition(callable.Name, MethodAttributes.Private | MethodAttributes.Static, returnType);
+
+            foreach (var param in callable.Parameters)
+                method.Parameters.Add(new ParameterDefinition(param.Name, ParameterAttributes.None, ResolveType(param.Type)));
+
             return method;
         }
 
