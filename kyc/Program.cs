@@ -11,6 +11,8 @@ namespace Kyc
         {
             bool help = false;
             bool interactive = false;
+            bool printLoweredTree = false;
+            bool printSyntaxTree = false;
 
             string? outputPath = null;
             var referencePaths = new List<string>();
@@ -18,6 +20,8 @@ namespace Kyc
             var options = new OptionSet() {
                 {"i|interactive", "starts a interactive kyloe shell", value => interactive = value is not null },
                 {"h|help", "show this message and exit", value => help = value is not null },
+                {"print-ir", "print intermidiate representation to the console", value => printLoweredTree = value is not null },
+                {"print-tree", "print syntax tree to the console", value => printSyntaxTree = value is not null },
                 {"o|output=", "the path to the output file", value => outputPath = value },
                 {"r|reference=", "the path to a reference dll", value => referencePaths.Add(value) },
             };
@@ -80,7 +84,13 @@ namespace Kyc
                 var opts = new CompilationOptions() { RequireMain = true };
                 var compilation = Compilation.Compile(text, opts);
                 compilation.GetDiagnostics().WriteTo(Console.Out);
-                compilation.WriteTo(Console.Out);
+                
+                if (printSyntaxTree)
+                    compilation.WriteSyntaxTree(Console.Out);
+
+                if (printLoweredTree)
+                    compilation.WriteLoweredTree(Console.Out);
+
                 compilation.CreateProgram(programName, outputPath);
             }
             catch (IOException ioException)

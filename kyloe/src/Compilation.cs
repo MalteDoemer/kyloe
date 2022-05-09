@@ -20,37 +20,47 @@ namespace Kyloe
     {
         private readonly DiagnosticResult diagnostics;
         private readonly Symbols.TypeSystem typeSystem;
-        private readonly LoweredCompilationUnit? compilationUnit;
+        private readonly SyntaxToken syntaxTree;
+        private readonly LoweredCompilationUnit? loweredTree;
 
-        private Compilation(Symbols.TypeSystem typeSystem, DiagnosticResult diagnostics, LoweredCompilationUnit? compilationUnit)
+        private Compilation(Symbols.TypeSystem typeSystem, DiagnosticResult diagnostics, SyntaxToken syntaxTree, LoweredCompilationUnit? compilationUnit)
         {
             this.diagnostics = diagnostics;
-            this.compilationUnit = compilationUnit;
+            this.syntaxTree = syntaxTree;
+            this.loweredTree = compilationUnit;
             this.typeSystem = typeSystem;
         }
 
-        public void WriteTo(TextWriter writer)
+        public void WriteLoweredTree(TextWriter writer)
         {
-            if (compilationUnit is not null)
+            if (loweredTree is not null)
             {
                 var treeWriter = new LoweredTreeWriter(writer);
-                treeWriter.WriteNode(compilationUnit);
+                treeWriter.WriteNode(loweredTree);
                 return;
             }
 
             writer.WriteLine("(null)");
         }
 
+        public void WriteSyntaxTree(TextWriter writer)
+        {
+            var treeWriter = new Syntax.TreeWriter(writer);
+            treeWriter.Write(syntaxTree);
+        }
+
         public void CreateProgram(string programName, string programPath)
         {
             var generator = new CodeGenerator(programName, typeSystem);
-            if (compilationUnit is not null)
-                generator.GenerateCompiationUnit(compilationUnit);
+            if (loweredTree is not null)
+                generator.GenerateCompiationUnit(loweredTree);
 
             generator.WriteTo(programPath);
         }
 
-        public LoweredNode? GetRoot() => compilationUnit;
+        public LoweredNode? GetLoweredTree() => loweredTree;
+
+        public SyntaxToken GetSyntaxTree() => syntaxTree;
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
@@ -81,10 +91,10 @@ namespace Kyloe
                 var flattener = new LoweredTreeFlattener(typeSystem);
                 var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
 
-                return new Compilation(typeSystem, diagnostics.ToResult(), flattenedCompilationUnit);
+                return new Compilation(typeSystem, diagnostics.ToResult(), rootNode, flattenedCompilationUnit);
             }
 
-            return new Compilation(typeSystem, diagnostics.ToResult(), null);
+            return new Compilation(typeSystem, diagnostics.ToResult(), rootNode, null);
         }
 
     }

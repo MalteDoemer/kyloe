@@ -21,7 +21,7 @@ namespace Kyloe.Tests.Lowering
             var compilation = Compilation.Compile(text);
 
             DiagnosticAssert.NoErrors(compilation.GetDiagnostics());
-            LoweredTreeAssert.AssertNode(node, compilation.GetRoot()!); // not null if no errors
+            LoweredTreeAssert.AssertNode(node, compilation.GetLoweredTree()!); // not null if no errors
         }
 
         public static IEnumerable<object[]> GetStatementData()
@@ -162,7 +162,7 @@ namespace Kyloe.Tests.Lowering
             var compilation = Compilation.Compile(text);
 
             DiagnosticAssert.NoErrors(compilation.GetDiagnostics());
-            LoweredTreeAssert.AssertNode(node, compilation.GetRoot()!); // not null if no errors
+            LoweredTreeAssert.AssertNode(node, compilation.GetLoweredTree()!); // not null if no errors
         }
 
         public static IEnumerable<object[]> GetWholeProgramData()
