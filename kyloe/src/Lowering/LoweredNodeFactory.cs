@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Kyloe.Semantics;
+using Kyloe.Symbols;
 
 namespace Kyloe.Lowering 
 {
@@ -34,6 +35,26 @@ namespace Kyloe.Lowering
         public static LoweredExpressionStatement ExpressionStatement(LoweredExpression expr) 
         {
             return new LoweredExpressionStatement(expr);
+        }
+
+        public static LoweredExpression SymbolExpression(Symbol symbol) 
+        {
+            return new LoweredSymbolExpression(symbol);
+        }
+
+        public static LoweredExpression LiteralExpression(TypeInfo type, object value) 
+        {
+            return new LoweredLiteralExpression(type, value);
+        }
+
+        public static LoweredExpression LogicalNot(TypeInfo type, LoweredExpression expr) 
+        {
+            return new LoweredUnaryExpression(type, expr, BoundOperation.LogicalNot);
+        }
+
+        public static LoweredExpression Assingment(TypeSystem ts, LoweredExpression left, LoweredExpression right) 
+        {
+            return new LoweredAssignment(ts, left, AssignmentOperation.Assign, right);
         }
     }
 }

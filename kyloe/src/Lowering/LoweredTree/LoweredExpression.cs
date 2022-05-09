@@ -3,6 +3,7 @@ using Kyloe.Symbols;
 
 namespace Kyloe.Lowering
 {
+
     internal abstract class LoweredExpression : LoweredNode
     {
         public abstract TypeInfo Type { get; }

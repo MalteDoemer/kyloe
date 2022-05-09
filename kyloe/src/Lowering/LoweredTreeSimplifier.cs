@@ -147,5 +147,36 @@ namespace Kyloe.Lowering
 
             return base.RewriteDeclarationStatement(statement);
         }
+
+        protected override LoweredExpression RewriteBinaryExpression(LoweredBinaryExpression expression)
+        {
+            if (expression.Operation == BoundOperation.LogicalAnd)
+            {
+                // left && right
+
+                // bool temp; 
+                // if (!left) temp = false; 
+                // else temp = right;
+                // temp
+
+                var temp = CreateTempVar(typeSystem.Bool);
+
+                var block = Block(
+                    new LoweredDeclarationStatement(temp, null),
+                    new LoweredIfStatement(
+                        LogicalNot(typeSystem.Bool, expression.LeftExpression),
+                        ExpressionStatement(Assingment(typeSystem, SymbolExpression(temp), LiteralExpression(typeSystem.Bool, false))),
+                        ExpressionStatement(Assingment(typeSystem, SymbolExpression(temp), expression.RightExpression))
+                    )
+                );
+
+                var final = SymbolExpression(temp);
+
+                var expr = new LoweredStatementExpression(block, final);
+                return base.RewriteStatementExpression(expr);
+            }
+
+            return base.RewriteBinaryExpression(expression);
+        }
     }
 }

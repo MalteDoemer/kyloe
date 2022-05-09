@@ -8,11 +8,18 @@ namespace Kyloe.Lowering
     {
         protected readonly TypeSystem typeSystem;
 
+        private int tempVarCount = 0;
+
         protected LoweredTreeRewriter(TypeSystem typeSystem)
         {
             this.typeSystem = typeSystem;
         }
 
+        protected LocalVariableSymbol CreateTempVar(TypeInfo type) 
+        {
+            var name = $"$temp{++tempVarCount}";
+            return new LocalVariableSymbol(name, type, false);
+        }
 
         public virtual LoweredCompilationUnit RewriteCompilationUnit(LoweredCompilationUnit compilationUnit)
         {
@@ -190,9 +197,22 @@ namespace Kyloe.Lowering
                     return RewriteVariableAccessExpression((LoweredSymbolExpression)expression);
                 case LoweredNodeKind.LoweredCallExpression:
                     return RewriteCallExpression((LoweredCallExpression)expression);
+                case LoweredNodeKind.LoweredStatementExpression:
+                    return RewriteStatementExpression((LoweredStatementExpression)expression);
                 default:
                     throw new Exception($"unexpected kind: {expression.Kind}");
             }
+        }
+
+        protected virtual LoweredExpression RewriteStatementExpression(LoweredStatementExpression expression)
+        {
+            var statements = RewriteBlockStatement(expression.Statements);
+            var finalExpr = RewriteExpression(expression.FinalExpression);
+
+            if (statements == expression.Statements && finalExpr == expression.FinalExpression)
+                return expression;
+
+            return new LoweredStatementExpression(statements, finalExpr);
         }
 
         protected virtual LoweredExpression RewriteCallExpression(LoweredCallExpression expression)

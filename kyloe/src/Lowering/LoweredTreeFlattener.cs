@@ -38,6 +38,14 @@ namespace Kyloe.Lowering
             return new LoweredFunctionDefinition(functionDefinition.Type, new LoweredBlockStatement(flat));
         }
 
+        protected override LoweredExpression RewriteStatementExpression(LoweredStatementExpression expression)
+        {
+            
+            RewriteBlockStatement(expression.Statements);
+
+            return expression.FinalExpression;
+        }
+
         private bool CanFallThrough(LoweredStatement stmt)
         {
             return stmt.Kind != LoweredNodeKind.LoweredReturnStatement

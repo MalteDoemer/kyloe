@@ -26,5 +26,6 @@ namespace Kyloe.Lowering
         LoweredGotoStatement,
         LoweredConditionalGotoStatement,
         LoweredLabelStatement,
+        LoweredStatementExpression,
     }
 }
