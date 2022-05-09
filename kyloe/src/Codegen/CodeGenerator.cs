@@ -34,7 +34,7 @@ namespace Kyloe.Codegen
 
         public void WriteTo(string path) 
         {
-            assembly.Write(path);
+            WriteTo(new FileStream(path, FileMode.Create));
         }
 
         public void WriteTo(Stream stream) 

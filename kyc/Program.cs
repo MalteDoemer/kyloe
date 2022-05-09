@@ -7,14 +7,19 @@ namespace Kyc
 {
     class Program
     {
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             bool help = false;
             bool interactive = false;
 
+            string? outputPath = null;
+            var referencePaths = new List<string>();
+
             var options = new OptionSet() {
                 {"i|interactive", "starts a interactive kyloe shell", value => interactive = value is not null },
                 {"h|help", "show this message and exit", value => help = value is not null },
+                {"o|output=", "the path to the output file", value => outputPath = value },
+                {"r|reference=", "the path to a reference dll", value => referencePaths.Add(value) },
             };
 
             List<string> extra;
@@ -26,59 +31,66 @@ namespace Kyc
             catch (OptionException e)
             {
                 WrongUsage(options, e.Message);
-                return;
+                return -1;
             }
 
             if (help)
             {
                 ShowHelp(options);
-                return;
+                return 0;
             }
 
             if (interactive)
             {
-                if (extra.Count > 0)
+                if (extra.Count > 0 || outputPath is not null)
                 {
                     WrongUsage(options, "too many arguments for interactive mode");
-                    return;
+                    return -1;
                 }
 
                 var i = new InteractiveKyloeShell();
                 i.Run();
-                return;
+                return 0;
             }
 
 
             if (extra.Count == 0)
             {
                 WrongUsage(options, "no input files");
-                return;
+                return -1;
             }
 
             if (extra.Count != 1)
             {
                 WrongUsage(options, "for now only one file allowed");
-                return;
+                return -1;
+            }
+
+            if (outputPath is null)
+            {
+                WrongUsage(options, "output path required");
+                return -1;
             }
 
             try
             {
                 var filePath = extra[0];
-                var fileName = Path.GetFileNameWithoutExtension(filePath);
-                var outFile = Path.Join(Path.GetDirectoryName(filePath), fileName + ".dll");
+                var programName = Path.GetFileNameWithoutExtension(outputPath);
                 var text = SourceText.FromFile(filePath);
                 var opts = new CompilationOptions() { RequireMain = true };
                 var compilation = Compilation.Compile(text, opts);
                 compilation.GetDiagnostics().WriteTo(Console.Out);
                 compilation.WriteTo(Console.Out);
-                compilation.CreateProgram(fileName, outFile);
-
+                compilation.CreateProgram(programName, outputPath);
             }
             catch (IOException ioException)
             {
+                Console.WriteLine(ioException);
                 WrongUsage(options, ioException.Message);
-                return;
+                return -1;
             }
+
+            return 0;
         }
 
         private static void WrongUsage(OptionSet options, string message)

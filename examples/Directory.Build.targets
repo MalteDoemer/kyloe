@@ -1,0 +1,32 @@
+<Project>
+
+  <Target Name="CreateManifestResourceNames" />
+
+  <Target Name="CoreCompile" DependsOnTargets="$(CoreCompileDependsOn)">
+    
+    <ItemGroup>
+      <ReferencePath Remove="@(ReferencePath)"
+                     Condition="'%(FileName)' != 'System.Console' AND
+                                '%(FileName)' != 'System.Runtime' AND
+                                '%(FileName)' != 'System.Runtime.Extensions'" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <KyloeCompilerArgs>@(Compile->'"%(Identity)"', ' ')</KyloeCompilerArgs>
+      <KyloeCompilerArgs>$(KyloeCompilerArgs) -o "@(IntermediateAssembly)"</KyloeCompilerArgs>
+      <KyloeCompilerArgs>$(KyloeCompilerArgs) @(ReferencePath->'-r "%(Identity)"', ' ')</KyloeCompilerArgs>
+
+      <ExeExt Condition="$([MSBuild]::IsOSUnixLike())"></ExeExt>
+      <ExeExt Condition="$([MSBuild]::IsOSPlatform('Windows'))">.exe</ExeExt>
+      <KyloeCompiler Condition="'$(KyloeCompiler)' == ''">kyc$(ExeExt)</KyloeCompiler>
+      <KyloeCompileCommand>$(KyloeCompiler) $(KyloeCompilerArgs)</KyloeCompileCommand>
+    </PropertyGroup>
+
+    <Exec Command="$(KyloeCompileCommand)" />
+  </Target>
+
+  <PropertyGroup>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+</Project>
