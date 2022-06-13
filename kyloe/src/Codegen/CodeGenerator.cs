@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Kyloe.Lowering;
@@ -255,7 +256,30 @@ namespace Kyloe.Codegen
 
         private void GenerateAssignment(LoweredAssignment expr, ILProcessor ilProcessor)
         {
-            throw new NotImplementedException();
+            // The lowered tree rewriters should have eliminated all compound assignments. 
+            Debug.Assert(expr.Operation == AssignmentOperation.Assign);
+
+            if (expr.LeftExpression is LoweredSymbolExpression left) 
+            {
+                switch (left.Symbol.Kind) 
+                {
+                    case SymbolKind.LocalVariableSymbol:
+                        var local = locals[(LocalVariableSymbol)left.Symbol];
+                        GenerateExpression(expr.RightExpression, ilProcessor);
+                        ilProcessor.Emit(OpCodes.Stloc, local); 
+                        break;
+
+                    case SymbolKind.GlobalVariableSymbol:
+                    case SymbolKind.FieldSymbol:
+                    case SymbolKind.ParameterSymbol:
+                    default:
+                        throw new Exception($"Unexpected symbol kind: {left.Symbol.Kind}");
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private void GenerateSymbolExpression(LoweredSymbolExpression expr, ILProcessor ilProcessor)
