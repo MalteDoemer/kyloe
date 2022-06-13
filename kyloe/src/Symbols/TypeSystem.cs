@@ -14,6 +14,7 @@ namespace Kyloe.Symbols
 
         public ErrorType Error { get; }
         public BuiltinType Void { get; }
+        public BuiltinType Object { get; }
         public BuiltinType Char { get; }
         public BuiltinType I8 { get; }
         public BuiltinType I16 { get; }
@@ -38,6 +39,7 @@ namespace Kyloe.Symbols
             GlobalScope = new SymbolScope();
 
             Error = new ErrorType();
+            Object = new BuiltinType("object");
             Void = new BuiltinType("void");
             Char = new BuiltinType("char");
             I8 = new BuiltinType("i8");
@@ -117,6 +119,7 @@ namespace Kyloe.Symbols
         {
             switch (type)
             {
+                case BuiltinTypeKind.Object: return Object;
                 case BuiltinTypeKind.Void: return Void;
                 case BuiltinTypeKind.Char: return Char;
                 case BuiltinTypeKind.I8: return I8;

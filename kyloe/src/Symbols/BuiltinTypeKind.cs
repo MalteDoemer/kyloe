@@ -4,6 +4,7 @@ namespace Kyloe.Symbols
     {
         private enum BuiltinTypeKind
         {
+            Object,
             Void,
             Char,
             I8,
