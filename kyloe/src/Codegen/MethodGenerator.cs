@@ -136,7 +136,15 @@ namespace Kyloe.Codegen
 
         private void GenerateCallExpression(LoweredCallExpression expr)
         {
-            throw new NotImplementedException();
+            // currently not used, but later, this will load the this pointer on the stack
+            GenerateExpression(expr.Expression);
+
+            foreach (var arg in expr.Arguments)
+                GenerateExpression(arg);
+
+            var method = Resolver.ResolveCallable(expr.CallableType);
+
+            ilProcessor.Emit(OpCodes.Call, method);
         }
 
         private void GenerateSymbolExpression(LoweredSymbolExpression expr)
@@ -148,8 +156,12 @@ namespace Kyloe.Codegen
                     ilProcessor.Emit(OpCodes.Ldloc, local);
                     break;
 
-                case SymbolKind.TypeNameSymbol:
                 case SymbolKind.CallableGroupSymbol:
+                    // nothing to do here
+                    break;
+
+
+                case SymbolKind.TypeNameSymbol:
                 case SymbolKind.FieldSymbol:
                 case SymbolKind.OperationSymbol:
                 case SymbolKind.ParameterSymbol:
