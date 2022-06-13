@@ -8,6 +8,8 @@ using Kyloe.Symbols;
 using Kyloe.Lowering;
 using System.IO;
 using Kyloe.Codegen;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Kyloe
 {
@@ -51,7 +53,7 @@ namespace Kyloe
 
         public void CreateProgram(string programName, string programPath)
         {
-            var generator = new CodeGenerator(programName, typeSystem);
+            var generator = CodeGenerator.Create(programName, typeSystem);
             if (loweredTree is not null)
                 generator.GenerateCompiationUnit(loweredTree);
 
@@ -64,11 +66,14 @@ namespace Kyloe
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
-        public static Compilation Compile(string text, CompilationOptions opts = default(CompilationOptions)) => Compile(SourceText.FromText(text), opts);
-
-        public static Compilation Compile(SourceText text, CompilationOptions opts = default(CompilationOptions))
+        public static Compilation Compile(string text, CompilationOptions opts = default(CompilationOptions))
         {
-            var typeSystem = Symbols.TypeSystem.Create();
+            return Compile(SourceText.FromText(text), Enumerable.Empty<string>(), opts);
+        }
+
+        public static Compilation Compile(SourceText text, IEnumerable<string> refrencePaths, CompilationOptions opts)
+        {
+            var typeSystem = Symbols.TypeSystem.Create(refrencePaths.Select(path => AssemblyDefinition.ReadAssembly(path)));
 
             var diagnostics = new DiagnosticCollector(text);
             var parser = new Parser(text.GetAllText(), diagnostics);

@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using Kyloe.Semantics;
+using Mono.Cecil;
 
 namespace Kyloe.Symbols
 {
@@ -29,12 +30,14 @@ namespace Kyloe.Symbols
         public BuiltinType Bool { get; }
         public BuiltinType String { get; }
 
-        public static TypeSystem Create()
+        public IEnumerable<AssemblyDefinition> ReferenceAssemblies { get; }
+
+        public static TypeSystem Create(IEnumerable<AssemblyDefinition> referenceAssemblies)
         {
-            return new TypeSystem();
+            return new TypeSystem(referenceAssemblies);
         }
 
-        private TypeSystem()
+        private TypeSystem(IEnumerable<AssemblyDefinition> referenceAssemblies)
         {
             GlobalScope = new SymbolScope();
 
@@ -113,6 +116,7 @@ namespace Kyloe.Symbols
                     AddBuiltinUnaryOperation(group.Group, op, ret, arg);
                 }
             }
+            ReferenceAssemblies = referenceAssemblies;
         }
 
         private BuiltinType GetBuiltinType(BuiltinTypeKind type)
