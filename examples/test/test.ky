@@ -1,20 +1,13 @@
-
-func yay() 
-{
-    hm();
+func test(x: bool) -> i64 {
+    if x {
+        return 1;
+    } else {
+        return 2;
+    }
 }
 
 func main() {
     var x = 5;
-
-    yay();
-
-    var y = 8;
-
+    var y = test(true);
     x = y;
-}
-
-func hm() 
-{
-
 }

@@ -258,13 +258,13 @@ namespace Kyloe.Semantics
 
             var builder = ImmutableArray.CreateBuilder<BoundParameterDeclaration>();
 
-            foreach (var param in parameters)
-                builder.Add(BindParameterDeclaration(param));
+            foreach (var (i, param) in parameters.EnumerateIndex())
+                builder.Add(BindParameterDeclaration(param, i));
 
             return new BoundParameters(builder.ToImmutable(), token);
         }
 
-        private BoundParameterDeclaration BindParameterDeclaration(SyntaxToken token)
+        private BoundParameterDeclaration BindParameterDeclaration(SyntaxToken token, int index)
         {
             // ParameterDeclaration
             // ├── Identifier
@@ -273,7 +273,7 @@ namespace Kyloe.Semantics
             var param = GetNode(token, SyntaxTokenKind.ParameterDeclaration);
             var nameTerminal = GetTerminal(param.Tokens[0], SyntaxTokenKind.Identifier);
             var typeClause = BindTypeClause(GetNode(param.Tokens[1]));
-            var symbol = new ParameterSymbol(nameTerminal.Text, typeClause.Type);
+            var symbol = new ParameterSymbol(nameTerminal.Text, index, typeClause.Type);
 
             return new BoundParameterDeclaration(symbol, token);
         }

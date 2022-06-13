@@ -16,6 +16,8 @@ namespace Kyloe.Codegen
         private ILProcessor ilProcessor => Method.Body.GetILProcessor();
 
         private Dictionary<Symbol, VariableDefinition> locals;
+        private Dictionary<LoweredLabel, int> lables;
+        private List<(int index, LoweredLabel jump)> jumps;
 
         public MethodGenerator(MethodDefinition method, TypeResolver resolver)
         {
@@ -23,6 +25,8 @@ namespace Kyloe.Codegen
             Resolver = resolver;
 
             locals = new Dictionary<Symbol, VariableDefinition>();
+            lables = new Dictionary<LoweredLabel, int>();
+            jumps = new List<(int index, LoweredLabel jump)>();
         }
 
         public MethodDefinition Method { get; }
@@ -32,6 +36,15 @@ namespace Kyloe.Codegen
         {
             foreach (var stmt in function.Body)
                 GenerateStatement(stmt);
+
+
+            // fill in all jump instructions
+            foreach (var (jumpInstructionIndex, targetLabel) in jumps)
+            {
+                var jumpInstruction = Method.Body.Instructions[jumpInstructionIndex];
+                var targetInstruction = Method.Body.Instructions[lables[targetLabel]];
+                jumpInstruction.Operand = targetInstruction;
+            }
 
             Method.Body.Optimize();
         }
@@ -62,17 +75,23 @@ namespace Kyloe.Codegen
 
         private void GenerateLabelStatement(LoweredLabelStatement stmt)
         {
-            throw new NotImplementedException();
+            // Add a label to the next instruction
+            lables.Add(stmt.Label, ilProcessor.Body.Instructions.Count);
         }
 
         private void GenerateConditionalGotoStatement(LoweredConditionalGotoStatement stmt)
         {
-            throw new NotImplementedException();
+            GenerateExpression(stmt.Condition);
+
+            // Only add a empty jump instruction here, the destination will be replaced later.
+            jumps.Add((ilProcessor.Body.Instructions.Count, stmt.Label));
+            ilProcessor.Emit(OpCodes.Brtrue, Instruction.Create(OpCodes.Nop));
         }
 
         private void GenerateGotoStatement(LoweredGotoStatement stmt)
         {
-            throw new NotImplementedException();
+            jumps.Add((ilProcessor.Body.Instructions.Count, stmt.Label));
+            ilProcessor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop));
         }
 
         private void GenerateEmptyStatement(LoweredEmptyStatement stmt)
@@ -160,11 +179,15 @@ namespace Kyloe.Codegen
                     // nothing to do here
                     break;
 
+                case SymbolKind.ParameterSymbol:
+                    var paramSymbol = (ParameterSymbol)expr.Symbol;
+                    var param = Method.Parameters[paramSymbol.Index];
+                    ilProcessor.Emit(OpCodes.Ldarg, param);
+                    break;
 
                 case SymbolKind.TypeNameSymbol:
                 case SymbolKind.FieldSymbol:
                 case SymbolKind.OperationSymbol:
-                case SymbolKind.ParameterSymbol:
                 case SymbolKind.GlobalVariableSymbol:
                     throw new NotImplementedException();
             }
@@ -286,6 +309,15 @@ namespace Kyloe.Codegen
             else if (expr.Type.Equals(Resolver.TypeSystem.String))
             {
                 ilProcessor.Emit(OpCodes.Ldstr, (string)expr.Value);
+            }
+            else if (expr.Type.Equals(Resolver.TypeSystem.Bool))
+            {
+                bool val = (bool)expr.Value;
+
+                if (val)
+                    ilProcessor.Emit(OpCodes.Ldc_I4_1);
+                else
+                    ilProcessor.Emit(OpCodes.Ldc_I4_0);
             }
             else
             {

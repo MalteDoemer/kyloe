@@ -146,8 +146,8 @@ namespace Kyloe.Symbols
         {
             var func = new BuiltinFunctionType(group, GetBuiltinType(ret));
 
-            foreach (var param in parameters)
-                func.Parameters.Add(new ParameterSymbol(param.name, GetBuiltinType(param.type)));
+            foreach (var (i, param) in parameters.EnumerateIndex())
+                func.Parameters.Add(new ParameterSymbol(param.name, i, GetBuiltinType(param.type)));
 
             return func;
         }
@@ -155,15 +155,15 @@ namespace Kyloe.Symbols
         private static void AddBuiltinBinaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo left, TypeInfo right)
         {
             var method = new MethodType(group, ret, isStatic: true, isOperator: true);
-            method.Parameters.Add(new ParameterSymbol("", left));
-            method.Parameters.Add(new ParameterSymbol("", right));
+            method.Parameters.Add(new ParameterSymbol("", 0, left));
+            method.Parameters.Add(new ParameterSymbol("", 1, right));
             group.Callables.Add(method);
         }
 
         private static void AddBuiltinUnaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo arg)
         {
             var method = new MethodType(group, ret, isStatic: true, isOperator: true);
-            method.Parameters.Add(new ParameterSymbol("", arg));
+            method.Parameters.Add(new ParameterSymbol("", 0, arg));
             group.Callables.Add(method);
         }
     }
