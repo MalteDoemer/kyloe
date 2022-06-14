@@ -5,7 +5,7 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredCompilationUnit : LoweredNode 
     {
-        public LoweredCompilationUnit(ImmutableArray<LoweredFunctionDefinition> loweredFunctions, LoweredStatement globalStatement, int mainFunctionIndex)
+        public LoweredCompilationUnit(ImmutableArray<LoweredFunctionDefinition> loweredFunctions, LoweredBlockStatement globalStatement, int mainFunctionIndex)
         {
             LoweredFunctions = loweredFunctions;
             GlobalStatement = globalStatement;
@@ -13,7 +13,7 @@ namespace Kyloe.Lowering
         }
 
         public ImmutableArray<LoweredFunctionDefinition> LoweredFunctions { get; }
-        public LoweredStatement GlobalStatement { get; }
+        public LoweredBlockStatement GlobalStatement { get; }
         
         public int MainFunctionIndex { get; }
         public LoweredFunctionDefinition? MainFunction => MainFunctionIndex < 0 ? null : LoweredFunctions[MainFunctionIndex];

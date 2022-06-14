@@ -13,6 +13,25 @@ namespace Kyloe.Lowering
             statements = ImmutableArray.CreateBuilder<LoweredStatement>();
         }
 
+        public override LoweredCompilationUnit RewriteCompilationUnit(LoweredCompilationUnit compilationUnit)
+        {
+            var globals = ImmutableArray.CreateBuilder<LoweredStatement>();
+            var functions = ImmutableArray.CreateBuilder<LoweredFunctionDefinition>(compilationUnit.LoweredFunctions.Length);
+
+            foreach (var func in compilationUnit.LoweredFunctions)
+                functions.Add(RewriteFunctionDefinition(func));
+
+            RewriteBlockStatement(compilationUnit.GlobalStatement);
+
+            if (statements.Count == 0 || CanFallThrough(statements.Last()))
+                statements.Add(new LoweredReturnStatement(null));
+
+            var global = new LoweredBlockStatement(statements.ToImmutable());
+            statements.Clear();
+
+            return new LoweredCompilationUnit(functions.MoveToImmutable(), global, compilationUnit.MainFunctionIndex);
+        }
+
         protected override LoweredBlockStatement RewriteBlockStatement(LoweredBlockStatement statement)
         {
             foreach (var stmt in statement)
@@ -40,7 +59,7 @@ namespace Kyloe.Lowering
 
         protected override LoweredExpression RewriteStatementExpression(LoweredStatementExpression expression)
         {
-            
+
             RewriteBlockStatement(expression.Statements);
 
             return expression.FinalExpression;

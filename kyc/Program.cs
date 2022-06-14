@@ -49,7 +49,7 @@ namespace Kyc
                 if (extra.Count > 0 || outputPath is not null)
                 {
                     WrongUsage(options, "too many arguments for interactive mode");
-                    return -1;
+                    return 1;
                 }
 
                 var i = new InteractiveKyloeShell();
@@ -57,11 +57,10 @@ namespace Kyc
                 return 0;
             }
 
-
             if (extra.Count == 0)
             {
                 WrongUsage(options, "no input files");
-                return -1;
+                return 1;
             }
 
             if (extra.Count != 1)
@@ -73,7 +72,7 @@ namespace Kyc
             if (outputPath is null)
             {
                 WrongUsage(options, "output path required");
-                return -1;
+                return 1;
             }
 
             try
@@ -83,7 +82,7 @@ namespace Kyc
                 var text = SourceText.FromFile(filePath);
                 var opts = new CompilationOptions() { RequireMain = true };
                 var compilation = Compilation.Compile(text, referencePaths, opts);
-                compilation.GetDiagnostics().WriteTo(Console.Out);
+                compilation.GetDiagnostics().WriteTo(Console.Error);
 
                 if (printSyntaxTree)
                     compilation.WriteSyntaxTree(Console.Out);
@@ -91,11 +90,13 @@ namespace Kyc
                 if (printLoweredTree)
                     compilation.WriteLoweredTree(Console.Out);
 
+                if (compilation.GetDiagnostics().HasErrors())
+                    return 1;
+
                 compilation.CreateProgram(programName, outputPath);
             }
             catch (IOException ioException)
             {
-                Console.WriteLine(ioException);
                 WrongUsage(options, ioException.Message);
                 return -1;
             }
@@ -105,8 +106,8 @@ namespace Kyc
 
         private static void WrongUsage(OptionSet options, string message)
         {
-            Console.Write("kyc: ");
-            Console.WriteLine(message);
+            Console.Error.Write("kyc: ");
+            Console.Error.WriteLine(message);
         }
 
         private static void ShowHelp(OptionSet options)

@@ -23,7 +23,7 @@ namespace Kyloe.Lowering
 
         public virtual LoweredCompilationUnit RewriteCompilationUnit(LoweredCompilationUnit compilationUnit)
         {
-            var global = RewriteStatement(compilationUnit.GlobalStatement);
+            var global = RewriteBlockStatement(compilationUnit.GlobalStatement);
 
             var builder = ImmutableArray.CreateBuilder<LoweredFunctionDefinition>(compilationUnit.LoweredFunctions.Length);
 

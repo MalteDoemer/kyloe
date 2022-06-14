@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Kyloe.Lowering;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
@@ -16,6 +17,7 @@ namespace Kyloe.Codegen
         private ILProcessor ilProcessor => Method.Body.GetILProcessor();
 
         private Dictionary<Symbol, VariableDefinition> locals;
+
         private Dictionary<LoweredLabel, int> lables;
         private List<(int index, LoweredLabel jump)> jumps;
 
@@ -31,6 +33,11 @@ namespace Kyloe.Codegen
 
         public MethodDefinition Method { get; }
         public TypeResolver Resolver { get; }
+
+        private FieldDefinition GetStaticFieldByName(string name)
+        {
+            return Method.DeclaringType.Fields.Where(f => f.Name == name).First();
+        }
 
         public void GenerateFunctionBody(LoweredFunctionDefinition function)
         {
@@ -100,17 +107,28 @@ namespace Kyloe.Codegen
 
         private void GenerateDeclarationStatement(LoweredDeclarationStatement stmt)
         {
-            // We are in a function body, so declaration should be a local variable.
-            Debug.Assert(stmt.Symbol.Kind == SymbolKind.LocalVariableSymbol);
-
             // The optimizers should have eliminated the initializer.
             Debug.Assert(stmt.Initializer is null);
 
-            var type = Resolver.ResolveType(stmt.Symbol.Type);
-            var local = new VariableDefinition(type);
+            if (stmt.Symbol.Kind == SymbolKind.LocalVariableSymbol)
+            {
+                var type = Resolver.ResolveType(stmt.Symbol.Type);
+                var local = new VariableDefinition(type);
 
-            locals.Add(stmt.Symbol, local);
-            Method.Body.Variables.Add(local);
+                locals.Add(stmt.Symbol, local);
+                Method.Body.Variables.Add(local);
+            }
+            else if (stmt.Symbol.Kind == SymbolKind.GlobalVariableSymbol)
+            {
+                var type = Resolver.ResolveType(stmt.Symbol.Type);
+                var global = new FieldDefinition(stmt.Symbol.Name, FieldAttributes.Static | FieldAttributes.Private, type);
+
+                Method.DeclaringType.Fields.Add(global);
+            }
+            else
+            {
+                throw new Exception($"Unexpected symbol kind: {stmt.Symbol.Kind}");
+            }
         }
 
         private void GenerateExpressionStatement(LoweredExpressionStatement stmt)
@@ -171,7 +189,7 @@ namespace Kyloe.Codegen
             switch (expr.Symbol.Kind)
             {
                 case SymbolKind.LocalVariableSymbol:
-                    var local = locals[(LocalVariableSymbol)expr.Symbol];
+                    var local = locals[expr.Symbol];
                     ilProcessor.Emit(OpCodes.Ldloc, local);
                     break;
 
@@ -185,10 +203,14 @@ namespace Kyloe.Codegen
                     ilProcessor.Emit(OpCodes.Ldarg, param);
                     break;
 
+                case SymbolKind.GlobalVariableSymbol:
+                    var global = GetStaticFieldByName(expr.Symbol.Name);
+                    ilProcessor.Emit(OpCodes.Ldsfld, global);
+                    break;
+
                 case SymbolKind.TypeNameSymbol:
                 case SymbolKind.FieldSymbol:
                 case SymbolKind.OperationSymbol:
-                case SymbolKind.GlobalVariableSymbol:
                     throw new NotImplementedException();
             }
         }
@@ -209,6 +231,12 @@ namespace Kyloe.Codegen
                         break;
 
                     case SymbolKind.GlobalVariableSymbol:
+                        var global = GetStaticFieldByName(left.Symbol.Name);
+                        GenerateExpression(expr.RightExpression);
+                        ilProcessor.Emit(OpCodes.Stsfld, global);
+                        break;
+
+
                     case SymbolKind.FieldSymbol:
                     case SymbolKind.ParameterSymbol:
                         throw new NotImplementedException();
@@ -219,7 +247,7 @@ namespace Kyloe.Codegen
             }
             else
             {
-                throw new NotImplementedException();
+                throw new Exception($"Unexpected lowered node kind: {expr.LeftExpression.Kind}");
             }
         }
 

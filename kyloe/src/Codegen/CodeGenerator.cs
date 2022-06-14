@@ -42,7 +42,23 @@ namespace Kyloe.Codegen
             }
 
 
-            foreach (var func in unit.LoweredFunctions) 
+            var attrs = MethodAttributes.SpecialName
+                        | MethodAttributes.RTSpecialName
+                        | MethodAttributes.Static
+                        | MethodAttributes.Private
+                        | MethodAttributes.HideBySig;
+
+            var staticCtor = new MethodDefinition(".cctor", attrs, Resolver.ResolveType(Resolver.TypeSystem.Void));
+            var ctorGenerator = new MethodGenerator(staticCtor, Resolver);
+
+            mainClass.Methods.Add(staticCtor);
+            
+            foreach (var stmt in unit.GlobalStatement)
+                ctorGenerator.GenerateStatement(stmt);
+
+
+
+            foreach (var func in unit.LoweredFunctions)
             {
                 var method = Resolver.ResolveCallable(func.Type).Resolve();
                 var generator = new MethodGenerator(method, Resolver);

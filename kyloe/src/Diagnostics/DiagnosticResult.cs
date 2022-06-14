@@ -27,8 +27,13 @@ namespace Kyloe.Diagnostics
         {
             var colorMode = DiagnosticWriter.ColorMode.None;
 
-            if (object.ReferenceEquals(writer, Console.Out))
-                colorMode = DiagnosticWriter.ColorMode.ConsoleColor;
+            if (object.ReferenceEquals(writer, Console.Error))
+            {
+                if (System.Environment.OSVersion.Platform == PlatformID.Win32NT)
+                    colorMode = DiagnosticWriter.ColorMode.ConsoleColor;
+                else
+                    colorMode = DiagnosticWriter.ColorMode.AnsiColor;
+            }
 
             var diagnosticWriter = new DiagnosticWriter(writer, sourceText, colorMode);
             diagnosticWriter.Write(this);
