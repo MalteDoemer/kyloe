@@ -1,6 +1,6 @@
 ﻿using Kyloe;
+using Kyloe.Backend;
 using Kyloe.Utility;
-using Mono.Cecil;
 using Mono.Options;
 
 namespace Kyc
@@ -81,8 +81,7 @@ namespace Kyc
                 var programName = Path.GetFileNameWithoutExtension(outputPath);
                 var text = SourceText.FromFile(filePath);
                 var opts = new CompilationOptions() { RequireMain = true };
-                var compilation = Compilation.Compile(text, referencePaths, opts);
-                compilation.GetDiagnostics().WriteTo(Console.Error);
+                var compilation = Compilation.Compile(programName, outputPath, BackendKind.Cecil, text, referencePaths, opts);
 
                 if (printSyntaxTree)
                     compilation.WriteSyntaxTree(Console.Out);
@@ -90,18 +89,15 @@ namespace Kyc
                 if (printLoweredTree)
                     compilation.WriteLoweredTree(Console.Out);
 
-                if (compilation.GetDiagnostics().HasErrors())
-                    return 1;
+                compilation.GetDiagnostics().WriteTo(Console.Error);
 
-                compilation.CreateProgram(programName, outputPath);
+                return compilation.GetDiagnostics().HasErrors() ? 1 : 0;
             }
             catch (IOException ioException)
             {
                 WrongUsage(options, ioException.Message);
                 return -1;
             }
-
-            return 0;
         }
 
         private static void WrongUsage(OptionSet options, string message)

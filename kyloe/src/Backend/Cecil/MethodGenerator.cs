@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Kyloe.Backend.Cecil;
 using Kyloe.Lowering;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
@@ -10,7 +11,7 @@ using Mono.Cecil.Cil;
 using Mono.Cecil.Rocks;
 
 
-namespace Kyloe.Codegen
+namespace Kyloe.Backend.Cecil
 {
     internal sealed class MethodGenerator
     {
@@ -21,10 +22,10 @@ namespace Kyloe.Codegen
         private Dictionary<LoweredLabel, int> lables;
         private List<(int index, LoweredLabel jump)> jumps;
 
-        public MethodGenerator(MethodDefinition method, TypeResolver resolver)
+        public MethodGenerator(MethodDefinition method, CecilBackend backend)
         {
             Method = method;
-            Resolver = resolver;
+            Backend = backend;
 
             locals = new Dictionary<Symbol, VariableDefinition>();
             lables = new Dictionary<LoweredLabel, int>();
@@ -32,7 +33,7 @@ namespace Kyloe.Codegen
         }
 
         public MethodDefinition Method { get; }
-        public TypeResolver Resolver { get; }
+        public CecilBackend Backend { get; }
 
         private FieldDefinition GetStaticFieldByName(string name)
         {
@@ -112,7 +113,7 @@ namespace Kyloe.Codegen
 
             if (stmt.Symbol.Kind == SymbolKind.LocalVariableSymbol)
             {
-                var type = Resolver.ResolveType(stmt.Symbol.Type);
+                var type = Backend.ResolveType(stmt.Symbol.Type);
                 var local = new VariableDefinition(type);
 
                 locals.Add(stmt.Symbol, local);
@@ -120,7 +121,7 @@ namespace Kyloe.Codegen
             }
             else if (stmt.Symbol.Kind == SymbolKind.GlobalVariableSymbol)
             {
-                var type = Resolver.ResolveType(stmt.Symbol.Type);
+                var type = Backend.ResolveType(stmt.Symbol.Type);
                 var global = new FieldDefinition(stmt.Symbol.Name, FieldAttributes.Static | FieldAttributes.Private, type);
 
                 Method.DeclaringType.Fields.Add(global);
@@ -137,7 +138,7 @@ namespace Kyloe.Codegen
 
             GenerateExpression(expr);
 
-            if (!expr.Type.Equals(Resolver.TypeSystem.Void))
+            if (!expr.Type.Equals(Backend.TypeSystem.Void))
                 ilProcessor.Emit(OpCodes.Pop);
         }
 
@@ -179,7 +180,7 @@ namespace Kyloe.Codegen
             foreach (var arg in expr.Arguments)
                 GenerateExpression(arg);
 
-            var method = Resolver.ResolveCallable(expr.CallableType);
+            var method = Backend.ResolveCallable(expr.CallableType);
 
             ilProcessor.Emit(OpCodes.Call, method);
         }
@@ -326,19 +327,19 @@ namespace Kyloe.Codegen
 
         private void GenerateLiteralExpression(LoweredLiteralExpression expr)
         {
-            if (expr.Type.Equals(Resolver.TypeSystem.I64))
+            if (expr.Type.Equals(Backend.TypeSystem.I64))
             {
                 ilProcessor.Emit(OpCodes.Ldc_I8, (long)expr.Value);
             }
-            else if (expr.Type.Equals(Resolver.TypeSystem.Double))
+            else if (expr.Type.Equals(Backend.TypeSystem.Double))
             {
                 ilProcessor.Emit(OpCodes.Ldc_R8, (double)expr.Value);
             }
-            else if (expr.Type.Equals(Resolver.TypeSystem.String))
+            else if (expr.Type.Equals(Backend.TypeSystem.String))
             {
                 ilProcessor.Emit(OpCodes.Ldstr, (string)expr.Value);
             }
-            else if (expr.Type.Equals(Resolver.TypeSystem.Bool))
+            else if (expr.Type.Equals(Backend.TypeSystem.Bool))
             {
                 bool val = (bool)expr.Value;
 

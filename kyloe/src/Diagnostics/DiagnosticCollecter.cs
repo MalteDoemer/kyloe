@@ -182,6 +182,18 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.MissingMainFunction, msg, null);
         }
 
+        public void UnableToReadLibrary(string name) 
+        {
+            var msg = $"unable to read library file'{name}'";
+            AddError(DiagnosticKind.UnableToReadLibrary, msg, null);
+        }
+
+        public void UnresolvedImport(string name, SourceLocation? location) 
+        {
+            var msg = $"unable to resolve import '{name}'";
+            AddError(DiagnosticKind.UnresolvedImport, msg, location);
+        }
+
         public void Clear()
         {
             diagnostics.Clear();

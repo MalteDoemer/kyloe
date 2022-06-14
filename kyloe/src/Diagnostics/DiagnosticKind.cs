@@ -29,5 +29,7 @@ namespace Kyloe.Diagnostics
         IllegalContinueStatement,
         IllegalBreakStatement,
         MissingMainFunction,
+        UnableToReadLibrary,
+        UnresolvedImport,
     }
 }

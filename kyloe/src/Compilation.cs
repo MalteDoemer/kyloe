@@ -1,15 +1,12 @@
-using Mono.Cecil;
 using Kyloe.Semantics;
 using System;
 using Kyloe.Diagnostics;
 using Kyloe.Utility;
 using Kyloe.Syntax;
-using Kyloe.Symbols;
 using Kyloe.Lowering;
 using System.IO;
-using Kyloe.Codegen;
 using System.Collections.Generic;
-using System.Linq;
+using Kyloe.Backend;
 
 namespace Kyloe
 {
@@ -21,43 +18,34 @@ namespace Kyloe
     public class Compilation
     {
         private readonly DiagnosticResult diagnostics;
-        private readonly Symbols.TypeSystem typeSystem;
+        private readonly Backend.Backend backend;
         private readonly SyntaxToken syntaxTree;
         private readonly LoweredCompilationUnit? loweredTree;
 
-        private Compilation(Symbols.TypeSystem typeSystem, DiagnosticResult diagnostics, SyntaxToken syntaxTree, LoweredCompilationUnit? compilationUnit)
+        private Compilation(Backend.Backend backend, DiagnosticResult diagnostics, SyntaxToken syntaxTree, LoweredCompilationUnit? compilationUnit)
         {
             this.diagnostics = diagnostics;
             this.syntaxTree = syntaxTree;
             this.loweredTree = compilationUnit;
-            this.typeSystem = typeSystem;
+            this.backend = backend;
         }
 
         public void WriteLoweredTree(TextWriter writer)
         {
-            if (loweredTree is not null)
+            if (loweredTree is null)
             {
-                var treeWriter = new LoweredTreeWriter(writer);
-                treeWriter.WriteNode(loweredTree);
+                writer.WriteLine("(null)");
                 return;
             }
 
-            writer.WriteLine("(null)");
+            var treeWriter = new LoweredTreeWriter(writer);
+            treeWriter.WriteNode(loweredTree);
         }
 
         public void WriteSyntaxTree(TextWriter writer)
         {
             var treeWriter = new Syntax.TreeWriter(writer);
             treeWriter.Write(syntaxTree);
-        }
-
-        public void CreateProgram(string programName, string programPath)
-        {
-            var generator = CodeGenerator.Create(programName, typeSystem);
-            if (loweredTree is not null)
-                generator.GenerateCompiationUnit(loweredTree);
-
-            generator.WriteTo(programPath);
         }
 
         public LoweredNode? GetLoweredTree() => loweredTree;
@@ -68,22 +56,25 @@ namespace Kyloe
 
         public static Compilation Compile(string text, CompilationOptions opts = default(CompilationOptions))
         {
-            return Compile(SourceText.FromText(text), Enumerable.Empty<string>(), opts);
+            throw new NotImplementedException();
+            // return Compile(SourceText.FromText(text), Enumerable.Empty<string>(), opts);
         }
 
-        public static Compilation Compile(SourceText text, IEnumerable<string> refrencePaths, CompilationOptions opts)
+        public static Compilation Compile(string programName, string programPath, BackendKind backendKind, SourceText source, IEnumerable<string> libraries, CompilationOptions opts)
         {
-            var typeSystem = Symbols.TypeSystem.Create(refrencePaths.Select(path => AssemblyDefinition.ReadAssembly(path)));
+            var diagnostics = new DiagnosticCollector(source);
 
-            var diagnostics = new DiagnosticCollector(text);
-            var parser = new Parser(text.GetAllText(), diagnostics);
+            var typeSystem = Symbols.TypeSystem.Create();
+            var backend = Backend.Backend.Create(programName, backendKind, typeSystem, libraries, diagnostics);
+
+            var parser = new Parser(source.GetAllText(), diagnostics);
             var rootNode = parser.Parse();
+
             var binder = new Binder(typeSystem, diagnostics);
             var boundCompilationUnit = binder.BindCompilationUnit(rootNode);
 
             if (opts.RequireMain && boundCompilationUnit.MainFunction is null)
                 diagnostics.MissingMainFunction();
-
 
             if (!diagnostics.HasErrors())
             {
@@ -96,11 +87,11 @@ namespace Kyloe
                 var flattener = new LoweredTreeFlattener(typeSystem);
                 var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
 
-                return new Compilation(typeSystem, diagnostics.ToResult(), rootNode, flattenedCompilationUnit);
+                backend.CreateProgram(programPath, flattenedCompilationUnit);
+                return new Compilation(backend, diagnostics.ToResult(), rootNode, flattenedCompilationUnit);
             }
 
-            return new Compilation(typeSystem, diagnostics.ToResult(), rootNode, null);
+            return new Compilation(backend, diagnostics.ToResult(), rootNode, null);
         }
-
     }
 }
