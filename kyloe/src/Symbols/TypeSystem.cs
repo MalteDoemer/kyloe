@@ -30,15 +30,17 @@ namespace Kyloe.Symbols
         public BuiltinType Bool { get; }
         public BuiltinType String { get; }
 
-        public IEnumerable<AssemblyDefinition> ReferenceAssemblies { get; }
+        public AssemblyDefinition KyloeBuiltinsAssembly { get; }
 
-        public static TypeSystem Create(IEnumerable<AssemblyDefinition> referenceAssemblies)
+        public static TypeSystem Create(AssemblyDefinition kyloeBuiltinsAssembly)
         {
-            return new TypeSystem(referenceAssemblies);
+            return new TypeSystem(kyloeBuiltinsAssembly);
         }
 
-        private TypeSystem(IEnumerable<AssemblyDefinition> referenceAssemblies)
+        private TypeSystem(AssemblyDefinition kyloeBuiltinsAssembly)
         {
+            KyloeBuiltinsAssembly = kyloeBuiltinsAssembly;
+
             GlobalScope = new SymbolScope();
 
             Error = new ErrorType();
@@ -63,19 +65,13 @@ namespace Kyloe.Symbols
             foreach (var builtin in Enum.GetValues<BuiltinTypeKind>())
                 GlobalScope.DeclareSymbol(new TypeNameSymbol(GetBuiltinType(builtin)));
 
-            foreach (var (name, ret, parameters) in BuiltinFunctionInfo.BuiltinFunctions)
-            {
-                var group = GlobalScope.LookupSymbol(name) as CallableGroupSymbol;
+            InitializeBuiltinFunctions();
 
-                if (group is null)
-                {
-                    group = new CallableGroupSymbol(new CallableGroupType(name, null));
-                    Debug.Assert(GlobalScope.DeclareSymbol(group));
-                }
+            InitializeBuiltinOperations();
+        }
 
-                group.Group.Callables.Add(CreateBuiltinFunction(name, group.Group, ret, parameters));
-            }
-
+        private void InitializeBuiltinOperations()
+        {
             foreach (var binary in BuiltinOperationInfo.BinaryOperations)
             {
                 var left = GetBuiltinType(binary.lhs);
@@ -116,7 +112,38 @@ namespace Kyloe.Symbols
                     AddBuiltinUnaryOperation(group.Group, op, ret, arg);
                 }
             }
-            ReferenceAssemblies = referenceAssemblies;
+
+        }
+
+        private void InitializeBuiltinFunctions()
+        {
+            var classes = KyloeBuiltinsAssembly.MainModule.Types.Where(type => type.IsPublic);
+
+            var methods = classes.SelectMany(cls => cls.Methods).Where(method => method.IsPublic && method.IsStatic);
+
+
+            foreach (var method in methods) 
+            {
+                var name = method.Name;
+                 
+
+            }
+
+
+            // foreach (var (name, ret, parameters) in BuiltinFunctionInfo.BuiltinFunctions)
+            // {
+            //     var group = GlobalScope.LookupSymbol(name) as CallableGroupSymbol;
+
+            //     if (group is null)
+            //     {
+            //         group = new CallableGroupSymbol(new CallableGroupType(name, null));
+            //         Debug.Assert(GlobalScope.DeclareSymbol(group));
+            //     }
+
+            //     var builtinFunction = CreateBuiltinFunction(name, group.Group, ret, parameters);
+
+            //     group.Group.Callables.Add(builtinFunction);
+            // }
         }
 
         private BuiltinType GetBuiltinType(BuiltinTypeKind type)
@@ -142,15 +169,15 @@ namespace Kyloe.Symbols
             }
         }
 
-        private BuiltinFunctionType CreateBuiltinFunction(string name, CallableGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
-        {
-            var func = new BuiltinFunctionType(group, GetBuiltinType(ret));
+        // private BuiltinFunctionType CreateBuiltinFunction(string name, CallableGroupType group, BuiltinTypeKind ret, ImmutableArray<(string name, BuiltinTypeKind type)> parameters)
+        // {
+        //     var func = new BuiltinFunctionType(group, GetBuiltinType(ret));
 
-            foreach (var (i, param) in parameters.EnumerateIndex())
-                func.Parameters.Add(new ParameterSymbol(param.name, i, GetBuiltinType(param.type)));
+        //     foreach (var (i, param) in parameters.EnumerateIndex())
+        //         func.Parameters.Add(new ParameterSymbol(param.name, i, GetBuiltinType(param.type)));
 
-            return func;
-        }
+        //     return func;
+        // }
 
         private static void AddBuiltinBinaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo left, TypeInfo right)
         {

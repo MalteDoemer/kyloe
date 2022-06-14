@@ -68,12 +68,14 @@ namespace Kyloe
 
         public static Compilation Compile(string text, CompilationOptions opts = default(CompilationOptions))
         {
-            return Compile(SourceText.FromText(text), Enumerable.Empty<string>(), opts);
+            return Compile(SourceText.FromText(text), "", opts);
         }
 
-        public static Compilation Compile(SourceText text, IEnumerable<string> refrencePaths, CompilationOptions opts)
+        public static Compilation Compile(SourceText text, string kyloeBuiltinsPath, CompilationOptions opts)
         {
-            var typeSystem = Symbols.TypeSystem.Create(refrencePaths.Select(path => AssemblyDefinition.ReadAssembly(path)));
+            var kyloeBuiltinsAssembly = AssemblyDefinition.ReadAssembly(kyloeBuiltinsPath);
+
+            var typeSystem = Symbols.TypeSystem.Create(kyloeBuiltinsAssembly);
 
             var diagnostics = new DiagnosticCollector(text);
             var parser = new Parser(text.GetAllText(), diagnostics);
