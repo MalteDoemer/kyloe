@@ -15,15 +15,15 @@ namespace Kyc
             bool printSyntaxTree = false;
 
             string? outputPath = null;
-            string? kyloeBuiltinsPath = null;
-            
+            var referencePaths = new List<string>();
+
             var options = new OptionSet() {
                 {"i|interactive", "starts a interactive kyloe shell", value => interactive = value is not null },
                 {"h|help", "show this message and exit", value => help = value is not null },
                 {"print-ir", "print intermidiate representation to the console", value => printLoweredTree = value is not null },
                 {"print-tree", "print syntax tree to the console", value => printSyntaxTree = value is not null },
                 {"o|output=", "the path to the output file", value => outputPath = value },
-                {"k|kyloe-builtins=", "the path to the kyloe-builtins.dll", value => kyloeBuiltinsPath = value },
+                {"r|reference=", "the path to a reference dll", value => referencePaths.Add(value) },
             };
 
             List<string> extra;
@@ -75,19 +75,13 @@ namespace Kyc
                 return 1;
             }
 
-            if (kyloeBuiltinsPath is null)
-            {
-                WrongUsage(options, "kyloe-builtins.dll path required");
-                return 1;
-            }
-
             try
             {
                 var filePath = extra[0];
                 var programName = Path.GetFileNameWithoutExtension(outputPath);
                 var text = SourceText.FromFile(filePath);
                 var opts = new CompilationOptions() { RequireMain = true };
-                var compilation = Compilation.Compile(text, kyloeBuiltinsPath, opts);
+                var compilation = Compilation.Compile(text, referencePaths, opts);
                 compilation.GetDiagnostics().WriteTo(Console.Error);
 
                 if (printSyntaxTree)

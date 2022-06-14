@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "codegen", "codegen\codegen.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe.bench", "kyloe.bench\kyloe.bench.csproj", "{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe-builtins", "kyloe-builtins\kyloe-builtins.csproj", "{BE4BC0F3-7ED5-447B-8E31-F7D06FFA5101}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,9 +48,5 @@ Global
 		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE4BC0F3-7ED5-447B-8E31-F7D06FFA5101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE4BC0F3-7ED5-447B-8E31-F7D06FFA5101}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE4BC0F3-7ED5-447B-8E31-F7D06FFA5101}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE4BC0F3-7ED5-447B-8E31-F7D06FFA5101}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,15 @@
 
+var global = 5;
+
+func test(x: bool) -> i64 {
+    if x {
+        return global;
+    } else {
+        return 65;
+    }
+}
 
 func main() {
-    println("hello kyloe!");
+    var x = 6;
+    global = test(false);
 }
