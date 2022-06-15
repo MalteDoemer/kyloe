@@ -22,6 +22,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\kyloe\kyloe.csproj" />
+    <ProjectReference Include="..\kyloe.builtins\kyloe.builtins.csproj" />
   </ItemGroup>
+
+
 
 </Project>

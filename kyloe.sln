@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "codegen", "codegen\codegen.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe.bench", "kyloe.bench\kyloe.bench.csproj", "{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kyloe.builtins", "kyloe.builtins\kyloe.builtins.csproj", "{B7802F29-481B-49C1-A855-30C31B8FF443}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD30355B-01B0-4F57-BDFE-04BC970E2CB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7802F29-481B-49C1-A855-30C31B8FF443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7802F29-481B-49C1-A855-30C31B8FF443}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7802F29-481B-49C1-A855-30C31B8FF443}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7802F29-481B-49C1-A855-30C31B8FF443}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

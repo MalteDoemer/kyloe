@@ -3,12 +3,12 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Collections.Immutable;
+using System.Reflection;
 
 namespace Kyloe
 {
     internal static class ReferenceAssmblyFinder
     {
-
         private static ImmutableArray<string> RefrenceAssemblies;
 
         public static IEnumerable<string> GetReferenceAssemblies() => RefrenceAssemblies;
@@ -21,9 +21,12 @@ namespace Kyloe
         private static IEnumerable<string> FindRefrenceAssemblies()
         {
             var assemblyDir = GetDotnetRefrenceDirectory();
-            System.Console.WriteLine(assemblyDir);
             yield return Path.Join(assemblyDir, "System.Runtime.dll");
             yield return Path.Join(assemblyDir, "System.Runtime.Extensions.dll");
+
+            var currentAssemlby = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            System.Console.WriteLine(currentAssemlby);
+            yield return Path.Join(currentAssemlby, "kyloe.builtins.dll");
         }
 
         private static string GetDotnetRoot()

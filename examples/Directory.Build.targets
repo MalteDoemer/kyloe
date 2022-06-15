@@ -5,13 +5,17 @@
   <Target Name="CoreCompile" DependsOnTargets="$(CoreCompileDependsOn)">
     
     <ItemGroup>
+
       <ReferencePath Remove="@(ReferencePath)"
-                     Condition="'%(FileName)' != 'System.Console' AND
+                     Condition="'%(FileName)' != 'kyloe.builtins' AND
+                                '%(FileName)' != 'System.Console' AND
                                 '%(FileName)' != 'System.Runtime' AND
                                 '%(FileName)' != 'System.Runtime.Extensions'" />
+
     </ItemGroup>
 
     <PropertyGroup>
+
       <KyloeCompilerArgs>@(Compile->'"%(Identity)"', ' ')</KyloeCompilerArgs>
       <KyloeCompilerArgs>$(KyloeCompilerArgs) -o "@(IntermediateAssembly)"</KyloeCompilerArgs>
       <KyloeCompilerArgs>$(KyloeCompilerArgs) @(ReferencePath->'-r "%(Identity)"', ' ')</KyloeCompilerArgs>

@@ -12,10 +12,13 @@ namespace Kyloe.Backend.Cecil
 {
     internal class CecilBackend : Backend
     {
-        private readonly Dictionary<Symbols.TypeInfo, TypeReference> types;
-        private readonly Dictionary<Symbols.TypeInfo, MethodReference> callables;
+        private readonly Dictionary<TypeInfo, TypeReference> types;
+        private readonly Dictionary<TypeInfo, MethodReference> callables;
+        private readonly Dictionary<string, TypeInfo> reverseTypes;
+        private readonly Dictionary<string, TypeInfo> reverseCallables;
 
-        private readonly ImmutableArray<AssemblyDefinition> assemblies;
+
+        private readonly ImmutableArray<ModuleDefinition> modules;
         private readonly DiagnosticCollector diagnostics;
 
         private readonly AssemblyDefinition assembly;
@@ -23,16 +26,19 @@ namespace Kyloe.Backend.Cecil
         public CecilBackend(string programName, Symbols.TypeSystem typeSystem, IEnumerable<string> libraries, DiagnosticCollector diagnostics) : base(typeSystem)
         {
             var assemblyName = new AssemblyNameDefinition(programName, new Version(0, 1));
-            this.assembly = AssemblyDefinition.CreateAssembly(assemblyName, programName, ModuleKind.Dll);
-
-            var assemblyBuilder = ImmutableArray.CreateBuilder<AssemblyDefinition>();
+            var assemblyResolver = new DefaultAssemblyResolver();
+            var moduleParams = new ModuleParameters();
+            moduleParams.AssemblyResolver = assemblyResolver;
+            this.assembly = AssemblyDefinition.CreateAssembly(assemblyName, programName, moduleParams);
+            var moduleBuilder = ImmutableArray.CreateBuilder<ModuleDefinition>();
 
             foreach (var path in libraries)
             {
                 try
                 {
-                    var asm = AssemblyDefinition.ReadAssembly(path);
-                    assemblyBuilder.Add(asm);
+                    var asm = ModuleDefinition.ReadModule(path);
+                    assemblyResolver.AddSearchDirectory(Path.GetDirectoryName(path));
+                    moduleBuilder.Add(asm);
                 }
                 catch (BadImageFormatException)
                 {
@@ -44,13 +50,16 @@ namespace Kyloe.Backend.Cecil
                 }
             }
 
-            this.assemblies = assemblyBuilder.ToImmutable();
+            this.modules = moduleBuilder.ToImmutable();
             this.diagnostics = diagnostics;
 
             types = new Dictionary<Symbols.TypeInfo, TypeReference>();
             callables = new Dictionary<Symbols.TypeInfo, MethodReference>();
+            reverseTypes = new Dictionary<string, TypeInfo>();
+            reverseCallables = new Dictionary<string, TypeInfo>();
 
             ResolveBuiltinTypes();
+            ResolveBuiltinFunctions();
         }
 
         public override BackendKind Kind => BackendKind.Cecil;
@@ -69,6 +78,37 @@ namespace Kyloe.Backend.Cecil
                 return callable;
 
             throw new NotImplementedException();
+        }
+
+        public override void ImportFunction(string fullName)
+        {
+            var methods = ResolveExternalFunction(fullName);
+            if (methods is null)
+                return;
+
+            var methodName = methods.First().Name;
+
+            var callGroup = new CallableGroupType(methodName, null); // parent is null here because functions don't have parents only methods have.
+
+
+            foreach (var method in methods)
+            {
+                var returnType = ReverseResolveType(method.ReturnType);
+                var functionType = new FunctionType(callGroup, returnType);
+
+                foreach (var (i, param) in method.Parameters.EnumerateIndex())
+                {
+                    var paramType = ReverseResolveType(param.ParameterType);
+                    functionType.Parameters.Add(new ParameterSymbol(param.Name, i, paramType));
+                }
+
+                AddCallable(functionType, method);
+                callGroup.Callables.Add(functionType);
+            }
+
+
+            if (!TypeSystem.GlobalScope.DeclareSymbol(new CallableGroupSymbol(callGroup)))
+                diagnostics.ImportedNameAlreadyExists(methodName, null);
         }
 
         public override void CreateProgram(CompilationOptions opts, LoweredCompilationUnit unit)
@@ -142,31 +182,59 @@ namespace Kyloe.Backend.Cecil
             }
         }
 
+        private void ResolveBuiltinFunctions()
+        {
+            ImportFunction("Kyloe.Builtins.println");
+        }
+
         private void AddType(Symbols.TypeInfo kyloeType, TypeReference cecilType)
         {
             types.Add(kyloeType, cecilType);
+            reverseTypes.Add(cecilType.FullName, kyloeType);
         }
 
         private void AddCallable(Symbols.TypeInfo kyloeType, MethodReference cecilType)
         {
             callables.Add(kyloeType, cecilType);
+            reverseCallables.Add(cecilType.FullName, kyloeType);
         }
 
         private TypeReference? ResolveExternalType(string metadataName)
         {
-            var types = assemblies.SelectMany(asm => asm.Modules)
-                                  .SelectMany(mod => mod.Types)
-                                  .Where(type => type.FullName == metadataName)
-                                  .ToArray();
+            var types = modules.SelectMany(mod => mod.Types)
+                               .Where(type => type.FullName == metadataName)
+                               .ToArray();
 
             if (types.Length != 1)
             {
-                System.Console.WriteLine($"failed to resolve type: {metadataName}");
                 diagnostics.UnresolvedImport(metadataName, null);
                 return null;
             }
 
             return assembly.MainModule.ImportReference(types.First());
+        }
+
+        private IEnumerable<MethodReference>? ResolveExternalFunction(string name)
+        {
+            var idx = name.LastIndexOf('.');
+
+            var typeName = name[..idx];
+            var methodName = name[(idx + 1)..];
+
+            var type = ResolveExternalType(typeName);
+
+            if (type is null)
+                return null;
+
+            var methods = type.Resolve().Methods.Where(method => method.IsPublic && method.IsStatic && method.Name == methodName);
+
+            if (!methods.Any())
+            {
+                diagnostics.UnresolvedImport(name, null);
+                return null;
+            }
+
+            return methods.Select(method => assembly.MainModule.ImportReference(method));
         }
 
         private MethodDefinition CreateFunctionType(Symbols.FunctionType function)
@@ -188,6 +256,22 @@ namespace Kyloe.Backend.Cecil
                         | MethodAttributes.HideBySig;
 
             return new MethodDefinition(".cctor", attrs, ResolveType(TypeSystem.Void));
+        }
+
+        private TypeInfo ReverseResolveType(TypeReference cecilType)
+        {
+            if (reverseTypes.TryGetValue(cecilType.FullName, out var reference))
+                return reference;
+
+            throw new NotImplementedException();
+        }
+
+        private TypeInfo ReverseResolveCallable(MethodReference cecilType)
+        {
+            if (reverseCallables.TryGetValue(cecilType.FullName, out var callable))
+                return callable;
+
+            throw new NotImplementedException();
         }
     }
 }

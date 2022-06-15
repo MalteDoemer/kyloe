@@ -194,6 +194,12 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.UnresolvedImport, msg, location);
         }
 
+        public void ImportedNameAlreadyExists(string name, SourceLocation? location) 
+        {
+            var msg = $"unable to import '{name}', the same name already exists";
+            AddError(DiagnosticKind.ImportedNameAlreadyExists, msg, location);
+        }
+
         public void Clear()
         {
             diagnostics.Clear();

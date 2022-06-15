@@ -31,5 +31,6 @@ namespace Kyloe.Diagnostics
         MissingMainFunction,
         UnableToReadLibrary,
         UnresolvedImport,
+        ImportedNameAlreadyExists,
     }
 }

@@ -105,7 +105,8 @@ namespace Kyc
             catch (IOException ioException)
             {
                 WrongUsage(options, ioException.Message);
-                return -1;
+                throw;
+                // return -1;
             }
         }
 

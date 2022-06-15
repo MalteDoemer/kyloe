@@ -6,4 +6,7 @@
 
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\kyloe.builtins\kyloe.builtins.csproj" />
+  </ItemGroup> 
 </Project>
