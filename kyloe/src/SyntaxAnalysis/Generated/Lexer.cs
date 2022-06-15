@@ -12,14 +12,17 @@ namespace Kyloe.Syntax
         
         private readonly HashSet<SyntaxTokenKind> discardTerminals;
         
+        private readonly Kyloe.Utility.SourceText source;
+        
         private readonly string text;
         
         private int pos;
         
-        public Lexer(string text)
+        public Lexer(Kyloe.Utility.SourceText source)
         {
             this.pos = 0;
-            this.text = text;
+            this.source = source;
+            this.text = source.GetAllText();
             
             var builder = ImmutableArray.CreateBuilder<(SyntaxTokenKind, string, Regex?)>(56);
             builder.Add((SyntaxTokenKind.Whitespace, string.Empty , new Regex(@"\G\s+", RegexOptions.Compiled | RegexOptions.Multiline)));
@@ -103,7 +106,7 @@ namespace Kyloe.Syntax
                         
                         if (match != 0) continue;
                         
-                        var location = Kyloe.Utility.SourceLocation.FromLength(pos, str.Length);
+                        var location = Kyloe.Utility.SourceLocation.FromLength(source, pos, str.Length);
                         var terminal = new SyntaxTerminal(kind, str, location);
                         pos += location.Length;
                         didMatch = true;
@@ -115,7 +118,7 @@ namespace Kyloe.Syntax
                         var match = regex.Match(text, pos);
                         if (!match.Success) continue;
                         
-                        var location = Kyloe.Utility.SourceLocation.FromLength(match.Index, match.Length);
+                        var location = Kyloe.Utility.SourceLocation.FromLength(source, match.Index, match.Length);
                         var terminal = new SyntaxTerminal(kind, match.Value, location);
                         pos += location.Length;
                         didMatch = true;
@@ -125,12 +128,12 @@ namespace Kyloe.Syntax
                 }
                 if (!didMatch)
                 {
-                    var errTerminal = new SyntaxTerminal(SyntaxTokenKind.Error, text[pos].ToString(), Kyloe.Utility.SourceLocation.FromLength(pos, 1));
+                    var errTerminal = new SyntaxTerminal(SyntaxTokenKind.Error, text[pos].ToString(), Kyloe.Utility.SourceLocation.FromLength(source, pos, 1));
                     pos += 1;
                     yield return errTerminal;
                 }
             }
-            yield return new SyntaxTerminal(SyntaxTokenKind.End, "<end>", Kyloe.Utility.SourceLocation.FromLength(pos, 0));
+            yield return new SyntaxTerminal(SyntaxTokenKind.End, "<end>", Kyloe.Utility.SourceLocation.FromLength(source, pos, 0));
         }
         
         public IEnumerable<SyntaxTerminal> Terminals()

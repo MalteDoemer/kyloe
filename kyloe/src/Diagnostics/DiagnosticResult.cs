@@ -11,12 +11,10 @@ namespace Kyloe.Diagnostics
 
     public sealed class DiagnosticResult : IEnumerable<Diagnostic>
     {
-        private readonly SourceText sourceText;
         private ImmutableArray<Diagnostic> diagnostics;
 
-        internal DiagnosticResult(SourceText sourceText, ImmutableArray<Diagnostic> diagnostics)
+        internal DiagnosticResult(ImmutableArray<Diagnostic> diagnostics)
         {
-            this.sourceText = sourceText;
             this.diagnostics = diagnostics;
         }
 
@@ -35,7 +33,7 @@ namespace Kyloe.Diagnostics
                     colorMode = DiagnosticWriter.ColorMode.AnsiColor;
             }
 
-            var diagnosticWriter = new DiagnosticWriter(writer, sourceText, colorMode);
+            var diagnosticWriter = new DiagnosticWriter(writer, colorMode);
             diagnosticWriter.Write(this);
         }
 

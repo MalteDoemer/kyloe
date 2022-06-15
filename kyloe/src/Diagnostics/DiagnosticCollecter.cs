@@ -10,15 +10,13 @@ using Kyloe.Utility;
 
 namespace Kyloe.Diagnostics
 {
-    internal sealed class DiagnosticCollector : ICollection<Diagnostic>
+    public sealed class DiagnosticCollector : ICollection<Diagnostic>
     {
         private readonly ImmutableArray<Diagnostic>.Builder diagnostics;
-        private readonly SourceText sourceText;
 
-        public DiagnosticCollector(SourceText sourceText)
+        public DiagnosticCollector()
         {
             diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
-            this.sourceText = sourceText;
         }
 
         public bool HasErrors() => diagnostics.Any(d => d.Severity == DiagnosticSeverity.Error);
@@ -39,37 +37,37 @@ namespace Kyloe.Diagnostics
             Add(new Diagnostic(DiagnosticSeverity.Error, kind, message, location));
         }
 
-        public void InvalidLiteralError(SourceLocation location)
+        internal void InvalidLiteralError(SourceLocation location)
         {
             var msg = "invalid literal";
             AddError(DiagnosticKind.InvalidLiteralError, msg, location);
         }
 
-        public void ExpectedModifiableValueError(SourceLocation location)
+        internal void ExpectedModifiableValueError(SourceLocation location)
         {
             var msg = $"expected a modifiable value";
             AddError(DiagnosticKind.ExpectedModifiableValueError, msg, location);
         }
 
-        public void ExpectedValueError(SourceLocation location)
+        internal void ExpectedValueError(SourceLocation location)
         {
             var msg = $"expected a value";
             AddError(DiagnosticKind.ExpectedValueError, msg, location);
         }
 
-        public void ExpectedTypeNameError(SourceLocation location)
+        internal void ExpectedTypeNameError(SourceLocation location)
         {
             var msg = $"expected a type name";
             AddError(DiagnosticKind.ExpectedTypeNameError, msg, location);
         }
 
-        public void InvalidCharacterError(SourceLocation location, char character)
+        internal void InvalidCharacterError(SourceLocation location, char character)
         {
             var msg = string.Format("invalid character: \\u{0:x4}", (int)(character));
             AddError(DiagnosticKind.InvalidCharacterError, msg, location);
         }
 
-        public void UnexpectedTokenError(SyntaxToken actual, SyntaxTokenKind[] expected)
+        internal void UnexpectedTokenError(SyntaxToken actual, SyntaxTokenKind[] expected)
         {
             string msg;
 
@@ -81,55 +79,55 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.UnexpectedTokenError, msg, actual.Location);
         }
 
-        public void UnsupportedBinaryOperation(SourceLocation location, BoundOperation operation, TypeInfo left, TypeInfo right)
+        internal void UnsupportedBinaryOperation(SourceLocation location, BoundOperation operation, TypeInfo left, TypeInfo right)
         {
             var msg = $"binary operator '{operation.GetSymbolOrName()}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
             AddError(DiagnosticKind.UnsupportedBinaryOperation, msg, location);
         }
 
-        public void UnsupportedUnaryOperation(SourceLocation location, BoundOperation operation, TypeInfo type)
+        internal void UnsupportedUnaryOperation(SourceLocation location, BoundOperation operation, TypeInfo type)
         {
             var msg = $"unary operator '{operation.GetSymbolOrName()}' cannot be used with type '{type.FullName()}'";
             AddError(DiagnosticKind.UnsupportedUnaryOperation, msg, location);
         }
 
-        public void UnsupportedAssignmentOperation(SourceLocation location, AssignmentOperation operation, TypeInfo left, TypeInfo right)
+        internal void UnsupportedAssignmentOperation(SourceLocation location, AssignmentOperation operation, TypeInfo left, TypeInfo right)
         {
             var msg = $"assignment operator '{operation.GetSymbolOrName()}' cannot be used with types '{left.FullName()}' and '{right.FullName()}'";
             AddError(DiagnosticKind.UnsupportedAssignmentOperation, msg, location);
         }
 
-        public void MissmatchedTypeError(SourceLocation location, TypeInfo expected, TypeInfo provided)
+        internal void MissmatchedTypeError(SourceLocation location, TypeInfo expected, TypeInfo provided)
         {
             var msg = $"missmatched types, expected '{expected.FullName()}', got '{provided.FullName()}'";
             AddError(DiagnosticKind.MissmatchedTypeError, msg, location);
         }
 
-        public void NonExistantNameError(SourceLocation location, string name)
+        internal void NonExistantNameError(SourceLocation location, string name)
         {
             var msg = $"the name '{name}' does not exist in the current scope";
             AddError(DiagnosticKind.NonExistantNameError, msg, location);
         }
 
-        public void NameAlreadyExistsError(SourceLocation location, string name)
+        internal void NameAlreadyExistsError(SourceLocation location, string name)
         {
             var msg = $"the name '{name}' already exists";
             AddError(DiagnosticKind.NameAlreadyExistsError, msg, location);
         }
 
-        public void RedefinedParameterError(SourceLocation location, string name)
+        internal void RedefinedParameterError(SourceLocation location, string name)
         {
             var msg = $"the parameter '{name}' already exists";
             AddError(DiagnosticKind.RedefinedParameterError, msg, location);
         }
 
-        public void NotCallableError(SourceLocation location)
+        internal void NotCallableError(SourceLocation location)
         {
             var msg = $"expression is not callable";
             AddError(DiagnosticKind.NotCallableError, msg, location);
         }
 
-        public void NoMatchingOverloadError(SourceLocation location, string name, BoundArguments arguments)
+        internal void NoMatchingOverloadError(SourceLocation location, string name, BoundArguments arguments)
         {
             string msg;
             if (arguments.Arguments.Length == 0)
@@ -140,25 +138,25 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.NoMatchingOverloadError, msg, location);
         }
 
-        public void OverloadWithSameParametersExistsError(SourceLocation location, string name)
+        internal void OverloadWithSameParametersExistsError(SourceLocation location, string name)
         {
             var msg = $"the function '{name}' already exists with the same parameters";
             AddError(DiagnosticKind.OverloadWithSameParametersExistsError, msg, location);
         }
 
-        public void IllegalElifStatement(SourceLocation location)
+        internal void IllegalElifStatement(SourceLocation location)
         {
             var msg = "unexpected elif statement";
             AddError(DiagnosticKind.IllegalElifStatement, msg, location);
         }
 
-        public void IllegalElseStatement(SourceLocation location)
+        internal void IllegalElseStatement(SourceLocation location)
         {
             var msg = "unexpected else statement";
             AddError(DiagnosticKind.IllegalElseStatement, msg, location);
         }
 
-        public void IllegalReturnStatement(SourceLocation location)
+        internal void IllegalReturnStatement(SourceLocation location)
         {
             var msg = "illeagal return statement outside a function";
             AddError(DiagnosticKind.IllegalReturnStatement, msg, location);
@@ -176,25 +174,25 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.IllegalContinueStatement, msg, location);
         }
 
-        public void MissingMainFunction()
+        internal void MissingMainFunction()
         {
             var msg = "the program does not contain a suitable 'main' function";
             AddError(DiagnosticKind.MissingMainFunction, msg, null);
         }
 
-        public void UnableToReadLibrary(string name) 
+        internal void UnableToReadLibrary(string name) 
         {
             var msg = $"unable to read library file'{name}'";
             AddError(DiagnosticKind.UnableToReadLibrary, msg, null);
         }
 
-        public void UnresolvedImport(string name, SourceLocation? location) 
+        internal void UnresolvedImport(string name, SourceLocation? location) 
         {
             var msg = $"unable to resolve import '{name}'";
             AddError(DiagnosticKind.UnresolvedImport, msg, location);
         }
 
-        public void ImportedNameAlreadyExists(string name, SourceLocation? location) 
+        internal void ImportedNameAlreadyExists(string name, SourceLocation? location) 
         {
             var msg = $"unable to import '{name}', the same name already exists";
             AddError(DiagnosticKind.ImportedNameAlreadyExists, msg, location);
@@ -232,7 +230,7 @@ namespace Kyloe.Diagnostics
 
         public DiagnosticResult ToResult()
         {
-            return new DiagnosticResult(sourceText, diagnostics.ToImmutable());
+            return new DiagnosticResult(diagnostics.ToImmutable());
         }
     }
 }

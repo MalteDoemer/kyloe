@@ -1,4 +1,5 @@
-﻿using Kyloe;
+﻿using System.Diagnostics.CodeAnalysis;
+using Kyloe;
 using Kyloe.Backend;
 using Kyloe.Utility;
 using Mono.Options;
@@ -15,7 +16,9 @@ namespace Kyc
             bool printSyntaxTree = false;
 
             string? outputPath = null;
+
             var referencePaths = new List<string>();
+            var sourcePaths = new List<string>();
 
             var options = new OptionSet() {
                 {"i|interactive", "starts a interactive kyloe shell", value => interactive = value is not null },
@@ -24,18 +27,16 @@ namespace Kyc
                 {"print-tree", "print syntax tree to the console", value => printSyntaxTree = value is not null },
                 {"o|output=", "the path to the output file", value => outputPath = value },
                 {"r|reference=", "the path to a reference dll", value => referencePaths.Add(value) },
+                {"<>", value => sourcePaths.Add(value) }
             };
-
-            List<string> extra;
 
             try
             {
-                extra = options.Parse(args);
+                options.Parse(args);
             }
             catch (OptionException e)
             {
-                WrongUsage(options, e.Message);
-                return -1;
+                PrintErrorAndExit(e.Message);
             }
 
             if (help)
@@ -46,40 +47,25 @@ namespace Kyc
 
             if (interactive)
             {
-                if (extra.Count > 0 || outputPath is not null)
-                {
-                    WrongUsage(options, "too many arguments for interactive mode");
-                    return 1;
-                }
+                if (sourcePaths.Count > 0 || outputPath is not null)
+                    PrintErrorAndExit("too many arguments for interactive mode");
 
                 var i = new InteractiveKyloeShell();
                 i.Run();
                 return 0;
             }
 
-            if (extra.Count == 0)
-            {
-                WrongUsage(options, "no input files");
-                return 1;
-            }
-
-            if (extra.Count != 1)
-            {
-                WrongUsage(options, "for now only one file allowed");
-                return -1;
-            }
+            if (sourcePaths.Count == 0)
+                PrintErrorAndExit("no input files");
 
             if (outputPath is null)
-            {
-                WrongUsage(options, "output path required");
-                return 1;
-            }
+                PrintErrorAndExit("output path required");
+
 
             try
             {
-                var filePath = extra[0];
                 var programName = Path.GetFileNameWithoutExtension(outputPath);
-                var text = SourceText.FromFile(filePath);
+                var sources = sourcePaths.Select(path => SourceText.FromFile(path));
 
                 var opts = new CompilationOptions()
                 {
@@ -90,7 +76,7 @@ namespace Kyc
                     RequireMain = true,
                 };
 
-                var compilation = Compilation.Compile(text, referencePaths, opts);
+                var compilation = Compilation.Compile(sources, referencePaths, opts);
 
                 if (printSyntaxTree)
                     compilation.WriteSyntaxTree(Console.Out);
@@ -104,16 +90,18 @@ namespace Kyc
             }
             catch (IOException ioException)
             {
-                WrongUsage(options, ioException.Message);
-                throw;
-                // return -1;
+                PrintErrorAndExit(ioException.Message);
             }
+
+            return 0;
         }
 
-        private static void WrongUsage(OptionSet options, string message)
+        [DoesNotReturnAttribute]
+        private static void PrintErrorAndExit(string message)
         {
             Console.Error.Write("kyc: ");
             Console.Error.WriteLine(message);
+            System.Environment.Exit(1);
         }
 
         private static void ShowHelp(OptionSet options)

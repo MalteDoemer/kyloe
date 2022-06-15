@@ -6,14 +6,12 @@ namespace Kyloe.Diagnostics
     internal class DiagnosticWriter
     {
         private readonly TextWriter writer;
-        private readonly SourceText sourceText;
         private readonly ColorMode colorMode;
 
 
-        public DiagnosticWriter(TextWriter writer, SourceText sourceText, ColorMode color = ColorMode.None)
+        public DiagnosticWriter(TextWriter writer, ColorMode color = ColorMode.None)
         {
             this.writer = writer;
-            this.sourceText = sourceText;
             this.colorMode = color;
         }
 
@@ -29,10 +27,10 @@ namespace Kyloe.Diagnostics
 
             if (diagnostic.Location is SourceLocation location)
             {
-                var (line, col) = sourceText.GetStartLineColumn(location);
+                var (line, col) = location.SourceText.GetStartLineColumn(location);
                 if (line >= 1 && col >= 1)
-                    if (sourceText.FileName is not null)
-                        writer.Write($"{sourceText.FileName}:{line}:{col}: ");
+                    if (location.SourceText.FileName is not null)
+                        writer.Write($"{location.SourceText.FileName}:{line}:{col}: ");
                     else 
                         writer.Write($"{line}:{col}: ");
             }

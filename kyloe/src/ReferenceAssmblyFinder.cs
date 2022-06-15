@@ -25,7 +25,6 @@ namespace Kyloe
             yield return Path.Join(assemblyDir, "System.Runtime.Extensions.dll");
 
             var currentAssemlby = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            System.Console.WriteLine(currentAssemlby);
             yield return Path.Join(currentAssemlby, "kyloe.builtins.dll");
         }
 

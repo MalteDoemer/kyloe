@@ -24,6 +24,10 @@
         "Name": "Kyloe.Utility.SourceLocation",
         "AccessModifiers": "Public"
     },
+    "TextClass": {
+        "Name": "Kyloe.Utility.SourceText",
+        "AccessModifiers": "Public"
+    },
     "ErrorCollectorClass": {
         "Name": "Kyloe.Diagnostics.DiagnosticCollector",
         "AccessModifiers": "Public"

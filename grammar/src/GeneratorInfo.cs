@@ -22,6 +22,7 @@ namespace Kyloe.Grammar
         public ClassInfo TokenClass { get; set; }
         public ClassInfo TerminalClass { get; set; }
         public ClassInfo NodeClass { get; set; }
+        public ClassInfo TextClass { get; set; }
         public ClassInfo LocationClass { get; set; }
         public ClassInfo ErrorCollectorClass { get; set; }
         public ClassInfo LexerClass { get; set; }

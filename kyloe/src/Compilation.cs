@@ -75,23 +75,20 @@ namespace Kyloe
 
             var refs = ReferenceAssmblyFinder.GetReferenceAssemblies();
 
-
-
-            return Compile(SourceText.FromText(text), refs, opts);
+            return Compile(new[] { SourceText.FromText(text) }, refs, opts);
         }
 
-        public static Compilation Compile(SourceText source, IEnumerable<string> libraries, CompilationOptions opts)
+        public static Compilation Compile(IEnumerable<SourceText> sources, IEnumerable<string> libraries, CompilationOptions opts)
         {
-            var diagnostics = new DiagnosticCollector(source);
+            var diagnostics = new DiagnosticCollector();
 
             var typeSystem = Symbols.TypeSystem.Create();
             var backend = Backend.Backend.Create(opts.ProgramName, opts.BackendKind, typeSystem, libraries, diagnostics);
 
-            var parser = new Parser(source.GetAllText(), diagnostics);
-            var rootNode = parser.Parse();
+            var syntaxTree = SyntaxTree.Parse(sources, diagnostics);
 
             var binder = new Binder(typeSystem, diagnostics);
-            var boundCompilationUnit = binder.BindCompilationUnit(rootNode);
+            var boundCompilationUnit = binder.BindCompilationUnit(syntaxTree.GetRoot());
 
             if (opts.RequireMain && boundCompilationUnit.MainFunction is null)
                 diagnostics.MissingMainFunction();
@@ -108,10 +105,10 @@ namespace Kyloe
                 var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
 
                 backend.CreateProgram(opts, flattenedCompilationUnit);
-                return new Compilation(backend, diagnostics.ToResult(), rootNode, flattenedCompilationUnit);
+                return new Compilation(backend, diagnostics.ToResult(), syntaxTree.GetRoot(), flattenedCompilationUnit);
             }
 
-            return new Compilation(backend, diagnostics.ToResult(), rootNode, null);
+            return new Compilation(backend, diagnostics.ToResult(), syntaxTree.GetRoot(), null);
         }
     }
 }

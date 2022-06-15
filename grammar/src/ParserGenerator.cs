@@ -323,12 +323,20 @@ namespace Kyloe.Grammar
                 type: set,
                 name: "discardTerminals");
 
+            var sourceField = new Field(
+                AccessModifier.Private,
+                InheritanceModifier.None,
+                @readonly: true,
+                type: info.TextClass.Name,
+                name: "source");
+
             var textField = new Field(
                 AccessModifier.Private,
                 InheritanceModifier.None,
                 @readonly: true,
                 type: "string",
-                name: "text");
+                name: "text"
+            );
 
             var posField = new Field(
                 AccessModifier.Private,
@@ -342,9 +350,10 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 info.LexerClass.Name,
                 null)
-                .AddArg("string text")
+                .AddArg($"{info.TextClass.Name} source")
                 .AddLine("this.pos = 0;")
-                .AddLine("this.text = text;")
+                .AddLine("this.source = source;")
+                .AddLine("this.text = source.GetAllText();")
                 .AddLine("")
                 .AddLine($"var builder = ImmutableArray.CreateBuilder{typeArgs}({groups.Count});")
                 .AddLines(groups.Select(t => $"builder.Add(({TokenKindAccessString(t.Item1)}, {t.Item2} , {t.Item3}));"))
@@ -375,6 +384,7 @@ namespace Kyloe.Grammar
                     info.LexerClass.Name)
                     .Add(patternsField)
                     .Add(discardField)
+                    .Add(sourceField)
                     .Add(textField)
                     .Add(posField)
                     .Add(ctor)
@@ -388,6 +398,7 @@ namespace Kyloe.Grammar
                     InheritanceModifier.Sealed,
                     info.LexerClass.Name)
                     .Add(patternsField)
+                    .Add(sourceField)
                     .Add(textField)
                     .Add(posField)
                     .Add(ctor)
@@ -414,7 +425,7 @@ namespace Kyloe.Grammar
                                 .AddLine("")
                                 .AddLine("if (match != 0) continue;")
                                 .AddLine("")
-                                .AddLine($"var location = {info.LocationClass.Name}.FromLength(pos, str.Length);")
+                                .AddLine($"var location = {info.LocationClass.Name}.FromLength(source, pos, str.Length);")
                                 .AddLine($"var terminal = new {info.TerminalClass.Name}(kind, str, location);")
                                 .AddLine("pos += location.Length;")
                                 .AddLine("didMatch = true;")
@@ -424,17 +435,17 @@ namespace Kyloe.Grammar
                                 .AddLine("var match = regex.Match(text, pos);")
                                 .AddLine("if (!match.Success) continue;")
                                 .AddLine("")
-                                .AddLine($"var location = {info.LocationClass.Name}.FromLength(match.Index, match.Length);")
+                                .AddLine($"var location = {info.LocationClass.Name}.FromLength(source, match.Index, match.Length);")
                                 .AddLine($"var terminal = new {info.TerminalClass.Name}(kind, match.Value, location);")
                                 .AddLine("pos += location.Length;")
                                 .AddLine("didMatch = true;")
                                 .AddLine("yield return terminal;")
                                 .AddLine("break;")))
                         .AddStatement(new IfStatement("!didMatch")
-                            .AddLine($"var errTerminal = new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.Error, text[pos].ToString(), {info.LocationClass.Name}.FromLength(pos, 1));")
+                            .AddLine($"var errTerminal = new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.Error, text[pos].ToString(), {info.LocationClass.Name}.FromLength(source, pos, 1));")
                             .AddLine("pos += 1;")
                             .AddLine("yield return errTerminal;")))
-                    .AddLine($"yield return new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.End, \"<end>\", {info.LocationClass.Name}.FromLength(pos, 0));");
+                    .AddLine($"yield return new {info.TerminalClass.Name}({info.TokenKindEnum.Name}.End, \"<end>\", {info.LocationClass.Name}.FromLength(source, pos, 0));");
         }
 
         public Class CreateParserClass()
@@ -492,12 +503,12 @@ namespace Kyloe.Grammar
                 InheritanceModifier.None,
                 info.ParserClass.Name,
                 null)
-                .AddArg("string text")
+                .AddArg($"{info.TextClass.Name} source")
                 .AddArg($"{info.ErrorCollectorClass.Name} errors")
                 .AddLine("this.pos = 0;")
                 .AddLine("this.isValid = true;")
                 .AddLine("this.errors = errors;")
-                .AddLine($"var lexer = new {info.LexerClass.Name}(text);")
+                .AddLine($"var lexer = new {info.LexerClass.Name}(source);")
                 .AddLine($"var builder = ImmutableArray.CreateBuilder<{info.TerminalClass.Name}>();")
                 .AddStatement(new ForeachLoop("var terminal in lexer.Terminals()")
                     .AddLine($"if (terminal.Kind == {info.TokenKindEnum.Name}.Error)")

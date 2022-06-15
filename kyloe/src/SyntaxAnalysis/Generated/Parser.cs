@@ -18,12 +18,12 @@ namespace Kyloe.Syntax
         
         private SyntaxTerminal current => pos < terminals.Length ? terminals[pos] : terminals[terminals.Length - 1];
         
-        public Parser(string text, Kyloe.Diagnostics.DiagnosticCollector errors)
+        public Parser(Kyloe.Utility.SourceText source, Kyloe.Diagnostics.DiagnosticCollector errors)
         {
             this.pos = 0;
             this.isValid = true;
             this.errors = errors;
-            var lexer = new Lexer(text);
+            var lexer = new Lexer(source);
             var builder = ImmutableArray.CreateBuilder<SyntaxTerminal>();
             foreach (var terminal in lexer.Terminals())
             {

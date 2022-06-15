@@ -1,0 +1,3 @@
+var globalState = 5;
+
+const MAX_STATE = 8;
