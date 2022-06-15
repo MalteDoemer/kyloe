@@ -71,14 +71,14 @@ namespace Kyloe.Backend.Cecil
             throw new NotImplementedException();
         }
 
-        public override void CreateProgram(string programPath, LoweredCompilationUnit unit)
+        public override void CreateProgram(CompilationOptions opts, LoweredCompilationUnit unit)
         {
             var mainAttrs = TypeAttributes.Public
                         | TypeAttributes.Class
                         | TypeAttributes.Abstract
                         | TypeAttributes.Sealed;
 
-            var mainClass = new TypeDefinition("", assembly.Name.Name, mainAttrs, ResolveType(TypeSystem.Object));
+            var mainClass = new TypeDefinition("", opts.ProgramName, mainAttrs, ResolveType(TypeSystem.Object));
             assembly.MainModule.Types.Add(mainClass);
 
             foreach (var func in unit.LoweredFunctions)
@@ -105,10 +105,10 @@ namespace Kyloe.Backend.Cecil
                 generator.GenerateFunctionBody(func);
             }
 
-            if (diagnostics.HasErrors())
+            if (diagnostics.HasErrors() || !opts.GenerateOutput)
                 return;
 
-            using var file = new FileStream(programPath, FileMode.Create);
+            using var file = new FileStream(opts.ProgramPath, FileMode.Create);
             assembly.Write(file);
         }
 

@@ -17,7 +17,7 @@ namespace Kyloe.Backend
 
         public TypeSystem TypeSystem { get; }
 
-        public abstract void CreateProgram(string programPath, LoweredCompilationUnit compilationUnit);
+        public abstract void CreateProgram(CompilationOptions opts, LoweredCompilationUnit compilationUnit);
 
         public static Backend Create(string programName, BackendKind backendKind, TypeSystem typeSystem, IEnumerable<string> libraries, DiagnosticCollector diagnostics)
         {

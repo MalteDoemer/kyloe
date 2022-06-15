@@ -80,8 +80,17 @@ namespace Kyc
                 var filePath = extra[0];
                 var programName = Path.GetFileNameWithoutExtension(outputPath);
                 var text = SourceText.FromFile(filePath);
-                var opts = new CompilationOptions() { RequireMain = true };
-                var compilation = Compilation.Compile(programName, outputPath, BackendKind.Cecil, text, referencePaths, opts);
+
+                var opts = new CompilationOptions()
+                {
+                    BackendKind = BackendKind.Cecil,
+                    ProgramName = programName,
+                    ProgramPath = outputPath,
+                    GenerateOutput = true,
+                    RequireMain = true,
+                };
+
+                var compilation = Compilation.Compile(text, referencePaths, opts);
 
                 if (printSyntaxTree)
                     compilation.WriteSyntaxTree(Console.Out);

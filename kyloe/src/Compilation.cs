@@ -1,5 +1,4 @@
 using Kyloe.Semantics;
-using System;
 using Kyloe.Diagnostics;
 using Kyloe.Utility;
 using Kyloe.Syntax;
@@ -7,11 +6,26 @@ using Kyloe.Lowering;
 using System.IO;
 using System.Collections.Generic;
 using Kyloe.Backend;
+using System.Linq;
 
 namespace Kyloe
 {
-    public struct CompilationOptions
+    public class CompilationOptions
     {
+
+        public CompilationOptions()
+        {
+            ProgramName = "program";
+            ProgramPath = "";
+            BackendKind = BackendKind.Cecil;
+            RequireMain = false;
+            GenerateOutput = false;
+        }
+
+        public string ProgramName { get; set; }
+        public string ProgramPath { get; set; }
+        public BackendKind BackendKind { get; set; }
+        public bool GenerateOutput { get; set; }
         public bool RequireMain { get; set; }
     }
 
@@ -54,18 +68,24 @@ namespace Kyloe
 
         public DiagnosticResult GetDiagnostics() => diagnostics;
 
-        public static Compilation Compile(string text, CompilationOptions opts = default(CompilationOptions))
+        public static Compilation Compile(string text, CompilationOptions? opts = null)
         {
-            throw new NotImplementedException();
-            // return Compile(SourceText.FromText(text), Enumerable.Empty<string>(), opts);
+            if (opts is null)
+                opts = new CompilationOptions();
+
+            var refs = ReferenceAssmblyFinder.GetReferenceAssemblies();
+
+
+
+            return Compile(SourceText.FromText(text), refs, opts);
         }
 
-        public static Compilation Compile(string programName, string programPath, BackendKind backendKind, SourceText source, IEnumerable<string> libraries, CompilationOptions opts)
+        public static Compilation Compile(SourceText source, IEnumerable<string> libraries, CompilationOptions opts)
         {
             var diagnostics = new DiagnosticCollector(source);
 
             var typeSystem = Symbols.TypeSystem.Create();
-            var backend = Backend.Backend.Create(programName, backendKind, typeSystem, libraries, diagnostics);
+            var backend = Backend.Backend.Create(opts.ProgramName, opts.BackendKind, typeSystem, libraries, diagnostics);
 
             var parser = new Parser(source.GetAllText(), diagnostics);
             var rootNode = parser.Parse();
@@ -87,7 +107,7 @@ namespace Kyloe
                 var flattener = new LoweredTreeFlattener(typeSystem);
                 var flattenedCompilationUnit = flattener.RewriteCompilationUnit(simplifiedCompilationUnit);
 
-                backend.CreateProgram(programPath, flattenedCompilationUnit);
+                backend.CreateProgram(opts, flattenedCompilationUnit);
                 return new Compilation(backend, diagnostics.ToResult(), rootNode, flattenedCompilationUnit);
             }
 
