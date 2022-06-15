@@ -249,7 +249,7 @@ namespace Kyloe.Lowering
             if (left == expression.LeftExpression && right == expression.RightExpression)
                 return expression;
 
-            return new LoweredBinaryExpression(expression.Type, left, expression.Operation, right);
+            return new LoweredBinaryExpression(left, expression.Operation, right, expression.Method);
         }
 
         protected virtual LoweredExpression RewriteUnaryExpression(LoweredUnaryExpression expression)
@@ -259,7 +259,7 @@ namespace Kyloe.Lowering
             if (expr == expression.Expression)
                 return expression;
 
-            return new LoweredUnaryExpression(expression.Type, expr, expression.Operation);
+            return new LoweredUnaryExpression(expr, expression.Operation, expression.Method);
         }
 
         protected virtual LoweredExpression RewriteAssignment(LoweredAssignment expression)
@@ -270,7 +270,7 @@ namespace Kyloe.Lowering
             if (left == expression.LeftExpression && right == expression.RightExpression)
                 return expression;
 
-            return new LoweredAssignment(typeSystem, left, expression.Operation, right);
+            return new LoweredAssignment(typeSystem, left, expression.Operation, right, expression.Method);
         }
 
         protected virtual LoweredExpression RewriteVariableAccessExpression(LoweredSymbolExpression expression)

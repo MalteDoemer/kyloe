@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
 using static Kyloe.Lowering.LoweredNodeFactory;
@@ -121,8 +122,12 @@ namespace Kyloe.Lowering
             var left = expression.LeftExpression;
             var right = expression.RightExpression;
             var op = SemanticInfo.GetOperationForAssignment(expression.Operation);
-            var binary = new LoweredBinaryExpression(left.Type, left, op, right);
-            var assign = new LoweredAssignment(typeSystem, left, AssignmentOperation.Assign, binary);
+
+            // There are no errors, so every compound assing must have a associated method.
+            Debug.Assert(expression.Method is not null);
+            
+            var binary = new LoweredBinaryExpression(left, op, right, expression.Method);
+            var assign = new LoweredAssignment(typeSystem, left, AssignmentOperation.Assign, binary, expression.Method);
 
             return base.RewriteAssignment(assign);
         }
@@ -140,7 +145,7 @@ namespace Kyloe.Lowering
 
                 var initializer = RewriteExpression(statement.Initializer);
                 var localAccess = new LoweredSymbolExpression(statement.Symbol);
-                var assign = new LoweredAssignment(typeSystem, localAccess, AssignmentOperation.Assign, initializer);
+                var assign = new LoweredAssignment(typeSystem, localAccess, AssignmentOperation.Assign, initializer, null);
 
                 return Block(decl, ExpressionStatement(assign));
             }

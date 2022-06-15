@@ -179,6 +179,18 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "var str: string = 'hello' + ' ' + 'world!';"
+            };
+
+            yield return new object[] {
+                "var x = 'hello' ==  'world!';"
+            };
+
+            yield return new object[] {
+                "var x = 'hello' !=  'world!';"
+            };
+
+            yield return new object[] {
                 "1 + 1.5;",
                 DiagnosticKind.UnsupportedBinaryOperation,
             };

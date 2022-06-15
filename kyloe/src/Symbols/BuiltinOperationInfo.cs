@@ -38,6 +38,12 @@ namespace Kyloe.Symbols
                 BoundOperation.GreaterThanOrEqual
             );
 
+            public static readonly ImmutableArray<BoundOperation> Addition = ImmutableArray.Create<BoundOperation>
+            (
+                BoundOperation.Addition
+            );
+
+
             public static readonly ImmutableArray<BoundOperation> Negation = ImmutableArray.Create<BoundOperation>
             (
                 BoundOperation.Negation
@@ -99,9 +105,11 @@ namespace Kyloe.Symbols
 
                 (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool),
                 (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Char, BuiltinTypeKind.Char),
-                (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.String, BuiltinTypeKind.String)
 
+                (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.String, BuiltinTypeKind.String),
+                (Addition, BuiltinTypeKind.String, BuiltinTypeKind.String, BuiltinTypeKind.String),
 
+                (EqualityOperations, BuiltinTypeKind.Bool, BuiltinTypeKind.Object, BuiltinTypeKind.Object)
             );
 
             public static readonly ImmutableArray<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind arg)> UnaryOperations = ImmutableArray.Create<(ImmutableArray<BoundOperation> ops, BuiltinTypeKind ret, BuiltinTypeKind arg)>

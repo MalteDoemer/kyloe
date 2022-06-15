@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using Kyloe.Semantics;
 using Kyloe.Symbols;
 
@@ -193,13 +194,19 @@ namespace Kyloe.Lowering
             var left = LowerExpression(expression.LeftExpression);
             var right = LowerExpression(expression.RightExpression);
 
-            return new LoweredAssignment(typeSystem, left, expression.Operation, right);
+            if (expression.Operation != AssignmentOperation.Assign)
+                Debug.Assert(expression.Method is not null);
+
+            return new LoweredAssignment(typeSystem, left, expression.Operation, right, expression.Method);
         }
 
         private LoweredExpression LowerUnaryExpression(BoundUnaryExpression expression)
         {
             var lowered = LowerExpression(expression.Expression);
-            return new LoweredUnaryExpression(expression.ResultType, lowered, expression.Operation);
+
+            Debug.Assert(expression.Method is not null);
+
+            return new LoweredUnaryExpression(lowered, expression.Operation, expression.Method!);
         }
 
         private LoweredExpression LowerParenthesizedExpression(BoundParenthesizedExpression expression)
@@ -212,7 +219,9 @@ namespace Kyloe.Lowering
             var left = LowerExpression(expression.LeftExpression);
             var right = LowerExpression(expression.RightExpression);
 
-            return new LoweredBinaryExpression(expression.ResultType, left, expression.Operation, right);
+            Debug.Assert(expression.Method is not null);
+
+            return new LoweredBinaryExpression(left, expression.Operation, right, expression.Method!);
         }
 
         private LoweredExpression LowerLiteralExpression(BoundLiteralExpression expression)

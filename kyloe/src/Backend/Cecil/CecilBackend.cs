@@ -17,7 +17,6 @@ namespace Kyloe.Backend.Cecil
         private readonly Dictionary<string, TypeInfo> reverseTypes;
         private readonly Dictionary<string, TypeInfo> reverseCallables;
 
-
         private readonly ImmutableArray<ModuleDefinition> modules;
         private readonly DiagnosticCollector diagnostics;
 
@@ -60,7 +59,13 @@ namespace Kyloe.Backend.Cecil
 
             ResolveBuiltinTypes();
             ResolveBuiltinFunctions();
+
+            ObjectEqualsMethod = ResolveCompilerFunction("System.Object.Equals", new[] { "System.Object", "System.Object" });
+            StringConcatMethod = ResolveCompilerFunction("System.String.Concat", new[] { "System.String", "System.String" });
         }
+
+        public MethodReference ObjectEqualsMethod { get; }
+        public MethodReference StringConcatMethod { get; }
 
         public override BackendKind Kind => BackendKind.Cecil;
 
@@ -235,6 +240,22 @@ namespace Kyloe.Backend.Cecil
             }
 
             return methods.Select(method => assembly.MainModule.ImportReference(method));
+        }
+
+        private MethodReference ResolveCompilerFunction(string name, IEnumerable<string> parameters)
+        {
+            var methods = ResolveExternalFunction(name);
+
+            var method = ResolveExternalFunction(name)?
+                        .Where(method => method.Parameters
+                                .Select(param => param.ParameterType.FullName)
+                                .SequenceEqual(parameters))
+                        .FirstOrDefault();
+
+            if (method is null)
+                throw new Exception($"unable to resolve compiler function '{name}'");
+
+            return method;
         }
 
         private MethodDefinition CreateFunctionType(Symbols.FunctionType function)

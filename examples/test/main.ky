@@ -1,4 +1,11 @@
+func test(x: bool) {
+    if (x) {
+        println("hi");
+    } else {
+        println("hey");
+    }
+}
+
 func main() {
-    println(globalState);
-    println(MAX_STATE);
+    println("Hello" + "World");
 }

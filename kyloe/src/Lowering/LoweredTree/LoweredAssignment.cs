@@ -6,18 +6,19 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredAssignment : LoweredExpression
     {
-        public LoweredAssignment(TypeSystem typeSystem, LoweredExpression leftExpression, AssignmentOperation operation, LoweredExpression rightExpression)
+        public LoweredAssignment(TypeSystem typeSystem, LoweredExpression leftExpression, AssignmentOperation operation, LoweredExpression rightExpression, MethodType? method)
         {
             LeftExpression = leftExpression;
             Operation = operation;
             RightExpression = rightExpression;
+            Method = method;
             Type = typeSystem.Void;
         }
 
         public LoweredExpression LeftExpression { get; }
         public AssignmentOperation Operation { get; }
         public LoweredExpression RightExpression { get; }
-        
+        public MethodType? Method { get; }
         public override TypeInfo Type { get; }
 
         public override ValueCategory ValueCategory => ValueCategory.None;

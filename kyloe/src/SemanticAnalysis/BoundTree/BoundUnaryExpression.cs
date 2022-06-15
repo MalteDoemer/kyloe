@@ -5,19 +5,23 @@ namespace Kyloe.Semantics
 {
     internal sealed class BoundUnaryExpression : BoundExpression
     {
-        public BoundUnaryExpression(BoundExpression expression, BoundOperation operation, TypeInfo result, SyntaxToken syntax)
+        private readonly TypeSystem typeSystem;
+
+        public BoundUnaryExpression(TypeSystem typeSystem, BoundExpression expression, BoundOperation operation, MethodType? method, SyntaxToken syntax)
         {
+            this.typeSystem = typeSystem;
             Expression = expression;
             Operation = operation;
-            ResultType = result;
+            Method = method;
             Syntax = syntax;
         }
 
         public BoundExpression Expression { get; }
         public BoundOperation Operation { get; }
-        
-        public override TypeInfo ResultType { get; }
-        
+        public MethodType? Method { get; }
+
+        public override TypeInfo ResultType => Method is null ? typeSystem.Error : Method.ReturnType;
+
         public override SyntaxToken Syntax { get; }
 
         public override BoundNodeKind Kind => BoundNodeKind.BoundUnaryExpression;

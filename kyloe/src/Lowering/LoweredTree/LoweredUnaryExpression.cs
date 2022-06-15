@@ -6,17 +6,18 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredUnaryExpression : LoweredExpression 
     {
-        public LoweredUnaryExpression(TypeInfo type, LoweredExpression Expression, BoundOperation operation)
+        public LoweredUnaryExpression(LoweredExpression Expression, BoundOperation operation, MethodType method)
         {
-            Type = type;
             this.Expression = Expression;
             Operation = operation;
+            Method = method;
         }
 
         public LoweredExpression Expression { get; }
         public BoundOperation Operation { get; }
-
-        public override TypeInfo Type { get; }
+        public MethodType Method { get; }
+        
+        public override TypeInfo Type => Method.ReturnType;
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

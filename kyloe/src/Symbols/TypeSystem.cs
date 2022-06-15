@@ -129,7 +129,7 @@ namespace Kyloe.Symbols
 
         private static void AddBuiltinBinaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo left, TypeInfo right)
         {
-            var method = new MethodType(group, ret, isStatic: true, isOperator: true);
+            var method = new MethodType(group, ret, isStatic: true, isOperator: true, isCompilerBuiltin: true);
             method.Parameters.Add(new ParameterSymbol("", 0, left));
             method.Parameters.Add(new ParameterSymbol("", 1, right));
             group.Callables.Add(method);
@@ -137,7 +137,7 @@ namespace Kyloe.Symbols
 
         private static void AddBuiltinUnaryOperation(CallableGroupType group, BoundOperation op, TypeInfo ret, TypeInfo arg)
         {
-            var method = new MethodType(group, ret, isStatic: true, isOperator: true);
+            var method = new MethodType(group, ret, isStatic: true, isOperator: true, isCompilerBuiltin: true);
             method.Parameters.Add(new ParameterSymbol("", 0, arg));
             group.Callables.Add(method);
         }

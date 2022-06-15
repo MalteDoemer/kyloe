@@ -278,50 +278,68 @@ namespace Kyloe.Backend.Cecil
 
         private void GenerateBinaryExpression(LoweredBinaryExpression expr)
         {
-            // TODO: handle non-builtin binary operations
-
-            GenerateExpression(expr.LeftExpression);
-            GenerateExpression(expr.RightExpression);
-
-            switch (expr.Operation)
+            if (expr.Method.IsCompilerBuiltin)
             {
-                case BoundOperation.Addition:
-                    ilProcessor.Emit(OpCodes.Add); break;
-                case BoundOperation.Subtraction:
-                    ilProcessor.Emit(OpCodes.Sub); break;
-                case BoundOperation.Multiplication:
-                    ilProcessor.Emit(OpCodes.Mul); break;
-                case BoundOperation.Division:
-                    ilProcessor.Emit(OpCodes.Div); break;
-                case BoundOperation.Modulo:
-                    ilProcessor.Emit(OpCodes.Rem); break;
-                case BoundOperation.BitwiseAnd:
-                    ilProcessor.Emit(OpCodes.And); break;
-                case BoundOperation.BitwiseOr:
-                    ilProcessor.Emit(OpCodes.Or); break;
-                case BoundOperation.BitwiseXor:
-                    ilProcessor.Emit(OpCodes.Xor); break;
-                case BoundOperation.LessThan:
-                    ilProcessor.Emit(OpCodes.Clt); break;
-                case BoundOperation.GreaterThan:
-                    ilProcessor.Emit(OpCodes.Cgt); break;
-                case BoundOperation.LessThanOrEqual:
-                    ilProcessor.Emit(OpCodes.Cgt);
-                    ilProcessor.Emit(OpCodes.Ceq);
-                    break;
-                case BoundOperation.GreaterThanOrEqual:
-                    ilProcessor.Emit(OpCodes.Clt);
-                    ilProcessor.Emit(OpCodes.Ceq);
-                    break;
-                case BoundOperation.Equal:
-                    ilProcessor.Emit(OpCodes.Ceq); break;
-                case BoundOperation.NotEqual:
-                    ilProcessor.Emit(OpCodes.Ceq);
-                    ilProcessor.Emit(OpCodes.Ldc_I4_0);
-                    ilProcessor.Emit(OpCodes.Ceq);
-                    break;
-                default:
-                    throw new Exception($"unknown operation {expr.Operation}");
+
+                GenerateExpression(expr.LeftExpression);
+                GenerateExpression(expr.RightExpression);
+
+                switch (expr.Operation)
+                {
+                    case BoundOperation.Addition:
+                        if (expr.LeftExpression.Type.Equals(Backend.TypeSystem.String))
+                            ilProcessor.Emit(OpCodes.Call, Backend.StringConcatMethod);
+                        else
+                            ilProcessor.Emit(OpCodes.Add); 
+                            
+                        break;
+                    case BoundOperation.Subtraction:
+                        ilProcessor.Emit(OpCodes.Sub); break;
+                    case BoundOperation.Multiplication:
+                        ilProcessor.Emit(OpCodes.Mul); break;
+                    case BoundOperation.Division:
+                        ilProcessor.Emit(OpCodes.Div); break;
+                    case BoundOperation.Modulo:
+                        ilProcessor.Emit(OpCodes.Rem); break;
+                    case BoundOperation.BitwiseAnd:
+                        ilProcessor.Emit(OpCodes.And); break;
+                    case BoundOperation.BitwiseOr:
+                        ilProcessor.Emit(OpCodes.Or); break;
+                    case BoundOperation.BitwiseXor:
+                        ilProcessor.Emit(OpCodes.Xor); break;
+                    case BoundOperation.LessThan:
+                        ilProcessor.Emit(OpCodes.Clt); break;
+                    case BoundOperation.GreaterThan:
+                        ilProcessor.Emit(OpCodes.Cgt); break;
+                    case BoundOperation.LessThanOrEqual:
+                        ilProcessor.Emit(OpCodes.Cgt);
+                        ilProcessor.Emit(OpCodes.Ceq);
+                        break;
+                    case BoundOperation.GreaterThanOrEqual:
+                        ilProcessor.Emit(OpCodes.Clt);
+                        ilProcessor.Emit(OpCodes.Ceq);
+                        break;
+                    case BoundOperation.Equal:
+                        if (expr.LeftExpression.Type.Equals(Backend.TypeSystem.Object) || expr.LeftExpression.Type.Equals(Backend.TypeSystem.String))
+                            ilProcessor.Emit(OpCodes.Call, Backend.ObjectEqualsMethod);
+                        else
+                            ilProcessor.Emit(OpCodes.Ceq);
+                        break;
+                    case BoundOperation.NotEqual:
+                        if (expr.LeftExpression.Type.Equals(Backend.TypeSystem.Object) || expr.LeftExpression.Type.Equals(Backend.TypeSystem.String))
+                            ilProcessor.Emit(OpCodes.Call, Backend.ObjectEqualsMethod);
+                        else
+                            ilProcessor.Emit(OpCodes.Ceq);
+                        ilProcessor.Emit(OpCodes.Ldc_I4_0);
+                        ilProcessor.Emit(OpCodes.Ceq);
+                        break;
+                    default:
+                        throw new Exception($"unknown operation {expr.Operation}");
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
 

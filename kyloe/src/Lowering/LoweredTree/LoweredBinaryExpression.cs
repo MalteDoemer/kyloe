@@ -6,19 +6,20 @@ namespace Kyloe.Lowering
 {
     internal sealed class LoweredBinaryExpression : LoweredExpression 
     {
-        public LoweredBinaryExpression(TypeInfo type, LoweredExpression leftExpression, BoundOperation operation, LoweredExpression rightExpression)
+        public LoweredBinaryExpression(LoweredExpression leftExpression, BoundOperation operation, LoweredExpression rightExpression, MethodType method)
         {
-            Type = type;
             LeftExpression = leftExpression;
             Operation = operation;
             RightExpression = rightExpression;
+            Method = method;
         }
 
         public LoweredExpression LeftExpression { get; }
         public BoundOperation Operation { get; }
         public LoweredExpression RightExpression { get; }
+        public MethodType Method { get; }
 
-        public override TypeInfo Type { get; }
+        public override TypeInfo Type => Method.ReturnType;
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
 

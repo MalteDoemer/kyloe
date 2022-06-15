@@ -180,11 +180,11 @@ namespace Kyloe.Semantics
 
             var mainSymbol = LookupSymbol("main");
 
-            if (mainSymbol is CallableGroupSymbol mainGroup) 
+            if (mainSymbol is CallableGroupSymbol mainGroup)
             {
                 // TODO: maybe give a warning here ?
 
-                if (FindCallOverload(mainGroup.Group, Enumerable.Empty<TypeInfo>()) is FunctionType mainFunctionType) 
+                if (FindCallOverload(mainGroup.Group, Enumerable.Empty<TypeInfo>()) is FunctionType mainFunctionType)
                 {
                     var mainFunctionDef = functionDefs.Where(f => f.FunctionType.Equals(mainFunctionType)).FirstOrDefault();
                     return new BoundCompilationUnit(globals.ToImmutable(), functionDefs.ToImmutable(), mainFunctionDef, token);
@@ -749,6 +749,9 @@ namespace Kyloe.Semantics
             var leftType = GetResultType(left, toAssign.Location, mustBeValue: true, mustBeModifiableValue: true);
             var rightType = GetResultType(right, rightLocation, mustBeValue: true);
 
+
+            MethodType? method = null;
+
             if (op == AssignmentOperation.Assign)
             {
                 if (IsTypeMissmatch(leftType, rightType))
@@ -757,15 +760,18 @@ namespace Kyloe.Semantics
             else
             {
                 var binaryOperation = SemanticInfo.GetOperationForAssignment(op);
-                var binaryOperationResult = GetBinaryOperationResult(left, binaryOperation, right);
+                method = GetBinaryOperationMethod(left, binaryOperation, right);
 
-                if (binaryOperationResult is null)
-                    diagnostics.UnsupportedAssignmentOperation(assignmentLocation, op, leftType, rightType);
-                else if (IsTypeMissmatch(leftType, binaryOperationResult))
-                    diagnostics.MissmatchedTypeError(assignmentLocation, leftType, binaryOperationResult);
+                if (left.ResultType is not ErrorType && right.ResultType is not ErrorType)
+                {
+                    if (method is null)
+                        diagnostics.UnsupportedAssignmentOperation(assignmentLocation, op, leftType, rightType);
+                    else if (IsTypeMissmatch(leftType, method.ReturnType))
+                        diagnostics.MissmatchedTypeError(assignmentLocation, leftType, method.ReturnType);
+                }
             }
 
-            return new BoundAssignmentExpression(typeSystem, left, op, right, token);
+            return new BoundAssignmentExpression(typeSystem, left, op, right, method, token);
         }
 
         private BoundBinaryExpression BindBinary(SyntaxToken token)
@@ -785,17 +791,15 @@ namespace Kyloe.Semantics
             var op = SemanticInfo.GetBinaryOperation(opTerminal.Kind);
             var right = BindExpression(rightSyntax);
 
-            var resultType = GetBinaryOperationResult(left, op, right);
+            var method = GetBinaryOperationMethod(left, op, right);
 
-            if (resultType is null)
+            if (method is null)
             {
-                if (!opTerminal.Invalid)
+                if (!opTerminal.Invalid && left.ResultType is not ErrorType && right.ResultType is not ErrorType)
                     diagnostics.UnsupportedBinaryOperation(token.Location, op, left.ResultType, right.ResultType);
-
-                resultType = typeSystem.Error;
             }
 
-            return new BoundBinaryExpression(left, op, right, resultType, token);
+            return new BoundBinaryExpression(typeSystem, left, op, right, method, token);
         }
 
         private BoundUnaryExpression BindPrefix(SyntaxToken token)
@@ -812,18 +816,15 @@ namespace Kyloe.Semantics
             var op = SemanticInfo.GetUnaryOperation(opTerminal.Kind);
             var expr = BindExpression(exprSyntax);
 
-            var resultType = GetUnaryOperationResult(op, expr);
+            var method = GetUnaryOperationMethod(op, expr);
 
-
-            if (resultType is null)
+            if (method is null)
             {
-                if (!opTerminal.Invalid)
+                if (!opTerminal.Invalid && expr.ResultType is not ErrorType)
                     diagnostics.UnsupportedUnaryOperation(token.Location, op, expr.ResultType);
-
-                resultType = typeSystem.Error;
             }
 
-            return new BoundUnaryExpression(expr, op, resultType, token);
+            return new BoundUnaryExpression(typeSystem, expr, op, method, token);
         }
 
         private BoundExpression BindPostfix(SyntaxToken token)
@@ -1010,7 +1011,7 @@ namespace Kyloe.Semantics
             return new BoundSymbolExpression(symbol, token);
         }
 
-        private TypeInfo? GetBinaryOperationResult(BoundExpression left, BoundOperation op, BoundExpression right)
+        private MethodType? GetBinaryOperationMethod(BoundExpression left, BoundOperation op, BoundExpression right)
         {
             Debug.Assert(op.IsBinaryOperation());
 
@@ -1018,7 +1019,7 @@ namespace Kyloe.Semantics
             var rightType = right.ResultType;
 
             if (leftType is ErrorType || rightType is ErrorType)
-                return typeSystem.Error;
+                return null;
 
             if (!left.IsValue || !right.IsValue)
                 return null;
@@ -1037,17 +1038,17 @@ namespace Kyloe.Semantics
             if (method is null || !method.IsOperator)
                 return null;
 
-            return method.ReturnType;
+            return method;
         }
 
-        private TypeInfo? GetUnaryOperationResult(BoundOperation op, BoundExpression expr)
+        private MethodType? GetUnaryOperationMethod(BoundOperation op, BoundExpression expr)
         {
             Debug.Assert(op.IsUnaryOperation());
 
             var type = expr.ResultType;
 
             if (type is ErrorType)
-                return typeSystem.Error;
+                return null;
 
             if (!expr.IsValue)
                 return null;
@@ -1066,7 +1067,7 @@ namespace Kyloe.Semantics
             if (method is null || !method.IsOperator)
                 return null;
 
-            return method.ReturnType;
+            return method;
         }
     }
 }

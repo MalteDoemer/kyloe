@@ -40,7 +40,7 @@ namespace Kyloe.Symbols
 
     internal sealed class MethodType : CallableType
     {
-        public MethodType(CallableGroupType group, TypeInfo returnType, bool isStatic = false, bool isOperator = false)
+        public MethodType(CallableGroupType group, TypeInfo returnType, bool isStatic = false, bool isOperator = false, bool isCompilerBuiltin = false)
         {
             Debug.Assert(group.ParentType is not null);
 
@@ -48,11 +48,13 @@ namespace Kyloe.Symbols
             ReturnType = returnType;
             IsStatic = isStatic;
             IsOperator = isOperator;
+            IsCompilerBuiltin = isCompilerBuiltin;
             Parameters = new List<ParameterSymbol>();
         }
 
         public bool IsStatic { get; set; }
         public bool IsOperator { get; set; }
+        public bool IsCompilerBuiltin { get; set; }
 
         public override CallableGroupType Group { get; }
 
