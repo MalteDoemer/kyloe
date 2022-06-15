@@ -16,7 +16,7 @@ namespace Kyloe.Tests.Lowering
             newStatements.Add(ReturnStatement(null));
 
             text = $"func main() {{ {text} }}";
-            var node = CompilationUnit(BlockStatement(), FunctionDefinition(newStatements.ToArray()));
+            var node = CompilationUnit(BlockStatement(ReturnStatement(null)), FunctionDefinition(newStatements.ToArray()));
 
             var compilation = Compilation.Compile(text);
 
@@ -170,7 +170,7 @@ namespace Kyloe.Tests.Lowering
             yield return new object[] {
                 "func main() { }",
                 VerifyNode.CompilationUnit(
-                    BlockStatement(),
+                    BlockStatement(ReturnStatement(null)),
                     FunctionDefinition(ReturnStatement(null))
                 )
             };
