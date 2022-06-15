@@ -13,12 +13,6 @@ Build the whole project:
 
 ```dotnet build```
 
-Add the kyc executable to the PATH:
-
-```PATH="$PATH:$(pwd)/kyc/bin/Debug/net6.0/"``` on Linux
-
-```set "PATH=%PATH%;%cd%\kyc\bin\Debug\net6.0\"``` on Windows
-
 Change directory to the folder containing the example:
 
 ```cd examples/test```

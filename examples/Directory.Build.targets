@@ -19,7 +19,9 @@
       <ExeExt Condition="$([MSBuild]::IsOSUnixLike())"></ExeExt>
       <ExeExt Condition="$([MSBuild]::IsOSPlatform('Windows'))">.exe</ExeExt>
       <KyloeCompiler Condition="'$(KyloeCompiler)' == ''">kyc$(ExeExt)</KyloeCompiler>
-      <KyloeCompileCommand>$(KyloeCompiler) $(KyloeCompilerArgs)</KyloeCompileCommand>
+
+      <KyloeCompileCommand>"$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..\', 'kyc/bin/Debug/net6.0',  '$(KyloeCompiler)'))" $(KyloeCompilerArgs)</KyloeCompileCommand>
+
     </PropertyGroup>
 
     <Exec Command="$(KyloeCompileCommand)" />
