@@ -26,13 +26,31 @@ namespace Kyloe
             yield return Path.Join(assemblyDir, "System.Runtime.Extensions.dll");
         }
 
-
-        private static string GetDotnetRefrenceDirectory()
+        private static string GetDotnetRoot()
         {
             var dotnetRoot = System.Environment.GetEnvironmentVariable("DOTNET_ROOT");
 
-            if (string.IsNullOrEmpty(dotnetRoot))
-                throw new Exception("unable to find .NET installation");
+            if (!string.IsNullOrEmpty(dotnetRoot))
+                return dotnetRoot;
+
+            // DOTNET_ROOT variable was not set, try out some default values
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                if (Directory.Exists("C:\\Program Files\\dotnet"))
+                    return "C:\\Program Files\\dotnet";
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                if (Directory.Exists("/usr/share/dotnet"))
+                    return "/usr/share/dotnet";
+            }
+
+            throw new Exception("unable to find .NET installation");
+        }
+
+        private static string GetDotnetRefrenceDirectory()
+        {
+            var dotnetRoot = GetDotnetRoot();
 
             var dotnetProcess = new Process();
             dotnetProcess.StartInfo = new ProcessStartInfo()
