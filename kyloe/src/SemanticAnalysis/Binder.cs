@@ -986,7 +986,7 @@ namespace Kyloe.Semantics
                         return res3;
                     return null;
                 case SyntaxTokenKind.String:
-                    return token.Text;
+                    return token.Text[1..(token.Text.Length - 1)];
                 default:
                     throw new System.Exception($"Unexpected literal type: {token.Kind}");
             }
