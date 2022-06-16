@@ -45,6 +45,10 @@ namespace Kyloe.Semantics
 
                 case BoundOperation.LogicalAnd: return "op_LogicalAnd";
                 case BoundOperation.LogicalOr: return "op_LogicalOr";
+
+                case BoundOperation.ImplicitConversion: return "op_Implicit";
+                case BoundOperation.ExplicitConversion: return "op_Explicit";
+
                 default:
                     throw new Exception($"unexpected operation: {operation}");
             }
@@ -72,6 +76,8 @@ namespace Kyloe.Semantics
                 case "op_UnaryPlus": return BoundOperation.Identity;
                 case "op_OnesComplement": return BoundOperation.BitwiseNot;
                 case "op_LogicalNot": return BoundOperation.LogicalNot;
+                case "op_Implicit": return BoundOperation.ImplicitConversion;
+                case "op_Explicit": return BoundOperation.ExplicitConversion;
                 default:
                     return null;
             }
@@ -85,6 +91,9 @@ namespace Kyloe.Semantics
                 case BoundOperation.Identity:
                 case BoundOperation.BitwiseNot:
                 case BoundOperation.LogicalNot:
+
+                case BoundOperation.ImplicitConversion:
+                case BoundOperation.ExplicitConversion:
                     return true;
                 default:
                     return false;

@@ -29,5 +29,6 @@ namespace Kyloe.Semantics
         BoundAssignmentExpression,
         BoundSymbolExpression,
         BoundCallExpression,
+        BoundConversionExpression,
     }
 }

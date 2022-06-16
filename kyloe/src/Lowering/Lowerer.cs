@@ -162,9 +162,17 @@ namespace Kyloe.Lowering
                     return LowerSymbolExpression((BoundSymbolExpression)expression);
                 case BoundNodeKind.BoundCallExpression:
                     return LowerCallExpression((BoundCallExpression)expression);
+                case BoundNodeKind.BoundConversionExpression:
+                    return LowerConversionExpression((BoundConversionExpression)expression);
                 default:
                     throw new Exception($"unexpected kind: {expression.Kind}");
             }
+        }
+
+        private LoweredExpression LowerConversionExpression(BoundConversionExpression expression)
+        {
+            var expr = LowerExpression(expression.Expression);
+            return new LoweredConversionExpression(expr, expression.Method);
         }
 
         private LoweredExpression LowerCallExpression(BoundCallExpression expression)

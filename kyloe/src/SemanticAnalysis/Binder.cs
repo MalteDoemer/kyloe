@@ -87,6 +87,17 @@ namespace Kyloe.Semantics
             return null;
         }
 
+        private CallableType? FindCallOverload(CallableGroupType group, TypeInfo returnType, IEnumerable<TypeInfo> parameterTypes)
+        {
+            foreach (var callable in group.Callables)
+            {
+                if (callable.ReturnType.Equals(returnType) && TypeSequenceEquals(callable.ParameterTypes, parameterTypes))
+                    return callable;
+            }
+
+            return null;
+        }
+
         private TypeInfo GetResultType(BoundExpression expr, SourceLocation src, TypeInfo? expectedType = null, bool mustBeValue = false, bool mustBeModifiableValue = false, bool mustBeTypeName = false)
         {
             if (expr.ResultType is ErrorType)
@@ -854,7 +865,7 @@ namespace Kyloe.Semantics
             throw new NotImplementedException();
         }
 
-        private BoundCallExpression BindCallExpression(SyntaxToken token)
+        private BoundExpression BindCallExpression(SyntaxToken token)
         {
             // Postfix
             // ├── Expr
@@ -880,6 +891,24 @@ namespace Kyloe.Semantics
                 }
 
                 return new BoundCallExpression(callable, callable.ReturnType, expr, args, token);
+            }
+            else if (expr.IsTypeName && args.Arguments.Length == 1)
+            {
+                // explicit conversion
+
+                var arg = args.Arguments[0];
+
+                var method = GetConversionMethod(BoundOperation.ExplicitConversion, expr.ResultType, arg);
+
+                if (method is null)
+                {
+                    if (expr.ResultType is not ErrorType && arg.ResultType is not ErrorType)
+                        diagnostics.NoExplicitConversionExists(token.Location, arg.ResultType, expr.ResultType);
+
+                    return new BoundCallExpression(typeSystem.Error, typeSystem.Error, expr, args, token);
+                }
+
+                return new BoundConversionExpression(arg, method, token);
             }
             else
             {
@@ -1063,6 +1092,33 @@ namespace Kyloe.Semantics
             var args = new[] { type };
 
             var method = FindCallOverload(group.Group, args) as MethodType;
+
+            if (method is null || !method.IsOperator)
+                return null;
+
+            return method;
+        }
+
+        private MethodType? GetConversionMethod(BoundOperation op, TypeInfo typeToConvertTo, BoundExpression arg)
+        {
+            var type = arg.ResultType;
+
+            if (type is ErrorType)
+                return null;
+
+            if (!arg.IsValue)
+                return null;
+
+            var name = SemanticInfo.GetFunctionNameFromOperation(op);
+
+            var group = type.ReadOnlyScope?.LookupSymbol(name) as CallableGroupSymbol;
+
+            if (group is null)
+                return null;
+
+            var args = new[] { type };
+
+            var method = FindCallOverload(group.Group, typeToConvertTo, args) as MethodType;
 
             if (method is null || !method.IsOperator)
                 return null;

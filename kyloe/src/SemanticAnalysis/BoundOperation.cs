@@ -23,5 +23,8 @@ namespace Kyloe.Semantics
         Negation,
         BitwiseNot,
         LogicalNot,
+
+        ImplicitConversion,
+        ExplicitConversion,
     }
 }

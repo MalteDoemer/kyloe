@@ -138,6 +138,12 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.NoMatchingOverloadError, msg, location);
         }
 
+        internal void NoExplicitConversionExists(SourceLocation location, TypeInfo from, TypeInfo to) 
+        {
+            var msg = $"cannot explicitly convert '{from.FullName()}' to '{to.FullName()}'";
+            AddError(DiagnosticKind.NoExplicitConversionExists, msg, location);
+        }
+
         internal void OverloadWithSameParametersExistsError(SourceLocation location, string name)
         {
             var msg = $"the function '{name}' already exists with the same parameters";

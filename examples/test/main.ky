@@ -1,11 +1,8 @@
-func test(x: bool) {
-    if (x) {
-        println("hi");
-    } else {
-        println("hey");
-    }
-}
-
 func main() {
-    println("Hello" + "World");
+
+    var u = u32(-1);
+
+    var f = float(u);
+
+    println(double(f));
 }

@@ -197,6 +197,8 @@ namespace Kyloe.Lowering
                     return RewriteVariableAccessExpression((LoweredSymbolExpression)expression);
                 case LoweredNodeKind.LoweredCallExpression:
                     return RewriteCallExpression((LoweredCallExpression)expression);
+                case LoweredNodeKind.LoweredConversionExpression:
+                    return RewriteConversionExpression((LoweredConversionExpression)expression);
                 case LoweredNodeKind.LoweredStatementExpression:
                     return RewriteStatementExpression((LoweredStatementExpression)expression);
                 default:
@@ -276,6 +278,16 @@ namespace Kyloe.Lowering
         protected virtual LoweredExpression RewriteVariableAccessExpression(LoweredSymbolExpression expression)
         {
             return expression;
+        }
+
+        protected virtual LoweredExpression RewriteConversionExpression(LoweredConversionExpression expression) 
+        {
+            var expr = RewriteExpression(expression.Expression);
+
+            if (expr == expression.Expression)
+                return expression;
+
+            return new LoweredConversionExpression(expr, expression.Method);
         }
 
     }

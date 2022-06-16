@@ -1,18 +1,27 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace Kyloe.Symbols
 {
-    internal sealed class FunctionType : CallableType
+    internal sealed class MethodType : CallableType
     {
-
-        public FunctionType(CallableGroupType group, TypeInfo returnType)
+        public MethodType(CallableGroupType group, TypeInfo returnType, bool isStatic = false, bool isOperator = false, bool isCompilerBuiltin = false)
         {
+            Debug.Assert(group.ParentType is not null);
+
             Group = group;
             ReturnType = returnType;
+            IsStatic = isStatic;
+            IsOperator = isOperator;
+            IsCompilerBuiltin = isCompilerBuiltin;
             Parameters = new List<ParameterSymbol>();
         }
+
+        public bool IsStatic { get; set; }
+        public bool IsOperator { get; set; }
+        public bool IsCompilerBuiltin { get; set; }
 
         public override CallableGroupType Group { get; }
 
@@ -20,7 +29,7 @@ namespace Kyloe.Symbols
 
         public override List<ParameterSymbol> Parameters { get; }
 
-        public override TypeKind Kind => TypeKind.FunctionType;
+        public override TypeKind Kind => TypeKind.MethodType;
 
         public override string FullName()
         {
@@ -36,4 +45,5 @@ namespace Kyloe.Symbols
             return builder.ToString();
         }
     }
+
 }

@@ -32,5 +32,6 @@ namespace Kyloe.Diagnostics
         UnableToReadLibrary,
         UnresolvedImport,
         ImportedNameAlreadyExists,
+        NoExplicitConversionExists,
     }
 }

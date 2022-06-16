@@ -40,6 +40,8 @@ namespace Kyloe.Lowering
                     WriteVariableAccessExpression((LoweredSymbolExpression)node); break;
                 case LoweredNodeKind.LoweredCallExpression:
                     WriteCallExpression((LoweredCallExpression)node); break;
+                case LoweredNodeKind.LoweredConversionExpression:
+                    WriteConversionExpression((LoweredConversionExpression)node); break;
                 case LoweredNodeKind.LoweredBlockStatement:
                     WriteBlockStatement((LoweredBlockStatement)node); break;
                 case LoweredNodeKind.LoweredContinueStatement:
@@ -140,6 +142,14 @@ namespace Kyloe.Lowering
             WriteNode(node.Expression);
             writer.Write('(');
             WriteArguments(node.Arguments);
+            writer.Write(')');
+        }
+
+        private void WriteConversionExpression(LoweredConversionExpression node)
+        {
+            writer.Write(node.Method.ReturnType.FullName());
+            writer.Write('(');
+            WriteNode(node.Expression);
             writer.Write(')');
         }
 

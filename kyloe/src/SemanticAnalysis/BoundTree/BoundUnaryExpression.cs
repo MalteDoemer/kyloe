@@ -28,4 +28,25 @@ namespace Kyloe.Semantics
 
         public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
     }
+
+    internal sealed class BoundConversionExpression : BoundExpression 
+    {
+        public BoundConversionExpression(BoundExpression expression, MethodType method, SyntaxToken syntax)
+        {
+            Expression = expression;
+            Method = method;
+            Syntax = syntax;
+        }
+
+        public BoundExpression Expression { get; }
+        public MethodType Method { get; }
+
+        public override TypeInfo ResultType => Method.ReturnType;
+
+        public override ValueCategory ValueCategory => ValueCategory.ReadableValue;
+
+        public override SyntaxToken Syntax { get; }
+
+        public override BoundNodeKind Kind => BoundNodeKind.BoundConversionExpression;
+    }
 }

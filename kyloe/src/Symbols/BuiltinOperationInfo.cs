@@ -6,6 +6,7 @@ namespace Kyloe.Symbols
 {
     internal partial class TypeSystem
     {
+
         private static class BuiltinOperationInfo
         {
             public static readonly ImmutableArray<BoundOperation> ArithmeticOperations = ImmutableArray.Create<BoundOperation>
@@ -62,6 +63,11 @@ namespace Kyloe.Symbols
             public static readonly ImmutableArray<BoundOperation> LogicalNot = ImmutableArray.Create<BoundOperation>
             (
                 BoundOperation.LogicalNot
+            );
+
+            public static readonly ImmutableArray<BoundOperation> ExplicitConversion = ImmutableArray.Create<BoundOperation>
+            (
+                BoundOperation.ExplicitConversion
             );
 
             public static readonly ImmutableArray<BoundOperation> NegationAndIdenity = Negation.Concat(Identity).ToImmutableArray();
@@ -127,14 +133,118 @@ namespace Kyloe.Symbols
                 (NegationAndIdenity, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
                 (NegationAndIdenity, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
 
-                (LogicalNot, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool)
-            );
+                (LogicalNot, BuiltinTypeKind.Bool, BuiltinTypeKind.Bool),
 
-            public static readonly ImmutableArray<(BuiltinTypeKind from, BuiltinTypeKind to)> ImplicitConversions = ImmutableArray.Create<(BuiltinTypeKind from, BuiltinTypeKind to)>(
-                (BuiltinTypeKind.I64, BuiltinTypeKind.I32)
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I64),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I32),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I16),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I8),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U64),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U32),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U16),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U8),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
+                
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.Double)
             );
         }
     }
-
-
 }

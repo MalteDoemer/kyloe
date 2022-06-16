@@ -166,9 +166,47 @@ namespace Kyloe.Backend.Cecil
                     GenerateSymbolExpression((LoweredSymbolExpression)expr); break;
                 case LoweredNodeKind.LoweredCallExpression:
                     GenerateCallExpression((LoweredCallExpression)expr); break;
-
+                case LoweredNodeKind.LoweredConversionExpression:
+                    GenerateConversionExpression((LoweredConversionExpression)expr); break;
                 default:
                     throw new Exception($"unexpected kind: {expr.Kind}");
+            }
+        }
+
+        private void GenerateConversionExpression(LoweredConversionExpression expr)
+        {
+            GenerateExpression(expr.Expression);
+
+            var ts = Backend.TypeSystem;
+
+            if (expr.Method.IsCompilerBuiltin)
+            {
+                if (expr.Type.Equals(ts.I8))
+                    ilProcessor.Emit(OpCodes.Conv_I1);
+                else if (expr.Type.Equals(ts.I16))
+                    ilProcessor.Emit(OpCodes.Conv_I2);
+                else if (expr.Type.Equals(ts.I32))
+                    ilProcessor.Emit(OpCodes.Conv_I4);
+                else if (expr.Type.Equals(ts.I64))
+                    ilProcessor.Emit(OpCodes.Conv_I8);
+                else if (expr.Type.Equals(ts.U8))
+                    ilProcessor.Emit(OpCodes.Conv_U1);
+                else if (expr.Type.Equals(ts.U16))
+                    ilProcessor.Emit(OpCodes.Conv_U2);
+                else if (expr.Type.Equals(ts.U32))
+                    ilProcessor.Emit(OpCodes.Conv_U4);
+                else if (expr.Type.Equals(ts.U64))
+                    ilProcessor.Emit(OpCodes.Conv_U8);
+                else if (expr.Type.Equals(ts.Float))
+                    ilProcessor.Emit(OpCodes.Conv_R4);
+                else if (expr.Type.Equals(ts.Double))
+                    ilProcessor.Emit(OpCodes.Conv_R8);
+                else
+                    throw new Exception($"Unexpected type {expr.Type}");
+            }
+            else
+            {
+                ilProcessor.Emit(OpCodes.Call, Backend.ResolveCallable(expr.Method));
             }
         }
 
@@ -290,8 +328,8 @@ namespace Kyloe.Backend.Cecil
                         if (expr.LeftExpression.Type.Equals(Backend.TypeSystem.String))
                             ilProcessor.Emit(OpCodes.Call, Backend.StringConcatMethod);
                         else
-                            ilProcessor.Emit(OpCodes.Add); 
-                            
+                            ilProcessor.Emit(OpCodes.Add);
+
                         break;
                     case BoundOperation.Subtraction:
                         ilProcessor.Emit(OpCodes.Sub); break;
