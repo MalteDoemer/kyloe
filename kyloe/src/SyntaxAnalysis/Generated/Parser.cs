@@ -235,6 +235,11 @@ namespace Kyloe.Syntax
                     var n0 = ParseWhileStatement();
                     return CreateNode(SyntaxTokenKind.Statement, n0);
                 }
+                case SyntaxTokenKind.ForKeyword:
+                {
+                    var n0 = ParseForStatement();
+                    return CreateNode(SyntaxTokenKind.Statement, n0);
+                }
                 case SyntaxTokenKind.VarKeyword:
                 case SyntaxTokenKind.ConstKeyword:
                 {
@@ -278,9 +283,9 @@ namespace Kyloe.Syntax
                 default:
                 {
                     var erroneous = current;
-                    Unexpected(SyntaxTokenKind.Identifier, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.String, SyntaxTokenKind.Bool, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.SemiColon);
-                    SkipInput(SyntaxTokenKind.Identifier, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.String, SyntaxTokenKind.Bool, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
-                    if (current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.ReturnKeyword || current.Kind == SyntaxTokenKind.ContinueKeyword || current.Kind == SyntaxTokenKind.BreakKeyword || current.Kind == SyntaxTokenKind.WhileKeyword || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.SemiColon)
+                    Unexpected(SyntaxTokenKind.Identifier, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.ForKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.String, SyntaxTokenKind.Bool, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.SemiColon);
+                    SkipInput(SyntaxTokenKind.Identifier, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.ForKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.String, SyntaxTokenKind.Bool, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
+                    if (current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.ReturnKeyword || current.Kind == SyntaxTokenKind.ContinueKeyword || current.Kind == SyntaxTokenKind.BreakKeyword || current.Kind == SyntaxTokenKind.ForKeyword || current.Kind == SyntaxTokenKind.WhileKeyword || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.SemiColon)
                     {
                         return ParseStatement();
                     }
@@ -298,7 +303,7 @@ namespace Kyloe.Syntax
         
         private SyntaxToken ParseBlockStatement()
         {
-            var n0 = Expect(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
+            var n0 = Expect(SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.ForKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.SemiColon, SyntaxTokenKind.RightCurly);
             var n1 = ParseRepeatedStatement();
             var n2 = Expect(SyntaxTokenKind.RightCurly);
             return CreateNode(SyntaxTokenKind.BlockStatement, n0, n1, n2);
@@ -311,13 +316,14 @@ namespace Kyloe.Syntax
                 default:
                 {
                     SyntaxToken node = new SyntaxNode(SyntaxTokenKind.Epsilon, ImmutableArray<SyntaxToken>.Empty);
-                    while (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.WhileKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.BreakKeyword || current.Kind == SyntaxTokenKind.ContinueKeyword || current.Kind == SyntaxTokenKind.ReturnKeyword || current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.RightCurly)
+                    while (current.Kind == SyntaxTokenKind.LeftCurly || current.Kind == SyntaxTokenKind.IfKeyword || current.Kind == SyntaxTokenKind.WhileKeyword || current.Kind == SyntaxTokenKind.ForKeyword || current.Kind == SyntaxTokenKind.VarKeyword || current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.Plus || current.Kind == SyntaxTokenKind.Minus || current.Kind == SyntaxTokenKind.Bang || current.Kind == SyntaxTokenKind.Tilde || current.Kind == SyntaxTokenKind.Int || current.Kind == SyntaxTokenKind.Float || current.Kind == SyntaxTokenKind.Bool || current.Kind == SyntaxTokenKind.String || current.Kind == SyntaxTokenKind.Identifier || current.Kind == SyntaxTokenKind.LeftParen || current.Kind == SyntaxTokenKind.BreakKeyword || current.Kind == SyntaxTokenKind.ContinueKeyword || current.Kind == SyntaxTokenKind.ReturnKeyword || current.Kind == SyntaxTokenKind.SemiColon || current.Kind == SyntaxTokenKind.RightCurly)
                     {
                         switch (current.Kind)
                         {
                             case SyntaxTokenKind.LeftCurly:
                             case SyntaxTokenKind.IfKeyword:
                             case SyntaxTokenKind.WhileKeyword:
+                            case SyntaxTokenKind.ForKeyword:
                             case SyntaxTokenKind.VarKeyword:
                             case SyntaxTokenKind.ConstKeyword:
                             case SyntaxTokenKind.Plus:
@@ -393,6 +399,17 @@ namespace Kyloe.Syntax
             return CreateNode(SyntaxTokenKind.WhileStatement, n0, n1, n2);
         }
         
+        private SyntaxToken ParseForStatement()
+        {
+            var n0 = Expect(SyntaxTokenKind.ForKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.ConstKeyword);
+            var n1 = ParseDeclarationStatement();
+            var n2 = ParseExpression();
+            var n3 = Expect(SyntaxTokenKind.SemiColon, SyntaxTokenKind.Plus, SyntaxTokenKind.Minus, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.Bool, SyntaxTokenKind.String, SyntaxTokenKind.Identifier, SyntaxTokenKind.LeftParen);
+            var n4 = ParseExpression();
+            var n5 = ParseBlockStatement();
+            return CreateNode(SyntaxTokenKind.ForStatement, n0, n1, n2, n3, n4, n5);
+        }
+        
         private SyntaxToken ParseBreakStatement()
         {
             var n0 = Expect(SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.SemiColon);
@@ -443,7 +460,7 @@ namespace Kyloe.Syntax
                 {
                     var erroneous = current;
                     Unexpected(SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword);
-                    SkipInput(SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.Identifier, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.String, SyntaxTokenKind.Bool, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.SemiColon, SyntaxTokenKind.End);
+                    SkipInput(SyntaxTokenKind.ConstKeyword, SyntaxTokenKind.VarKeyword, SyntaxTokenKind.Identifier, SyntaxTokenKind.ReturnKeyword, SyntaxTokenKind.ContinueKeyword, SyntaxTokenKind.BreakKeyword, SyntaxTokenKind.ForKeyword, SyntaxTokenKind.WhileKeyword, SyntaxTokenKind.IfKeyword, SyntaxTokenKind.FuncKeyword, SyntaxTokenKind.String, SyntaxTokenKind.Bool, SyntaxTokenKind.Int, SyntaxTokenKind.Float, SyntaxTokenKind.RightCurly, SyntaxTokenKind.LeftCurly, SyntaxTokenKind.LeftParen, SyntaxTokenKind.Bang, SyntaxTokenKind.Tilde, SyntaxTokenKind.Minus, SyntaxTokenKind.Plus, SyntaxTokenKind.SemiColon, SyntaxTokenKind.End);
                     if (current.Kind == SyntaxTokenKind.ConstKeyword || current.Kind == SyntaxTokenKind.VarKeyword)
                     {
                         return ParseDeclarationStatement();

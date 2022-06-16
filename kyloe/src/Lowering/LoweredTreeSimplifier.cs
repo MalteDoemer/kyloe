@@ -48,6 +48,34 @@ namespace Kyloe.Lowering
             return RewriteStatement(block);
         }
 
+        protected override LoweredStatement RewriteForStatement(LoweredForStatement statement)
+        {
+            // for decl; condition; increment
+            // continue:
+            //      body
+            // break:
+
+
+
+            // decl
+            // while condition
+            // body
+            // increment
+
+
+            var block = Block(
+                statement.DeclarationStatement,
+                new LoweredWhileStatement(statement.BreakLabel, statement.ContinueLabel, statement.Condition,
+                    Block(
+                        statement.Body,
+                        ExpressionStatement(statement.Increment)
+                    )
+                )
+            );
+
+            return RewriteStatement(block);
+        }
+
         protected override LoweredStatement RewriteContinueStatement(LoweredContinueStatement statement)
         {
             return new LoweredGotoStatement(statement.Label);
@@ -125,7 +153,7 @@ namespace Kyloe.Lowering
 
             // There are no errors, so every compound assing must have a associated method.
             Debug.Assert(expression.Method is not null);
-            
+
             var binary = new LoweredBinaryExpression(left, op, right, expression.Method);
             var assign = new LoweredAssignment(typeSystem, left, AssignmentOperation.Assign, binary, expression.Method);
 

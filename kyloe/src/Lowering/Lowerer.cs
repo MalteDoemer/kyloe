@@ -65,6 +65,8 @@ namespace Kyloe.Lowering
                     return LowerExpressionStatement((BoundExpressionStatement)statement);
                 case BoundNodeKind.BoundWhileStatement:
                     return LowerWhileStatement((BoundWhileStatement)statement);
+                case BoundNodeKind.BoundForStatement:
+                    return LowerForStatement((BoundForStatement)statement);
                 case BoundNodeKind.BoundReturnStatement:
                     return LowerReturnStatement((BoundReturnStatement)statement);
                 case BoundNodeKind.BoundContinueStatement:
@@ -124,6 +126,21 @@ namespace Kyloe.Lowering
             loopLableStack.Pop();
 
             return new LoweredWhileStatement(lables.Item1, lables.Item2, condition, body);
+        }
+
+        private LoweredStatement LowerForStatement(BoundForStatement statement)
+        {
+            var lables = (LoweredLabel.Create("break"), LoweredLabel.Create("continue"));
+
+            var decl = LowerStatement(statement.DeclarationStatement);
+            var condition = LowerExpression(statement.Condition);
+            var increment = LowerExpression(statement.Increment);
+
+            loopLableStack.Push(lables);
+            var body = LowerStatement(statement.Body);
+            loopLableStack.Pop();
+
+            return new LoweredForStatement(lables.Item1, lables.Item2, decl, condition, increment, body);
         }
 
         private LoweredStatement LowerReturnStatement(BoundReturnStatement statement)

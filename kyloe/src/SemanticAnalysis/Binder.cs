@@ -399,6 +399,8 @@ namespace Kyloe.Semantics
                     return BindIfStatement(token);
                 case SyntaxTokenKind.WhileStatement:
                     return BindWhileStatement(token);
+                case SyntaxTokenKind.ForStatement:
+                    return BindForStatement(token);
                 case SyntaxTokenKind.ReturnStatement:
                     return BindReturnStatement(token);
                 case SyntaxTokenKind.BreakStatement:
@@ -556,6 +558,40 @@ namespace Kyloe.Semantics
 
                 return BindStatement(blockSyntax);
             }
+        }
+
+        private BoundStatement BindForStatement(SyntaxToken token)
+        {
+            // ForStatement
+            // ├── ForKeyword
+            // ├── DeclarationStatement
+            // ├── Condition
+            // ├── Semicolon
+            // ├── Increment
+            // └── BlockStatement
+
+            var forStatement = GetNode(token, SyntaxTokenKind.ForStatement);
+
+            var declSyntax = forStatement.Tokens[1];
+            var conditionSyntax = forStatement.Tokens[2];
+            var incrementSyntax = forStatement.Tokens[4];
+            var blockSyntax = forStatement.Tokens[5];
+
+
+            BoundStatement declStatement = declSyntax.Kind == SyntaxTokenKind.Error ? 
+                                           new BoundInvalidStatement(declSyntax) : 
+                                           BindDeclarationStatement(declSyntax);
+
+            var condition = BindExpression(conditionSyntax);
+            var _result = GetResultType(condition, conditionSyntax.Location, typeSystem.Bool, mustBeValue: true);
+
+            var increment = BindExpression(incrementSyntax);
+
+            loopStack.Push(forStatement);
+            var body = BindStatement(blockSyntax);
+            loopStack.Pop();
+
+            return new BoundForStatement(declStatement, condition, increment, body, token);
         }
 
         private BoundWhileStatement BindWhileStatement(SyntaxToken token)

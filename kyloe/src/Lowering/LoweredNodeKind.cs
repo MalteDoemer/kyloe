@@ -28,5 +28,6 @@ namespace Kyloe.Lowering
         LoweredLabelStatement,
         LoweredStatementExpression,
         LoweredConversionExpression,
+        LoweredForStatement,
     }
 }

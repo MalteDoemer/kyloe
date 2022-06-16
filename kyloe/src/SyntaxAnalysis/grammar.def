@@ -68,6 +68,7 @@ IfKeyword = '\bif\b';
 ElseKeyword = '\belse\b';
 ElifKeyword = '\belif\b';
 WhileKeyword = '\bwhile\b';
+ForKeyword = '\bfor\b';
 BreakKeyword = '\bbreak\b';
 ContinueKeyword = '\bcontinue\b';
 ReturnKeyword = '\breturn\b';
@@ -94,6 +95,7 @@ OptionalTypeClause = TypeClause | #;
 Statement = BlockStatement | 
             IfStatement | 
             WhileStatement | 
+            ForStatement | 
             DeclarationStatement | 
             ExpressionStatement | 
             BreakStatement | 
@@ -111,6 +113,8 @@ ElifClause = (ElifKeyword, Expression);
 ElifStatement = ((ElseKeyword | ElifClause), BlockStatement, ElifStatement) | #;
 
 WhileStatement = WhileKeyword, Expression, BlockStatement;
+
+ForStatement = ForKeyword, DeclarationStatement, Expression, SemiColon, Expression, BlockStatement;
 
 BreakStatement = BreakKeyword, SemiColon;
 ContinueStatement = ContinueKeyword, SemiColon;

@@ -15,7 +15,7 @@ namespace Kyloe.Lowering
             this.typeSystem = typeSystem;
         }
 
-        protected LocalVariableSymbol CreateTempVar(TypeInfo type) 
+        protected LocalVariableSymbol CreateTempVar(TypeInfo type)
         {
             var name = $"$temp{++tempVarCount}";
             return new LocalVariableSymbol(name, type, false);
@@ -57,6 +57,8 @@ namespace Kyloe.Lowering
                     return RewriteReturnStatement((LoweredReturnStatement)statement);
                 case LoweredNodeKind.LoweredWhileStatement:
                     return RewriteWhileStatement((LoweredWhileStatement)statement);
+                case LoweredNodeKind.LoweredForStatement:
+                    return RewriteForStatement((LoweredForStatement)statement);
                 case LoweredNodeKind.LoweredExpressionStatement:
                     return RewriteExpressionStatement((LoweredExpressionStatement)statement);
                 case LoweredNodeKind.LoweredDeclarationStatement:
@@ -139,6 +141,19 @@ namespace Kyloe.Lowering
                 return statement;
 
             return new LoweredWhileStatement(statement.BreakLabel, statement.ContinueLabel, condition, body);
+        }
+
+        protected virtual LoweredStatement RewriteForStatement(LoweredForStatement statement)
+        {
+            var decl = RewriteStatement(statement.DeclarationStatement);
+            var condition = RewriteExpression(statement.Condition);
+            var increment = RewriteExpression(statement.Increment);
+            var body = RewriteStatement(statement.Body);
+
+            if (decl == statement.DeclarationStatement && condition == statement.Condition && increment == statement.Increment &&body == statement.Body)
+                return statement;
+
+            return new LoweredForStatement(statement.BreakLabel, statement.ContinueLabel, decl, condition, increment, body);
         }
 
         protected virtual LoweredStatement RewriteExpressionStatement(LoweredExpressionStatement statement)
@@ -280,7 +295,7 @@ namespace Kyloe.Lowering
             return expression;
         }
 
-        protected virtual LoweredExpression RewriteConversionExpression(LoweredConversionExpression expression) 
+        protected virtual LoweredExpression RewriteConversionExpression(LoweredConversionExpression expression)
         {
             var expr = RewriteExpression(expression.Expression);
 

@@ -24,7 +24,7 @@ namespace Kyloe.Syntax
             this.source = source;
             this.text = source.GetAllText();
             
-            var builder = ImmutableArray.CreateBuilder<(SyntaxTokenKind, string, Regex?)>(56);
+            var builder = ImmutableArray.CreateBuilder<(SyntaxTokenKind, string, Regex?)>(57);
             builder.Add((SyntaxTokenKind.Whitespace, string.Empty , new Regex(@"\G\s+", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.LineComment, string.Empty , new Regex(@"\G\/\/.*\n", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.BlockComment, string.Empty , new Regex(@"\G\/\*.*\*\/", RegexOptions.Compiled | RegexOptions.Multiline)));
@@ -77,6 +77,7 @@ namespace Kyloe.Syntax
             builder.Add((SyntaxTokenKind.ElseKeyword, string.Empty , new Regex(@"\G\belse\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ElifKeyword, string.Empty , new Regex(@"\G\belif\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.WhileKeyword, string.Empty , new Regex(@"\G\bwhile\b", RegexOptions.Compiled | RegexOptions.Multiline)));
+            builder.Add((SyntaxTokenKind.ForKeyword, string.Empty , new Regex(@"\G\bfor\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.BreakKeyword, string.Empty , new Regex(@"\G\bbreak\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ContinueKeyword, string.Empty , new Regex(@"\G\bcontinue\b", RegexOptions.Compiled | RegexOptions.Multiline)));
             builder.Add((SyntaxTokenKind.ReturnKeyword, string.Empty , new Regex(@"\G\breturn\b", RegexOptions.Compiled | RegexOptions.Multiline)));
