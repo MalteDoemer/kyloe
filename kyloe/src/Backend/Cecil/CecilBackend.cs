@@ -190,6 +190,9 @@ namespace Kyloe.Backend.Cecil
         private void ResolveBuiltinFunctions()
         {
             ImportFunction("Kyloe.Builtins.println");
+            ImportFunction("Kyloe.Builtins.print");
+            ImportFunction("Kyloe.Builtins.input");
+            ImportFunction("Kyloe.Builtins.len");
         }
 
         private void AddType(Symbols.TypeInfo kyloeType, TypeReference cecilType)

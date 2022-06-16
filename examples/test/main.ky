@@ -1,8 +1,4 @@
 func main() {
-
-    var u = u32(-1);
-
-    var f = float(u);
-
-    println(double(f));
+    var in = input("> ");
+    println("You wrote '" + in);
 }
