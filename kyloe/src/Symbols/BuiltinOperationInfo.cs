@@ -145,6 +145,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I64),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I64),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.I64),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.I64),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I32),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I32),
@@ -156,6 +158,9 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I32),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I32),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.I32),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.I32),
+
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I16),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I16),
@@ -167,6 +172,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I16),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I16),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.I16),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.I16),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.I8),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.I8),
@@ -178,6 +185,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.I8),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.I8),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.I8),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.I8),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U64),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U64),
@@ -189,6 +198,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U64),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U64),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.U64),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.U64),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U32),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U32),
@@ -200,6 +211,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U32),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U32),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.U32),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.U32),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U16),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U16),
@@ -211,6 +224,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U16),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U16),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.U16),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.U16),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.U8),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.U8),
@@ -222,6 +237,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.U8),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.U8),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.U8),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.U8),
 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.Float),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.Float),
@@ -233,6 +250,8 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.Float),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.Float),
                 (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.Float),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.Float),
                 
                 (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.Double),
                 (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.Double),
@@ -243,7 +262,24 @@ namespace Kyloe.Symbols
                 (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.Double),
                 (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.Double),
                 (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.Double),
-                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.Double)
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.Double),
+                (ExplicitConversion, BuiltinTypeKind.Object, BuiltinTypeKind.Double),
+
+                (ExplicitConversion, BuiltinTypeKind.I64, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.I32, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.I16, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.I8, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.U64, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.U32, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.U16, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.U8, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.Double, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.Float, BuiltinTypeKind.String),
+                (ExplicitConversion, BuiltinTypeKind.String, BuiltinTypeKind.String)
+
+
+
             );
         }
     }

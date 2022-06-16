@@ -179,30 +179,49 @@ namespace Kyloe.Backend.Cecil
 
             var ts = Backend.TypeSystem;
 
+
+            TypeInfo to = expr.Type;
+            TypeInfo from = expr.Expression.Type;
+
             if (expr.Method.IsCompilerBuiltin)
             {
-                if (expr.Type.Equals(ts.I8))
+                if (to.Equals(ts.Object))
+                {
+                    if (!from.Equals(ts.String) && !from.Equals(ts.Object))
+                        ilProcessor.Emit(OpCodes.Box);
+                }
+                else if (to.Equals(ts.String))
+                {
+                    var methodref = Backend.ConvertMethods[(from, ts.String)];
+                    ilProcessor.Emit(OpCodes.Call, methodref);
+                }
+                else if (from.Equals(ts.String)) 
+                {
+                    var methodref = Backend.ConvertMethods[(ts.String, to)];
+                    ilProcessor.Emit(OpCodes.Call, methodref);
+                }
+                else if (to.Equals(ts.I8))
                     ilProcessor.Emit(OpCodes.Conv_I1);
-                else if (expr.Type.Equals(ts.I16))
+                else if (to.Equals(ts.I16))
                     ilProcessor.Emit(OpCodes.Conv_I2);
-                else if (expr.Type.Equals(ts.I32))
+                else if (to.Equals(ts.I32))
                     ilProcessor.Emit(OpCodes.Conv_I4);
-                else if (expr.Type.Equals(ts.I64))
+                else if (to.Equals(ts.I64))
                     ilProcessor.Emit(OpCodes.Conv_I8);
-                else if (expr.Type.Equals(ts.U8))
+                else if (to.Equals(ts.U8))
                     ilProcessor.Emit(OpCodes.Conv_U1);
-                else if (expr.Type.Equals(ts.U16))
+                else if (to.Equals(ts.U16))
                     ilProcessor.Emit(OpCodes.Conv_U2);
-                else if (expr.Type.Equals(ts.U32))
+                else if (to.Equals(ts.U32))
                     ilProcessor.Emit(OpCodes.Conv_U4);
-                else if (expr.Type.Equals(ts.U64))
+                else if (to.Equals(ts.U64))
                     ilProcessor.Emit(OpCodes.Conv_U8);
-                else if (expr.Type.Equals(ts.Float))
+                else if (to.Equals(ts.Float))
                     ilProcessor.Emit(OpCodes.Conv_R4);
-                else if (expr.Type.Equals(ts.Double))
+                else if (to.Equals(ts.Double))
                     ilProcessor.Emit(OpCodes.Conv_R8);
                 else
-                    throw new Exception($"Unexpected type {expr.Type}");
+                    throw new Exception($"Unexpected type {to}");
             }
             else
             {

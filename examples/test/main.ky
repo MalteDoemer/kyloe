@@ -1,4 +1,6 @@
 func main() {
     var in = input("> ");
-    println("You wrote '" + in);
+    var num = i64(in);
+
+    println("You wrote " + string(num));
 }

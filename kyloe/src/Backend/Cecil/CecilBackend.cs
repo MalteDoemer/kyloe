@@ -22,7 +22,7 @@ namespace Kyloe.Backend.Cecil
 
         private readonly AssemblyDefinition assembly;
 
-        public CecilBackend(string programName, Symbols.TypeSystem typeSystem, IEnumerable<string> libraries, DiagnosticCollector diagnostics) : base(typeSystem)
+        public CecilBackend(string programName, Symbols.TypeSystem ts, IEnumerable<string> libraries, DiagnosticCollector diagnostics) : base(ts)
         {
             var assemblyName = new AssemblyNameDefinition(programName, new Version(0, 1));
             var assemblyResolver = new DefaultAssemblyResolver();
@@ -56,16 +56,44 @@ namespace Kyloe.Backend.Cecil
             callables = new Dictionary<Symbols.TypeInfo, MethodReference>();
             reverseTypes = new Dictionary<string, TypeInfo>();
             reverseCallables = new Dictionary<string, TypeInfo>();
+            ConvertMethods = new Dictionary<(TypeInfo from, TypeInfo to), MethodReference>();
 
             ResolveBuiltinTypes();
             ResolveBuiltinFunctions();
 
             ObjectEqualsMethod = ResolveCompilerFunction("System.Object.Equals", new[] { "System.Object", "System.Object" });
             StringConcatMethod = ResolveCompilerFunction("System.String.Concat", new[] { "System.String", "System.String" });
+            ConvertMethods.Add((ts.Bool, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Boolean" }));
+            ConvertMethods.Add((ts.I8, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.SByte" }));
+            ConvertMethods.Add((ts.I16, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Int16" }));
+            ConvertMethods.Add((ts.I32, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Int32" }));
+            ConvertMethods.Add((ts.I64, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Int64" }));
+            ConvertMethods.Add((ts.U8, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Byte" }));
+            ConvertMethods.Add((ts.U16, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.UInt16" }));
+            ConvertMethods.Add((ts.U32, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.UInt32" }));
+            ConvertMethods.Add((ts.U64, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.UInt64" }));
+            ConvertMethods.Add((ts.Float, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Single" }));
+            ConvertMethods.Add((ts.Double, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Double" }));
+            ConvertMethods.Add((ts.Object, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.Object" }));
+            ConvertMethods.Add((ts.String, ts.String), ResolveCompilerFunction("System.Convert.ToString", new[] { "System.String" }));
+
+            ConvertMethods.Add((ts.String, ts.Bool), ResolveCompilerFunction("System.Convert.ToBoolean", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.I8), ResolveCompilerFunction("System.Convert.ToSByte", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.I16), ResolveCompilerFunction("System.Convert.ToInt16", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.I32), ResolveCompilerFunction("System.Convert.ToInt32", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.I64), ResolveCompilerFunction("System.Convert.ToInt64", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.U8), ResolveCompilerFunction("System.Convert.ToByte", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.U16), ResolveCompilerFunction("System.Convert.ToUInt16", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.U32), ResolveCompilerFunction("System.Convert.ToUInt32", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.U64), ResolveCompilerFunction("System.Convert.ToUInt64", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.Float), ResolveCompilerFunction("System.Convert.ToSingle", new[] { "System.String" }));
+            ConvertMethods.Add((ts.String, ts.Double), ResolveCompilerFunction("System.Convert.ToDouble", new[] { "System.String" }));
         }
 
         public MethodReference ObjectEqualsMethod { get; }
         public MethodReference StringConcatMethod { get; }
+
+        public Dictionary<(TypeInfo from, TypeInfo to), MethodReference> ConvertMethods { get; }
 
         public override BackendKind Kind => BackendKind.Cecil;
 
