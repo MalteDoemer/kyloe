@@ -191,6 +191,14 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "var x: i32 = i32(5);"
+            };
+
+            yield return new object[] {
+                "var x = float(5); var f: float = x;"
+            };
+
+            yield return new object[] {
                 "1 + 1.5;",
                 DiagnosticKind.UnsupportedBinaryOperation,
             };
@@ -354,6 +362,11 @@ namespace Kyloe.Tests.Binding
             yield return new object[] {
                 "9223372036854775808;",
                 DiagnosticKind.InvalidLiteralError,
+            };
+
+            yield return new object[] {
+                "var x: float = float('hi');",
+                DiagnosticKind.NoExplicitConversionExists,
             };
         }
 
