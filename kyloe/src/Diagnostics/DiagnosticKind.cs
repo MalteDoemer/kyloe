@@ -23,6 +23,7 @@ namespace Kyloe.Diagnostics
         InvalidLiteralError,
         IllegalElseStatement,
         IllegalElifStatement,
+        NoExplicitConversionExists,
 
         // TODO: tests
         IllegalReturnStatement,
@@ -32,6 +33,5 @@ namespace Kyloe.Diagnostics
         UnableToReadLibrary,
         UnresolvedImport,
         ImportedNameAlreadyExists,
-        NoExplicitConversionExists,
     }
 }

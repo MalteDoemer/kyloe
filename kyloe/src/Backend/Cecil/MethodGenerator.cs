@@ -195,7 +195,7 @@ namespace Kyloe.Backend.Cecil
                     var methodref = Backend.ConvertMethods[(from, ts.String)];
                     ilProcessor.Emit(OpCodes.Call, methodref);
                 }
-                else if (from.Equals(ts.String)) 
+                else if (from.Equals(ts.String))
                 {
                     var methodref = Backend.ConvertMethods[(ts.String, to)];
                     ilProcessor.Emit(OpCodes.Call, methodref);
@@ -311,25 +311,29 @@ namespace Kyloe.Backend.Cecil
 
         private void GenerateUnaryExpression(LoweredUnaryExpression expr)
         {
-            // TODO: handle non-builtin unary operations
-
             GenerateExpression(expr.Expression);
-
-            switch (expr.Operation)
+            if (expr.Method.IsCompilerBuiltin)
             {
-                case BoundOperation.Identity:
-                    break;
-                case BoundOperation.Negation:
-                    ilProcessor.Emit(OpCodes.Neg); break;
-                case BoundOperation.BitwiseNot:
-                    ilProcessor.Emit(OpCodes.Not); break;
-                case BoundOperation.LogicalNot:
-                    ilProcessor.Emit(OpCodes.Ldc_I4_0);
-                    ilProcessor.Emit(OpCodes.Ceq);
-                    break;
+                switch (expr.Operation)
+                {
+                    case BoundOperation.Identity:
+                        break;
+                    case BoundOperation.Negation:
+                        ilProcessor.Emit(OpCodes.Neg); break;
+                    case BoundOperation.BitwiseNot:
+                        ilProcessor.Emit(OpCodes.Not); break;
+                    case BoundOperation.LogicalNot:
+                        ilProcessor.Emit(OpCodes.Ldc_I4_0);
+                        ilProcessor.Emit(OpCodes.Ceq);
+                        break;
 
-                default:
-                    throw new Exception($"unknown operation {expr.Operation}");
+                    default:
+                        throw new Exception($"unknown operation {expr.Operation}");
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
         }
 

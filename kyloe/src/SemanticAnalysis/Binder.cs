@@ -193,8 +193,6 @@ namespace Kyloe.Semantics
 
             if (mainSymbol is CallableGroupSymbol mainGroup)
             {
-                // TODO: maybe give a warning here ?
-
                 if (FindCallOverload(mainGroup.Group, Enumerable.Empty<TypeInfo>()) is FunctionType mainFunctionType)
                 {
                     var mainFunctionDef = functionDefs.Where(f => f.FunctionType.Equals(mainFunctionType)).FirstOrDefault();
