@@ -363,11 +363,6 @@ namespace Kyloe.Tests.Binding
                 "9223372036854775808;",
                 DiagnosticKind.InvalidLiteralError,
             };
-
-            yield return new object[] {
-                "var x: float = float('hi');",
-                DiagnosticKind.NoExplicitConversionExists,
-            };
         }
 
         public static IEnumerable<object[]> GetCombinedStatementData()
