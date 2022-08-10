@@ -20,6 +20,30 @@ namespace Kyloe.Semantics
             }
         }
 
+        internal static bool IsValidExpressionStatement(BoundExpression expression)
+        {
+            if (expression.ResultType is ErrorType)
+                return true;
+
+            switch (expression.Kind)
+            {
+                case BoundNodeKind.BoundAssignmentExpression:
+                case BoundNodeKind.BoundCallExpression:
+                    return true;
+                case BoundNodeKind.BoundLiteralExpression:
+                case BoundNodeKind.BoundBinaryExpression:
+                case BoundNodeKind.BoundParenthesizedExpression:
+                case BoundNodeKind.BoundInvalidExpression:
+                case BoundNodeKind.BoundUnaryExpression:
+                case BoundNodeKind.BoundConversionExpression:
+                case BoundNodeKind.BoundSymbolExpression:
+                    return expression.IsValue;
+                default:
+                    throw new Exception($"unexpected kind: {expression.Kind}");
+            }
+
+        }
+
         public static string GetFunctionNameFromOperation(BoundOperation operation)
         {
             switch (operation)
@@ -287,7 +311,7 @@ namespace Kyloe.Semantics
             }
         }
 
-        internal static string GetSymbolOrName(this BoundOperation op) 
+        internal static string GetSymbolOrName(this BoundOperation op)
         {
             var sym = op.GetSymbol();
 
@@ -297,7 +321,7 @@ namespace Kyloe.Semantics
             return op.ToString();
         }
 
-        internal static string GetSymbolOrName(this AssignmentOperation op) 
+        internal static string GetSymbolOrName(this AssignmentOperation op)
         {
             var sym = op.GetSymbol();
 

@@ -150,6 +150,12 @@ namespace Kyloe.Diagnostics
             AddError(DiagnosticKind.OverloadWithSameParametersExistsError, msg, location);
         }
 
+        internal void InvalidExpressionStatement(SourceLocation location) 
+        {
+            var msg = "this expression cannot be used as a statement";
+            AddError(DiagnosticKind.InvalidExpressionStatement, msg, location);
+        }
+
         internal void IllegalElifStatement(SourceLocation location)
         {
             var msg = "unexpected elif statement";

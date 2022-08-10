@@ -622,6 +622,11 @@ namespace Kyloe.Semantics
 
             var statement = GetNode(token, SyntaxTokenKind.ExpressionStatement);
             var bound = BindExpression(statement.Tokens[0]);
+
+            if (!SemanticInfo.IsValidExpressionStatement(bound)) {
+                diagnostics.InvalidExpressionStatement(statement.Tokens[0].Location);
+            }
+
             return new BoundExpressionStatement(bound, token);
         }
 
