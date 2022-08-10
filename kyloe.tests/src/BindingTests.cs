@@ -224,6 +224,16 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "i32;",
+                DiagnosticKind.InvalidExpressionStatement,
+            };
+
+            yield return new object[] {
+                "println;",
+                DiagnosticKind.InvalidExpressionStatement,
+            };
+
+            yield return new object[] {
                 @"while true {
                     println('hi');
                 }"

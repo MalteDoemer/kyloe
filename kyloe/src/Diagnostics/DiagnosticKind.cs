@@ -24,9 +24,9 @@ namespace Kyloe.Diagnostics
         IllegalElseStatement,
         IllegalElifStatement,
         NoExplicitConversionExists,
+        InvalidExpressionStatement,
 
         // TODO: tests
-        InvalidExpressionStatement,
         IllegalReturnStatement,
         IllegalContinueStatement,
         IllegalBreakStatement,
