@@ -199,6 +199,10 @@ namespace Kyloe.Tests.Binding
             };
 
             yield return new object[] {
+                "var x: object = object(5);",
+            };
+
+            yield return new object[] {
                 "1 + 1.5;",
                 DiagnosticKind.UnsupportedBinaryOperation,
             };

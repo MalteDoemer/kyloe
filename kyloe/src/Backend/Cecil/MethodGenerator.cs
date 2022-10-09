@@ -188,7 +188,10 @@ namespace Kyloe.Backend.Cecil
                 if (to.Equals(ts.Object))
                 {
                     if (!from.Equals(ts.String) && !from.Equals(ts.Object))
-                        ilProcessor.Emit(OpCodes.Box);
+                    {
+                        var type = Backend.ResolveType(from);
+                        ilProcessor.Emit(OpCodes.Box, type);
+                    }
                 }
                 else if (to.Equals(ts.String))
                 {
