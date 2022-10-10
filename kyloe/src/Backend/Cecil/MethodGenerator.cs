@@ -377,10 +377,12 @@ namespace Kyloe.Backend.Cecil
                         ilProcessor.Emit(OpCodes.Cgt); break;
                     case BoundOperation.LessThanOrEqual:
                         ilProcessor.Emit(OpCodes.Cgt);
+                        ilProcessor.Emit(OpCodes.Ldc_I4_0);
                         ilProcessor.Emit(OpCodes.Ceq);
                         break;
                     case BoundOperation.GreaterThanOrEqual:
                         ilProcessor.Emit(OpCodes.Clt);
+                        ilProcessor.Emit(OpCodes.Ldc_I4_0);
                         ilProcessor.Emit(OpCodes.Ceq);
                         break;
                     case BoundOperation.Equal:
