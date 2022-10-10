@@ -1,0 +1,10 @@
+func main() {
+
+    for var i = 0; i < 10; i += 1 {
+        increment(); // The function from the other file
+    }
+
+    increment(10);
+
+    println("The counter is at: " + string(counter)); // Using a global variable from the other file
+}

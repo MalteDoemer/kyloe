@@ -1,0 +1,18 @@
+var counter = 0;
+const COUNTER_MAX = 100;
+
+func increment() {
+    if counter < COUNTER_MAX {
+        counter += 1;
+    }
+}
+
+func increment(val: i64) {
+    if counter + val >= COUNTER_MAX {
+        return;
+    }
+    
+    counter += val;
+}
+
+

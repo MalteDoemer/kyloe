@@ -1,0 +1,17 @@
+func main() {
+
+    var num = i64(random(100.0));
+    var guess = i64(input("Guess a number between 0 and 100: "));
+
+    while guess != num {
+        if num < guess {
+            println("The number is smaller!");
+        } else {
+            println("The number is greater!");
+        }
+
+        guess = i64(input("Guess again: "));
+    }
+
+    println("Correct!");
+}

@@ -27,7 +27,11 @@ Change directory to the folder containing the example:
 
 ```cd examples/hello-world```
 
-Run the example:
+Build the example with:
+
+```dotnet build```
+
+And execute it with:
 
 ```dotnet run```
 

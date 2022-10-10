@@ -1,5 +1,17 @@
-func main() {
-    for var i = 4; i < 10; i+=1 {
-        println(i);
+func div(a: i64, b: i64) -> i64 {
+    if b == 0 {
+        println("Divide by zero");
+        exit();
     }
+
+    return a / b;
+}
+
+func main() {
+    var r1 = div(12, 4);
+
+    println(r1);
+
+    var r2 = div(1, 0);
+    println(r2);
 }
