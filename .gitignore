@@ -2,3 +2,4 @@ BenchmarkDotNet.Artifacts/
 obj/
 bin/
 .vscode/
+.VSCodeCounter
