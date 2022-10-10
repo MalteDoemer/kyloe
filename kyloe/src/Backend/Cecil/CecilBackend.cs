@@ -219,6 +219,8 @@ namespace Kyloe.Backend.Cecil
         {
             ImportFunction("Kyloe.Builtins.println");
             ImportFunction("Kyloe.Builtins.print");
+            ImportFunction("Kyloe.Builtins.random");
+            ImportFunction("Kyloe.Builtins.exit");
             ImportFunction("Kyloe.Builtins.input");
             ImportFunction("Kyloe.Builtins.len");
         }
