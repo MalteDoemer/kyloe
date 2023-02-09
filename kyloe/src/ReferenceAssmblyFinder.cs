@@ -78,7 +78,7 @@ namespace Kyloe
                 var dirVersion = Version.Parse(subdirName);
 
                 if (dirVersion.Major == dotnetVersion.Major && dirVersion.Minor == dotnetVersion.Minor)
-                    return Path.Join(dir, subdirName, "ref", "net6.0"); // TODO: don't hadcode net6.0
+                    return Path.Join(dir, subdirName, "ref", "net7.0"); // TODO: don't hadcode net7.0
             }
 
             throw new Exception("unable to find sdk directory");
