@@ -21,8 +21,10 @@ namespace Kyloe
         private static IEnumerable<string> FindRefrenceAssemblies()
         {
             var assemblyDir = GetDotnetRefrenceDirectory();
+            System.Console.WriteLine(assemblyDir);
             yield return Path.Join(assemblyDir, "System.Runtime.dll");
             yield return Path.Join(assemblyDir, "System.Runtime.Extensions.dll");
+
 
             var currentAssemlby = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             yield return Path.Join(currentAssemlby, "kyloe.builtins.dll");
@@ -72,13 +74,24 @@ namespace Kyloe
 
             var dir = Path.Join(dotnetRoot, "packs", "Microsoft.NETCore.App.Ref");
 
+            if (!Directory.Exists(dir))
+                throw new Exception("unable to find .NET packs directory");
+
             foreach (var subdir in Directory.EnumerateDirectories(dir))
             {
                 var subdirName = Path.GetFileName(subdir);
                 var dirVersion = Version.Parse(subdirName);
 
                 if (dirVersion.Major == dotnetVersion.Major && dirVersion.Minor == dotnetVersion.Minor)
-                    return Path.Join(dir, subdirName, "ref", "net7.0"); // TODO: don't hadcode net7.0
+                {
+                    var netVersion = $"net{dirVersion.Major}.0";
+                    var refDir = Path.Join(subdir, "ref", netVersion);
+
+                    if (!Directory.Exists(refDir))
+                        throw new Exception("unable to find .NET reference directory");
+
+                    return refDir;
+                }
             }
 
             throw new Exception("unable to find sdk directory");

@@ -24,7 +24,7 @@
       <ExeExt Condition="$([MSBuild]::IsOSPlatform('Windows'))">.exe</ExeExt>
       <KyloeCompiler Condition="'$(KyloeCompiler)' == ''">kyc$(ExeExt)</KyloeCompiler>
 
-      <KyloeCompileCommand>"$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)..\', 'kyc/bin/Debug/net8.0',  '$(KyloeCompiler)'))" $(KyloeCompilerArgs)</KyloeCompileCommand>
+      <KyloeCompileCommand>"$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)../', 'kyc/bin/Debug/', '$(TargetFramework)/',  '$(KyloeCompiler)'))" $(KyloeCompilerArgs)</KyloeCompileCommand>
 
     </PropertyGroup>
 
