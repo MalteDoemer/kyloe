@@ -12,9 +12,15 @@ namespace Kyloe.Syntax
             {
                 case SyntaxTokenKind.VarKeyword:
                 case SyntaxTokenKind.ConstKeyword:
+                case SyntaxTokenKind.FuncKeyword:
                 case SyntaxTokenKind.IfKeyword:
                 case SyntaxTokenKind.ElseKeyword:
-                case SyntaxTokenKind.FuncKeyword:
+                case SyntaxTokenKind.ElifKeyword:
+                case SyntaxTokenKind.WhileKeyword:
+                case SyntaxTokenKind.ForKeyword:
+                case SyntaxTokenKind.BreakKeyword:
+                case SyntaxTokenKind.ContinueKeyword:
+                case SyntaxTokenKind.ReturnKeyword:
                     return true;
                 default:
                     return false;
@@ -109,18 +115,30 @@ namespace Kyloe.Syntax
                     return "var";
                 case SyntaxTokenKind.ConstKeyword:
                     return "const";
+                case SyntaxTokenKind.FuncKeyword:
+                    return "func";
                 case SyntaxTokenKind.IfKeyword:
                     return "if";
                 case SyntaxTokenKind.ElseKeyword:
                     return "else";
-                case SyntaxTokenKind.FuncKeyword:
-                    return "func";
+                case SyntaxTokenKind.ElifKeyword:
+                    return "elif";
+                case SyntaxTokenKind.WhileKeyword:
+                    return "while";
+                case SyntaxTokenKind.ForKeyword:
+                    return "for";
+                case SyntaxTokenKind.BreakKeyword:
+                    return "break";
+                case SyntaxTokenKind.ContinueKeyword:
+                    return "continue";
+                case SyntaxTokenKind.ReturnKeyword:
+                    return "return";
                 default:
                     return null;
             }
         }
 
-        public static string GetSymbolOrName(this SyntaxTokenKind kind) 
+        public static string GetSymbolOrName(this SyntaxTokenKind kind)
         {
             var sym = GetSimpleTerminalString(kind);
 
